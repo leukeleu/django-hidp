@@ -1,0 +1,20 @@
+# https://github.com/marketplace/actions/labeler
+
+docker-setup:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.dockerignore'
+      - 'docker-compose.yml'
+      - 'docker/**'
+      - '**/.dockerignore'
+      - '**/Dockerfile'
+
+backend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/**'
+
+frontend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'frontend/**'

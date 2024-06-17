@@ -1,0 +1,14 @@
+# Note: Use a global .gitignore file to ignore common files and directories
+*.pem
+local.ini
+/var/*
+# Keep /var/README.md
+!/var/README.md
+!/var/dist
+# Keep /var/dist/.keep (but not the rest of /var/dist)
+/var/dist/*
+!/var/dist/.keep
+# Keep /var/public/README.md (but not the rest of /var/public)
+!/var/public
+/var/public/*
+!/var/public/README.md
