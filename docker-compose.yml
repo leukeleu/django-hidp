@@ -1,0 +1,63 @@
+x-logging:
+  &default-logging
+  options:
+    # Keep the logging history short
+    max-size: "1m"
+    max-file: "1"
+
+services:
+
+  nginx:
+    image: 'nginx:stable-alpine'
+    restart: unless-stopped
+    volumes:
+      - './docker/conf/certs:/etc/certs'
+      - './docker/conf/nginx:/etc/nginx/conf.d'
+      - '.:/code'
+    ports:
+      - '80:80'
+      - '443:443'
+    depends_on:
+      - python
+    logging: *default-logging
+
+  postgres:
+    image: 'postgres:14-alpine'
+    environment:
+      - 'POSTGRES_PASSWORD=postgres'
+    restart: unless-stopped
+    volumes:
+      - 'postgres_data:/var/lib/postgresql/data'
+    ports:
+      - '54321:5432'
+    healthcheck:
+      test: 'pg_isready -U postgres'
+      interval: 5s
+      timeout: 5s
+    logging: *default-logging
+
+  python:
+    image: python:hidp
+    build:
+      context: './backend'
+    restart: unless-stopped
+    volumes:
+      - '.:/code'
+    environment:
+      # Note: Also update the nginx config, and port mapping below, if you change this port.
+      - 'DJANGO_RUNSERVER_PORT=8000'
+    # Uncomment the next two lines to make Django available on localhost:8000
+    # ports:
+    #   - '8000:8000'
+    stdin_open: true
+    tty: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
+    # Use "command: 'debug-container'" to make the container sleep forever (instead of starting runserver).
+    # This is useful for debugging the container, e.g. to run commands inside it, remove python packages, etc.
+    # command: 'debug-container'
+
+volumes:
+  postgres_data:

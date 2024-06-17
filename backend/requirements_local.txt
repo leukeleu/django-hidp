@@ -1,0 +1,6 @@
+-r requirements.txt
+
+coverage[toml]~=7.2
+factory_boy~=3.3.0
+pywatchman~=2.0.0
+ruff~=0.4.1
