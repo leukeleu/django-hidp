@@ -1,9 +1,12 @@
+from datetime import timedelta
 from unittest import mock
 
-from django.contrib.auth import SESSION_KEY
-from django.contrib.auth.signals import user_login_failed
+from django.contrib.auth import SESSION_KEY, get_user, get_user_model
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.signals import user_logged_in, user_login_failed
 from django.http import HttpRequest
 from django.test import TestCase, override_settings
+from django.utils import timezone
 
 from hidp.accounts import auth
 from tests.factories import user_factories
@@ -87,3 +90,121 @@ class TestAuthenticate(TestCase):
             request=self.request,
             credentials={"username": self.user.username, "password": "*" * 20},
         )
+
+
+class TestLogin(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory()
+
+    def setUp(self):
+        self.request = HttpRequest()
+        self.request.session = self.client.session
+
+    @mock.patch(
+        "django.contrib.auth.signals.user_logged_in.send", wraps=user_logged_in.send
+    )
+    def test_success(self, user_logged_in):
+        """
+        Logs in the user and sets the user in the request's session.
+        """
+        auth.login(self.request, self.user)
+
+        self.assertEqual(self.request.session[SESSION_KEY], str(self.user.pk))
+        user_logged_in.assert_called_once_with(
+            sender=get_user_model(),
+            request=self.request,
+            user=self.user,
+        )
+
+        self.user.refresh_from_db()
+        self.assertAlmostEqual(
+            self.user.last_login, timezone.now(), delta=timedelta(seconds=1)
+        )
+
+    @mock.patch(
+        "django.contrib.auth.signals.user_logged_in.send", wraps=user_logged_in.send
+    )
+    def test_inactive_user(self, user_logged_in):
+        """
+        Does not verify that the user is allowed to log in.
+        """
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+
+        auth.login(self.request, self.user)
+
+        self.assertEqual(self.request.session[SESSION_KEY], str(self.user.pk))
+        user_logged_in.assert_called_once_with(
+            sender=get_user_model(),
+            request=self.request,
+            user=self.user,
+        )
+
+        self.user.refresh_from_db()
+        self.assertAlmostEqual(
+            self.user.last_login, timezone.now(), delta=timedelta(seconds=1)
+        )
+
+        # `django.contrib.auth.get_user` **does** verify that the user is
+        # allowed to log in and returns an `AnonymousUser` instance.
+        # This results in `request.user` being an `AnonymousUser` on the next
+        # request, once `AuthenticationMiddleware` has processed the request.
+        self.assertIsInstance(get_user(self.request), AnonymousUser)
+
+    def test_none_user(self):
+        """
+        User may be None, and in some cases this will **not** cause an exception.
+        """
+        # Unexpected behaviour, flagged in https://code.djangoproject.com/ticket/35530#comment:1
+
+        # Edge cases where Django raises unexpected exceptions.
+
+        with (
+            self.subTest("request.user is absent"),
+            self.assertRaisesMessage(
+                AttributeError, "'HttpRequest' object has no attribute 'user'"
+            ),
+        ):
+            auth.login(self.request, None)
+
+        with self.subTest("Current user is None"):
+            self.request.user = None
+            with self.assertRaisesMessage(
+                AttributeError, "'NoneType' object has no attribute '_meta'"
+            ):
+                auth.login(self.request, None)
+
+        with self.subTest("Current user is AnonymousUser"):
+            self.request.user = AnonymousUser()
+            with self.assertRaisesMessage(
+                AttributeError, "'AnonymousUser' object has no attribute '_meta'"
+            ):
+                auth.login(self.request, None)
+
+        # Edge case where Django uses the current user.
+
+        with self.subTest("Current user is not None"):
+            # Will log in the current user (again) for some reason.
+            user = user_factories.UserFactory()
+            self.request.user = user
+
+            with mock.patch(
+                "django.contrib.auth.signals.user_logged_in.send",
+                wraps=user_logged_in.send,
+            ) as mock_user_logged_in:
+                auth.login(self.request, None)
+
+                mock_user_logged_in.assert_called_once_with(
+                    sender=get_user_model(),
+                    request=self.request,
+                    user=user,
+                )
+
+            user.refresh_from_db()
+
+            self.assertEqual(self.request.session[SESSION_KEY], str(user.pk))
+            self.assertAlmostEqual(
+                user.last_login, timezone.now(), delta=timedelta(seconds=1)
+            )
+            self.assertEqual(self.request.session[SESSION_KEY], str(user.pk))
