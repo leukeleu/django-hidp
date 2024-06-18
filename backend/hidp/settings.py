@@ -35,6 +35,9 @@ DEBUG = config.getboolean("app", "debug", fallback=False)
 
 ALLOWED_HOSTS = config.getliteral("app", "allowed_hosts")
 
+# Trust X-Forwarded-Host header in development
+USE_X_FORWARDED_HOST = DEBUG
+
 # Security settings
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
