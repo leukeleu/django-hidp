@@ -3,7 +3,11 @@ from unittest import mock
 
 from django.contrib.auth import SESSION_KEY, get_user, get_user_model
 from django.contrib.auth.models import AnonymousUser
-from django.contrib.auth.signals import user_logged_in, user_login_failed
+from django.contrib.auth.signals import (
+    user_logged_in,
+    user_logged_out,
+    user_login_failed,
+)
 from django.http import HttpRequest
 from django.test import TestCase, override_settings
 from django.utils import timezone
@@ -208,3 +212,60 @@ class TestLogin(TestCase):
                 user.last_login, timezone.now(), delta=timedelta(seconds=1)
             )
             self.assertEqual(self.request.session[SESSION_KEY], str(user.pk))
+
+
+class TestLogout(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory()
+
+    def setUp(self):
+        self.request = HttpRequest()
+        self.request.session = self.client.session
+        self.request.user = AnonymousUser()
+
+    @mock.patch(
+        "django.contrib.auth.signals.user_logged_out.send",
+        wraps=user_logged_out.send,
+    )
+    def test_logout_without_login(self, mock_user_logged_out):
+        """
+        Resets the session regardless of whether a user is logged in.
+        """
+        self.request.session["test"] = "test"
+        session_key = self.request.session.session_key
+        auth.logout(self.request)
+
+        self.assertNotEqual(session_key, self.request.session.session_key)
+        self.assertNotIn("test", self.request.session)
+        mock_user_logged_out.assert_called_once_with(
+            sender=type(None),  # Weird, but that's what Django does.
+            request=self.request,
+            user=None,
+        )
+        self.assertIsInstance(self.request.user, AnonymousUser)
+
+    @mock.patch(
+        "django.contrib.auth.signals.user_logged_out.send",
+        wraps=user_logged_out.send,
+    )
+    def test_logout_after_login(self, mock_user_logged_out):
+        """
+        Logs out the user and removes the user from the request's session.
+        """
+        # Log in the user.
+        auth.login(self.request, self.user)
+        session_key = self.request.session.session_key
+        self.assertEqual(self.request.session[SESSION_KEY], str(self.user.pk))
+
+        # Log out the user.
+        auth.logout(self.request)
+
+        self.assertNotEqual(session_key, self.request.session.session_key)
+        self.assertNotIn(SESSION_KEY, self.request.session)
+        mock_user_logged_out.assert_called_once_with(
+            sender=get_user_model(),
+            request=self.request,
+            user=self.user,
+        )
+        self.assertIsInstance(self.request.user, AnonymousUser)
