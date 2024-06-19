@@ -6,11 +6,16 @@
 </head>
 <body>
   {% if request.user.is_authenticated %}
-  <p>
-    {% blocktranslate %}
-    You are currently logged in as {{ user }}.
-    {% endblocktranslate %}
-  </p>
+  <form action="{%  url 'auth:logout' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{% url 'auth:login' %}">
+    <p>
+      {% blocktranslate %}
+      You are currently logged in as {{ user }}.
+      {% endblocktranslate %}
+      <button type="submit">{% translate 'Log out' %}</button>
+    </p>
+  </form>
   {% endif %}
 
   <form method="post">
