@@ -46,7 +46,7 @@ class TestAuthenticate(TestCase):
         "django.contrib.auth.signals.user_login_failed.send",
         wraps=user_login_failed.send,
     )
-    def test_invalid_credentials(self, user_login_failed):
+    def test_invalid_credentials(self, mock_user_login_failed):
         """
         Returns None if the credentials are invalid and sends the
         `django.contrib.auth.user_login_failed` signal.
@@ -59,7 +59,7 @@ class TestAuthenticate(TestCase):
         )
 
         self.assertIsNone(user)
-        user_login_failed.assert_called_once_with(
+        mock_user_login_failed.assert_called_once_with(
             sender="django.contrib.auth",
             request=self.request,
             credentials={"username": self.user.username, "password": "*" * 20},
@@ -69,7 +69,7 @@ class TestAuthenticate(TestCase):
         "django.contrib.auth.signals.user_login_failed.send",
         wraps=user_login_failed.send,
     )
-    def test_permission_denied(self, user_login_failed):
+    def test_permission_denied(self, mock_user_login_failed):
         """
         Returns None if the user is not allowed to log in and sends the
         `django.contrib.auth.user_login_failed` signal.
@@ -85,7 +85,7 @@ class TestAuthenticate(TestCase):
         )
 
         self.assertIsNone(user)
-        user_login_failed.assert_called_once_with(
+        mock_user_login_failed.assert_called_once_with(
             sender="django.contrib.auth",
             request=self.request,
             credentials={"username": self.user.username, "password": "*" * 20},
@@ -104,14 +104,14 @@ class TestLogin(TestCase):
     @mock.patch(
         "django.contrib.auth.signals.user_logged_in.send", wraps=user_logged_in.send
     )
-    def test_success(self, user_logged_in):
+    def test_success(self, mock_user_logged_in):
         """
         Logs in the user and sets the user in the request's session.
         """
         auth.login(self.request, self.user)
 
         self.assertEqual(self.request.session[SESSION_KEY], str(self.user.pk))
-        user_logged_in.assert_called_once_with(
+        mock_user_logged_in.assert_called_once_with(
             sender=get_user_model(),
             request=self.request,
             user=self.user,
@@ -125,7 +125,7 @@ class TestLogin(TestCase):
     @mock.patch(
         "django.contrib.auth.signals.user_logged_in.send", wraps=user_logged_in.send
     )
-    def test_inactive_user(self, user_logged_in):
+    def test_inactive_user(self, mock_user_logged_in):
         """
         Does not verify that the user is allowed to log in.
         """
@@ -135,7 +135,7 @@ class TestLogin(TestCase):
         auth.login(self.request, self.user)
 
         self.assertEqual(self.request.session[SESSION_KEY], str(self.user.pk))
-        user_logged_in.assert_called_once_with(
+        mock_user_logged_in.assert_called_once_with(
             sender=get_user_model(),
             request=self.request,
             user=self.user,
