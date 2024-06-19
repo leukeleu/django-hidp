@@ -6,5 +6,5 @@ class TestRoot(TestCase):
     def test_root(self):
         response = self.client.get("/")
         self.assertRedirects(
-            response, reverse("accounts:login"), fetch_redirect_response=False
+            response, reverse("auth:login"), fetch_redirect_response=False
         )

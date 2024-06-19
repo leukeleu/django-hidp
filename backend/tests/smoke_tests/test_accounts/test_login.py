@@ -15,7 +15,7 @@ class TestLogin(TestCase):
         cls.user = user_factories.UserFactory()
 
     def test_get_login(self):
-        response = self.client.get(reverse("accounts:login"))
+        response = self.client.get(reverse("auth:login"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "accounts/login.html")
         self.assertIn("form", response.context)
@@ -23,7 +23,7 @@ class TestLogin(TestCase):
 
     def test_valid_login_default_redirect(self):
         response = self.client.post(
-            reverse("accounts:login"),
+            reverse("auth:login"),
             {
                 "username": self.user.username,
                 "password": "P@ssw0rd!",
@@ -33,7 +33,7 @@ class TestLogin(TestCase):
 
     def test_valid_login_safe_next_param(self):
         response = self.client.post(
-            f"{reverse('accounts:login')}",
+            f"{reverse('auth:login')}",
             {
                 "username": self.user.username,
                 "password": "P@ssw0rd!",
@@ -44,7 +44,7 @@ class TestLogin(TestCase):
 
     def test_valid_login_unsafe_next_param(self):
         response = self.client.post(
-            f"{reverse('accounts:login')}",
+            f"{reverse('auth:login')}",
             {
                 "username": self.user.username,
                 "password": "P@ssw0rd!",
@@ -55,7 +55,7 @@ class TestLogin(TestCase):
 
     def test_invalid_login(self):
         response = self.client.post(
-            reverse("accounts:login"),
+            reverse("auth:login"),
             {
                 "username": self.user.username,
                 "password": "invalid",
