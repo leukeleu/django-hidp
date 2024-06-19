@@ -5,6 +5,54 @@ from django.utils.translation import gettext_lazy as _
 from ..compat.uuid7 import uuid7
 
 
+class UserManager(auth_models.UserManager):
+    """
+    Custom user manager that uses email as the username field.
+    """
+
+    use_in_migrations = True
+
+    def _create_user(self, username, email, password, **extra_fields):
+        if not email:
+            raise ValueError("User must have an email address")
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.clean()
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password=None, **extra_fields):
+        """
+        Create a new user with the given email and password.
+
+        Prefer using this method over instantiating the user model directly,
+        as it ensures that the email address is normalized and the password is hashed.
+
+        Automatically sets `is_staff` to `False` and `is_superuser` to `False`,
+        unless explicitly set otherwise in `extra_fields`.
+        """
+        return super().create_user(
+            username=email,
+            email=email,
+            password=password,
+            **extra_fields,
+        )
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        """
+        Create a new superuser with the given email and password.
+
+        Automatically sets `is_staff` and `is_superuser` to `True`,
+        unless explicitly set otherwise in `extra_fields`.
+        """
+        return super().create_superuser(
+            username=email,
+            email=email,
+            password=password,
+            **extra_fields,
+        )
+
+
 class BaseUser(auth_models.AbstractUser):
     """
     Extends the default Django user model, inheriting the following fields:
@@ -81,6 +129,8 @@ class BaseUser(auth_models.AbstractUser):
     USERNAME_FIELD = "email"
     # Add names as required fields
     REQUIRED_FIELDS = ["first_name", "last_name"]
+
+    objects = UserManager()
 
     class Meta:
         abstract = True
