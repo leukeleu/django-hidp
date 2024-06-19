@@ -119,4 +119,4 @@ skip_covered = true
 skip_empty = true
 
 [tool.coverage.html]
-directory = "var/htmlcov"
+directory = "../var/htmlcov"
