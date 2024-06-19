@@ -146,6 +146,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Login and logout settings
+LOGIN_URL = "auth:login"
+
 # Default login redirect URL
 LOGIN_REDIRECT_URL = "/"
 
