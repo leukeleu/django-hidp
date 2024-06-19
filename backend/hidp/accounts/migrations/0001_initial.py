@@ -1,9 +1,10 @@
 import django.contrib.auth.models
-import django.contrib.auth.validators
-from django.contrib.postgres.operations import CreateCollation
 import django.utils.timezone
 
+from django.contrib.postgres.operations import CreateCollation
 from django.db import migrations, models
+
+import hidp.compat.uuid7
 
 
 class Migration(migrations.Migration):
@@ -27,11 +28,11 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.BigAutoField(
-                        auto_created=True,
+                    models.UUIDField(
+                        default=hidp.compat.uuid7.uuid7,
+                        editable=False,
                         primary_key=True,
                         serialize=False,
-                        verbose_name="ID",
                     ),
                 ),
                 ("password", models.CharField(max_length=128, verbose_name="password")),
@@ -50,21 +51,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "username",
-                    models.CharField(
-                        error_messages={
-                            "unique": "A user with that username already exists."
-                        },
-                        help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
-                        max_length=150,
-                        unique=True,
-                        validators=[
-                            django.contrib.auth.validators.UnicodeUsernameValidator()
-                        ],
-                        verbose_name="username",
-                    ),
-                ),
-                (
                     "first_name",
                     models.CharField(
                         blank=True, max_length=150, verbose_name="first name"
@@ -79,7 +65,10 @@ class Migration(migrations.Migration):
                 (
                     "email",
                     models.EmailField(
-                        blank=True, max_length=254, verbose_name="email address"
+                        db_collation="case_insensitive",
+                        max_length=254,
+                        unique=True,
+                        verbose_name="email address",
                     ),
                 ),
                 (
@@ -103,6 +92,19 @@ class Migration(migrations.Migration):
                     models.DateTimeField(
                         default=django.utils.timezone.now, verbose_name="date joined"
                     ),
+                ),
+                (
+                    "email_verified",
+                    models.DateTimeField(
+                        blank=True,
+                        editable=False,
+                        null=True,
+                        verbose_name="email verified",
+                    ),
+                ),
+                (
+                    "last_modified",
+                    models.DateTimeField(auto_now=True, verbose_name="last modified"),
                 ),
                 (
                     "groups",
