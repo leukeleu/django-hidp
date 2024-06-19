@@ -1,0 +1,22 @@
+{% load i18n %}
+<!doctype html>
+<html>
+<head>
+  <title>{% translate 'Log in' %}</title>
+</head>
+<body>
+  {% if request.user.is_authenticated %}
+  <p>
+    {% blocktranslate %}
+    You are currently logged in as {{ user }}.
+    {% endblocktranslate %}
+  </p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% translate 'Log in' %}</button>
+  </form>
+</body>
+</html>
