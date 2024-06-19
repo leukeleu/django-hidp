@@ -55,3 +55,37 @@ class LoginView(auth_views.LoginView):
         3. `settings.LOGIN_REDIRECT_URL` if it is set.
         """
         return super().get_success_url()
+
+
+class LogoutView(auth_views.LogoutView):
+    """
+    Logs out the user, regardless of whether a user is logged in.
+
+    A POST request (including a CSRF token) is required to log out.
+    This prevents a malicious site from logging out a user without their consent,
+    for example by linking to the logout URL.
+
+    After logging out, the user is redirected to the URL returned by get_redirect_url().
+    """
+
+    # Django 5.0 will no longer allow GET (and HEAD) requests to the logout view.
+    # Disallow these methods now for forward compatibility.
+    http_method_names = [
+        method
+        for method in auth_views.LogoutView.http_method_names
+        if method not in {"get", "head"}
+    ]
+
+    def get_redirect_url(self):
+        """
+        Return the URL to redirect to after a successful logout.
+
+        Returns one of the following:
+
+        1. The URL specified by the `self.redirect_field_name`
+          (i.e. `next`) parameter, if it is present in the request and
+          the value is valid and safe.
+        2. The URL specified by `self.next_page` if it is set.
+        3. `settings.LOGOUT_REDIRECT_URL` if it is set.
+        """
+        return super().get_redirect_url()
