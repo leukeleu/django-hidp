@@ -90,3 +90,21 @@ def login(request, user, backend=None):
     # a detailed docstring and provide a consistent interface for the
     # `hidp.accounts.auth` module.
     django_auth.login(request, user, backend=backend)
+
+
+def logout(request):
+    """
+    Logs out the user, regardless of whether a user is logged in.
+
+    Removes all session data, including the user and the CSRF token,
+    and cycles the session key.
+
+    Sends the `django.contrib.auth.user_logged_out` signal **before**
+    the session is flushed. This allows listeners to access the user
+    and the request before the session is reset.
+    """
+
+    # Wrap Django's logout, without altering its behavior, to add
+    # a detailed docstring and provide a consistent interface for the
+    # `hidp.accounts.auth` module.
+    django_auth.logout(request)
