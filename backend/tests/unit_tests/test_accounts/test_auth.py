@@ -38,7 +38,7 @@ class TestAuthenticate(TestCase):
 
         user = auth.authenticate(
             request=self.request,
-            username=self.user.username,
+            email=self.user.email,
             password="P@ssw0rd!",
         )
 
@@ -58,7 +58,7 @@ class TestAuthenticate(TestCase):
 
         user = auth.authenticate(
             request=self.request,
-            username=self.user.username,
+            email=self.user.email,
             password="invalid",
         )
 
@@ -66,7 +66,7 @@ class TestAuthenticate(TestCase):
         mock_user_login_failed.assert_called_once_with(
             sender="django.contrib.auth",
             request=self.request,
-            credentials={"username": self.user.username, "password": "*" * 20},
+            credentials={"email": self.user.email, "password": "*" * 20},
         )
 
     @mock.patch(
@@ -84,7 +84,7 @@ class TestAuthenticate(TestCase):
 
         user = auth.authenticate(
             request=self.request,
-            username=self.user.username,
+            email=self.user.email,
             password="P@ssw0rd!",
         )
 
@@ -92,7 +92,7 @@ class TestAuthenticate(TestCase):
         mock_user_login_failed.assert_called_once_with(
             sender="django.contrib.auth",
             request=self.request,
-            credentials={"username": self.user.username, "password": "*" * 20},
+            credentials={"email": self.user.email, "password": "*" * 20},
         )
 
 
