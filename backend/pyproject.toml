@@ -6,7 +6,6 @@ requires-python = ">=3.11"  # server constraint
 unsafe-fixes = false
 line-length = 88
 extend-exclude = [
-  "var/*",
   "*/migrations/*",
 ]
 
@@ -107,7 +106,6 @@ source = [
   "tests",
 ]
 omit = [
-  "./var/*",
   "**/[aw]sgi.py",
   "**/migrations/*",
   "**/settings.py",
