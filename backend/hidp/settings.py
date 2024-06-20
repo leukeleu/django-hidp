@@ -328,6 +328,8 @@ OAUTH2_PROVIDER = {
         "email": "View email address",
     },
     "DEFAULT_SCOPES": ["openid"],
+    # Custom OAuth2Validator that maps OIDC scopes to the correct user attributes
+    "OAUTH2_VALIDATOR_CLASS": "hidp.accounts.oauth_validators.OAuth2Validator",
 }
 
 # Remove the _OIDC_RSA_PRIVATE_KEY from the global namespace
