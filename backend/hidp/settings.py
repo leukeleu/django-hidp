@@ -70,6 +70,8 @@ INSTALLED_APPS = [
     # Django REST Framework
     "rest_framework",
     "django_filters",
+    # Django OAuth Toolkit
+    "oauth2_provider",
     # Headless Identity Provider
     "hidp.accounts",
 ]
