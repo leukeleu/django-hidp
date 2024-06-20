@@ -27,6 +27,11 @@ if ! sha1sum -c "${_FROZEN_REQUIREMENTS}.sha1"; then
   sha1sum "${_FROZEN_REQUIREMENTS}" > "${_FROZEN_REQUIREMENTS}.sha1"
 fi
 
+if [ ! -f '../var/oidc.key' ]; then
+    echo "Generating OIDC key..."
+    openssl genrsa -out '../var/oidc.key' 4096
+fi
+
 if [ ! -f './hidp/local.ini' ]; then
     echo "Creating local.ini..."
     cp './hidp/local.example.ini' './hidp/local.ini'
