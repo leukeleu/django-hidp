@@ -15,14 +15,14 @@ class TestAuthenticationForm(TestCase):
 
     def test_is_valid(self):
         form = AuthenticationForm(
-            data={"username": self.user.username, "password": "P@ssw0rd!"}
+            data={"username": self.user.email, "password": "P@ssw0rd!"}
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(form.get_user(), self.user)
 
     def test_is_invalid(self):
         form = AuthenticationForm(
-            data={"username": self.user.username, "password": "wrong"}
+            data={"username": self.user.email, "password": "wrong"}
         )
         self.assertFalse(form.is_valid())
         self.assertIsNone(form.get_user())
@@ -30,7 +30,7 @@ class TestAuthenticationForm(TestCase):
             form,
             None,
             [
-                "Please enter a correct username and password."
+                "Please enter a correct email address and password."
                 " Note that both fields may be case-sensitive."
             ],
         )
@@ -41,7 +41,7 @@ class TestAuthenticationForm(TestCase):
 
         with self.subTest("Default backend"):
             form = AuthenticationForm(
-                data={"username": self.user.username, "password": "P@ssw0rd!"}
+                data={"username": self.user.email, "password": "P@ssw0rd!"}
             )
             self.assertFalse(form.is_valid())
             # The user is not authenticated.
@@ -50,7 +50,7 @@ class TestAuthenticationForm(TestCase):
                 form,
                 None,
                 [
-                    "Please enter a correct username and password."
+                    "Please enter a correct email address and password."
                     " Note that both fields may be case-sensitive."
                 ],
             )
@@ -64,7 +64,7 @@ class TestAuthenticationForm(TestCase):
             ),
         ):
             form = AuthenticationForm(
-                data={"username": self.user.username, "password": "P@ssw0rd!"}
+                data={"username": self.user.email, "password": "P@ssw0rd!"}
             )
             self.assertFalse(form.is_valid())
             # The user is authenticated, but not allowed to log in.

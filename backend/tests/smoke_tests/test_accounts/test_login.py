@@ -25,7 +25,7 @@ class TestLogin(TestCase):
         response = self.client.post(
             reverse("auth:login"),
             {
-                "username": self.user.username,
+                "username": self.user.email,
                 "password": "P@ssw0rd!",
             },
         )
@@ -35,7 +35,7 @@ class TestLogin(TestCase):
         response = self.client.post(
             f"{reverse('auth:login')}",
             {
-                "username": self.user.username,
+                "username": self.user.email,
                 "password": "P@ssw0rd!",
                 "next": "/example/",
             },
@@ -46,7 +46,7 @@ class TestLogin(TestCase):
         response = self.client.post(
             f"{reverse('auth:login')}",
             {
-                "username": self.user.username,
+                "username": self.user.email,
                 "password": "P@ssw0rd!",
                 "next": "https://example.com/",
             },
@@ -57,7 +57,7 @@ class TestLogin(TestCase):
         response = self.client.post(
             reverse("auth:login"),
             {
-                "username": self.user.username,
+                "username": self.user.email,
                 "password": "invalid",
             },
         )
@@ -69,7 +69,7 @@ class TestLogin(TestCase):
             response.context["form"],
             None,
             (
-                "Please enter a correct username and password."
+                "Please enter a correct email address and password."
                 " Note that both fields may be case-sensitive."
             ),
         )
