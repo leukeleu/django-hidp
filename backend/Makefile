@@ -66,6 +66,7 @@ install-pipeline:
 	@cat  "${requirements}" | sed 's/^/  /'
 	@echo "================================"
 	uv pip install -r "${requirements}" -r requirements_local.txt
+	openssl genrsa -out '../var/oidc.key' 4096
 	ln -s local.example.ini hidp/local.ini
 	echo "*:*:*:postgres:postgres" > "$${HOME}/.pgpass"
 	chmod 600 "$${HOME}/.pgpass"
