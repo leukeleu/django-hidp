@@ -7,4 +7,6 @@ from hidp.config import urls as hidp_urls
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="auth:login"), name="root"),
     path("", include(hidp_urls)),
+    # Django Admin
+    path("django-admin/", admin.site.urls),
 ]

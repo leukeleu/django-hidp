@@ -20,6 +20,29 @@ BASE_DIR = PROJECT_DIR.parent.parent
 # Shared var directory (for logs, cache, etc.)
 VAR_DIR = BASE_DIR / "var"
 
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.messages",  # Required for django.contrib.admin
+]
+
+MIDDLEWARE = [
+    "django.contrib.sessions.middleware.SessionMiddleware",  # For MessageMiddleware
+    "django.contrib.messages.middleware.MessageMiddleware",
+]
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
+
 # Disable all log output, except warnings
 LOGGING = {
     "version": 1,
