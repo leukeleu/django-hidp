@@ -1,3 +1,7 @@
+"""
+Configuration for django.contrib.auth.
+"""
+
 REQUIRED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",

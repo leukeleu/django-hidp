@@ -4,6 +4,11 @@ Configuration for Django OAuth Toolkit (DOT) in the HiDP application.
 
 from datetime import timedelta
 
+REQUIRED_APPS = [
+    # Django OAuth Toolkit
+    "oauth2_provider",
+]
+
 OAUTH2_PROVIDER = {
     # The number of seconds an access token remains valid.
     # Requesting a protected resource after this duration will fail.
@@ -114,9 +119,9 @@ def configure_django(
 
     # Add DOT to the installed apps
     settings.setdefault("INSTALLED_APPS", [])
-    settings["INSTALLED_APPS"] += [
-        "oauth2_provider",
-    ]
+    for app in REQUIRED_APPS:
+        if app not in settings["INSTALLED_APPS"]:
+            settings["INSTALLED_APPS"].append(app)
 
     # Configure DOT
     settings["OAUTH2_PROVIDER"] = get_oauth_provider_settings(
