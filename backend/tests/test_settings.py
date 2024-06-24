@@ -2,12 +2,23 @@ import logging
 import os
 import warnings
 
-from hidp.settings import *  # noqa: F403 (* import)
+from pathlib import Path
+
+from hidp import config as hidp_config
 
 warnings.resetwarnings()
 warnings.simplefilter("module")
 
 logging.captureWarnings(capture=True)
+
+# Project directory (where settings.py is)
+PROJECT_DIR = Path(__file__).resolve().parent
+
+# Repository root directory
+BASE_DIR = PROJECT_DIR.parent.parent
+
+# Shared var directory (for logs, cache, etc.)
+VAR_DIR = BASE_DIR / "var"
 
 # Disable all log output, except warnings
 LOGGING = {
@@ -48,3 +59,10 @@ CACHES = {
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
+
+ROOT_URLCONF = "tests.test_urls"
+
+hidp_config.configure_django(
+    globals(),
+    OIDC_RSA_PRIVATE_KEY=(VAR_DIR / "oidc.key").read_text()
+)
