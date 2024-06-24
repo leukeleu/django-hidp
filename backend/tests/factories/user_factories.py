@@ -5,7 +5,7 @@ from factory.django import DjangoModelFactory
 
 class UserFactory(DjangoModelFactory):
     class Meta:
-        model = "accounts.User"
+        model = "hidp_accounts.User"
         skip_postgeneration_save = True
 
     first_name = factory.Faker("first_name")
