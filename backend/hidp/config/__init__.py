@@ -1,4 +1,4 @@
-from . import oauth_provider
+from . import contrib_auth, oauth_provider
 
 __all__ = [
     "configure_django",
@@ -33,4 +33,5 @@ def configure_django(
         specific settings have been configured. This will then (attempt to) configure
         apps, middleware, and other necessary settings.
     """
+    contrib_auth.configure_django(settings)
     oauth_provider.configure_django(settings, OIDC_RSA_PRIVATE_KEY=OIDC_RSA_PRIVATE_KEY)
