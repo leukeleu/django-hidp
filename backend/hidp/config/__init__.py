@@ -1,4 +1,4 @@
-from . import contrib_auth, oauth_provider
+from . import contrib_auth, oauth_provider, hidp
 
 __all__ = [
     "configure_django",
@@ -35,3 +35,4 @@ def configure_django(
     """
     contrib_auth.configure_django(settings)
     oauth_provider.configure_django(settings, OIDC_RSA_PRIVATE_KEY=OIDC_RSA_PRIVATE_KEY)
+    hidp.configure_django(settings)
