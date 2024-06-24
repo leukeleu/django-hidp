@@ -14,8 +14,8 @@ if hasattr(uuid, "uuid7"):
 else:
     # Taken from the CPython pull request:
     # * https://github.com/python/cpython/pull/120650
-    # * Commit (2024-06-19T07:39:18Z)
-    # * https://github.com/python/cpython/blob/295d82d513717adb96d9faab7e255dbedb237d88/Lib/uuid.py#L770-L790
+    # * Commit (2024-06-21T21:40:33Z)
+    # * https://github.com/python/cpython/blob/55edd0c04d6578c0b1da280ba981db4f41f46b94/Lib/uuid.py#L768-L786
     # Modifications:
     # * Added noqa comments to supress ruff warnings
     # * Manually set the variant and version bits.
@@ -29,7 +29,7 @@ else:
         import time  # noqa: PLC0415 (import-outside-toplevel)
 
         nanoseconds = time.time_ns()
-        timestamp_ms = nanoseconds // 10**6  # may be improved
+        timestamp_ms = nanoseconds // 1_000_000
         if _last_timestamp_v7 is not None and timestamp_ms <= _last_timestamp_v7:
             timestamp_ms = _last_timestamp_v7 + 1
         _last_timestamp_v7 = timestamp_ms
