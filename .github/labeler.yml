@@ -9,12 +9,12 @@ docker-setup:
       - '**/.dockerignore'
       - '**/Dockerfile'
 
-backend:
+package:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'package/**'
+
+project:
   - changed-files:
     - any-glob-to-any-file:
       - 'project/**'
-
-frontend:
-  - changed-files:
-    - any-glob-to-any-file:
-      - 'frontend/**'
