@@ -271,7 +271,7 @@ else:
     # Generate a new key using: penssl genrsa -out 'oidc.key' 4096
     _OIDC_RSA_PRIVATE_KEY = config.getliteral("app", "oidc_rsa_private_key")
 
-# Configure OAUTH2_PROVIDER as required by the HiDP application
+# Configure OAUTH2_PROVIDER as required by the HIdP application
 OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
     OIDC_RSA_PRIVATE_KEY=_OIDC_RSA_PRIVATE_KEY
 )

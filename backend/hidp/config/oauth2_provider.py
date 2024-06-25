@@ -1,5 +1,5 @@
 """
-Configuration for Django OAuth Toolkit (DOT) in the HiDP application.
+Configuration for Django OAuth Toolkit (DOT) in the HIdP application.
 """
 
 from datetime import timedelta
@@ -30,7 +30,7 @@ OAUTH2_PROVIDER = {
     "REFRESH_TOKEN_EXPIRE_SECONDS": timedelta(days=90).total_seconds(),
     # The number of seconds between when a refresh token is first used
     # and when it is expired.
-    # The most common case of this for this is native mobile applications
+    # The most common case for this are native mobile applications
     # that run into issues of network connectivity during the refresh cycle
     # and are unable to complete the full request/response life cycle.
     # Without a grace period the application only has a consumed
@@ -64,7 +64,7 @@ def get_oauth2_provider_settings(
 ):
     """
     Returns a configuration object for Django OAuth Toolkit (DOT),
-    optimized for the HiDP application.
+    optimized for the HIdP application.
 
     Arguments:
 
