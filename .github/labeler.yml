@@ -12,7 +12,7 @@ docker-setup:
 package:
   - changed-files:
     - any-glob-to-any-file:
-      - 'package/**'
+      - 'packages/**'
 
 project:
   - changed-files:
