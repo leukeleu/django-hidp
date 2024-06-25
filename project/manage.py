@@ -7,7 +7,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hidp.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hidp_sandbox.settings")
     try:
         from django.core.management import execute_from_command_line  # noqa: PLC0415
     except ImportError as exc:

@@ -67,7 +67,7 @@ install-pipeline:
 	@echo "================================"
 	uv pip install -r "${requirements}" -r requirements_local.txt
 	openssl genrsa -out '../var/oidc.key' 4096
-	ln -s local.example.ini hidp/local.ini
+	ln -s local.example.ini hidp_sandbox/local.ini
 	echo "*:*:*:postgres:postgres" > "$${HOME}/.pgpass"
 	chmod 600 "$${HOME}/.pgpass"
 	./manage.py collectstatic --link --settings=tests.test_settings

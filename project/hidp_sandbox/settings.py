@@ -85,7 +85,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "hidp.urls"
+ROOT_URLCONF = "hidp_sandbox.urls"
 
 TEMPLATES = [
     {
@@ -105,7 +105,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "hidp.wsgi.application"
+WSGI_APPLICATION = "hidp_sandbox.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

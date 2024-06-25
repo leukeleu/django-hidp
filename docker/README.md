@@ -55,13 +55,13 @@ to manage host file entries. Install with `brew cask install gas-mask`
 
 ### 3. Configure project settings (optional)
 
-On startup, the `python` container will copy `hidp/local.example.ini` to 
-`hidp/local.ini` (if it does not yet exist).
+On startup, the `python` container will copy `hidp_sandbox/local.example.ini` to 
+`hidp_sandbox/local.ini` (if it does not yet exist).
 
 To manually configure the settings, first copy the example file:
 
 ```sh
-cp hidp/local.example.ini hidp/local.ini
+cp hidp_sandbox/local.example.ini hidp/local.ini
 ```
 
 Then edit the settings to your liking.

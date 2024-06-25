@@ -42,7 +42,7 @@ RUN chmod 600 ~/.pgpass
 # Make the uv cache survive container recreation
 ENV UV_CACHE_DIR /code/var/cache/uv
 
-WORKDIR /code/backend
+WORKDIR /code/project
 COPY entrypoint.sh .
 
 ENTRYPOINT ["./entrypoint.sh"]
