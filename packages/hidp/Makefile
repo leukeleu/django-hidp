@@ -47,7 +47,7 @@ coveragetest: unittests
 coverage: unittests
 	# Generate test coverage html report
 	coverage html
-	@echo "Coverage report is located at ../var/htmlcov/index.html"
+	@echo "Coverage report is located at ../../var/htmlcov/index.html"
 
 .PHONY: django-checks
 django-checks:
