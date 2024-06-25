@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from django.test import TestCase
 
-from ..factories import user_factories
+from hidp.test.factories import user_factories
 
 # Note: These tests are mainly an example on how to use factories
 #       and the Django test client. Use them as a reference and write

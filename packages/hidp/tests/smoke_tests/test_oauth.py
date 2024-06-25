@@ -14,7 +14,7 @@ from django.core.signing import b64_encode
 from django.test import TestCase
 from django.utils.timezone import now as tz_now
 
-from tests.factories import user_factories
+from hidp.test.factories import user_factories
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
