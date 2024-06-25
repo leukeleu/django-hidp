@@ -1,0 +1,2 @@
+-e .
+-e ../hidp-pycqa
