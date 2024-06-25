@@ -12,6 +12,12 @@ dynamic = [
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 
+[tool.setuptools.packages.find]
+include = [
+  "hidp",
+  "hidp.*",
+]
+
 [tool.ruff]
 extend = "../hidp-pycqa/pyproject.toml"
 
@@ -38,4 +44,4 @@ skip_covered = true
 skip_empty = true
 
 [tool.coverage.html]
-directory = "../var/htmlcov"
+directory = "../../var/htmlcov"

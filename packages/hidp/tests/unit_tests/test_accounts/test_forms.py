@@ -1,7 +1,7 @@
 from django.test import TestCase, override_settings
 
 from hidp.accounts.forms import AuthenticationForm
-from tests.factories import user_factories
+from hidp.test.factories import user_factories
 
 
 @override_settings(

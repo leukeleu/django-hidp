@@ -4,7 +4,7 @@ from django.core import mail
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 
-from tests.factories import user_factories
+from hidp.test.factories import user_factories
 
 
 @override_settings(

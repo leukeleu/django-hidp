@@ -7,22 +7,19 @@ from urllib.parse import parse_qs, urlsplit
 
 from jwcrypto import jwk, jwt
 from oauth2_provider.models import get_access_token_model, get_application_model
-from rest_framework.test import APIClient
 
 from django.conf import settings
 from django.core.signing import b64_encode
 from django.test import TestCase
 from django.utils.timezone import now as tz_now
 
-from tests.factories import user_factories
+from hidp.test.factories import user_factories
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
 
 
 class TestOAuthFlow(TestCase):
-    client_class = APIClient
-
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory(
@@ -59,7 +56,7 @@ class TestOAuthFlow(TestCase):
             token="secret-access-token-key",
             application=self.application,
         )
-        (client or self.client).credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+        (client or self.client).defaults["HTTP_AUTHORIZATION"] = f"Bearer {token}"
 
     def authorization_request(self, code_verifier="secret", **oauth_params):
         """Perform an authorization request"""
