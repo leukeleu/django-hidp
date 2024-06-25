@@ -2,7 +2,7 @@ import logging
 import os
 import warnings
 
-from hidp.settings import *  # noqa: F403 (* import)
+from hidp_sandbox.settings import *  # noqa: F403 (* import)
 
 warnings.resetwarnings()
 warnings.simplefilter("module")

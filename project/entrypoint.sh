@@ -32,9 +32,9 @@ if [ ! -f '../var/oidc.key' ]; then
     openssl genrsa -out '../var/oidc.key' 4096
 fi
 
-if [ ! -f './hidp/local.ini' ]; then
+if [ ! -f './hidp_sandbox/local.ini' ]; then
     echo "Creating local.ini..."
-    cp './hidp/local.example.ini' './hidp/local.ini'
+    cp './hidp_sandbox/local.example.ini' './hidp_sandbox/local.ini'
 fi
 
 # NOTE: To debug issues with the container, without starting the server,

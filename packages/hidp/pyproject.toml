@@ -1,6 +1,13 @@
 [project]
 name = "hidp"
-requires-python = ">=3.11"  # server constraint
+version = "0.0.0"
+requires-python = ">=3.11"
+dynamic = [
+  "dependencies"
+]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
 
 [tool.ruff]
 unsafe-fixes = false
@@ -106,7 +113,7 @@ django = [
 [tool.coverage.run]
 branch = true
 source = [
-  "hidp_sandbox",
+  "hidp",
   "tests",
 ]
 omit = [
