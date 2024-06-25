@@ -53,3 +53,19 @@ coverage: unittests
 django-checks:
 	# Run Django system checks
 	python manage.py check --fail-level WARNING
+
+##
+# This target is used by GitHub actions
+##
+
+.PHONY: install-pipeline
+install-pipeline: requirements = "../../var/requirements_frozen.txt"
+install-pipeline:
+	uv pip compile requirements.txt -q -o "${requirements}" --no-annotate --no-header
+	@echo "===== PACKAGE DEPENDENCIES ====="
+	@cat  "${requirements}" | sed 's/^/  /'
+	@echo "================================"
+	uv pip install -r "${requirements}" -r requirements_local.txt
+	openssl genrsa -out '../../var/oidc.key' 4096
+	echo "*:*:*:postgres:postgres" > "$${HOME}/.pgpass"
+	chmod 600 "$${HOME}/.pgpass"
