@@ -12,6 +12,12 @@ dynamic = [
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 
+[tool.setuptools.packages.find]
+include = [
+  "hidp",
+  "hidp.*",
+]
+
 [tool.ruff]
 extend = "../hidp-pycqa/pyproject.toml"
 
