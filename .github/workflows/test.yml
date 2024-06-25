@@ -38,3 +38,14 @@ jobs:
       - uses: ./.github/actions/backend
         with:
           working-directory: ${{ matrix.working-directory }}
+
+  # Report success/failure
+  success:
+    name: Success
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs:
+      - test
+    steps:
+      - run: exit 1
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
