@@ -54,6 +54,10 @@ unfixable = [
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]
+"hidp/config/*" = [
+  "N803", # ALL_UPPERCASE is OK in config code
+]
+
 "tests/*" = [
   # This is OK in test code
   "PLR0904",  # too many public methods
