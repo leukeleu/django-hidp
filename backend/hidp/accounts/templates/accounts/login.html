@@ -6,9 +6,9 @@
 </head>
 <body>
   {% if request.user.is_authenticated %}
-  <form action="{%  url 'auth:logout' %}" method="post">
+  <form action="{%  url 'hidp_accounts:logout' %}" method="post">
     {% csrf_token %}
-    <input type="hidden" name="next" value="{% url 'auth:login' %}">
+    <input type="hidden" name="next" value="{% url 'hidp_accounts:login' %}">
     <p>
       {% blocktranslate %}
       You are currently logged in as {{ user }}.

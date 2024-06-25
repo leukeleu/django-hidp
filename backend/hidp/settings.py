@@ -148,7 +148,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Login and logout settings
-LOGIN_URL = "auth:login"
+LOGIN_URL = "hidp_accounts:login"
 
 # Default login and logout redirect URL
 LOGIN_REDIRECT_URL = "/"

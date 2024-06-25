@@ -15,14 +15,14 @@ This module also defines the namespace `auth` for these URLs.
 
 Include this namespace when reversing URLs, for example:
 
-    reverse("auth:login")
+    reverse("hidp_accounts:login")
 """
 
 from django.urls import path
 
 from . import views
 
-app_name = "auth"
+app_name = "hidp_accounts"
 
 urlpatterns = [
     path("login/", views.LoginView.as_view(), name="login"),

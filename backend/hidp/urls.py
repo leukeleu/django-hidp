@@ -8,7 +8,7 @@ from .router import router
 
 urlpatterns = [
     # Project
-    path("", RedirectView.as_view(pattern_name="auth:login"), name="root"),
+    path("", RedirectView.as_view(pattern_name="hidp_accounts:login"), name="root"),
     path("", include(hidp_urls)),
     *router.urls,
     # Django Admin
