@@ -97,6 +97,9 @@ section-order = [
   "first-party",
   "local-folder",
 ]
+known-first-party = [
+  "hidp"
+]
 
 [tool.ruff.lint.isort.sections]
 django = [
