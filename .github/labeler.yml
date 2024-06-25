@@ -12,7 +12,7 @@ docker-setup:
 backend:
   - changed-files:
     - any-glob-to-any-file:
-      - 'backend/**'
+      - 'project/**'
 
 frontend:
   - changed-files:

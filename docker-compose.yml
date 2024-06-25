@@ -39,7 +39,7 @@ services:
   python:
     image: python:hidp
     build:
-      context: './backend'
+      context: './project'
     restart: unless-stopped
     volumes:
       - '.:/code'

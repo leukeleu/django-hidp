@@ -4,8 +4,6 @@ description: Lint, checks & tests
 inputs:
   working-directory:
     description: 'The working directory to run the commands in'
-    required: false
-    default: './backend'
 
 runs:
   using: composite
