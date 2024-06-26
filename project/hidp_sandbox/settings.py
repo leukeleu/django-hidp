@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     # Django OAuth Toolkit
     "oauth2_provider",
     # Headless Identity Provider
+    "hidp",
     "hidp.accounts",
 ]
 
