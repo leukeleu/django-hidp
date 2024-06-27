@@ -10,10 +10,13 @@ help:
 	@echo "  make coveragetest - Generate coverage report"
 	@echo "  make coverage - Generate test coverage html report"
 	@echo "  make django-checks - Run Django system checks"
+	@echo "  make checkmanifest - Check if all files are included in the sdist"
+	@echo "  make checksetup - Check package metadata"
+	@echo "  make build - Build the package"
 	@echo
 
 .PHONY: test
-test: lint django-checks migrationtest coveragetest
+test: lint django-checks migrationtest coveragetest checkmanifest checksetup
 
 .PHONY: lint
 lint:
@@ -53,6 +56,26 @@ coverage: unittests
 django-checks:
 	# Run Django system checks
 	python manage.py check --fail-level WARNING
+
+.PHONY: checkmanifest
+checkmanifest:
+	# Check if all files are included in the sdist
+	check-manifest
+
+.PHONY: checksetup
+checksetup: build
+	# Check metadata
+	twine check ../../var/dist/*.whl
+
+.PHONY: build
+build: clean
+	# Build the package
+	python -m build --installer uv --outdir ../../var/dist
+
+.PHONY: clean
+clean:
+	# Clean up build files
+	rm -rf ../../var/dist/*.whl ../../var/dist/*.tar.gz
 
 ##
 # This target is used by GitHub actions

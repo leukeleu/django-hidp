@@ -1,0 +1,16 @@
+include Makefile
+include manage.py
+include requirements.txt
+include requirements_local.txt
+include runtests.py
+recursive-include hidp/accounts/templates/accounts *.html
+graft tests
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
+global-exclude Thumbs.db
+global-exclude Desktop.ini
+global-exclude *.swp
+global-exclude *~
+global-exclude *.bak
+global-exclude var/*
