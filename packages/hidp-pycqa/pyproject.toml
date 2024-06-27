@@ -16,6 +16,10 @@ dependencies = [
   # Testing
   "coverage ~= 7.1",
   "factory-boy ~= 3.3.0",
+
+  # Build / release
+  "build",
+  "twine",
 ]
 
 [tool.ruff]

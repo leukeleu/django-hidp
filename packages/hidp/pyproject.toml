@@ -6,8 +6,9 @@ authors = [
 ]
 requires-python = ">=3.11"
 dynamic = [
-  "dependencies"
+  "dependencies",
 ]
+readme = "README.md"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
