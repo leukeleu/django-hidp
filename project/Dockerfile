@@ -42,6 +42,9 @@ RUN chmod 600 ~/.pgpass
 # Make the uv cache survive container recreation
 ENV UV_CACHE_DIR /code/var/cache/uv
 
+# Make git trust the mounted repository, even when the permissions are "suspicious"
+RUN git config --global --add safe.directory /code
+
 WORKDIR /code/project
 COPY entrypoint.sh .
 
