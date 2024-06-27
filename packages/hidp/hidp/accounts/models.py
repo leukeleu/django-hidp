@@ -1,5 +1,6 @@
 from django.contrib.auth import models as auth_models
 from django.db import models
+from django.db.models import functions
 from django.utils.translation import gettext_lazy as _
 
 from ..compat.uuid7 import uuid7
@@ -17,7 +18,6 @@ class UserManager(auth_models.UserManager):
             raise ValueError("User must have an email address")
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        user.clean()
         user.save(using=self._db)
         return user
 
@@ -114,10 +114,7 @@ class BaseUser(auth_models.AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid7, editable=False)
     # Remove the username field
     username = None
-    # Change the email field to be case-insensitive, unique and required
-    email = models.EmailField(
-        _("email address"), unique=True, db_collation="case_insensitive"
-    )
+    email = models.EmailField(_("email address"), unique=True)
     # Store the date when the email was verified
     email_verified = models.DateTimeField(
         _("email verified"), blank=True, null=True, editable=False
@@ -136,6 +133,12 @@ class BaseUser(auth_models.AbstractUser):
         abstract = True
         verbose_name = _("user")
         verbose_name_plural = _("users")
+        constraints = [
+            models.UniqueConstraint(
+                functions.Lower("email"),
+                name="unique_lower_email",
+            )
+        ]
 
     def set_password(self, raw_password):
         """
@@ -173,6 +176,10 @@ class BaseUser(auth_models.AbstractUser):
         Additional keyword arguments are passed to the `send_mail` function as-is.
         """
         super().email_user(subject, message, from_email=from_email, **kwargs)
+
+    def save(self, *args, update_fields=None, **kwargs):
+        self.clean()  # Always normalize the email address
+        super().save(*args, update_fields=update_fields, **kwargs)
 
 
 class User(BaseUser):

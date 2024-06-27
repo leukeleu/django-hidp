@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.db.models.functions import Collate
 from django.utils.translation import gettext_lazy as _
 
 from .models import User
@@ -76,12 +75,3 @@ class UserAdmin(BaseUserAdmin):
         "last_modified",
     )
     ordering = ("pk",)
-
-    def get_queryset(self, request):
-        # Allow searching by case-insensitive email
-        # https://adamj.eu/tech/2023/02/23/migrate-django-postgresql-ci-fields-case-insensitive-collation/#adjust-queries
-        return (
-            super()
-            .get_queryset(request)
-            .annotate(email_ci=Collate("email", collation="und-x-icu"))
-        )
