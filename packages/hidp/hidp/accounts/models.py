@@ -1,5 +1,6 @@
 from django.contrib.auth import models as auth_models
 from django.db import models
+from django.db.models import functions
 from django.utils.translation import gettext_lazy as _
 
 from ..compat.uuid7 import uuid7
@@ -114,8 +115,6 @@ class BaseUser(auth_models.AbstractUser):
     # Remove the username field
     username = None
     email = models.EmailField(_("email address"), unique=True)
-    # Case-insensitive version of the email address, to guarantee uniqueness
-    ci_email = models.EmailField(_("email address"), unique=True, editable=False)
     # Store the date when the email was verified
     email_verified = models.DateTimeField(
         _("email verified"), blank=True, null=True, editable=False
@@ -134,6 +133,12 @@ class BaseUser(auth_models.AbstractUser):
         abstract = True
         verbose_name = _("user")
         verbose_name_plural = _("users")
+        constraints = [
+            models.UniqueConstraint(
+                functions.Lower("email"),
+                name="unique_lower_email",
+            )
+        ]
 
     def set_password(self, raw_password):
         """
@@ -172,23 +177,8 @@ class BaseUser(auth_models.AbstractUser):
         """
         super().email_user(subject, message, from_email=from_email, **kwargs)
 
-    def clean(self):
-        super().clean()
-        # Store a case-insensitive version of the email address
-        self.ci_email = self.email.lower()
-
     def save(self, *args, update_fields=None, **kwargs):
         self.clean()  # Always normalize the email address
-        if (
-            update_fields
-            and "email" in update_fields
-            and "ci_email" not in update_fields
-        ):
-            # Make sure the ci_email field is updated when the email field is updated
-            update_fields = [
-                *update_fields,
-                "ci_email",
-            ]
         super().save(*args, update_fields=update_fields, **kwargs)
 
 

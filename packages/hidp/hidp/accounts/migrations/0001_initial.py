@@ -61,15 +61,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "ci_email",
-                    models.EmailField(
-                        max_length=254,
-                        unique=True,
-                        verbose_name="email address",
-                        editable=False,
-                    ),
-                ),
-                (
                     "is_staff",
                     models.BooleanField(
                         default=False,
@@ -135,5 +126,11 @@ class Migration(migrations.Migration):
             managers=[
                 ("objects", hidp.accounts.models.UserManager()),
             ],
+        ),
+        migrations.AddConstraint(
+            model_name='user',
+            constraint=models.UniqueConstraint(
+                django.db.models.functions.text.Lower('email'),
+                name='unique_lower_email'),
         ),
     ]
