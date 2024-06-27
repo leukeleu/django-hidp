@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.sessions",
     "oauth2_provider",
+    "hidp",
     "hidp.accounts",
 ]
 
