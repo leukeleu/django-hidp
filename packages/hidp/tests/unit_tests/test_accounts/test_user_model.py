@@ -31,6 +31,20 @@ class TestUserModel(TestCase):
         ):
             user_factories.UserFactory(email="USER@Example.COM")
 
+    def test_change_email_unique_constraint(self):
+        """
+        Changing the email field should also update the ci_email field to
+        maintain the unique constraint.
+        """
+        user = user_factories.UserFactory()  # new user
+        with self.assertRaisesMessage(
+            IntegrityError, "duplicate key value violates unique constraint"
+        ):
+            user.email = "UseR@example.com"  # existing user's email, but different case
+            # Try to circumvent the unique constraint by only updating the email field
+            # (omitting the ci_email field)
+            user.save(update_fields=["email"])
+
     def test_str(self):
         """
         The string representation of the user is the (normalized) email address.

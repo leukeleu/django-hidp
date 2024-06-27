@@ -13,9 +13,6 @@ class UserFactory(DjangoModelFactory):
     email = factory.Faker("email")
     password = factory.django.Password("P@ssw0rd!")
 
-    # Call the `clean` method after creating the user
-    clean = factory.PostGenerationMethodCall("clean")
-
 
 class SuperUserFactory(UserFactory):
     is_superuser = True

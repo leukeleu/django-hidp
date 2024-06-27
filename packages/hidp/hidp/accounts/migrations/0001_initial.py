@@ -1,7 +1,5 @@
-import django.contrib.auth.models
 import django.utils.timezone
 
-from django.contrib.postgres.operations import CreateCollation
 from django.db import migrations, models
 
 import hidp.compat.uuid7
@@ -15,14 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Create case-insensitive collation
-        # https://adamj.eu/tech/2023/02/23/migrate-django-postgresql-ci-fields-case-insensitive-collation/
-        CreateCollation(
-            "case_insensitive",
-            provider="icu",
-            locale="und-u-ks-level2",
-            deterministic=False,
-        ),
         migrations.CreateModel(
             name="User",
             fields=[
@@ -65,10 +55,18 @@ class Migration(migrations.Migration):
                 (
                     "email",
                     models.EmailField(
-                        db_collation="case_insensitive",
                         max_length=254,
                         unique=True,
                         verbose_name="email address",
+                    ),
+                ),
+                (
+                    "ci_email",
+                    models.EmailField(
+                        max_length=254,
+                        unique=True,
+                        verbose_name="email address",
+                        editable=False,
                     ),
                 ),
                 (
