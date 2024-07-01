@@ -97,3 +97,13 @@ class LogoutView(auth_views.LogoutView):
         3. `settings.LOGOUT_REDIRECT_URL` if it is set.
         """
         return super().get_redirect_url()
+
+    def post(self, request, *args, **kwargs):
+        """Logout may be done via POST."""
+        # Use the HIdP logout wrapper, for good measure.
+        hidp_auth.logout(request)
+        redirect_to = self.get_success_url()
+        if redirect_to != request.get_full_path():
+            # Redirect to target page once the session has been cleared.
+            return HttpResponseRedirect(redirect_to)
+        return super().get(request, *args, **kwargs)
