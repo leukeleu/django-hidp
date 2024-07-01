@@ -27,32 +27,11 @@ runs:
       working-directory: ${{ inputs.working-directory }}
       shell: bash
 
-    - name: Lint
+    - name: Lint, check, test and build (if applicable)
       run: |
         source ./var/venv/bin/activate
-        make lint
+        make test
       working-directory: ${{ inputs.working-directory }}
       shell: bash
       env:
         RUFF_OUTPUT_FORMAT: github
-
-    - name: Django checks
-      run: |
-        source ./var/venv/bin/activate
-        make django-checks
-      working-directory: ${{ inputs.working-directory }}
-      shell: bash
-
-    - name: Django migration checks
-      run: |
-        source ./var/venv/bin/activate
-        make migrationtest
-      working-directory: ${{ inputs.working-directory }}
-      shell: bash
-
-    - name: Tests
-      run: |
-        source ./var/venv/bin/activate
-        make coveragetest
-      working-directory: ${{ inputs.working-directory }}
-      shell: bash
