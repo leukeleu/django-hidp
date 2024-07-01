@@ -159,15 +159,18 @@ class TestLogin(TestCase):
     def test_none_user(self):
         """
         User may be None, and in some cases this will **not** cause an exception.
-        """
-        # Unexpected behaviour, flagged in https://code.djangoproject.com/ticket/35530#comment:1
 
-        # Edge cases where Django raises unexpected exceptions.
+        This is unexpected behaviour, see also:
+        https://code.djangoproject.com/ticket/35530#comment:1
+
+        The wrapped `django.contrib.auth.login` function raises an exception if the user
+        is not an instance of `AbstractBaseUser`.
+        """
 
         with (
             self.subTest("request.user is absent"),
             self.assertRaisesMessage(
-                AttributeError, "'HttpRequest' object has no attribute 'user'"
+                TypeError, "'NoneType' does not extend AbstractBaseUser"
             ),
         ):
             auth.login(self.request, None)
@@ -175,43 +178,28 @@ class TestLogin(TestCase):
         with self.subTest("Current user is None"):
             self.request.user = None
             with self.assertRaisesMessage(
-                AttributeError, "'NoneType' object has no attribute '_meta'"
+                TypeError, "'NoneType' does not extend AbstractBaseUser"
             ):
                 auth.login(self.request, None)
 
         with self.subTest("Current user is AnonymousUser"):
             self.request.user = AnonymousUser()
             with self.assertRaisesMessage(
-                AttributeError, "'AnonymousUser' object has no attribute '_meta'"
+                TypeError, "'NoneType' does not extend AbstractBaseUser"
             ):
                 auth.login(self.request, None)
 
-        # Edge case where Django uses the current user.
+        # Edge case, Django uses the current user here, HIdP does not.
 
         with self.subTest("Current user is not None"):
             # Will log in the current user (again) for some reason.
             user = user_factories.UserFactory()
             self.request.user = user
 
-            with mock.patch(
-                "django.contrib.auth.signals.user_logged_in.send",
-                wraps=user_logged_in.send,
-            ) as mock_user_logged_in:
+            with self.assertRaisesMessage(
+                TypeError, "'NoneType' does not extend AbstractBaseUser"
+            ):
                 auth.login(self.request, None)
-
-                mock_user_logged_in.assert_called_once_with(
-                    sender=get_user_model(),
-                    request=self.request,
-                    user=user,
-                )
-
-            user.refresh_from_db()
-
-            self.assertEqual(self.request.session[SESSION_KEY], str(user.pk))
-            self.assertAlmostEqual(
-                user.last_login, timezone.now(), delta=timedelta(seconds=1)
-            )
-            self.assertEqual(self.request.session[SESSION_KEY], str(user.pk))
 
 
 class TestLogout(TestCase):

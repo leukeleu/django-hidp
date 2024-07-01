@@ -1,4 +1,5 @@
 from django.contrib import auth as django_auth
+from django.contrib.auth.base_user import AbstractBaseUser
 
 
 def authenticate(request, **credentials):
@@ -86,9 +87,12 @@ def login(request, user, backend=None):
     user object (if it exists) with the current date and time.
     """
 
-    # Wrap Django's login, without altering its behavior, to add
-    # a detailed docstring and provide a consistent interface for the
-    # `hidp.accounts.auth` module.
+    # Be explicit about the expected type of the user argument. Do not handle
+    # None values, unlike Django, to avoid unexpected behavior.
+    # See also:
+    # https://code.djangoproject.com/ticket/35530#comment:1
+    if not isinstance(user, AbstractBaseUser):
+        raise TypeError(f"{type(user).__name__!r} does not extend AbstractBaseUser")
     django_auth.login(request, user, backend=backend)
 
 
