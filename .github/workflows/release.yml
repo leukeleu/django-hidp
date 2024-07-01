@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "is_prerelease=$(echo ${{ github.ref }} \
           | grep -qE '[.-](dev|rc)[.-]?[0-9]+$' && echo true || echo false)" \
-          >> $GITHUB_ENV
+          >> $GITHUB_OUTPUT
         id: is_prerelease
 
       - name: Release to DevPI
