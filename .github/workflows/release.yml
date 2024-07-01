@@ -44,5 +44,5 @@ jobs:
         with:
           user: ${{ secrets.DEVPI_USERNAME }}
           password: ${{ secrets.DEVPI_PASSWORD }}
-          repository-url: https://${{ secrets.DEVPI_USERNAME }}:${{ secrets.DEVPI_PASSWORD }}@devpi.leukeleu.nl/leukeleu/${{ fromJson(steps.is_prerelease.outputs.is_prerelease) && 'dev' || 'prod' }}
+          repository-url: https://${{ secrets.DEVPI_USERNAME }}:${{ secrets.DEVPI_PASSWORD }}@devpi.leukeleu.nl/leukeleu/${{ fromJson(steps.is_prerelease.outputs.is_prerelease) && 'dev' || 'prod' }}/
           packages-dir: ./var/dist
