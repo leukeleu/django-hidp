@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "is_prerelease=$(echo ${{ github.ref }} \
           | grep -qE '[.-](dev|rc)[.-]?[0-9]+$' && echo true || echo false)" \
-          >> $GITHUB_ENV
+          >> $GITHUB_OUTPUT
         id: is_prerelease
 
       - name: Release to DevPI
@@ -44,5 +44,5 @@ jobs:
         with:
           user: ${{ secrets.DEVPI_USERNAME }}
           password: ${{ secrets.DEVPI_PASSWORD }}
-          repository-url: https://${{ secrets.DEVPI_USERNAME }}:${{ secrets.DEVPI_PASSWORD }}@devpi.leukeleu.nl/leukeleu/${{ fromJson(steps.is_prerelease.outputs.is_prerelease) && 'dev' || 'prod' }}
+          repository-url: https://${{ secrets.DEVPI_USERNAME }}:${{ secrets.DEVPI_PASSWORD }}@devpi.leukeleu.nl/leukeleu/${{ fromJson(steps.is_prerelease.outputs.is_prerelease) && 'dev' || 'prod' }}/
           packages-dir: ./var/dist
