@@ -1,10 +1,11 @@
 """
-Generate time-sortable UUIDs (version 7)
+Generate time-sortable UUIDs (version 7) (RFC 9562)
 
 Provides a `uuid7` function that's either directly imported from Python's `uuid` module
 (if it's available) or an implementation based on a pull request to add it to CPython.
 """
 
+import os
 import uuid
 
 if hasattr(uuid, "uuid7"):
@@ -13,35 +14,69 @@ if hasattr(uuid, "uuid7"):
     uuid7 = uuid.uuid7
 else:
     # Taken from the CPython pull request:
-    # * https://github.com/python/cpython/pull/120650
-    # * Commit (2024-06-21T21:40:33Z)
-    # * https://github.com/python/cpython/blob/55edd0c04d6578c0b1da280ba981db4f41f46b94/Lib/uuid.py#L768-L786
+    # * https://github.com/python/cpython/pull/121119
+    # * Commit (2024-06-28T09:40:44Z)
+    # * https://github.com/python/cpython/blob/bcd1417e8c8a1d23091930d6e5ca3190873d7191/Lib/uuid.py#L723-L779
     # Modifications:
     # * Added noqa comments to supress ruff warnings
     # * Manually set the variant and version bits.
 
     _last_timestamp_v7 = None
+    _last_counter_v7 = 0  # 42-bit counter
 
     def uuid7():
-        """Generate a UUID from a Unix timestamp in milliseconds and random bits."""
-        global _last_timestamp_v7  # noqa: PLW0603 (global-statement)
-        import os  # noqa: PLC0415 (import-outside-toplevel)
-        import time  # noqa: PLC0415 (import-outside-toplevel)
+        """Generate a UUID from a Unix timestamp in milliseconds and random bits.
 
+        UUIDv7 objects feature monotonicity within a millisecond.
+        """
+        # --- 48 ---   -- 4 --   --- 12 ---   -- 2 --   --- 30 ---   - 32 -
+        # unix_ts_ms | version | counter_hi | variant | counter_lo | random
+        #
+        # 'counter = counter_hi | counter_lo' is a 42-bit counter constructed
+        # with Method 1 of RFC 9562, §6.2, and its MSB is set to 0.
+        #
+        # 'random' is a 32-bit random value regenerated for every new UUID.
+        #
+        # If multiple UUIDs are generated within the same millisecond, the LSB
+        # of 'counter' is incremented by 1. When overflowing, the timestamp is
+        # advanced and the counter is reset to a random 42-bit integer with MSB
+        # set to 0.
+
+        def get_counter_and_tail():
+            rand = int.from_bytes(os.urandom(10))
+            # 42-bit counter with MSB set to 0
+            counter = (rand >> 32) & 0x1ffffffffff
+            # 32-bit random data
+            tail = rand & 0xffffffff
+            return counter, tail
+
+        global _last_timestamp_v7
+        global _last_counter_v7
+
+        import time
         nanoseconds = time.time_ns()
-        timestamp_ms = nanoseconds // 1_000_000
-        if _last_timestamp_v7 is not None and timestamp_ms <= _last_timestamp_v7:
-            timestamp_ms = _last_timestamp_v7 + 1
+        timestamp_ms, _ = divmod(nanoseconds, 1_000_000)
+
+        if _last_timestamp_v7 is None or timestamp_ms > _last_timestamp_v7:
+            counter, tail = get_counter_and_tail()
+        else:
+            if timestamp_ms < _last_timestamp_v7:
+                timestamp_ms = _last_timestamp_v7 + 1
+            # advance the counter
+            counter = _last_counter_v7 + 1
+            if counter > 0x3ffffffffff:
+                timestamp_ms += 1  # advance the timestamp
+                counter, tail = get_counter_and_tail()
+            else:
+                tail = int.from_bytes(os.urandom(4))
+
         _last_timestamp_v7 = timestamp_ms
-        int_uuid_7 = (timestamp_ms & 0xFFFFFFFFFFFF) << 80
-        # Ideally, we would have 'rand_a' = first 12 bits of 'rand'
-        # and 'rand_b' = lowest 62 bits, but it is easier to test
-        # when we pick 'rand_a' from the lowest bits of 'rand' and
-        # 'rand_b' from the next 62 bits, ignoring the 6 first bits
-        # of 'rand'.
-        rand = int.from_bytes(os.urandom(10))  # 80 random bits (ignore 6 first)
-        int_uuid_7 |= (rand & 0x0FFF) << 64  # rand_a
-        int_uuid_7 |= (rand >> 12) & 0x3FFFFFFFFFFFFFFF  # rand_b
+        _last_counter_v7 = counter
+
+        int_uuid_7 = (timestamp_ms & 0xffffffffffff) << 80
+        int_uuid_7 |= ((counter >> 30) & 0xfff) << 64
+        int_uuid_7 |= (counter & 0x3fffffff) << 32
+        int_uuid_7 |= tail & 0xffffffff
 
         # Manually set the variant and version bits, to avoid a
         # `ValueError('illegal version number')` when calling the UUID constructor
