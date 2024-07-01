@@ -1,6 +1,9 @@
+from unittest import mock
+
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from hidp.accounts import auth as hidp_auth
 from hidp.accounts.forms import AuthenticationForm
 from hidp.test.factories import user_factories
 
@@ -21,6 +24,17 @@ class TestLogin(TestCase):
         self.assertTemplateUsed(response, "accounts/login.html")
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], AuthenticationForm)
+
+    @mock.patch("hidp.accounts.views.hidp_auth.login", wraps=hidp_auth.login)
+    def test_valid_login_wrapped_login_function(self, mock_login):
+        self.client.post(
+            self.login_url,
+            {
+                "username": self.user.email,
+                "password": "P@ssw0rd!",
+            },
+        )
+        mock_login.assert_called_once()
 
     def test_valid_login_default_redirect(self):
         response = self.client.post(

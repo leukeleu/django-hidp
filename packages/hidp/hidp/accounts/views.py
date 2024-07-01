@@ -1,5 +1,7 @@
 from django.contrib.auth import views as auth_views
+from django.http import HttpResponseRedirect
 
+from . import auth as hidp_auth
 from .forms import AuthenticationForm
 
 
@@ -55,6 +57,12 @@ class LoginView(auth_views.LoginView):
         3. `settings.LOGIN_REDIRECT_URL` if it is set.
         """
         return super().get_success_url()
+
+    def form_valid(self, form):
+        """Security check complete. Log the user in."""
+        # Use the HIdP login wrapper, for additional checks.
+        hidp_auth.login(self.request, form.get_user())
+        return HttpResponseRedirect(self.get_success_url())
 
 
 class LogoutView(auth_views.LogoutView):
