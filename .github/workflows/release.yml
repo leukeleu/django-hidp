@@ -1,0 +1,48 @@
+name: Release
+
+concurrency:
+  # Only one release job can run at a time
+  group: ${{ github.workflow }}
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Release HIdP
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # A build is created as part of the test job
+      - uses: ./.github/actions/backend
+        with:
+          working-directory: './packages/hidp'
+
+      - name: Determine release type
+        run: |
+          echo "is_prerelease=$(echo ${{ github.ref }} \
+          | grep -qE '[.-](dev|rc)[.-]?[0-9]+$' && echo true || echo false)" \
+          >> $GITHUB_ENV
+        id: is_prerelease
+
+      - name: Release to DevPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: ${{ secrets.DEVPI_USERNAME }}
+          password: ${{ secrets.DEVPI_PASSWORD }}
+          repository-url: https://${{ secrets.DEVPI_USERNAME }}:${{ secrets.DEVPI_PASSWORD }}@devpi.leukeleu.nl/leukeleu/${{ fromJson(steps.is_prerelease.outputs.is_prerelease) && 'dev' || 'prod' }}
+          packages-dir: ./var/dist
