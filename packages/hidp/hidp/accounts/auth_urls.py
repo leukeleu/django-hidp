@@ -11,7 +11,7 @@ Include this module in the root URL configuration:
         path("", include(auth_urls)),
     ]
 
-This module also defines the namespace `auth` for these URLs.
+This module also defines the namespace `hidp_accounts` for these URLs.
 
 Include this namespace when reversing URLs, for example:
 
