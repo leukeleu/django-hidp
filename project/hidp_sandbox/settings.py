@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     # Headless Identity Provider
     "hidp",
     "hidp.accounts",
+    "hidp.federated",
 ]
 
 MIDDLEWARE = [
