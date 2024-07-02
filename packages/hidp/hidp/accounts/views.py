@@ -104,8 +104,11 @@ class LogoutView(auth_views.LogoutView):
         return super().get_redirect_url()
 
     def post(self, request, *args, **kwargs):
-        """Logout may be done via POST."""
-        # Use the HIdP logout wrapper, for good measure.
+        """
+        Log out the user and redirect to the success URL.
+        """
+        # This **replaces** the base implementation in order to use the
+        # HIdP logout wrapper, for good measure.
         hidp_auth.logout(request)
         redirect_to = self.get_success_url()
         if redirect_to != request.get_full_path():
