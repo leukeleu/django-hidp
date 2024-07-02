@@ -37,7 +37,7 @@ Create a local (wildcard) cert using `mkcert`
 ```sh
 mkcert -cert-file ./docker/conf/certs/cert.pem -key-file \
        ./docker/conf/certs/key.pem \
-       hidp.test "*.hidp.test"
+       hidp.test "*.hidp.test" local.hidp.leukeleu.dev
 ```
 
 
@@ -46,7 +46,7 @@ mkcert -cert-file ./docker/conf/certs/cert.pem -key-file \
 Add the following line to `/etc/hosts`:
 
 ```
-127.0.0.1       hidp.test www.hidp.test
+127.0.0.1       hidp.test www.hidp.test local.hidp.leukeleu.dev
 ```
 
 > *TIP*: [Gas Mask](https://github.com/2ndalpha/gasmask) is a nice tool
