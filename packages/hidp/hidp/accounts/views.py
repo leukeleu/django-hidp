@@ -1,5 +1,7 @@
 from django.contrib.auth import views as auth_views
+from django.http import HttpResponseRedirect
 
+from . import auth as hidp_auth
 from .forms import AuthenticationForm
 
 
@@ -56,6 +58,17 @@ class LoginView(auth_views.LoginView):
         """
         return super().get_success_url()
 
+    def form_valid(self, form):
+        """
+        User has provided valid credentials and is allowed to log in.
+        Persist the user and backend in the session and redirect to the
+        success URL.
+        """
+        # This **replaces** the base implementation in order to use the
+        # HIdP login wrapper function, that performs additional checks.
+        hidp_auth.login(self.request, form.get_user())
+        return HttpResponseRedirect(self.get_success_url())
+
 
 class LogoutView(auth_views.LogoutView):
     """
@@ -89,3 +102,16 @@ class LogoutView(auth_views.LogoutView):
         3. `settings.LOGOUT_REDIRECT_URL` if it is set.
         """
         return super().get_redirect_url()
+
+    def post(self, request, *args, **kwargs):
+        """
+        Log out the user and redirect to the success URL.
+        """
+        # This **replaces** the base implementation in order to use the
+        # HIdP logout wrapper, for good measure.
+        hidp_auth.logout(request)
+        redirect_to = self.get_success_url()
+        if redirect_to != request.get_full_path():
+            # Redirect to target page once the session has been cleared.
+            return HttpResponseRedirect(redirect_to)
+        return super().get(request, *args, **kwargs)

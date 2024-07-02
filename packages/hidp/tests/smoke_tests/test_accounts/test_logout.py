@@ -1,8 +1,10 @@
 from http import HTTPStatus
+from unittest import mock
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
+from hidp.accounts import auth as hidp_auth
 from hidp.test.factories import user_factories
 
 
@@ -20,6 +22,11 @@ class TestLogout(TestCase):
         """GET is not allowed for the logout view."""
         response = self.client.get(self.logout_url)
         self.assertEqual(HTTPStatus.METHOD_NOT_ALLOWED, response.status_code)
+
+    @mock.patch("hidp.accounts.views.hidp_auth.logout", wraps=hidp_auth.logout)
+    def test_post_logout(self, mock_logout):
+        self.client.post(self.logout_url)
+        mock_logout.assert_called_once()
 
     def test_post_logout_no_login(self):
         """POST is allowed for the logout view, even if the user is not logged in."""
