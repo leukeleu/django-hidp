@@ -1,0 +1,75 @@
+from django.test import SimpleTestCase
+
+from hidp.federated.providers.base import OIDCClient
+
+
+class UnfinishedOIDCClient(OIDCClient):
+    # Missing all the required attributes
+    ...
+
+
+class ExampleOIDCClient(OIDCClient):
+    # A perfectly valid OIDC client, with all the required attributes
+    # and a valid provider key. It just doesn't work because it's an example.
+    provider_key = "example"
+    authorization_endpoint = "https://example.com/auth"
+    token_endpoint = "https://example.com/token"
+    userinfo_endpoint = "https://example.com/userinfo"
+    jwks_uri = "https://example.com/jwks"
+
+
+class BadIdentifierOIDCClient(ExampleOIDCClient):
+    # A valid OIDC client, but with a provider key that is not URL-safe.
+    provider_key = "Bad Identifier (test)"
+
+
+class TestCustomProvider(SimpleTestCase):
+    def test_invalid_provider(self):
+        """Missing attributes raise a NotImplementedError."""
+        with self.assertRaisesMessage(
+            NotImplementedError,
+            "'UnfinishedOIDCClient' misses (some of) the required attributes.",
+        ):
+            UnfinishedOIDCClient(client_id="test")
+
+    def test_bad_identifier(self):
+        """A provider key that is not URL-safe raises a ValueError."""
+        with self.assertRaisesMessage(
+            ValueError,
+            "'BadIdentifierOIDCClient.provider_key' is not URL-safe:"
+            " 'Bad Identifier (test)'",
+        ):
+            BadIdentifierOIDCClient(client_id="test")
+
+    def test_invalid_callback_base_url(self):
+        """An invalid callback base URL raises a ValueError."""
+        with self.assertRaisesMessage(
+            ValueError,
+            "Invalid callback base url: 'localhost:8000/example'."
+            " Should be in the form of '<scheme>://<netloc>'.",
+        ):
+            ExampleOIDCClient(
+                client_id="test",
+                callback_base_url="localhost:8000/example",
+            )
+
+    def test_valid_callback_base_url(self):
+        """A valid callback_base_url is stored."""
+        client = ExampleOIDCClient(
+            client_id="test", callback_base_url="https://example.com/"
+        )
+        self.assertEqual(client.client_id, "test")
+        self.assertEqual(client.callback_base_url, "https://example.com/")
+
+    def test_client_with_secret(self):
+        """A client with a secret is stored."""
+        client = ExampleOIDCClient(client_id="test", client_secret="secret")
+        self.assertEqual(client.client_id, "test")
+        self.assertEqual(client.client_secret, "secret")
+
+    def test_minimal_client(self):
+        """client_secret and callback_base_url default to None if not provided."""
+        client = ExampleOIDCClient(client_id="test")
+        self.assertEqual(client.client_id, "test")
+        self.assertEqual(client.client_secret, None)
+        self.assertEqual(client.callback_base_url, None)
