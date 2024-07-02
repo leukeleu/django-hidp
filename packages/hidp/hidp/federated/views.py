@@ -1,0 +1,61 @@
+from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.urls import reverse
+from django.views.generic import View
+
+from ..config import oidc_clients
+from .oidc import authorization_code_flow
+
+
+class OIDCMixin:
+    http_method_names = ["get"]
+    callback_pattern = "hidp_oidc_client:callback"
+
+    def get_oidc_client(self, provider_key):  # noqa: PLR6301 (no-self-use)
+        try:
+            return oidc_clients.get_oidc_client(provider_key)
+        except KeyError:
+            raise Http404(f"OIDC Client not found: {provider_key!r}") from None
+
+    def get_redirect_uri(self, provider_key):
+        return reverse(
+            self.callback_pattern,
+            kwargs={
+                "provider_key": provider_key,
+            },
+        )
+
+
+class OIDCAuthenticationRequestView(OIDCMixin, View):
+    """
+    Initiates an OpenID Connect Authorization Code Flow authentication request.
+    """
+
+    def get(self, request, *, provider_key):
+        """
+        Prepare the authentication request parameters, update the session state
+        with the required information, and redirect the user to the OpenID Connect
+        provider's authorization endpoint.
+        """
+        return HttpResponseRedirect(
+            authorization_code_flow.prepare_authentication_request(
+                request,
+                client=self.get_oidc_client(provider_key),
+                redirect_uri=self.get_redirect_uri(provider_key),
+            )
+        )
+
+
+class OIDCAuthenticationCallbackView(OIDCMixin, View):
+    """
+    Handles the callback response from an OpenID Connect Authorization Code Flow
+    authentication request. This handles both successful and failed responses.
+    """
+
+    def get(self, request, provider_key):
+        return JsonResponse(
+            authorization_code_flow.handle_authentication_callback(
+                request,
+                client=self.get_oidc_client(provider_key),
+                redirect_uri=self.get_redirect_uri(provider_key),
+            )
+        )
