@@ -49,7 +49,7 @@ def login(request, user, backend=None):
     It is recommended to only call this function with the user returned by
     a successful call to `authenticate`.
 
-    If the given user is not `None` two scenarios are possible:
+    Two scenarios are possible:
 
     1. The request session does not have a user:
        The existing anonymous session data is retained. The session key is
@@ -60,17 +60,8 @@ def login(request, user, backend=None):
        This logs out the existing user and rotates the session key.
 
     Does **not** verify that the user is allowed to log in. Might result
-    in incosistent behaviour when user argument is not the return value of
+    in inconsistent behaviour when user argument is not the return value of
     `authenticate`.
-
-    If the given user is `None` a fallback is attempted:
-
-    1. If the request already has a user, this user is logged in (again).
-
-    2. If there is no user in the request, an exception is raised.
-
-    Avoid relying on this fallback behavior, check for `None` before calling
-    this function.
 
     The `backend` argument is optional. If not provided, the user's `backend`
     attribute is used. The user may not have a `backend` attribute if it was
@@ -80,11 +71,11 @@ def login(request, user, backend=None):
     authentication backend configured, that backend is used. Otherwise,
     a `ValueError` is raised.
 
-    If no exceptions are raised, the CSRF token is rotated and the
+    If no exception is raised, the CSRF token is rotated and the
     `django.contrib.auth.user_logged_in` signal is sent.
 
     Django listens to this signal to update the `last_login` field of the
-    user object (if it exists) with the current date and time.
+    user object (if the field exists) with the current date and time.
     """
 
     # Be explicit about the expected type of the user argument. Do not handle
