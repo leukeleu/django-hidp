@@ -59,8 +59,13 @@ class LoginView(auth_views.LoginView):
         return super().get_success_url()
 
     def form_valid(self, form):
-        """Security check complete. Log the user in."""
-        # Use the HIdP login wrapper, for additional checks.
+        """
+        User has provided valid credentials and is allowed to log in.
+        Persist the user and backend in the session and redirect to the
+        success URL.
+        """
+        # This **replaces** the base implementation in order to use the
+        # HIdP login wrapper function, that performs additional checks.
         hidp_auth.login(self.request, form.get_user())
         return HttpResponseRedirect(self.get_success_url())
 
