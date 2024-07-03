@@ -5,10 +5,10 @@ Provides the URL patterns for OAuth2 and OpenID Connect (OIDC) endpoints.
 
 Include this module in the root URL configuration:
 
-    from hidp.accounts import oidc_urls
+    from hidp.accounts import oidc_provider_urls
 
     urlpatterns = [
-        path("o/", include(oidc_urls)),
+        path("o/", include(oidc_provider_urls)),
     ]
 
 This module uses the `oauth2_provider` namespace for these URLs.
