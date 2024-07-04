@@ -1,0 +1,97 @@
+"""
+Provide the basic interface, and some common functionality, for all providers.
+"""
+
+import urllib.parse
+
+
+def _valid_provider_key(provider_key):
+    """
+    The provider key is valid when URL-encoding it does not change the value.
+    """
+    return urllib.parse.quote(provider_key) == provider_key
+
+
+def _valid_callback_base_url(callback_base_url):
+    """
+    The callback base url is valid when it has a scheme, netloc, the path is empty
+    or points to the root, and all other parts are empty.
+    """
+    scheme, netloc, path, query, fragment = urllib.parse.urlsplit(callback_base_url)
+    path = path.rstrip("/")  # Remove trailing slash so "/" becomes ""
+    return scheme and netloc and not (path or query or fragment)
+
+
+class OIDCClient:
+    # Provider key, used to identify the provider in the application.
+    # This should be unique, descriptive, url-safe and, preferably, lowercase.
+    provider_key = NotImplemented  # type: str
+
+    # OpenID Connect endpoints, can usually be extracted from the provider's
+    # discovery document, commonly found at:
+    # https://<provider>/.well-known/openid-configuration
+    authorization_endpoint = NotImplemented  # type: str
+    token_endpoint = NotImplemented  # type: str
+    userinfo_endpoint = NotImplemented  # type: str
+    jwks_uri = NotImplemented  # type: str
+
+    # Provider assigned client ID
+    client_id = None  # type: str
+    # Provider assigned client secret, if required for token exchange
+    client_secret = None  # type: str | None
+    # Alternative base URL to use instead of the one of the request when
+    # constructing the callback URL.
+    callback_base_url = None  # type: str | None
+
+    def __init__(self, *, client_id, client_secret=None, callback_base_url=None):
+        """
+        Initialize the OpenID Connect client.
+
+        Arguments:
+            client_id (str):
+                The client ID provided by the OpenID Connect provider.
+            client_secret (str | None):
+                The client secret provided by the OpenID Connect provider.
+                Leave as None if the provider does not require a client secret.
+            callback_base_url (str | None):
+                Alternative base URL to use instead of the one of the request
+                when constructing the callback URL.
+
+                Some providers require the callback URL to be on a public domain,
+                which may not be the case during development.
+                Leave as None to use the request domain.
+
+        """
+        # Only allow instantiation if all required attributes are set.
+        if any(
+            value is NotImplemented
+            for value in (
+                self.provider_key,
+                self.authorization_endpoint,
+                self.token_endpoint,
+                self.userinfo_endpoint,
+                self.jwks_uri,
+            )
+        ):
+            raise NotImplementedError(
+                f"{self.__class__.__name__!r} misses (some of) the required attributes."
+            )
+
+        if not _valid_provider_key(self.provider_key):
+            raise ValueError(
+                f"'{self.__class__.__name__}.provider_key' is not URL-safe:"
+                f" {self.provider_key!r}"
+            )
+
+        if callback_base_url is not None and not _valid_callback_base_url(
+            callback_base_url
+        ):
+            raise ValueError(
+                f"Invalid callback base url: {callback_base_url!r}."
+                f" Should be in the form of '<scheme>://<netloc>'."
+            )
+
+        # Validation passed, initialize the client.
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.callback_base_url = callback_base_url
