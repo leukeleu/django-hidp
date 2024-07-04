@@ -6,6 +6,7 @@ from configparser import ConfigParser
 from pathlib import Path
 
 from hidp import config as hidp_config
+from hidp.federated.providers.google import GoogleOIDCClient
 
 # Project directory (where settings.py is)
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -280,6 +281,17 @@ OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
 
 # Remove the _OIDC_RSA_PRIVATE_KEY from the global namespace
 del _OIDC_RSA_PRIVATE_KEY
+
+# Configure OIDC Clients for the HIdP application
+hidp_config.configure_oidc_clients(
+    GoogleOIDCClient(
+        client_id=config.getliteral("app", "google_oidc_client_id"),
+        client_secret=config.getliteral("app", "google_oidc_client_secret"),
+        callback_base_url=config.getliteral(
+            "app", "google_oidc_callback_base_url", fallback=None
+        ),
+    ),
+)
 
 # Django REST Framework
 
