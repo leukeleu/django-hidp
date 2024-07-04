@@ -12,6 +12,7 @@ REQUIRED_APPS = [
     "oauth2_provider",
     "hidp",
     "hidp.accounts",
+    "hidp.federated",
 ]
 
 REQUIRED_MIDDLEWARE = [
