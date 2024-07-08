@@ -22,7 +22,6 @@ with support for the optional PKCE extension.
 import base64
 import hashlib
 import secrets
-import string
 
 from urllib.parse import urlencode, urljoin
 
@@ -30,9 +29,6 @@ import requests
 
 from ..constants import OIDC_STATES_SESSION_KEY
 from .exceptions import OAuth2Error, OIDCError
-
-# URL-safe characters
-_SAFE_CHARACTERS = string.ascii_letters + string.digits + "_.-"
 
 
 def _build_absolute_uri(request, client, redirect_uri):
@@ -46,10 +42,6 @@ def _build_absolute_uri(request, client, redirect_uri):
         client.callback_base_url or request.build_absolute_uri("/"),
         redirect_uri,
     )
-
-
-def _get_random_string(length):
-    return "".join(secrets.choice(_SAFE_CHARACTERS) for _ in range(length))
 
 
 def _add_state_to_session(request, state_key):
@@ -176,7 +168,7 @@ def prepare_authentication_request(request, *, client, redirect_uri, **extra_par
     """
     # 2.1.1. Client Prepares Authentication Request
     # https://openid.net/specs/openid-connect-basic-1_0.html#AuthenticationRequest
-    state_key = _get_random_string(32)
+    state_key = secrets.token_urlsafe(32)
     _add_state_to_session(request, state_key)
 
     redirect_uri = _build_absolute_uri(request, client, redirect_uri)
