@@ -19,6 +19,8 @@ with support for the optional PKCE extension.
 #
 # https://openid.net/specs/openid-connect-basic-1_0.html#CodeFlow
 
+import base64
+import hashlib
 import secrets
 import string
 
@@ -61,6 +63,27 @@ def _add_state_to_session(request, state_key):
     request.session[OIDC_STATES_SESSION_KEY] = states
 
 
+def _add_code_verifier_to_session(request, state_key, code_verifier):
+    """
+    Associate the code verifier with the state.
+
+    This is necessary in order to send it to the token endpoint for verification.
+    """
+    if (
+        OIDC_STATES_SESSION_KEY not in request.session
+        or state_key not in request.session[OIDC_STATES_SESSION_KEY]
+    ):
+        raise ValueError(
+            "Missing state in session. State must be added before creating"
+            " a PKCE challenge."
+        )
+
+    request.session[OIDC_STATES_SESSION_KEY][state_key]["code_verifier"] = code_verifier
+    # Django doesn't detect changes to mutable objects stored in the session.
+    # Manually mark the session as modified to ensure the changes are saved.
+    request.session.modified = True
+
+
 def get_authentication_request_parameters(
     *, client_id, redirect_uri, state, scope="openid email profile", **extra_params
 ):
@@ -94,6 +117,46 @@ def get_authentication_request_parameters(
     }
 
 
+def create_pkce_challenge(request, *, state_key):
+    """
+    Returns a dictionary with parameters for the Proof Key for Code Exchange
+    (PKCE) extension to an OpenID Connect Authorization Code Flow.
+
+    Associates the code verifier with the state, to be used in the token
+    exchange request.
+    """
+    # 4.1. Client Creates a Code Verifier
+    # code_verifier [is a] [...] random STRING with a minimum length
+    # of 43 characters and a maximum length of 128 characters.
+    # https://www.rfc-editor.org/rfc/rfc7636.html#section-4.1
+
+    # 64 bytes, encoded in base64, is 86 characters long.
+    # This is within the recommended range of 43 to 128 characters.
+    code_verifier = secrets.token_urlsafe(64)
+    _add_code_verifier_to_session(request, state_key, code_verifier)
+
+    # 4.2. Client Creates the Code Challenge
+    # "S256" is Mandatory To Implement (MTI) on the server. Clients are
+    # permitted to use "plain" only if they cannot support "S256" for some
+    # technical reason [...].
+    # https://www.rfc-editor.org/rfc/rfc7636.html#section-4.2
+
+    # The code challenge is the SHA-256 hash of the code verifier, encoded
+    # as a URL-safe base64 string without padding.
+    code_challenge = (
+        base64.urlsafe_b64encode(
+            hashlib.sha256(code_verifier.encode("ascii")).digest()
+        ).decode("ascii")
+    ).rstrip("=")  # Strip padding
+
+    # 4.3. Client Sends the Code Challenge with the Authorization Request
+    # https://www.rfc-editor.org/rfc/rfc7636.html#section-4.3
+    return {
+        "code_challenge": code_challenge,
+        "code_challenge_method": "S256",
+    }
+
+
 def prepare_authentication_request(request, *, client, redirect_uri, **extra_params):
     """
     Prepares an authentication request for an OpenID Connect Authorization Code Flow.
@@ -123,6 +186,10 @@ def prepare_authentication_request(request, *, client, redirect_uri, **extra_par
         state=state_key,
         **extra_params,
     )
+
+    if client.has_pkce_support:
+        # Add PKCE parameters to the request.
+        request_parameters |= create_pkce_challenge(request, state_key=state_key)
 
     return urljoin(
         client.authorization_endpoint,

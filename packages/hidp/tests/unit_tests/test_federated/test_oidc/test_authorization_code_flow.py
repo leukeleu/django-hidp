@@ -5,7 +5,14 @@ from django.test import RequestFactory, SimpleTestCase, TestCase
 from hidp.federated.constants import OIDC_STATES_SESSION_KEY
 from hidp.federated.oidc import authorization_code_flow, exceptions
 
-from ...test_federated.test_providers.example import ExampleOIDCClient
+from ...test_federated.test_providers.example import (
+    ExampleOIDCClient,
+    code_challenge_from_code_verifier,
+)
+
+
+class NoPKCEOIDCClient(ExampleOIDCClient):
+    has_pkce_support = False
 
 
 class TestAuthenticationRequestParams(SimpleTestCase):
@@ -92,9 +99,9 @@ class TestPrepareAuthenticationRequest(TestCase):
         self.request = RequestFactory().get("/auth/")
         self.request.session = self.client.session
 
-    def test_prepare_no_callback_base_url(self):
-        """Uses the client's authorization endpoint and the request's domain."""
-        client = ExampleOIDCClient(client_id="client_id")
+    def test_no_pkce_support(self):
+        """Omits PKCE parameters when the client doesn't support it."""
+        client = NoPKCEOIDCClient(client_id="client_id")
         url = authorization_code_flow.prepare_authentication_request(
             self.request, client=client, redirect_uri="/redirect/"
         )
@@ -112,6 +119,38 @@ class TestPrepareAuthenticationRequest(TestCase):
             url,
         )
 
+    def test_prepare_no_callback_base_url(self):
+        """Uses the client's authorization endpoint and the request's domain."""
+        client = ExampleOIDCClient(client_id="client_id")
+        url = authorization_code_flow.prepare_authentication_request(
+            self.request, client=client, redirect_uri="/redirect/"
+        )
+        # Adds state to session
+        self.assertIn(OIDC_STATES_SESSION_KEY, self.request.session)
+        state_key = next(iter(self.request.session[OIDC_STATES_SESSION_KEY].keys()))
+        # Adds code_verifier to session
+        self.assertIn(
+            "code_verifier", self.request.session[OIDC_STATES_SESSION_KEY][state_key]
+        )
+        code_verifier = self.request.session[OIDC_STATES_SESSION_KEY][state_key][
+            "code_verifier"
+        ]
+        code_challenge = code_challenge_from_code_verifier(code_verifier)
+        # Adds correct parameters to URL
+        self.assertEqual(
+            (
+                f"https://example.com/auth"
+                f"?response_type=code"
+                f"&client_id={client.client_id}"
+                f"&scope=openid+email+profile"
+                f"&redirect_uri=http%3A%2F%2Ftestserver%2Fredirect%2F"
+                f"&state={state_key}"
+                f"&code_challenge={code_challenge}"
+                f"&code_challenge_method=S256"
+            ),
+            url,
+        )
+
     def test_prepare_callback_base_url(self):
         """Uses the client's authorization endpoint and callback base URL."""
         client = ExampleOIDCClient(
@@ -124,16 +163,41 @@ class TestPrepareAuthenticationRequest(TestCase):
         # Adds state to session
         self.assertIn(OIDC_STATES_SESSION_KEY, self.request.session)
         state_key = next(iter(self.request.session[OIDC_STATES_SESSION_KEY]))
+        # Adds code_verifier to session
+        self.assertIn(
+            "code_verifier", self.request.session[OIDC_STATES_SESSION_KEY][state_key]
+        )
+        code_verifier = self.request.session[OIDC_STATES_SESSION_KEY][state_key][
+            "code_verifier"
+        ]
+        code_challenge = code_challenge_from_code_verifier(code_verifier)
         # Adds correct parameters to URL
         self.assertEqual(
-            f"https://example.com/auth"
-            f"?response_type=code"
-            f"&client_id={client.client_id}"
-            f"&scope=openid+email+profile"
-            f"&redirect_uri=https%3A%2F%2Fexample.com%2Fredirect%2F"
-            f"&state={state_key}",
+            (
+                f"https://example.com/auth"
+                f"?response_type=code"
+                f"&client_id={client.client_id}"
+                f"&scope=openid+email+profile"
+                f"&redirect_uri=https%3A%2F%2Fexample.com%2Fredirect%2F"
+                f"&state={state_key}"
+                f"&code_challenge={code_challenge}"
+                f"&code_challenge_method=S256"
+            ),
             url,
         )
+
+    def test_create_pkce_challenge_no_state(self):
+        """
+        It is not possible to create a PKCE challenge without first adding a state.
+        """
+        with self.assertRaisesMessage(
+            ValueError,
+            "Missing state in session. State must be added before"
+            " creating a PKCE challenge.",
+        ):
+            authorization_code_flow.create_pkce_challenge(
+                self.request, state_key="fake_state"
+            )
 
 
 class TestValidateAuthenticationCallback(TestCase):
