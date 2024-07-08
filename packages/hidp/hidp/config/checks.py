@@ -17,6 +17,7 @@ REQUIRED_APPS = [
 
 REQUIRED_MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
 ]
 
@@ -48,7 +49,7 @@ def check_installed_apps(**kwargs):
 E002 = checks.Error(
     "MIDDLEWARE does not include the required middleware for HIdP to work.",
     hint="MIDDLEWARE should include the following middleware: {}.".format(
-        ", ".join(f"{middleware}!r" for middleware in REQUIRED_MIDDLEWARE)
+        ", ".join(f"{middleware!r}" for middleware in REQUIRED_MIDDLEWARE)
     ),
 )
 
