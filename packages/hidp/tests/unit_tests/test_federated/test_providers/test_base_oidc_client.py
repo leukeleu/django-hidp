@@ -2,6 +2,8 @@ from django.test import SimpleTestCase
 
 from hidp.federated.providers.base import OIDCClient
 
+from .example import ExampleOIDCClient
+
 
 class UnfinishedOIDCClient(OIDCClient):
     # Missing all the required attributes
@@ -15,16 +17,6 @@ class UnsafeOIDCClient(OIDCClient):
     token_endpoint = "http://example.com/token"
     userinfo_endpoint = "http://example.com/userinfo"
     jwks_uri = "http://example.com/jwks"
-
-
-class ExampleOIDCClient(OIDCClient):
-    # A perfectly valid OIDC client, with all the required attributes
-    # and a valid provider key. It just doesn't work because it's an example.
-    provider_key = "example"
-    authorization_endpoint = "https://example.com/auth"
-    token_endpoint = "https://example.com/token"
-    userinfo_endpoint = "https://example.com/userinfo"
-    jwks_uri = "https://example.com/jwks"
 
 
 class BadIdentifierOIDCClient(ExampleOIDCClient):
