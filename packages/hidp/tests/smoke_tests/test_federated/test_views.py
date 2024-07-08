@@ -24,8 +24,17 @@ class TestOIDCAuthenticationRequestView(TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
-    def test_unknown_provider(self):
+    def test_requires_post(self):
         response = self.client.get(
+            reverse(
+                "hidp_oidc_client:authenticate", kwargs={"provider_key": "example"}
+            ),
+            secure=True,
+        )
+        self.assertEqual(response.status_code, 405)
+
+    def test_unknown_provider(self):
+        response = self.client.post(
             reverse(
                 "hidp_oidc_client:authenticate", kwargs={"provider_key": "unknown"}
             ),
@@ -34,7 +43,7 @@ class TestOIDCAuthenticationRequestView(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_redirects_to_provider(self):
-        response = self.client.get(
+        response = self.client.post(
             reverse(
                 "hidp_oidc_client:authenticate", kwargs={"provider_key": "example"}
             ),
