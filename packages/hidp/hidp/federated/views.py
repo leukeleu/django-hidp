@@ -1,4 +1,9 @@
-from django.http import Http404, HttpResponseRedirect, JsonResponse
+from django.http import (
+    Http404,
+    HttpResponseBadRequest,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.urls import reverse
 from django.views.generic import View
 
@@ -9,6 +14,13 @@ from .oidc import authorization_code_flow
 class OIDCMixin:
     http_method_names = ["get"]
     callback_pattern = "hidp_oidc_client:callback"
+
+    def dispatch(self, request, *args, **kwargs):
+        # Require HTTPS for OIDC requests. This is a security requirement to
+        # prevent the authentication request from happening in the clear.
+        if not request.is_secure():
+            return HttpResponseBadRequest("Insecure request")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_oidc_client(self, provider_key):  # noqa: PLR6301 (no-self-use)
         try:
