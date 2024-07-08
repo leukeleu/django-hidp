@@ -12,7 +12,6 @@ from .oidc import authorization_code_flow
 
 
 class OIDCMixin:
-    http_method_names = ["get"]
     callback_pattern = "hidp_oidc_client:callback"
 
     def dispatch(self, request, *args, **kwargs):
@@ -42,7 +41,12 @@ class OIDCAuthenticationRequestView(OIDCMixin, View):
     Initiates an OpenID Connect Authorization Code Flow authentication request.
     """
 
-    def get(self, request, *, provider_key):
+    http_method_names = [
+        "post",
+        "options",
+    ]
+
+    def post(self, request, *, provider_key):
         """
         Prepare the authentication request parameters, update the session state
         with the required information, and redirect the user to the OpenID Connect
@@ -62,6 +66,11 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
     Handles the callback response from an OpenID Connect Authorization Code Flow
     authentication request. This handles both successful and failed responses.
     """
+
+    http_method_names = [
+        "get",
+        "options",
+    ]
 
     def get(self, request, provider_key):
         return JsonResponse(
