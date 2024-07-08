@@ -304,14 +304,15 @@ class TestObtainTokens(SimpleTestCase):
             "token_type": "token_type",
         }
 
-    def test_obtain_tokens_no_secret(self, mock_requests_post):
-        """Obtains tokens without a client secret or callback base URL."""
+    def test_obtain_tokens_no_pkce(self, mock_requests_post):
+        """Omits code_verifier when PKCE is not supported."""
         request = RequestFactory().get("/callback/")
-        client = ExampleOIDCClient(client_id="client_id")
+        client = NoPKCEOIDCClient(client_id="client_id")
         mock_requests_post.return_value.json.return_value = self.mock_response
 
         tokens = authorization_code_flow.obtain_tokens(
             request=request,
+            state={},
             client=client,
             code="code",
             redirect_uri="/redirect/",
@@ -333,6 +334,53 @@ class TestObtainTokens(SimpleTestCase):
             tokens,
         )
 
+    def test_no_code_verifier_in_state(self, mock_requests_post):
+        """Raises an OIDCError when the code_verifier is missing from the state."""
+        request = RequestFactory().get("/callback/")
+        client = ExampleOIDCClient(client_id="client_id")
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "Missing 'code_verifier' in state.",
+        ):
+            authorization_code_flow.obtain_tokens(
+                request=request,
+                state={},
+                client=client,
+                code="code",
+                redirect_uri="/redirect/",
+            )
+
+    def test_obtain_tokens_no_secret(self, mock_requests_post):
+        """Obtains tokens without a client secret or callback base URL."""
+        request = RequestFactory().get("/callback/")
+        client = ExampleOIDCClient(client_id="client_id")
+        mock_requests_post.return_value.json.return_value = self.mock_response
+
+        tokens = authorization_code_flow.obtain_tokens(
+            request=request,
+            state={"code_verifier": "test"},
+            client=client,
+            code="code",
+            redirect_uri="/redirect/",
+        )
+
+        mock_requests_post.assert_called_once_with(
+            client.token_endpoint,
+            data={
+                "grant_type": "authorization_code",
+                "code": "code",
+                "redirect_uri": "http://testserver/redirect/",
+                "client_id": client.client_id,
+                "code_verifier": "test",
+            },
+            headers={"Accept": "application/json"},
+            timeout=(5, 30),
+        )
+        self.assertEqual(
+            self.mock_response,
+            tokens,
+        )
+
     def test_obtain_tokens_with_secret_and_callback_base_url(self, mock_requests_post):
         """Obtains tokens with a client secret and callback base URL."""
         request = RequestFactory().get("/callback/")
@@ -345,6 +393,7 @@ class TestObtainTokens(SimpleTestCase):
 
         tokens = authorization_code_flow.obtain_tokens(
             request=request,
+            state={"code_verifier": "test"},
             client=client,
             code="code",
             redirect_uri="/redirect/",
@@ -358,6 +407,7 @@ class TestObtainTokens(SimpleTestCase):
                 "redirect_uri": "https://example.com/redirect/",
                 "client_id": client.client_id,
                 "client_secret": client.client_secret,
+                "code_verifier": "test",
             },
             headers={"Accept": "application/json"},
             timeout=(5, 30),
@@ -376,7 +426,7 @@ class TestHandleAuthenticationCallback(TestCase):
     @mock.patch(
         "hidp.federated.oidc.authorization_code_flow.validate_authentication_callback",
         autospec=True,
-        return_value=("code", {"test": "test"}),
+        return_value=("code", {"code_verifier": "test"}),
     )
     @mock.patch(
         "hidp.federated.oidc.authorization_code_flow.obtain_tokens",
@@ -403,7 +453,11 @@ class TestHandleAuthenticationCallback(TestCase):
 
         mock_validate_callback.assert_called_once_with(self.request)
         mock_obtain_tokens.assert_called_once_with(
-            self.request, client=client, code="code", redirect_uri="/redirect/"
+            self.request,
+            state={"code_verifier": "test"},
+            client=client,
+            code="code",
+            redirect_uri="/redirect/",
         )
         self.assertEqual(
             {

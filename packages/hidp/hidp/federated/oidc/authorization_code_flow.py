@@ -264,7 +264,7 @@ def validate_authentication_callback(request):
     return code, state
 
 
-def obtain_tokens(request, *, client, code, redirect_uri):
+def obtain_tokens(request, *, state, client, code, redirect_uri):
     """
     Obtains the tokens from an OpenID Connect Authorization Code Flow
     authentication request.
@@ -272,6 +272,8 @@ def obtain_tokens(request, *, client, code, redirect_uri):
     Arguments:
         request (HttpRequest):
             The current HTTP request.
+        state (dict):
+            The state associated with the authentication request.
         client (OIDCClient):
             The OpenID Connect client to use for the authentication request.
         code (str):
@@ -294,10 +296,18 @@ def obtain_tokens(request, *, client, code, redirect_uri):
         "redirect_uri": _build_absolute_uri(request, client, redirect_uri),
         "client_id": client.client_id,
     }
+
     if client.client_secret:
         # Some providers require the client secret to be included
         # in the token request.
         token_request_data["client_secret"] = client.client_secret
+
+    if client.has_pkce_support:
+        if "code_verifier" not in state:
+            raise OIDCError("Missing 'code_verifier' in state.")
+        # 4.5. Client Sends [...] the Code Verifier to the Token Endpoint
+        # https://www.rfc-editor.org/rfc/rfc7636.html#section-4.5
+        token_request_data["code_verifier"] = state["code_verifier"]
 
     # 2.1.6.2. Client Receives Tokens
     # https://openid.net/specs/openid-connect-basic-1_0.html#TokenOK
@@ -342,9 +352,13 @@ def handle_authentication_callback(request, *, client, redirect_uri):
         OAuth2Error: If the callback contains an error.
         OIDCError: If the callback is invalid.
     """
-    code, state = validate_authentication_callback(request)  # noqa: F841 (state is not used **yet**)
+    code, state = validate_authentication_callback(request)
     token_response = obtain_tokens(
-        request, client=client, code=code, redirect_uri=redirect_uri
+        request,
+        state=state,
+        client=client,
+        code=code,
+        redirect_uri=redirect_uri,
     )
     validate_id_token(token_response.get("id_token"))
     return token_response
