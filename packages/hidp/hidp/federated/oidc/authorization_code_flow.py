@@ -19,6 +19,7 @@
 import base64
 import collections
 import hashlib
+import http
 import json
 import secrets
 import time
@@ -227,6 +228,7 @@ def prepare_authentication_request(
         redirect_uri=_build_absolute_uri(request, client, callback_url),
         state=state_key,
         scope=client.scope,
+        response_mode="form_post",
         **extra_params,
     )
 
@@ -297,8 +299,14 @@ def validate_authentication_callback(request):
     # If the End-User grants the access request, the Authorization Server
     # Issues a code and delivers it to the Client [...].
     # https://openid.net/specs/openid-connect-basic-1_0.html#CodeOK
-    code = request.GET.get("code")
-    state_key = request.GET.get("state")
+    breakpoint()
+    if request.method == http.HTTPMethod.POST:
+        request_params = request.POST
+    else:
+        request_params = request.GET
+
+    code = request_params.get("code")
+    state_key = request_params.get("state")
 
     # 2.1.5.2. End-User Denies Authorization or Invalid Request
     # If the End-User denies the authorization or the End-User
@@ -306,15 +314,15 @@ def validate_authentication_callback(request):
     # Authorization Response as defined in Section 4.1.2.1 of OAuth 2.0
     # https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.2.1
     # https://openid.net/specs/openid-connect-basic-1_0.html#CodeAuthzError
-    error = request.GET.get("error")
+    error = request_params.get("error")
     if error:
         # Remove the state from the session, authentication failed
         # and the state should not be used again.
         _pop_state_from_session(request, state_key)
         raise OAuth2Error(
             error,
-            description=request.GET.get("error_description"),
-            uri=request.GET.get("error_uri"),
+            description=request_params.get("error_description"),
+            uri=request_params.get("error_uri"),
         )
 
     for param, value in (("code", code), ("state", state_key)):

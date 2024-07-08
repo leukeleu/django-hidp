@@ -12,6 +12,7 @@ from django.http import (
 )
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, FormView, View
 
@@ -129,6 +130,7 @@ class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View
 
 
 @method_decorator(rate_limit_strict, name="dispatch")
+@method_decorator(csrf_exempt, name="dispatch")
 class OIDCAuthenticationCallbackView(OIDCMixin, View):
     """
     Handle the callback from an OIDC authentication request.
@@ -138,6 +140,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
 
     http_method_names = [
         "get",
+        "post",
         "options",
     ]
 
@@ -322,6 +325,10 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
                 user, next_url=self.get_redirect_url()
             )
         )
+
+    def post(self, request, provider_key):
+        # Delegate to the GET handler
+        return self.get(request, provider_key)
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
