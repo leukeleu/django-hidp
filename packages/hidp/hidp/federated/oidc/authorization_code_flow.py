@@ -23,7 +23,7 @@ import base64
 import hashlib
 import secrets
 
-from urllib.parse import urlencode, urljoin
+from urllib.parse import urlencode, urljoin, urlsplit
 
 import requests
 
@@ -290,10 +290,13 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
     # 2.1.6.1. Client Sends Code
     # https://openid.net/specs/openid-connect-basic-1_0.html#TokenRequest
 
+    redirect_uri = _build_absolute_uri(request, client, redirect_uri)
+    redirect_uri_origin = "://".join(urlsplit(redirect_uri)[:2])
+
     token_request_data = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": _build_absolute_uri(request, client, redirect_uri),
+        "redirect_uri": redirect_uri,
         "client_id": client.client_id,
     }
 
@@ -316,6 +319,9 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
         data=token_request_data,
         headers={
             "Accept": "application/json",
+            # Some providers (e.g. Microsoft) require the Origin header
+            # to be present and equal the redirect URI origin.
+            "Origin": redirect_uri_origin,
         },
         # Generous timeouts, might reconsider
         timeout=(

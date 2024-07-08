@@ -326,7 +326,10 @@ class TestObtainTokens(SimpleTestCase):
                 "redirect_uri": "http://testserver/redirect/",
                 "client_id": client.client_id,
             },
-            headers={"Accept": "application/json"},
+            headers={
+                "Accept": "application/json",
+                "Origin": "http://testserver",
+            },
             timeout=(5, 30),
         )
         self.assertEqual(
@@ -373,7 +376,10 @@ class TestObtainTokens(SimpleTestCase):
                 "client_id": client.client_id,
                 "code_verifier": "test",
             },
-            headers={"Accept": "application/json"},
+            headers={
+                "Accept": "application/json",
+                "Origin": "http://testserver",
+            },
             timeout=(5, 30),
         )
         self.assertEqual(
@@ -409,7 +415,10 @@ class TestObtainTokens(SimpleTestCase):
                 "client_secret": client.client_secret,
                 "code_verifier": "test",
             },
-            headers={"Accept": "application/json"},
+            headers={
+                "Accept": "application/json",
+                "Origin": "https://example.com",
+            },
             timeout=(5, 30),
         )
         self.assertEqual(
