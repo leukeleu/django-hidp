@@ -24,6 +24,11 @@ class BadIdentifierOIDCClient(ExampleOIDCClient):
     provider_key = "Bad Identifier (test)"
 
 
+class NamedExampleOIDCClient(ExampleOIDCClient):
+    # A valid OIDC client, but with a custom name.
+    name = "Named Example"
+
+
 class TestCustomProvider(SimpleTestCase):
     def test_invalid_provider(self):
         """Missing attributes raise a NotImplementedError."""
@@ -95,5 +100,11 @@ class TestCustomProvider(SimpleTestCase):
         """client_secret and callback_base_url default to None if not provided."""
         client = ExampleOIDCClient(client_id="test")
         self.assertEqual(client.client_id, "test")
+        self.assertEqual(client.name, "Example")
         self.assertEqual(client.client_secret, None)
         self.assertEqual(client.callback_base_url, None)
+
+    def test_named_client(self):
+        """Custom name takes precedence over the default name."""
+        client = NamedExampleOIDCClient(client_id="test")
+        self.assertEqual(client.name, "Named Example")

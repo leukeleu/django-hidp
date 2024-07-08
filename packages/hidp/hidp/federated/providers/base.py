@@ -38,6 +38,9 @@ class OIDCClient:
     # Provider key, used to identify the provider in the application.
     # This should be unique, descriptive, url-safe and, preferably, lowercase.
     provider_key = NotImplemented  # type: str
+    # Provider name, used for display purposes. Will default to the capitalized
+    # provider key if not set.
+    name = None  # type: str | None
 
     # OpenID Connect endpoints, can usually be extracted from the provider's
     # discovery document, commonly found at:
@@ -116,6 +119,9 @@ class OIDCClient:
             )
 
         # Validation passed, initialize the client.
+        if self.name is None:
+            self.name = self.provider_key.capitalize()
+
         self.client_id = client_id
         self.client_secret = client_secret
         self.callback_base_url = callback_base_url
