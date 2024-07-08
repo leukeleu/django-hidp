@@ -64,11 +64,25 @@ class TestCustomProvider(SimpleTestCase):
         with self.assertRaisesMessage(
             ValueError,
             "Invalid callback base url: 'localhost:8000/example'."
-            " Should be in the form of '<scheme>://<netloc>'.",
+            " Should be in the form of 'https://<netloc>'"
+            " (path, querystring and/or fragment are not allowed).",
         ):
             ExampleOIDCClient(
                 client_id="test",
                 callback_base_url="localhost:8000/example",
+            )
+
+    def test_insecure_callback_base_url(self):
+        """An insecure callback base URL raises a ValueError."""
+        with self.assertRaisesMessage(
+            ValueError,
+            "Invalid callback base url: 'http://example.com/'."
+            " Should be in the form of 'https://<netloc>'"
+            " (path, querystring and/or fragment are not allowed).",
+        ):
+            ExampleOIDCClient(
+                client_id="test",
+                callback_base_url="http://example.com/",
             )
 
     def test_valid_callback_base_url(self):
