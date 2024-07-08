@@ -1,7 +1,7 @@
 from django.test import SimpleTestCase
 
 from hidp.config import configure_oidc_clients
-from hidp.config.oidc_clients import get_oidc_client
+from hidp.config.oidc_clients import get_oidc_client, get_registered_oidc_clients
 
 from ..test_federated.test_providers.example import ExampleOIDCClient
 
@@ -71,3 +71,19 @@ class TestOIDCClientsRegistry(SimpleTestCase):
             "No OIDC client registered for provider key: 'example'",
         ):
             get_oidc_client("example")
+
+    def test_get_registered_oidc_clients(self):
+        """Retrieving all registered clients returns a list in registration order."""
+        clients = [
+            ExampleOIDCClient(client_id="test"),
+            ExampleOIDCClient2(client_id="test-2"),
+        ]
+        configure_oidc_clients(*clients)
+        registered_clients = get_registered_oidc_clients()
+        self.assertEqual(len(clients), len(registered_clients))
+        self.assertEqual(clients, registered_clients)
+
+        with self.subTest("Mutation"):
+            # Mutating the returned list should not affect the registry.
+            registered_clients[0] = None
+            self.assertEqual(clients, get_registered_oidc_clients())

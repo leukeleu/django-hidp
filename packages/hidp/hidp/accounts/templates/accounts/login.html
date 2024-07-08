@@ -18,10 +18,30 @@
   </form>
   {% endif %}
 
+  <h1>{% translate 'Log in with username and password' %}</h1>
+
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">{% translate 'Log in' %}</button>
   </form>
+
+  {% if oidc_login_providers %}
+  <hr>
+
+  <h1>{%  translate 'Log in using a third-party service' %}</h1>
+
+  {% for item in oidc_login_providers %}
+  <form action="{{ item.url }}" method="POST">
+    {% csrf_token %}
+    <button type="submit">
+      {% blocktranslate with provider=item.provider.name %}
+        Log in with {{ provider }}
+      {% endblocktranslate %}
+    </button>
+  </form>
+
+  {% endfor %}
+  {% endif %}
 </body>
 </html>

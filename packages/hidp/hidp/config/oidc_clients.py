@@ -47,3 +47,14 @@ def get_oidc_client(provider_key):
         raise KeyError(
             f"No OIDC client registered for provider key: {provider_key!r}"
         ) from None
+
+
+def get_registered_oidc_clients():
+    """
+    Retrieve a list of registered OIDC clients.
+
+    Returns:
+        list of OIDCClient:
+            A list of OIDC client instances.
+    """
+    return list(_registry.values())
