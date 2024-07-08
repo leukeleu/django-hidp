@@ -1,6 +1,8 @@
 from django.contrib.auth import views as auth_views
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 
+from ..config import oidc_clients
 from . import auth as hidp_auth
 from .forms import AuthenticationForm
 
@@ -42,7 +44,21 @@ class LoginView(auth_views.LoginView):
           The name of the current site (host name if `RequestSite` is used)
         * Any additional data present is `self.extra_context`
         """
-        return super().get_context_data(**kwargs)
+        return super().get_context_data(
+            oidc_login_providers=[
+                {
+                    "provider": provider,
+                    "url": reverse(
+                        "hidp_oidc_client:authenticate",
+                        kwargs={
+                            "provider_key": provider.provider_key,
+                        },
+                    ),
+                }
+                for provider in oidc_clients.get_registered_oidc_clients()
+            ],
+            **kwargs,
+        )
 
     def get_success_url(self):
         """
