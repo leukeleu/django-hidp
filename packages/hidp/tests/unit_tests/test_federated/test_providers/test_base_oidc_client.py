@@ -8,6 +8,15 @@ class UnfinishedOIDCClient(OIDCClient):
     ...
 
 
+class UnsafeOIDCClient(OIDCClient):
+    # A seemingly valid OIDC client, but the endpoints do not utilize TLS.
+    provider_key = "unsafe"
+    authorization_endpoint = "http://example.com/auth"
+    token_endpoint = "http://example.com/token"
+    userinfo_endpoint = "http://example.com/userinfo"
+    jwks_uri = "http://example.com/jwks"
+
+
 class ExampleOIDCClient(OIDCClient):
     # A perfectly valid OIDC client, with all the required attributes
     # and a valid provider key. It just doesn't work because it's an example.
@@ -32,6 +41,15 @@ class TestCustomProvider(SimpleTestCase):
         ):
             UnfinishedOIDCClient(client_id="test")
 
+    def test_unsafe_endpoints(self):
+        """An OIDC client with unsafe endpoints raises a ValueError."""
+        with self.assertRaisesMessage(
+            ValueError,
+            "All endpoints must use TLS (https):"
+            " 'http://example.com/auth' does not.",
+        ):
+            UnsafeOIDCClient(client_id="test")
+
     def test_bad_identifier(self):
         """A provider key that is not URL-safe raises a ValueError."""
         with self.assertRaisesMessage(
@@ -46,11 +64,25 @@ class TestCustomProvider(SimpleTestCase):
         with self.assertRaisesMessage(
             ValueError,
             "Invalid callback base url: 'localhost:8000/example'."
-            " Should be in the form of '<scheme>://<netloc>'.",
+            " Should be in the form of 'https://<netloc>'"
+            " (path, querystring and/or fragment are not allowed).",
         ):
             ExampleOIDCClient(
                 client_id="test",
                 callback_base_url="localhost:8000/example",
+            )
+
+    def test_insecure_callback_base_url(self):
+        """An insecure callback base URL raises a ValueError."""
+        with self.assertRaisesMessage(
+            ValueError,
+            "Invalid callback base url: 'http://example.com/'."
+            " Should be in the form of 'https://<netloc>'"
+            " (path, querystring and/or fragment are not allowed).",
+        ):
+            ExampleOIDCClient(
+                client_id="test",
+                callback_base_url="http://example.com/",
             )
 
     def test_valid_callback_base_url(self):

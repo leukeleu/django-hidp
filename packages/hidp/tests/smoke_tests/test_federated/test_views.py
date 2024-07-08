@@ -24,19 +24,34 @@ class TestOIDCAuthenticationRequestView(TestCase):
     def setUp(self):
         configure_oidc_clients(ExampleOIDCClient(client_id="test"))
 
+    def test_requires_https(self):
+        response = self.client.get(
+            reverse(
+                "hidp_oidc_client:authenticate", kwargs={"provider_key": "example"}
+            ),
+            secure=False,
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_unknown_provider(self):
         response = self.client.get(
-            reverse("hidp_oidc_client:authenticate", kwargs={"provider_key": "unknown"})
+            reverse(
+                "hidp_oidc_client:authenticate", kwargs={"provider_key": "unknown"}
+            ),
+            secure=True,
         )
         self.assertEqual(response.status_code, 404)
 
     def test_redirects_to_provider(self):
         response = self.client.get(
-            reverse("hidp_oidc_client:authenticate", kwargs={"provider_key": "example"})
+            reverse(
+                "hidp_oidc_client:authenticate", kwargs={"provider_key": "example"}
+            ),
+            secure=True,
         )
         state_key = next(iter(self.client.session[OIDC_STATES_SESSION_KEY]))
         callback_url = urllib.parse.quote(
-            "http://testserver"
+            "https://testserver"
             + reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"})
         )
         self.assertRedirects(
@@ -50,9 +65,17 @@ class TestOIDCAuthenticationCallbackView(TestCase):
     def setUp(self):
         configure_oidc_clients(ExampleOIDCClient(client_id="test"))
 
+    def test_requires_https(self):
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=False,
+        )
+        self.assertEqual(response.status_code, 400)
+
     def test_unknown_provider(self):
         response = self.client.get(
-            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "unknown"})
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "unknown"}),
+            secure=True,
         )
         self.assertEqual(response.status_code, 404)
 
@@ -68,7 +91,8 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         self, mock_handle_authentication_callback
     ):
         response = self.client.get(
-            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"})
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
         )
         mock_handle_authentication_callback.assert_called_once()
         self.assertEqual(response.status_code, 200)

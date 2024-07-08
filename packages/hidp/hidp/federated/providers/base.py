@@ -14,12 +14,24 @@ def _valid_provider_key(provider_key):
 
 def _valid_callback_base_url(callback_base_url):
     """
-    The callback base url is valid when it has a scheme, netloc, the path is empty
-    or points to the root, and all other parts are empty.
+    The callback base url is valid when the scheme is available and set to https,
+    a netloc is present, the path is empty or points to the root, and all
+    other parts are empty.
     """
     scheme, netloc, path, query, fragment = urllib.parse.urlsplit(callback_base_url)
     path = path.rstrip("/")  # Remove trailing slash so "/" becomes ""
-    return scheme and netloc and not (path or query or fragment)
+    return scheme == "https" and netloc and not (path or query or fragment)
+
+
+def _valid_endpoint(endpoint):
+    """
+    Communication with endpoints MUST utilize TLS.
+    """
+    # In order to prevent man-in-the-middle attacks, the authorization
+    # server MUST require the use of TLS with [...] for any request sent
+    # to the authorization and token endpoints.
+    # https://datatracker.ietf.org/doc/html/rfc6749#section-10.9
+    return endpoint.startswith("https://")
 
 
 class OIDCClient:
@@ -83,12 +95,24 @@ class OIDCClient:
                 f" {self.provider_key!r}"
             )
 
+        for endpoint in (
+            self.authorization_endpoint,
+            self.token_endpoint,
+            self.userinfo_endpoint,
+            self.jwks_uri,
+        ):
+            if not _valid_endpoint(endpoint):
+                raise ValueError(
+                    f"All endpoints must use TLS (https): {endpoint!r} does not."
+                )
+
         if callback_base_url is not None and not _valid_callback_base_url(
             callback_base_url
         ):
             raise ValueError(
                 f"Invalid callback base url: {callback_base_url!r}."
-                f" Should be in the form of '<scheme>://<netloc>'."
+                f" Should be in the form of 'https://<netloc>'"
+                " (path, querystring and/or fragment are not allowed)."
             )
 
         # Validation passed, initialize the client.
