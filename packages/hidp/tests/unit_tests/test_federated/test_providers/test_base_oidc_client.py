@@ -8,6 +8,15 @@ class UnfinishedOIDCClient(OIDCClient):
     ...
 
 
+class UnsafeOIDCClient(OIDCClient):
+    # A seemingly valid OIDC client, but the endpoints do not utilize TLS.
+    provider_key = "unsafe"
+    authorization_endpoint = "http://example.com/auth"
+    token_endpoint = "http://example.com/token"
+    userinfo_endpoint = "http://example.com/userinfo"
+    jwks_uri = "http://example.com/jwks"
+
+
 class ExampleOIDCClient(OIDCClient):
     # A perfectly valid OIDC client, with all the required attributes
     # and a valid provider key. It just doesn't work because it's an example.
@@ -31,6 +40,15 @@ class TestCustomProvider(SimpleTestCase):
             "'UnfinishedOIDCClient' misses (some of) the required attributes.",
         ):
             UnfinishedOIDCClient(client_id="test")
+
+    def test_unsafe_endpoints(self):
+        """An OIDC client with unsafe endpoints raises a ValueError."""
+        with self.assertRaisesMessage(
+            ValueError,
+            "All endpoints must use TLS (https):"
+            " 'http://example.com/auth' does not.",
+        ):
+            UnsafeOIDCClient(client_id="test")
 
     def test_bad_identifier(self):
         """A provider key that is not URL-safe raises a ValueError."""
