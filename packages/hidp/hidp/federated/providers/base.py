@@ -50,6 +50,10 @@ class OIDCClient:
     userinfo_endpoint = NotImplemented  # type: str
     jwks_uri = NotImplemented  # type: str
 
+    # Whether the provider supports PKCE (Proof Key for Code Exchange).
+    # Note: Only set to True if the provider supports S256 as the code challenge method.
+    has_pkce_support = True
+
     # Provider assigned client ID
     client_id = None  # type: str
     # Provider assigned client secret, if required for token exchange
