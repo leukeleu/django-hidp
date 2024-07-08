@@ -59,5 +59,8 @@ services:
     # This is useful for debugging the container, e.g. to run commands inside it, remove python packages, etc.
     # command: 'debug-container'
 
+  redis:
+    image: 'redis:7-alpine'
+
 volumes:
   postgres_data:

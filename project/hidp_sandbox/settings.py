@@ -86,6 +86,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "hidp.rate_limit.middleware.RateLimitMiddleware",
 ]
 
 ROOT_URLCONF = "hidp_sandbox.urls"
@@ -301,3 +302,18 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
 }
+
+# Cache settings
+
+_REDIS_SOCKET = config.getliteral("app", "redis_socket", fallback=None)
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": (
+            f"unix://{_REDIS_SOCKET}?db=0" if _REDIS_SOCKET else "redis://redis:6379/1",
+        ),
+    },
+}
+
+del _REDIS_SOCKET  # Remove the _REDIS_SOCKET from the global namespace
