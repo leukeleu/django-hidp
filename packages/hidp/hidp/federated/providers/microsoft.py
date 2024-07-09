@@ -24,9 +24,23 @@ from . import base
 class MicrosoftOIDCClient(base.OIDCClient):
     provider_key = "microsoft"
 
-    # Microsoft OpenID Connect endpoints
+    # Microsoft OpenID Connect configuration:
     # https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration
+    issuer = "https://login.microsoftonline.com/{tenantid}/v2.0"
     authorization_endpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"  # fmt: skip # noqa: E501
     token_endpoint = "https://login.microsoftonline.com/common/oauth2/v2.0/token"  # noqa: S105 (not a secret)
     userinfo_endpoint = "https://graph.microsoft.com/oidc/userinfo"
     jwks_uri = "https://login.microsoftonline.com/common/discovery/v2.0/keys"
+
+    def get_issuer(self, *, claims):
+        # Use the tenant ID from the claims to format the issuer URL.
+        # The common issuer URL is used for all tenants, but the tenant ID
+        # is required for the issuer URL to be valid.
+        #
+        # This is somewhat strange, but it's how Microsoft has set up
+        # their OpenID Connect configuration.
+        return (
+            self.issuer.format(tenantid=tid)
+            if (tid := claims.get("tid"))
+            else self.issuer
+        )

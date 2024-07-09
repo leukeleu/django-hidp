@@ -45,8 +45,9 @@ from . import base
 class GoogleOIDCClient(base.OIDCClient):
     provider_key = "google"
 
-    # Google OpenID Connect endpoints
+    # Google OpenID Connect configuration:
     # https://accounts.google.com/.well-known/openid-configuration
+    issuer = "https://accounts.google.com"
     authorization_endpoint = "https://accounts.google.com/o/oauth2/v2/auth"
     token_endpoint = "https://oauth2.googleapis.com/token"  # noqa: S105 (not a secret)
     userinfo_endpoint = "https://openidconnect.googleapis.com/v1/userinfo"
