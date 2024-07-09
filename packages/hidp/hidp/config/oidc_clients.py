@@ -1,9 +1,10 @@
+from ..federated.oidc import jwks
 from ..federated.providers.base import OIDCClient
 
 _registry = {}
 
 
-def configure_oidc_clients(*clients):
+def configure_oidc_clients(*clients, eagerly_provision_jwk_store=False):
     """
     Configure OIDC clients for the HIdP application.
 
@@ -14,6 +15,11 @@ def configure_oidc_clients(*clients):
     Arguments:
         *clients (OIDCClient):
             One or more OIDCClient instances to register.
+        eagerly_provision_jwk_store (bool):
+            Whether to eagerly load the JWK data for the registered clients.
+            This is useful to ensure that the keys are loaded at application startup
+            instead of the first time they are needed.
+
     """
     _registry.clear()
     for client in clients:
@@ -23,6 +29,11 @@ def configure_oidc_clients(*clients):
             raise ValueError(f"Duplicate provider key: {client.provider_key!r}")
         else:
             _registry[client.provider_key] = client
+
+    # Finished registering clients, provision JWK store if requested.
+    if eagerly_provision_jwk_store:
+        for client in clients:
+            jwks.get_oidc_client_jwks(client, eager=True)
 
 
 def get_oidc_client(provider_key):
