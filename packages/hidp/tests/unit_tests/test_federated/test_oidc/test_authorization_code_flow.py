@@ -1,7 +1,12 @@
+import time
+
 from unittest import mock
+
+from jwcrypto import jwt
 
 from django.test import RequestFactory, SimpleTestCase, TestCase
 
+from hidp import config as hidp_config
 from hidp.federated.constants import OIDC_STATES_SESSION_KEY
 from hidp.federated.oidc import authorization_code_flow, exceptions
 
@@ -427,6 +432,181 @@ class TestObtainTokens(SimpleTestCase):
         )
 
 
+@mock.patch.object(
+    authorization_code_flow.jwks,
+    "get_oidc_client_jwks",
+    autospec=True,
+)
+class TestParseIdToken(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Generate a key and a key set
+        key = jwt.JWK(generate="RSA")
+        key["kid"] = key.thumbprint()
+        key_set = jwt.JWKSet()
+        key_set.add(key)
+
+        # Generate an unregistered key
+        unregistered_key = jwt.JWK(generate="RSA")
+        unregistered_key["kid"] = unregistered_key.thumbprint()
+
+        # Expose the keys and key set
+        cls.key = key
+        cls.key_set = key_set
+        cls.unregistered_key = unregistered_key
+
+    def setUp(self):
+        self.client = ExampleOIDCClient(client_id="client_id")
+        hidp_config.configure_oidc_clients(self.client)
+
+    def _get_token(self, *, claims=None, key=None, key_id=None):
+        key = key or self.key
+        token = jwt.JWT(
+            header={"alg": "RS256", "kid": key_id or key["kid"]}, claims=claims or {}
+        )
+        token.make_signed_token(key)
+        return token.serialize()
+
+    def test_unable_to_get_jwks(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the JWKs cannot be retrieved."""
+        mock_get_oidc_client_jwks.return_value = None
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "Unable to get JWKs for 'example'. The ID Token cannot be validated.",
+        ):
+            authorization_code_flow.parse_id_token(
+                "id_token",
+                client=self.client,
+            )
+
+    def test_invalid_token(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the token is invalid."""
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' is invalid.",
+        ):
+            authorization_code_flow.parse_id_token(
+                "invalid_token",
+                client=self.client,
+            )
+
+    def test_unknown_key(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the key is not in the key set."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        token = self._get_token(key=self.unregistered_key)
+
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' is signed with an unknown key.",
+        ):
+            authorization_code_flow.parse_id_token(token, client=self.client)
+
+    def test_missing_claims(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the claims are missing."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        token = self._get_token()
+
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' has invalid or missing claims:"
+            " Claim sub is missing.",
+        ):
+            authorization_code_flow.parse_id_token(token, client=self.client)
+
+    def test_wrong_audience(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the audience is incorrect."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        token = self._get_token(
+            claims={
+                "sub": "subject",
+                "iss": "issuer",
+                "aud": "wrong_client_id",
+            },
+        )
+
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' has invalid or missing claims:"
+            " Invalid 'aud' value.",
+        ):
+            authorization_code_flow.parse_id_token(token, client=self.client)
+
+    def test_expired_token(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the token is expired."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        token = self._get_token(
+            claims={
+                "sub": "subject",
+                "iss": "issuer",
+                "aud": "client_id",
+                "exp": 1234567890,
+            },
+        )
+
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' has expired: Expired at 1234567890",
+        ):
+            authorization_code_flow.parse_id_token(token, client=self.client)
+
+    def test_not_yet_valid_token(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the token is not yet valid."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        token = self._get_token(
+            claims={
+                "sub": "subject",
+                "iss": "issuer",
+                "aud": "client_id",
+                "exp": time.time() + 3600,
+                "iat": time.time(),
+                "nbf": time.time() + 300,
+            },
+        )
+
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' is not yet valid.",
+        ):
+            authorization_code_flow.parse_id_token(token, client=self.client)
+
+    def test_wrong_issuer(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the issuer is incorrect."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        token = self._get_token(
+            claims={
+                "sub": "subject",
+                "iss": "https://example.test",
+                "aud": "client_id",
+                "exp": time.time() + 3600,
+                "iat": time.time(),
+            },
+        )
+
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' is not issued by 'https://example.com',"
+            " got 'https://example.test'.",
+        ):
+            authorization_code_flow.parse_id_token(token, client=self.client)
+
+    def test_parse_id_token(self, mock_get_oidc_client_jwks):
+        """Parses the ID token and returns the claims."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        claims = {
+            "sub": "subject",
+            "iss": self.client.issuer,
+            "aud": self.client.client_id,
+            "exp": time.time() + 3600,
+            "iat": time.time(),
+        }
+        token = self._get_token(claims=claims)
+        parsed_claims = authorization_code_flow.parse_id_token(
+            token,
+            client=self.client,
+        )
+        self.assertEqual(claims, parsed_claims)
+
+
 class TestHandleAuthenticationCallback(TestCase):
     def setUp(self):
         self.request = RequestFactory().get("/callback/")
@@ -447,16 +627,17 @@ class TestHandleAuthenticationCallback(TestCase):
         },
     )
     @mock.patch(
-        "hidp.federated.oidc.authorization_code_flow.validate_id_token",
+        "hidp.federated.oidc.authorization_code_flow.parse_id_token",
         autospec=True,
+        return_value={"claims": "claims"},
     )
     def test_handle_callback(
-        self, mock_validate_id_token, mock_obtain_tokens, mock_validate_callback
+        self, mock_parse_id_token, mock_obtain_tokens, mock_validate_callback
     ):
         """Handles the authentication callback and returns the tokens."""
         client = ExampleOIDCClient(client_id="client_id")
 
-        tokens = authorization_code_flow.handle_authentication_callback(
+        tokens, claims = authorization_code_flow.handle_authentication_callback(
             self.request, client=client, redirect_uri="/redirect/"
         )
 
@@ -468,6 +649,8 @@ class TestHandleAuthenticationCallback(TestCase):
             code="code",
             redirect_uri="/redirect/",
         )
+        mock_parse_id_token.assert_called_once_with("id_token", client=client)
+
         self.assertEqual(
             {
                 "access_token": "access_token",
@@ -476,4 +659,8 @@ class TestHandleAuthenticationCallback(TestCase):
             },
             tokens,
         )
-        mock_validate_id_token.assert_called_once_with("id_token")
+
+        self.assertEqual(
+            {"claims": "claims"},
+            claims,
+        )
