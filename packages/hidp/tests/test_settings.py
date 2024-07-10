@@ -6,10 +6,31 @@ from pathlib import Path
 
 from hidp import config as hidp_config
 
+# Enable all warnings
 warnings.resetwarnings()
+# Warn only once per module
 warnings.simplefilter("module")
-
+# Redirect warnings output to the logging system
 logging.captureWarnings(capture=True)
+
+# Disable all log output, except warnings
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+        "null": {"class": "logging.NullHandler"},
+    },
+    "loggers": {
+        "": {
+            "handlers": ["null"],
+        },
+        "py.warnings": {
+            "handlers": ["console"],
+            "level": "WARNING",
+        },
+    },
+}
 
 # Repository root directory
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
@@ -53,24 +74,6 @@ TEMPLATES = [
 OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
     OIDC_RSA_PRIVATE_KEY=(VAR_DIR / "oidc.key").read_text(),
 )
-
-# Disable all log output, except warnings
-LOGGING = {
-    "version": 1,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-        "null": {"class": "logging.NullHandler"},
-    },
-    "loggers": {
-        "": {
-            "handlers": ["null"],
-        },
-        "py.warnings": {
-            "handlers": ["console"],
-            "level": "WARNING",
-        },
-    },
-}
 
 # Test key
 SECRET_KEY = "secret-key-only-for-testing"
