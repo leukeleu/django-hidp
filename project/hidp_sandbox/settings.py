@@ -7,6 +7,7 @@ from pathlib import Path
 
 from hidp import config as hidp_config
 from hidp.federated.providers.google import GoogleOIDCClient
+from hidp.federated.providers.microsoft import MicrosoftOIDCClient
 
 # Project directory (where settings.py is)
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -290,6 +291,12 @@ hidp_config.configure_oidc_clients(
         client_secret=config.getliteral("app", "google_oidc_client_secret"),
         callback_base_url=config.getliteral(
             "app", "google_oidc_callback_base_url", fallback=None
+        ),
+    ),
+    MicrosoftOIDCClient(
+        client_id=config.getliteral("app", "microsoft_oidc_client_id"),
+        callback_base_url=config.getliteral(
+            "app", "microsoft_oidc_callback_base_url", fallback=None
         ),
     ),
 )
