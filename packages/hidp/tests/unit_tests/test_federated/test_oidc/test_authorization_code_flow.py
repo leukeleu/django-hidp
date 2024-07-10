@@ -2,6 +2,8 @@ import time
 
 from unittest import mock
 
+import requests
+
 from jwcrypto import jwt
 
 from django.test import RequestFactory, SimpleTestCase, TestCase
@@ -607,6 +609,112 @@ class TestParseIdToken(TestCase):
         self.assertEqual(claims, parsed_claims)
 
 
+@mock.patch.object(
+    authorization_code_flow.requests,
+    "get",
+    autospec=True,
+)
+class TestGetUserInfo(TestCase):
+    @staticmethod
+    def _mock_response(content, *, status_code=200):
+        response = requests.Response()
+        response._content = content  # noqa: SLF001 (protected attribute)
+        response.status_code = status_code
+        return response
+
+    def test_request_error(self, mock_requests_get):
+        """Raises an OIDCError when the request fails."""
+        client = ExampleOIDCClient(client_id="client_id")
+        mock_requests_get.side_effect = requests.RequestException("Request failed.")
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "Failed to fetch user information from 'example'"
+            " from 'https://example.com/userinfo'.",
+        ):
+            authorization_code_flow.get_user_info(
+                client=client,
+                access_token="access_token",
+                claims={"sub": "subject"},
+            )
+
+    def test_response_error(self, mock_requests_get):
+        """Raises an OIDCError when the response is not OK."""
+        client = ExampleOIDCClient(client_id="client_id")
+        mock_requests_get.return_value = self._mock_response(
+            b"Not Found", status_code=404
+        )
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "Error after fetching user information from 'example'"
+            " from 'https://example.com/userinfo': 404.",
+        ):
+            authorization_code_flow.get_user_info(
+                client=client,
+                access_token="access_token",
+                claims={"sub": "subject"},
+            )
+
+    def test_invalid_response(self, mock_requests_get):
+        """Raises an OIDCError when the response is not JSON."""
+        client = ExampleOIDCClient(client_id="client_id")
+        mock_requests_get.return_value = self._mock_response(
+            b"Not JSON, there must be a mistake."
+        )
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "Failed to parse user information from 'example'"
+            " from 'https://example.com/userinfo'.",
+        ):
+            authorization_code_flow.get_user_info(
+                client=client,
+                access_token="access_token",
+                claims={"sub": "subject"},
+            )
+
+    def test_wrong_sub(self, mock_requests_get):
+        """Raises an OIDCError when the "sub" claim doesn't match the expected value."""
+        client = ExampleOIDCClient(client_id="client_id")
+        mock_requests_get.return_value.json.return_value = {
+            "sub": "wrong_subject",
+        }
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "User information from 'example' does not match the"
+            " ID token 'sub' claim.",
+        ):
+            authorization_code_flow.get_user_info(
+                client=client,
+                access_token="access_token",
+                claims={"sub": "subject"},
+            )
+
+    def test_get_user_info(self, mock_requests_get):
+        """Retrieves the user info and returns the claims."""
+        client = ExampleOIDCClient(client_id="client_id")
+        mock_requests_get.return_value.json.return_value = {
+            "sub": "subject",
+        }
+        user_info = authorization_code_flow.get_user_info(
+            client=client,
+            access_token="access_token",
+            claims={"sub": "subject"},
+        )
+        mock_requests_get.assert_called_once_with(
+            client.userinfo_endpoint,
+            headers={
+                "Authorization": "Bearer access_token",
+                "Accept": "application/json",
+            },
+            timeout=(5, 30),
+        )
+        self.assertEqual(
+            user_info,
+            {
+                "sub": "subject",
+            },
+        )
+
+
 class TestHandleAuthenticationCallback(TestCase):
     def setUp(self):
         self.request = RequestFactory().get("/callback/")
@@ -631,14 +739,25 @@ class TestHandleAuthenticationCallback(TestCase):
         autospec=True,
         return_value={"claims": "claims"},
     )
+    @mock.patch(
+        "hidp.federated.oidc.authorization_code_flow.get_user_info",
+        autospec=True,
+        return_value={"user_info": "user_info"},
+    )
     def test_handle_callback(
-        self, mock_parse_id_token, mock_obtain_tokens, mock_validate_callback
+        self,
+        mock_get_user_info,
+        mock_parse_id_token,
+        mock_obtain_tokens,
+        mock_validate_callback,
     ):
         """Handles the authentication callback and returns the tokens."""
         client = ExampleOIDCClient(client_id="client_id")
 
-        tokens, claims = authorization_code_flow.handle_authentication_callback(
-            self.request, client=client, redirect_uri="/redirect/"
+        tokens, claims, user_info = (
+            authorization_code_flow.handle_authentication_callback(
+                self.request, client=client, redirect_uri="/redirect/"
+            )
         )
 
         mock_validate_callback.assert_called_once_with(self.request)
@@ -650,6 +769,11 @@ class TestHandleAuthenticationCallback(TestCase):
             redirect_uri="/redirect/",
         )
         mock_parse_id_token.assert_called_once_with("id_token", client=client)
+        mock_get_user_info.assert_called_once_with(
+            client=client,
+            access_token="access_token",
+            claims={"claims": "claims"},
+        )
 
         self.assertEqual(
             {
@@ -663,4 +787,9 @@ class TestHandleAuthenticationCallback(TestCase):
         self.assertEqual(
             {"claims": "claims"},
             claims,
+        )
+
+        self.assertEqual(
+            {"user_info": "user_info"},
+            user_info,
         )
