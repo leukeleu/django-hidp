@@ -1,3 +1,4 @@
+-r docs/requirements.txt
 -e .
 -e ../hidp-pycqa
 
