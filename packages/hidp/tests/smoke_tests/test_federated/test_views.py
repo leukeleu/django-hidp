@@ -8,7 +8,10 @@ from django.urls import reverse
 from hidp.config import configure_oidc_clients
 from hidp.federated.constants import OIDC_STATES_SESSION_KEY
 
-from ...unit_tests.test_federated.test_providers.example import ExampleOIDCClient
+from ...unit_tests.test_federated.test_providers.example import (
+    ExampleOIDCClient,
+    code_challenge_from_code_verifier,
+)
 
 
 class TestOIDCAuthenticationRequestView(TestCase):
@@ -50,13 +53,26 @@ class TestOIDCAuthenticationRequestView(TestCase):
             secure=True,
         )
         state_key = next(iter(self.client.session[OIDC_STATES_SESSION_KEY]))
+        code_verifier = self.client.session[OIDC_STATES_SESSION_KEY][state_key][
+            "code_verifier"
+        ]
+        code_challenge = code_challenge_from_code_verifier(code_verifier)
         callback_url = urllib.parse.quote(
             "https://testserver"
             + reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"})
         )
         self.assertRedirects(
             response,
-            f"https://example.com/auth?client_id=test&response_type=code&scope=openid+email+profile&redirect_uri={callback_url}&state={state_key}",
+            (
+                f"https://example.com/auth"
+                f"?client_id=test"
+                f"&response_type=code"
+                f"&scope=openid+email+profile"
+                f"&redirect_uri={callback_url}"
+                f"&state={state_key}"
+                f"&code_challenge={code_challenge}"
+                f"&code_challenge_method=S256"
+            ),
             fetch_redirect_response=False,
         )
 

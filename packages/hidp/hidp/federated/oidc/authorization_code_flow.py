@@ -19,18 +19,16 @@ with support for the optional PKCE extension.
 #
 # https://openid.net/specs/openid-connect-basic-1_0.html#CodeFlow
 
+import base64
+import hashlib
 import secrets
-import string
 
-from urllib.parse import urlencode, urljoin
+from urllib.parse import urlencode, urljoin, urlsplit
 
 import requests
 
 from ..constants import OIDC_STATES_SESSION_KEY
 from .exceptions import OAuth2Error, OIDCError
-
-# URL-safe characters
-_SAFE_CHARACTERS = string.ascii_letters + string.digits + "_.-"
 
 
 def _build_absolute_uri(request, client, redirect_uri):
@@ -46,10 +44,6 @@ def _build_absolute_uri(request, client, redirect_uri):
     )
 
 
-def _get_random_string(length):
-    return "".join(secrets.choice(_SAFE_CHARACTERS) for _ in range(length))
-
-
 def _add_state_to_session(request, state_key):
     """
     Adds a state to the session, to be used in the authentication response.
@@ -59,6 +53,27 @@ def _add_state_to_session(request, state_key):
     states = request.session.get(OIDC_STATES_SESSION_KEY, {})
     states[state_key] = {}
     request.session[OIDC_STATES_SESSION_KEY] = states
+
+
+def _add_code_verifier_to_session(request, state_key, code_verifier):
+    """
+    Associate the code verifier with the state.
+
+    This is necessary in order to send it to the token endpoint for verification.
+    """
+    if (
+        OIDC_STATES_SESSION_KEY not in request.session
+        or state_key not in request.session[OIDC_STATES_SESSION_KEY]
+    ):
+        raise ValueError(
+            "Missing state in session. State must be added before creating"
+            " a PKCE challenge."
+        )
+
+    request.session[OIDC_STATES_SESSION_KEY][state_key]["code_verifier"] = code_verifier
+    # Django doesn't detect changes to mutable objects stored in the session.
+    # Manually mark the session as modified to ensure the changes are saved.
+    request.session.modified = True
 
 
 def get_authentication_request_parameters(
@@ -94,6 +109,46 @@ def get_authentication_request_parameters(
     }
 
 
+def create_pkce_challenge(request, *, state_key):
+    """
+    Returns a dictionary with parameters for the Proof Key for Code Exchange
+    (PKCE) extension to an OpenID Connect Authorization Code Flow.
+
+    Associates the code verifier with the state, to be used in the token
+    exchange request.
+    """
+    # 4.1. Client Creates a Code Verifier
+    # code_verifier [is a] [...] random STRING with a minimum length
+    # of 43 characters and a maximum length of 128 characters.
+    # https://www.rfc-editor.org/rfc/rfc7636.html#section-4.1
+
+    # 64 bytes, encoded in base64, is 86 characters long.
+    # This is within the recommended range of 43 to 128 characters.
+    code_verifier = secrets.token_urlsafe(64)
+    _add_code_verifier_to_session(request, state_key, code_verifier)
+
+    # 4.2. Client Creates the Code Challenge
+    # "S256" is Mandatory To Implement (MTI) on the server. Clients are
+    # permitted to use "plain" only if they cannot support "S256" for some
+    # technical reason [...].
+    # https://www.rfc-editor.org/rfc/rfc7636.html#section-4.2
+
+    # The code challenge is the SHA-256 hash of the code verifier, encoded
+    # as a URL-safe base64 string without padding.
+    code_challenge = (
+        base64.urlsafe_b64encode(
+            hashlib.sha256(code_verifier.encode("ascii")).digest()
+        ).decode("ascii")
+    ).rstrip("=")  # Strip padding
+
+    # 4.3. Client Sends the Code Challenge with the Authorization Request
+    # https://www.rfc-editor.org/rfc/rfc7636.html#section-4.3
+    return {
+        "code_challenge": code_challenge,
+        "code_challenge_method": "S256",
+    }
+
+
 def prepare_authentication_request(request, *, client, redirect_uri, **extra_params):
     """
     Prepares an authentication request for an OpenID Connect Authorization Code Flow.
@@ -113,7 +168,7 @@ def prepare_authentication_request(request, *, client, redirect_uri, **extra_par
     """
     # 2.1.1. Client Prepares Authentication Request
     # https://openid.net/specs/openid-connect-basic-1_0.html#AuthenticationRequest
-    state_key = _get_random_string(32)
+    state_key = secrets.token_urlsafe(32)
     _add_state_to_session(request, state_key)
 
     redirect_uri = _build_absolute_uri(request, client, redirect_uri)
@@ -123,6 +178,10 @@ def prepare_authentication_request(request, *, client, redirect_uri, **extra_par
         state=state_key,
         **extra_params,
     )
+
+    if client.has_pkce_support:
+        # Add PKCE parameters to the request.
+        request_parameters |= create_pkce_challenge(request, state_key=state_key)
 
     return urljoin(
         client.authorization_endpoint,
@@ -205,7 +264,7 @@ def validate_authentication_callback(request):
     return code, state
 
 
-def obtain_tokens(request, *, client, code, redirect_uri):
+def obtain_tokens(request, *, state, client, code, redirect_uri):
     """
     Obtains the tokens from an OpenID Connect Authorization Code Flow
     authentication request.
@@ -213,6 +272,8 @@ def obtain_tokens(request, *, client, code, redirect_uri):
     Arguments:
         request (HttpRequest):
             The current HTTP request.
+        state (dict):
+            The state associated with the authentication request.
         client (OIDCClient):
             The OpenID Connect client to use for the authentication request.
         code (str):
@@ -229,16 +290,27 @@ def obtain_tokens(request, *, client, code, redirect_uri):
     # 2.1.6.1. Client Sends Code
     # https://openid.net/specs/openid-connect-basic-1_0.html#TokenRequest
 
+    redirect_uri = _build_absolute_uri(request, client, redirect_uri)
+    redirect_uri_origin = "://".join(urlsplit(redirect_uri)[:2])
+
     token_request_data = {
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": _build_absolute_uri(request, client, redirect_uri),
+        "redirect_uri": redirect_uri,
         "client_id": client.client_id,
     }
+
     if client.client_secret:
         # Some providers require the client secret to be included
         # in the token request.
         token_request_data["client_secret"] = client.client_secret
+
+    if client.has_pkce_support:
+        if "code_verifier" not in state:
+            raise OIDCError("Missing 'code_verifier' in state.")
+        # 4.5. Client Sends [...] the Code Verifier to the Token Endpoint
+        # https://www.rfc-editor.org/rfc/rfc7636.html#section-4.5
+        token_request_data["code_verifier"] = state["code_verifier"]
 
     # 2.1.6.2. Client Receives Tokens
     # https://openid.net/specs/openid-connect-basic-1_0.html#TokenOK
@@ -247,6 +319,9 @@ def obtain_tokens(request, *, client, code, redirect_uri):
         data=token_request_data,
         headers={
             "Accept": "application/json",
+            # Some providers (e.g. Microsoft) require the Origin header
+            # to be present and equal the redirect URI origin.
+            "Origin": redirect_uri_origin,
         },
         # Generous timeouts, might reconsider
         timeout=(
@@ -283,9 +358,13 @@ def handle_authentication_callback(request, *, client, redirect_uri):
         OAuth2Error: If the callback contains an error.
         OIDCError: If the callback is invalid.
     """
-    code, state = validate_authentication_callback(request)  # noqa: F841 (state is not used **yet**)
+    code, state = validate_authentication_callback(request)
     token_response = obtain_tokens(
-        request, client=client, code=code, redirect_uri=redirect_uri
+        request,
+        state=state,
+        client=client,
+        code=code,
+        redirect_uri=redirect_uri,
     )
     validate_id_token(token_response.get("id_token"))
     return token_response
