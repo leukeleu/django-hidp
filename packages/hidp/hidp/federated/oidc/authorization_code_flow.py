@@ -26,6 +26,7 @@ import json
 import secrets
 import time
 
+from datetime import timedelta
 from urllib.parse import urlencode, urljoin, urlsplit
 
 import requests
@@ -35,6 +36,30 @@ from jwcrypto import jwt
 from ..constants import OIDC_STATES_SESSION_KEY
 from . import jwks
 from .exceptions import InvalidOIDCStateError, OAuth2Error, OIDCError
+
+# Maximum number of concurrent state entries (authentication requests)
+# that can be stored in the session. It should be enough to handle
+# concurrent requests, but within reason.
+_OIDC_MAX_STATE_ENTRIES = 25
+
+# How long the state should be stored in the session.
+#
+# This is the maximum amount of time between the initial authentication
+# request and the callback from the OpenID Connect provider.
+#
+# This should be a middle ground between security and usability.
+#
+# State should be kept for long enough to allow for the following scenarios:
+# - Network latency (the user might be on a slow connection).
+# - The user might be going through a password reset flow at the provider.
+#
+# However, state should not be kept for too long, as:
+# - The user might simply get distracted.
+# - The user might close the browser and come back later.
+# - The user might just abandon the authentication process.
+#
+# So, at some point, the state should be considered stale and removed.
+_OIDC_STATE_TTL = timedelta(minutes=15).total_seconds()
 
 
 def _build_absolute_uri(request, client, redirect_uri):
@@ -50,6 +75,20 @@ def _build_absolute_uri(request, client, redirect_uri):
     )
 
 
+def _clamp_state_entries(states):
+    """
+    Clamps the number of state entries to the maximum allowed.
+
+    If the number of state entries exceeds the maximum, the oldest
+    entries are removed.
+    """
+    return dict(
+        sorted(
+            states.items(), key=lambda item: item[1].get("created_at", 0), reverse=True
+        )[:_OIDC_MAX_STATE_ENTRIES]
+    )
+
+
 def _add_state_to_session(request, state_key):
     """
     Adds a state to the session, to be used in the authentication response.
@@ -57,8 +96,11 @@ def _add_state_to_session(request, state_key):
     # Multiple concurrent authentication requests might be happening at the
     # same time. A dictionary is used to store the state for each request.
     states = request.session.get(OIDC_STATES_SESSION_KEY, {})
-    states[state_key] = {}
-    request.session[OIDC_STATES_SESSION_KEY] = states
+    states[state_key] = {
+        # Allow the state to expire after a certain amount of time.
+        "created_at": time.time(),
+    }
+    request.session[OIDC_STATES_SESSION_KEY] = _clamp_state_entries(states)
 
 
 def _add_code_verifier_to_session(request, state_key, code_verifier):
@@ -195,13 +237,29 @@ def prepare_authentication_request(request, *, client, redirect_uri, **extra_par
     )
 
 
+def _cull_expired_states(states):
+    """
+    Removes stale state entries from the session.
+
+    The state is considered stale if it has been stored for longer
+    than the configured TTL.
+    """
+    now = time.time()
+    return {
+        state_key: state
+        for state_key, state in states.items()
+        if now - state.get("created_at", 0) <= _OIDC_STATE_TTL
+    }
+
+
 def _pop_state_from_session(request, state_key):
     """
     Returns the state stored in the session for the given state ID.
     The state is removed from the session once it has been retrieved.
     If the state is not found, returns None.
     """
-    states = request.session.get(OIDC_STATES_SESSION_KEY, {})
+    # Get the known states from the session, culling any stale states.
+    states = _cull_expired_states(request.session.get(OIDC_STATES_SESSION_KEY, {}))
     # Remove the requested state from the known states.
     state = states.pop(state_key, None)
     # Update the session with the modified states. This is necessary to

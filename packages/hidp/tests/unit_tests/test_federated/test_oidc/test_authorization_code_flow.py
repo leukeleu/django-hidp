@@ -1,3 +1,4 @@
+import random
 import time
 
 from unittest import mock
@@ -206,11 +207,47 @@ class TestPrepareAuthenticationRequest(TestCase):
                 self.request, state_key="fake_state"
             )
 
+    def test_limit_concurrent_authentication_requests(self):
+        """
+        The total number of concurrent authentication requests (states) is limited.
+        """
+        # States *without* creation time (precaution for old/invalid states)
+        states = [{} for _ in range(25)]
+        # States with a creation time in the past
+        states += [{"created_at": time.time() - n * 100} for n in range(25)]
+        # Shuffle the states so they are in random order
+        random.shuffle(states)
+        # Add the states to the session
+        self.request.session[OIDC_STATES_SESSION_KEY] = {
+            f"state-{n}": state for n, state in enumerate(states)
+        }
+        authorization_code_flow.prepare_authentication_request(
+            self.request,
+            client=ExampleOIDCClient(client_id="client_id"),
+            redirect_uri="/redirect/",
+        )
+        # Total amount of states is limited
+        self.assertEqual(25, len(self.request.session[OIDC_STATES_SESSION_KEY]))
+        # New state is the first one
+        self.assertNotIn(
+            next(iter(self.request.session[OIDC_STATES_SESSION_KEY].values())),
+            states,
+        )
+        # Oldest states are removed (states without a creation time are considered old).
+        # States are sorted by creation time, so the last 24 states are the newest.
+        self.assertSequenceEqual(
+            sorted(states, key=lambda state: state.get("created_at", 0), reverse=True)[
+                :24
+            ],
+            list(self.request.session[OIDC_STATES_SESSION_KEY].values())[1:],
+        )
+
 
 class TestValidateAuthenticationCallback(TestCase):
     def setUp(self):
         self.session = self.client.session
-        self.session[OIDC_STATES_SESSION_KEY] = {"state-123": {"test": "test"}}
+        self.states = {"state-123": {"test": "test", "created_at": time.time()}}
+        self.session[OIDC_STATES_SESSION_KEY] = self.states.copy()
 
     def test_missing_params(self):
         """Raises an OIDCError when the code and state are missing."""
@@ -237,7 +274,7 @@ class TestValidateAuthenticationCallback(TestCase):
         self.assertNotIn("state-123", request.session[OIDC_STATES_SESSION_KEY])
 
     def test_missing_state_with_code(self):
-        """ "Raises an OIDCError when the state is missing."""
+        """Raises an OIDCError when the state is missing."""
         request = RequestFactory().get("/callback/?code=code&state=")
         request.session = self.session
         with self.assertRaisesMessage(
@@ -249,7 +286,7 @@ class TestValidateAuthenticationCallback(TestCase):
         self.assertIn("state-123", request.session[OIDC_STATES_SESSION_KEY])
 
     def test_invalid_state(self):
-        """ "Raises an OIDCError when the state is invalid."""
+        """Raises an OIDCError when the state is invalid."""
         request = RequestFactory().get("/callback/?code=code&state=state-321")
         request.session = self.session
         with self.assertRaisesMessage(
@@ -258,6 +295,25 @@ class TestValidateAuthenticationCallback(TestCase):
             authorization_code_flow.validate_authentication_callback(request)
         # The state is **not** removed, as it's not the state from the request.
         self.assertIn("state-123", request.session[OIDC_STATES_SESSION_KEY])
+
+    def test_expired_state(self):
+        """Raises an OIDCError when the state has expired."""
+        for state in [
+            {},  # Missing created_at (precaution for old/invalid states)
+            {"created_at": time.time() - 3600},  # Expired
+        ]:
+            with self.subTest(state=state):
+                request = RequestFactory().get("/callback/?code=code&state=state-321")
+                request.session = self.session
+                request.session[OIDC_STATES_SESSION_KEY]["state-321"] = state
+                with self.assertRaisesMessage(
+                    exceptions.OIDCError, "Invalid 'state' parameter"
+                ):
+                    authorization_code_flow.validate_authentication_callback(request)
+                # The state is removed, as the authentication failed.
+                self.assertNotIn("state-321", request.session[OIDC_STATES_SESSION_KEY])
+                # The other state is **not** removed.
+                self.assertIn("state-123", request.session[OIDC_STATES_SESSION_KEY])
 
     def test_error_response(self):
         """Raises an OAuth2Error when the callback contains an error response."""
@@ -290,7 +346,7 @@ class TestValidateAuthenticationCallback(TestCase):
         # Extracts code and state
         code, state = authorization_code_flow.validate_authentication_callback(request)
         self.assertEqual("code", code)
-        self.assertEqual({"test": "test"}, state)
+        self.assertEqual(self.states["state-123"], state)
         # Removes state from session
         self.assertNotIn(
             "state-123",
