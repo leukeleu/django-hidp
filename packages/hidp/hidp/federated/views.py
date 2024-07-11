@@ -1,3 +1,5 @@
+from django_ratelimit.decorators import ratelimit
+
 from django.http import (
     Http404,
     HttpResponseBadRequest,
@@ -5,6 +7,7 @@ from django.http import (
     JsonResponse,
 )
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views.generic import View
 
 from ..config import oidc_clients
@@ -36,6 +39,9 @@ class OIDCMixin:
         )
 
 
+@method_decorator(ratelimit(key="ip", rate="10/s", method="POST"), name="post")
+@method_decorator(ratelimit(key="ip", rate="30/m", method="POST"), name="post")
+@method_decorator(ratelimit(key="ip", rate="100/15m", method="POST"), name="post")
 class OIDCAuthenticationRequestView(OIDCMixin, View):
     """
     Initiates an OpenID Connect Authorization Code Flow authentication request.
@@ -61,6 +67,9 @@ class OIDCAuthenticationRequestView(OIDCMixin, View):
         )
 
 
+@method_decorator(ratelimit(key="ip", rate="10/s", method="GET"), name="get")
+@method_decorator(ratelimit(key="ip", rate="30/m", method="GET"), name="get")
+@method_decorator(ratelimit(key="ip", rate="100/15m", method="GET"), name="get")
 class OIDCAuthenticationCallbackView(OIDCMixin, View):
     """
     Handles the callback response from an OpenID Connect Authorization Code Flow
