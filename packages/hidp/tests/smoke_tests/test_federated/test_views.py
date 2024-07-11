@@ -2,11 +2,13 @@ import urllib.parse
 
 from unittest import mock
 
+from django.contrib import messages
 from django.test import TestCase
 from django.urls import reverse
 
 from hidp.config import configure_oidc_clients
 from hidp.federated.constants import OIDC_STATES_SESSION_KEY
+from hidp.federated.oidc.exceptions import InvalidOIDCStateError, OAuth2Error, OIDCError
 
 from ...unit_tests.test_federated.test_providers.example import (
     ExampleOIDCClient,
@@ -120,3 +122,57 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         )
         mock_handle_authentication_callback.assert_called_once()
         self.assertEqual(response.status_code, 200)
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        side_effect=InvalidOIDCStateError("OIDC state not found"),
+    )
+    def test_handles_state_error(self, mock_handle_authentication_callback):
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(
+            ["The authentication request has expired. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+        self.assertRedirects(
+            response,
+            reverse("hidp_accounts:login"),
+        )
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        side_effect=OIDCError("OIDC error"),
+    )
+    def test_handles_oidc_error(self, mock_handle_authentication_callback):
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(
+            ["Unexpected error during authentication. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+        self.assertRedirects(
+            response,
+            reverse("hidp_accounts:login"),
+        )
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        side_effect=OAuth2Error("OAuth2 error"),
+    )
+    def test_handles_oauth2_error(self, mock_handle_authentication_callback):
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(
+            ["Unexpected error during authentication. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+        self.assertRedirects(
+            response,
+            reverse("hidp_accounts:login"),
+        )
