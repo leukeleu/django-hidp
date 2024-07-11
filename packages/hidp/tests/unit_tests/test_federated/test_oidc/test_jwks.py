@@ -1,3 +1,5 @@
+import io
+
 from unittest import mock
 
 import requests
@@ -5,7 +7,8 @@ import requests
 from jwcrypto.jwk import JWK, JWKSet
 
 from django.core.cache import cache
-from django.test import TestCase, override_settings
+from django.core.management import call_command
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from hidp import config
 from hidp.federated.oidc import jwks
@@ -200,3 +203,40 @@ class TestJwksStore(TestCase):
         # Falls back to fetching the data from the provider.
         mock_requests_get.assert_called_once()  # The request is made
         self.assertIsInstance(jwks_data, JWKSet)
+
+
+@mock.patch.object(jwks, "get_oidc_client_jwks", autospec=True)
+class RefreshJwks(SimpleTestCase):
+    def setUp(self):
+        class AnotherOIDCClient(ExampleOIDCClient):
+            provider_key = "another"
+
+        self.oidc_clients = [
+            ExampleOIDCClient(client_id="test"),
+            AnotherOIDCClient(client_id="another"),
+        ]
+        config.configure_oidc_clients(*self.oidc_clients)
+
+    def test_refresh_registered_oidc_clients_jwks(self, mock_get_oidc_client_jwks):
+        """Eagerly fetches the JWKS data for all registered OIDC clients."""
+        jwks.refresh_registered_oidc_clients_jwks()
+        mock_get_oidc_client_jwks.assert_has_calls(
+            [mock.call(client, eager=True) for client in self.oidc_clients]
+        )
+
+    def test_refresh_oidc_clients_jwks_management_command(
+        self, mock_get_oidc_client_jwks
+    ):
+        """Eagerly fetches the JWKs data and logs the process to stdout."""
+        stdout = io.StringIO()
+        call_command("refresh_oidc_clients_jwks", stdout=stdout)
+        mock_get_oidc_client_jwks.assert_has_calls(
+            [mock.call(client, eager=True) for client in self.oidc_clients]
+        )
+        self.assertEqual(
+            [
+                f"Fetching JWKs for '{client.provider_key}' from '{client.jwks_uri}'..."
+                for client in self.oidc_clients
+            ],
+            stdout.getvalue().splitlines(),
+        )

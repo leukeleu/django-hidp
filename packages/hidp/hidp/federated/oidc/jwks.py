@@ -153,3 +153,15 @@ def get_oidc_client_jwks(client, *, eager=False):
     # Success! Cache the JWK data for future use.
     cache.set(cache_key, response.text, timeout=_JWKS_DATA_CACHE_TIMEOUT)
     return jwks
+
+
+def refresh_registered_oidc_clients_jwks(stdout=None):
+    """
+    Refresh the JWK data for all registered OIDC clients.
+    """
+    for client in oidc_clients.get_registered_oidc_clients():
+        if stdout:
+            stdout.write(
+                f"Fetching JWKs for {client.provider_key!r} from {client.jwks_uri!r}..."
+            )
+        get_oidc_client_jwks(client, eager=True)
