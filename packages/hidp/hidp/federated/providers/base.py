@@ -42,9 +42,10 @@ class OIDCClient:
     # provider key if not set.
     name = None  # type: str | None
 
-    # OpenID Connect endpoints, can usually be extracted from the provider's
-    # discovery document, commonly found at:
+    # OpenID Connect configuration, can usually be extracted from the
+    # provider's discovery document, commonly found at:
     # https://<provider>/.well-known/openid-configuration
+    issuer = NotImplemented  # type: str
     authorization_endpoint = NotImplemented  # type: str
     token_endpoint = NotImplemented  # type: str
     userinfo_endpoint = NotImplemented  # type: str
@@ -86,6 +87,7 @@ class OIDCClient:
             value is NotImplemented
             for value in (
                 self.provider_key,
+                self.issuer,
                 self.authorization_endpoint,
                 self.token_endpoint,
                 self.userinfo_endpoint,
@@ -129,3 +131,18 @@ class OIDCClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.callback_base_url = callback_base_url
+
+    def get_issuer(self, *, claims):
+        """
+        Return the expected value of the 'iss' claim in the ID token.
+
+        Only override this method if absolutely necessary.
+
+        Arguments:
+            claims (dict):
+                The claims from the ID token.
+        """
+        # Some providers (like Microsoft) have a different issuer
+        # for each tenant. This method allows to return the expected
+        # issuer based on the claims.
+        return self.issuer

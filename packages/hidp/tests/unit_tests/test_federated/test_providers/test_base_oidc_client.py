@@ -13,6 +13,7 @@ class UnfinishedOIDCClient(OIDCClient):
 class UnsafeOIDCClient(OIDCClient):
     # A seemingly valid OIDC client, but the endpoints do not utilize TLS.
     provider_key = "unsafe"
+    issuer = "http://example.com"
     authorization_endpoint = "http://example.com/auth"
     token_endpoint = "http://example.com/token"
     userinfo_endpoint = "http://example.com/userinfo"
@@ -103,6 +104,11 @@ class TestCustomProvider(SimpleTestCase):
         self.assertEqual(client.name, "Example")
         self.assertEqual(client.client_secret, None)
         self.assertEqual(client.callback_base_url, None)
+
+    def test_get_issuer(self):
+        """The issuer is returned by get_issuer."""
+        client = ExampleOIDCClient(client_id="test")
+        self.assertEqual(client.issuer, client.get_issuer(claims={}))
 
     def test_named_client(self):
         """Custom name takes precedence over the default name."""

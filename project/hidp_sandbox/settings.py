@@ -299,6 +299,10 @@ hidp_config.configure_oidc_clients(
             "app", "microsoft_oidc_callback_base_url", fallback=None
         ),
     ),
+    # Eagerly provision the JWK store to ensure that the keys are loaded
+    # at application startup. This increases the application startup time
+    # but avoids the first request to be slow.
+    eagerly_provision_jwk_store=True,
 )
 
 # Django REST Framework

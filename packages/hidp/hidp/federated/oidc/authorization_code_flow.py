@@ -21,13 +21,18 @@ with support for the optional PKCE extension.
 
 import base64
 import hashlib
+import json
 import secrets
+import time
 
 from urllib.parse import urlencode, urljoin, urlsplit
 
 import requests
 
+from jwcrypto import jwt
+
 from ..constants import OIDC_STATES_SESSION_KEY
+from . import jwks
 from .exceptions import OAuth2Error, OIDCError
 
 
@@ -323,7 +328,7 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
             # to be present and equal the redirect URI origin.
             "Origin": redirect_uri_origin,
         },
-        # Generous timeouts, might reconsider
+        # Timeouts in seconds
         timeout=(
             5,  # Connect timeout
             30,  # Read timeout
@@ -331,11 +336,113 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
     ).json()
 
 
-def validate_id_token(id_token):
+def parse_id_token(raw_id_token, *, client):
+    """
+    Asserts that the given ID Token is valid and issued by the expected
+    OpenID Connect provider.
+
+    Arguments:
+        raw_id_token (str):
+            The ID Token to validate.
+        client (OIDCClient):
+            The OpenID Connect client used to obtain the token.
+
+    Returns:
+        dict: The claims from the ID Token.
+
+    Raises:
+        OIDCError: If the ID Token is invalid. The authentication process
+                   should be aborted and the token should not be used.
+    """
+    # 2.2. ID Token
+    # The ID Token is a security token that contains Claims about the
+    # authentication of an End-User by an Authorization Server when using a
+    # Client, and potentially other requested Claims. The ID Token is
+    # represented as a JSON Web Token (JWT).
+    #
+    # https://openid.net/specs/openid-connect-basic-1_0.html#IDToken
+
     # 2.2.1. ID Token Validation
     # The Client MUST validate the ID Token in the Token Response.
+    #
+    # If any of the validation procedures [...] fail, any operations requiring
+    # the information that failed to correctly validate MUST be aborted
+    # and the information that failed to validate MUST NOT be used.
+    #
     # https://openid.net/specs/openid-connect-basic-1_0.html#IDTokenValidation
-    ...  # TODO: Implement ID Token validation
+
+    # Parse the token and validate in a way that goes beyond the basic
+    # validation described in the OpenID Connect Basic Implementer's Guide.
+    # Besides checking the claims, this also validates that the token is
+    # signed with the expected algorithm and that the signature is valid.
+
+    # To check the signature, the public key(s) of the OpenID Connect provider
+    # must be obtained.
+    keys = jwks.get_oidc_client_jwks(client)
+    if keys is None:
+        raise OIDCError(
+            f"Unable to get JWKs for {client.provider_key!r}."
+            " The ID Token cannot be validated."
+        )
+
+    try:
+        # Parse the token, check the signature and perform basic claim validation.
+        id_token = jwt.JWT(
+            jwt=raw_id_token,
+            # Only accept tokens signed with RSA using SHA-256 hash algorithm.
+            algs=["RS256"],
+            # A signed token is expected (as opposed to an encrypted token).
+            expected_type="JWS",
+            # Use the public keys of the provider to verify the signature.
+            key=keys,
+            # Make sure claims are available for further validation.
+            check_claims={
+                "sub": None,  # Present
+                "iss": None,  # Present (value is checked later)
+                "aud": client.client_id,  # Must match the client ID
+                "exp": None,  # Not expired (current time + 1 minute leeway)
+                "iat": None,  # Present
+            },
+        )
+        claims = json.loads(id_token.claims)
+    except jwt.JWTMissingKey:
+        # The token is signed with an unknown key.
+        raise OIDCError(
+            f"ID Token from {client.provider_key!r} is signed with an unknown key."
+        ) from None
+    except (jwt.JWTInvalidClaimValue, jwt.JWTMissingClaim) as exc:
+        # Claim verification failed.
+        raise OIDCError(
+            f"ID Token from {client.provider_key!r} has invalid or missing"
+            f" claims: {exc}."
+        ) from None
+    except jwt.JWTExpired as exc:
+        # Token is expired.
+        raise OIDCError(
+            f"ID Token from {client.provider_key!r} has expired: {exc}."
+        ) from None
+    except (ValueError, jwt.JWException) as exc:
+        # Token is invalid.
+        raise OIDCError(f"ID Token from {client.provider_key!r} is invalid.") from exc
+    else:
+        # Check if the token is currently valid.
+        if "nbf" in claims and claims["nbf"] > time.time():
+            # The token is not valid yet.
+            raise OIDCError(f"ID Token from {client.provider_key!r} is not yet valid.")
+
+        # The token is valid, and not expired.
+        # The required claims are available for further validation.
+
+        # Check the issuer after obtaining the claims.
+        if claims["iss"] != (expected_issuer := client.get_issuer(claims=claims)):
+            # The issuer is not the expected one.
+            raise OIDCError(
+                f"ID Token from {client.provider_key!r} is not issued by"
+                f" {expected_issuer!r}, got {claims['iss']!r}."
+            )
+
+        # Everything checks out.
+        return claims
 
 
 def handle_authentication_callback(request, *, client, redirect_uri):
@@ -366,5 +473,5 @@ def handle_authentication_callback(request, *, client, redirect_uri):
         code=code,
         redirect_uri=redirect_uri,
     )
-    validate_id_token(token_response.get("id_token"))
-    return token_response
+    claims = parse_id_token(token_response.get("id_token"), client=client)
+    return token_response, claims

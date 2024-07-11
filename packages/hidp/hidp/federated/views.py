@@ -82,10 +82,14 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
     ]
 
     def get(self, request, provider_key):
+        tokens, claims = authorization_code_flow.handle_authentication_callback(
+            request,
+            client=self.get_oidc_client(provider_key),
+            redirect_uri=self.get_redirect_uri(provider_key),
+        )
         return JsonResponse(
-            authorization_code_flow.handle_authentication_callback(
-                request,
-                client=self.get_oidc_client(provider_key),
-                redirect_uri=self.get_redirect_uri(provider_key),
-            )
+            {
+                "tokens": tokens,
+                "claims": claims,
+            }
         )

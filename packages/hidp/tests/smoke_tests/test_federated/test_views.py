@@ -97,11 +97,16 @@ class TestOIDCAuthenticationCallbackView(TestCase):
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
-        return_value={
-            "id_token": "id_token",
-            "access_token": "access_token",
-            "token_type": "token_type",
-        },
+        return_value=(
+            {
+                "id_token": "id_token",
+                "access_token": "access_token",
+                "token_type": "token_type",
+            },
+            {
+                "claims": "claims",
+            },
+        ),
     )
     def test_calls_handle_authentication_callback(
         self, mock_handle_authentication_callback
