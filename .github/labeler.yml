@@ -18,3 +18,9 @@ project:
   - changed-files:
     - any-glob-to-any-file:
       - 'project/**'
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/build-docs.yml'
+      - 'packages/**/docs/**'
