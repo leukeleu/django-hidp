@@ -3,6 +3,10 @@ include manage.py
 include requirements.txt
 include requirements_local.txt
 include runtests.py
+include docs/Makefile
+include docs/conf.py
+include docs/requirements.txt
+recursive-include docs *.md
 recursive-include hidp/accounts/templates/accounts *.html
 graft tests
 global-exclude __pycache__
