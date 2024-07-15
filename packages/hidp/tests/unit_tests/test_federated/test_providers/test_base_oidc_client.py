@@ -30,6 +30,11 @@ class NamedExampleOIDCClient(ExampleOIDCClient):
     name = "Named Example"
 
 
+class NoPKCEOIDCClient(ExampleOIDCClient):
+    # A valid OIDC client, but lacking PKCE support.
+    has_pkce_support = False
+
+
 class TestCustomProvider(SimpleTestCase):
     def test_invalid_provider(self):
         """Missing attributes raise a NotImplementedError."""
@@ -96,6 +101,18 @@ class TestCustomProvider(SimpleTestCase):
         client = ExampleOIDCClient(client_id="test", client_secret="secret")
         self.assertEqual(client.client_id, "test")
         self.assertEqual(client.client_secret, "secret")
+
+    def test_client_without_pkce_requires_secret(self):
+        """A client without PKCE support requires a client secret."""
+        with self.assertRaisesMessage(
+            ValueError,
+            (
+                "Please provide a client secret."
+                " 'NoPKCEOIDCClient' declares it does not support PKCE,"
+                " which means a client secret must be required for token exchange."
+            ),
+        ):
+            NoPKCEOIDCClient(client_id="test")
 
     def test_minimal_client(self):
         """client_secret and callback_base_url default to None if not provided."""

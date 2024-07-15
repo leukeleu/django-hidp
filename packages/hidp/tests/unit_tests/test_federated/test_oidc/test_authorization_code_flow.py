@@ -106,7 +106,7 @@ class TestPrepareAuthenticationRequest(TestCase):
 
     def test_no_pkce_support(self):
         """Omits PKCE parameters when the client doesn't support it."""
-        client = NoPKCEOIDCClient(client_id="client_id")
+        client = NoPKCEOIDCClient(client_id="client_id", client_secret="client_secret")
         url = authorization_code_flow.prepare_authentication_request(
             self.request, client=client, redirect_uri="/redirect/"
         )
@@ -312,7 +312,7 @@ class TestObtainTokens(SimpleTestCase):
     def test_obtain_tokens_no_pkce(self, mock_requests_post):
         """Omits code_verifier when PKCE is not supported."""
         request = RequestFactory().get("/callback/")
-        client = NoPKCEOIDCClient(client_id="client_id")
+        client = NoPKCEOIDCClient(client_id="client_id", client_secret="client_secret")
         mock_requests_post.return_value.json.return_value = self.mock_response
 
         tokens = authorization_code_flow.obtain_tokens(
@@ -334,6 +334,7 @@ class TestObtainTokens(SimpleTestCase):
             headers={
                 "Accept": "application/json",
                 "Origin": "http://testserver",
+                "Authorization": "Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=",
             },
             timeout=(5, 30),
         )
