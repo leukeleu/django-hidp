@@ -22,5 +22,6 @@ project:
 documentation:
   - changed-files:
     - any-glob-to-any-file:
-      - '.github/workflows/build-docs.yml'
+      - '.github/actions/build-hidp-docs/action.yml'
+      - '.github/workflows/deploy-docs.yml'
       - 'packages/**/docs/**'
