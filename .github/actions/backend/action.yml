@@ -15,7 +15,7 @@ runs:
 
     - name: Lint, check, test and build (if applicable)
       run: |
-        source ./var/venv/bin/activate
+        source ~/.venv/bin/activate
         make test
       working-directory: ${{ inputs.working-directory }}
       shell: bash

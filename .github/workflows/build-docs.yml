@@ -16,7 +16,7 @@ jobs:
 
       - name: Build documentation
         run: |
-          source ./var/venv/bin/activate
+          source ~/.venv/bin/activate
           make html
         working-directory: './packages/hidp/docs'
         shell: bash

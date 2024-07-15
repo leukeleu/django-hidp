@@ -21,8 +21,8 @@ runs:
 
     - name: Install dependencies
       run: |
-        uv venv ./var/venv
-        source ./var/venv/bin/activate
+        uv venv ~/.venv
+        source ~/.venv/bin/activate
         make install-pipeline
       working-directory: ${{ inputs.working-directory }}
       shell: bash
