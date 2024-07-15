@@ -1,9 +1,9 @@
-name: Backend
+name: Python Code Quality Assurance
 description: Lint, checks & tests
 
 inputs:
   working-directory:
-    description: 'The working directory to run the commands in'
+    description: The working directory to run the commands in
 
 runs:
   using: composite

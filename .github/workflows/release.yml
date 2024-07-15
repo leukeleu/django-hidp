@@ -27,8 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # A build is created as part of the test job
-      - uses: ./.github/actions/backend
+      # A build is created as part of the QA job
+      - uses: ./.github/actions/python-qa
         with:
           working-directory: './packages/hidp'
 
