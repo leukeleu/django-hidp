@@ -5,6 +5,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 
+from hidp.rate_limit.decorators import rate_limit_default, rate_limit_strict
+
 from ..config import oidc_clients
 from . import auth as hidp_auth
 from .forms import AuthenticationForm
@@ -13,9 +15,7 @@ from .forms import AuthenticationForm
 @method_decorator(
     ratelimit(key="post:username", rate="10/m", method="POST"), name="post"
 )
-@method_decorator(ratelimit(key="ip", rate="10/s", method="POST"), name="post")
-@method_decorator(ratelimit(key="ip", rate="30/m", method="POST"), name="post")
-@method_decorator(ratelimit(key="ip", rate="100/15m", method="POST"), name="post")
+@method_decorator(rate_limit_strict, name="dispatch")
 class LoginView(auth_views.LoginView):
     """
     Display the login form and handle the login action.
@@ -95,8 +95,7 @@ class LoginView(auth_views.LoginView):
         return HttpResponseRedirect(self.get_success_url())
 
 
-@method_decorator(ratelimit(key="ip", rate="10/s", method="POST"), name="post")
-@method_decorator(ratelimit(key="ip", rate="30/m", method="POST"), name="post")
+@method_decorator(rate_limit_default, name="dispatch")
 class LogoutView(auth_views.LogoutView):
     """
     Logs out the user, regardless of whether a user is logged in.
