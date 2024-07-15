@@ -9,6 +9,8 @@ from hidp import config as hidp_config
 from hidp.federated.providers.google import GoogleOIDCClient
 from hidp.federated.providers.microsoft import MicrosoftOIDCClient
 
+from .oidc_providers.oidc_certification import OIDCCertificationProvider
+
 # Project directory (where settings.py is)
 PROJECT_DIR = Path(__file__).resolve().parent
 
@@ -285,7 +287,7 @@ OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
 del _OIDC_RSA_PRIVATE_KEY
 
 # Configure OIDC Clients for the HIdP application
-hidp_config.configure_oidc_clients(
+oidc_clients = [
     GoogleOIDCClient(
         client_id=config.getliteral("app", "google_oidc_client_id"),
         client_secret=config.getliteral("app", "google_oidc_client_secret"),
@@ -299,6 +301,18 @@ hidp_config.configure_oidc_clients(
             "app", "microsoft_oidc_callback_base_url", fallback=None
         ),
     ),
+]
+
+if config.getboolean("app", "enable_oidc_certification_client", fallback=False):
+    oidc_clients.append(
+        OIDCCertificationProvider(
+            client_id="oidc_cert",
+            client_secret="not-a-secret",  # noqa: S106 (not a secret)
+        )
+    )
+
+hidp_config.configure_oidc_clients(
+    *oidc_clients,
     # Eagerly provision the JWK store to ensure that the keys are loaded
     # at application startup. This increases the application startup time
     # but avoids the first request to be slow.
