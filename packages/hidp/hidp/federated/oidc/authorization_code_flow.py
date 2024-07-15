@@ -304,11 +304,21 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
         "redirect_uri": redirect_uri,
         "client_id": client.client_id,
     }
+    token_request_headers = {
+        "Accept": "application/json",
+        # Some providers (e.g. Microsoft) require the Origin header
+        # to be present and equal the redirect URI origin.
+        "Origin": redirect_uri_origin,
+    }
 
     if client.client_secret:
-        # Some providers require the client secret to be included
-        # in the token request.
-        token_request_data["client_secret"] = client.client_secret
+        # Some providers require the client secret to be included in the token request.
+        # The Client MUST authenticate to the Token Endpoint using the
+        # HTTP Basic method [...].
+        basic_auth_credentials = base64.b64encode(
+            f"{client.client_id}:{client.client_secret}".encode()
+        ).decode()
+        token_request_headers |= {"Authorization": f"Basic {basic_auth_credentials}"}
 
     if client.has_pkce_support:
         if "code_verifier" not in state:
@@ -322,12 +332,7 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
     return requests.post(
         client.token_endpoint,
         data=token_request_data,
-        headers={
-            "Accept": "application/json",
-            # Some providers (e.g. Microsoft) require the Origin header
-            # to be present and equal the redirect URI origin.
-            "Origin": redirect_uri_origin,
-        },
+        headers=token_request_headers,
         # Timeouts in seconds
         timeout=(
             5,  # Connect timeout

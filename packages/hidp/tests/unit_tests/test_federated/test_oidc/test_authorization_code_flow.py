@@ -417,12 +417,12 @@ class TestObtainTokens(SimpleTestCase):
                 "code": "code",
                 "redirect_uri": "https://example.com/redirect/",
                 "client_id": client.client_id,
-                "client_secret": client.client_secret,
                 "code_verifier": "test",
             },
             headers={
                 "Accept": "application/json",
                 "Origin": "https://example.com",
+                "Authorization": "Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=",
             },
             timeout=(5, 30),
         )
