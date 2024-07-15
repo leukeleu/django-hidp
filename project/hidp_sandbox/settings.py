@@ -159,6 +159,9 @@ LOGIN_URL = "hidp_accounts:login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
+# Faster reads by caching session data
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
