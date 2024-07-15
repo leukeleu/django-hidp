@@ -24,13 +24,13 @@ using the Django Admin interface.
 from django_ratelimit.decorators import ratelimit
 from oauth2_provider import views as oauth2_views
 
-from django.urls import re_path
+from django.urls import path
 
 app_name = "oauth2_provider"
 
 base_urlpatterns = [
-    re_path(
-        r"^authorize/$",
+    path(
+        "authorize/",
         ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
             ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
                 ratelimit(key="ip", method=ratelimit.ALL, rate="100/15m")(
@@ -40,8 +40,8 @@ base_urlpatterns = [
         ),
         name="authorize",
     ),
-    re_path(
-        r"^token/$",
+    path(
+        "token/",
         ratelimit(key="ip", method="POST", rate="10/s")(
             ratelimit(key="ip", method="POST", rate="30/m")(
                 ratelimit(key="ip", method="POST", rate="100/15m")(
@@ -51,8 +51,8 @@ base_urlpatterns = [
         ),
         name="token",
     ),
-    re_path(
-        r"^revoke_token/$",
+    path(
+        "revoke_token/",
         ratelimit(key="ip", method="POST", rate="10/s")(
             ratelimit(key="ip", method="POST", rate="30/m")(
                 oauth2_views.RevokeTokenView.as_view()
@@ -60,8 +60,8 @@ base_urlpatterns = [
         ),
         name="revoke-token",
     ),
-    re_path(
-        r"^introspect/$",
+    path(
+        "introspect/",
         ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
             ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
                 oauth2_views.IntrospectTokenView.as_view()
@@ -72,8 +72,8 @@ base_urlpatterns = [
 ]
 
 oidc_urlpatterns = [
-    re_path(
-        r"^\.well-known/openid-configuration/?$",
+    path(
+        ".well-known/openid-configuration",
         ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
             ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
                 oauth2_views.ConnectDiscoveryInfoView.as_view()
@@ -81,8 +81,8 @@ oidc_urlpatterns = [
         ),
         name="oidc-connect-discovery-info",
     ),
-    re_path(
-        r"^\.well-known/jwks.json$",
+    path(
+        ".well-known/jwks.json",
         ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
             ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
                 oauth2_views.JwksInfoView.as_view()
@@ -90,8 +90,8 @@ oidc_urlpatterns = [
         ),
         name="jwks-info",
     ),
-    re_path(
-        r"^userinfo/$",
+    path(
+        "userinfo/",
         ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
             ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
                 oauth2_views.UserInfoView.as_view()
@@ -99,8 +99,8 @@ oidc_urlpatterns = [
         ),
         name="user-info",
     ),
-    re_path(
-        r"^logout/$",
+    path(
+        "logout/",
         ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
             ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
                 oauth2_views.RPInitiatedLogoutView.as_view()
