@@ -25,10 +25,12 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # A build is created as part of the test job
-      - uses: ./.github/actions/backend
+      # A build is created as part of the QA job
+      - name: Linting, checks & tests
+        uses: ./.github/actions/python-qa
         with:
           working-directory: './packages/hidp'
 

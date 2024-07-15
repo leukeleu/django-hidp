@@ -1,0 +1,18 @@
+name: Build HIdP Documentation
+description: Build the documentation for the HIdP package
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Python
+      uses: ./.github/actions/setup-python
+      with:
+        working-directory: './packages/hidp'
+
+    - name: Build documentation
+      run: |
+        source ~/.venv/bin/activate
+        make html
+      working-directory: './packages/hidp/docs'
+      shell: bash

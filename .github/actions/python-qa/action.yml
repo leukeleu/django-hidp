@@ -1,0 +1,24 @@
+name: Python Code Quality Assurance
+description: Lint, checks & tests
+
+inputs:
+  working-directory:
+    description: The working directory to run the commands in
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Python
+      uses: ./.github/actions/setup-python
+      with:
+        working-directory: ${{ inputs.working-directory }}
+
+    - name: Lint, check, test and build (if applicable)
+      run: |
+        source ~/.venv/bin/activate
+        make test
+      working-directory: ${{ inputs.working-directory }}
+      shell: bash
+      env:
+        RUFF_OUTPUT_FORMAT: github
