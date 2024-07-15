@@ -438,12 +438,20 @@ def parse_id_token(raw_id_token, *, client):
         # The token is valid, and not expired.
         # The required claims are available for further validation.
 
-        # Check the issuer after obtaining the claims.
+        # Check the issuer
         if claims["iss"] != (expected_issuer := client.get_issuer(claims=claims)):
             # The issuer is not the expected one.
             raise OIDCError(
                 f"ID Token from {client.provider_key!r} is not issued by"
                 f" {expected_issuer!r}, got {claims['iss']!r}."
+            )
+
+        # Check for the absence of the nonce claim. It is not sent in the
+        # authentication request, so it should not be present in the ID Token.
+        if "nonce" in claims:
+            raise OIDCError(
+                f"ID Token from {client.provider_key!r} contains an unexpected"
+                f" 'nonce' claim."
             )
 
         # Everything checks out.

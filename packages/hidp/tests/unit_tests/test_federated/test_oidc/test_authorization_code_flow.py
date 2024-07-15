@@ -589,6 +589,26 @@ class TestParseIdToken(TestCase):
         ):
             authorization_code_flow.parse_id_token(token, client=self.client)
 
+    def test_unexpected_nonce(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the nonce is incorrect."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        token = self._get_token(
+            claims={
+                "sub": "subject",
+                "iss": self.client.issuer,
+                "aud": self.client.client_id,
+                "exp": time.time() + 3600,
+                "iat": time.time(),
+                "nonce": "unexpected_nonce",
+            },
+        )
+
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' contains an unexpected 'nonce' claim.",
+        ):
+            authorization_code_flow.parse_id_token(token, client=self.client)
+
     def test_parse_id_token(self, mock_get_oidc_client_jwks):
         """Parses the ID token and returns the claims."""
         mock_get_oidc_client_jwks.return_value = self.key_set
