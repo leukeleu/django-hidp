@@ -28,16 +28,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: ./.github/actions/setup-python
-        with:
-          working-directory: './packages/hidp'
-
       - name: Build documentation
-        run: |
-          source ~/.venv/bin/activate
-          make html
-        working-directory: './packages/hidp/docs'
-        shell: bash
+        uses: ./.github/actions/build-hidp-docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -39,6 +39,10 @@ jobs:
         with:
           working-directory: ${{ matrix.working-directory }}
 
+      - name: Build documentation
+        uses: ./.github/actions/build-hidp-docs
+        if: ${{ matrix.working-directory == './packages/hidp' }}
+
   # Report success/failure
   success:
     name: Success
