@@ -9,7 +9,8 @@ runs:
   using: composite
 
   steps:
-    - uses: ./.github/actions/setup-python
+    - name: Setup Python
+      uses: ./.github/actions/setup-python
       with:
         working-directory: ${{ inputs.working-directory }}
 

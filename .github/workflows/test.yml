@@ -33,9 +33,11 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: ./.github/actions/python-qa
+      - name: Linting, checks & tests
+        uses: ./.github/actions/python-qa
         with:
           working-directory: ${{ matrix.working-directory }}
 
