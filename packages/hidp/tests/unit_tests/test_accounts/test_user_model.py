@@ -76,3 +76,10 @@ class TestUserModel(TestCase):
         self.assertEqual("Test subject", email.subject)
         self.assertEqual("Test message", email.body)
         self.assertEqual("test@example.com", email.from_email)
+
+    def test_get_short_name(self):
+        """
+        Returns the first name of the user.
+        """
+        user = user_factories.UserFactory(first_name="First", last_name="Last")
+        self.assertEqual("First", user.get_short_name())

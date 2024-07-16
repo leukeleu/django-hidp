@@ -181,6 +181,22 @@ class BaseUser(auth_models.AbstractUser):
             )
         ]
 
+    @property
+    def is_anonymous(self):
+        """
+        ``bool``: Always ``False`` (as opposed to always ``True``
+        for ``AnonymousUser``).
+        """
+        return super().is_anonymous
+
+    @property
+    def is_authenticated(self):
+        """
+        ``bool``: Always ``True`` (as opposed to always ``False``
+        for ``AnonymousUser``).
+        """
+        return super().is_authenticated
+
     def check_password(self, raw_password):
         """
         Check the raw password against the user's hashed password.
@@ -199,6 +215,14 @@ class BaseUser(auth_models.AbstractUser):
         """
         return super().check_password(raw_password)
 
+    def clean(self):
+        """
+        Normalize the email address by lower-casing the domain part.
+
+        Automatically called before saving the user.
+        """
+        super().clean()
+
     def email_user(self, subject, message, from_email=None, **kwargs):
         """
         Email this user with the given subject and message.
@@ -213,6 +237,34 @@ class BaseUser(auth_models.AbstractUser):
             from_email (``str``, `optional`): The sender's email address.
         """
         super().email_user(subject, message, from_email=from_email, **kwargs)
+
+    def get_full_name(self):
+        """
+        Return the first name and the last name, separated by a space.
+
+        Returns:
+            ``str``: The full name of the user.
+        """
+        return super().get_full_name()
+
+    def get_short_name(self):
+        """
+        Return the first name.
+
+        Returns:
+            ``str``: The first name of the user.
+        """
+        return super().get_short_name()
+
+    def has_usable_password(self):
+        """
+        Check if the user has a usable password.
+
+        Returns:
+            ``bool``: ``True`` if the user has a password set and it doesn't begin with
+            the unusable password prefix.
+        """
+        return super().has_usable_password()
 
     def save(self, *args, update_fields=None, **kwargs):
         """
@@ -243,4 +295,6 @@ class BaseUser(auth_models.AbstractUser):
 
 
 class User(BaseUser):
-    pass
+    """
+    Concrete class that extends ``BaseUser``.
+    """
