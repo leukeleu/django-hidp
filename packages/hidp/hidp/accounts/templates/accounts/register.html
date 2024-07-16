@@ -1,0 +1,39 @@
+{% load i18n %}
+<!doctype html>
+<html>
+<head>
+  <title>{% translate 'Sign up' %}</title>
+</head>
+<body>
+  {% if request.user.is_authenticated %}
+  <form action="{%  url 'hidp_accounts:logout' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{% url 'hidp_accounts:register' %}">
+    <p>
+      {% blocktranslate %}
+      You are currently logged in as {{ user }}.
+      {% endblocktranslate %}
+      <button type="submit">{% translate 'Log out' %}</button>
+    </p>
+  </form>
+
+  {% else %}
+  <h1>{% translate 'Create a new account' %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% translate 'Sign up' %}</button>
+  </form>
+
+  <hr>
+
+  <p>
+    {% url 'hidp_accounts:login' as login_url %}
+    {% blocktranslate with login_url=login_url %}
+    Already have an account? <a href="{{ login_url }}">Log in</a>.
+    {% endblocktranslate %}
+  </p>
+  {% endif %}
+</body>
+</html>
