@@ -20,6 +20,7 @@ with support for the optional PKCE extension.
 # https://openid.net/specs/openid-connect-basic-1_0.html#CodeFlow
 
 import base64
+import collections
 import hashlib
 import json
 import secrets
@@ -445,6 +446,83 @@ def parse_id_token(raw_id_token, *, client):
         return claims
 
 
+def get_user_info(*, client, access_token, claims):
+    """
+    Obtains the user information from an OpenID Connect provider.
+
+    Arguments:
+        client (OIDCClient):
+            The OpenID Connect client used to obtain the token.
+        access_token (str):
+            The access token to use to retrieve the user information.
+        claims (dict):
+            The claims from the ID Token
+
+    Returns:
+        dict: The user information from the OpenID Connect provider.
+    """
+    # 2.3.1. UserInfo Request
+    # Clients send requests to the UserInfo Endpoint to obtain Claims about
+    # the End-User using an Access Token obtained through [...] Authentication.
+    # https://openid.net/specs/openid-connect-basic-1_0.html#UserInfoRequest
+
+    try:
+        # The request SHOULD use the HTTP GET method [...]
+        response = requests.get(
+            client.userinfo_endpoint,
+            headers={
+                # the Access Token SHOULD be sent using the Authorization header field.
+                "Authorization": f"Bearer {access_token}",
+                "Accept": "application/json",
+            },
+            # Generous timeouts
+            timeout=(
+                5,  # Connect timeout
+                30,  # Read timeout
+            ),
+        )
+    except requests.RequestException:
+        raise OIDCError(
+            f"Failed to fetch user information from {client.provider_key!r}"
+            f" from {client.userinfo_endpoint!r}."
+        ) from None
+
+    try:
+        response.raise_for_status()
+    except requests.RequestException:
+        raise OIDCError(
+            f"Error after fetching user information from {client.provider_key!r}"
+            f" from {client.userinfo_endpoint!r}: {response.status_code}."
+        ) from None
+
+    # 2.3.2. Successful UserInfo Response
+    # https://openid.net/specs/openid-connect-basic-1_0.html#UserInfoResponse
+    try:
+        # The UserInfo Claims MUST be returned as the members of a JSON object.
+        user_info = response.json()
+    except json.JSONDecodeError:
+        raise OIDCError(
+            f"Failed to parse user information from {client.provider_key!r}"
+            f" from {client.userinfo_endpoint!r}."
+        ) from None
+
+    # The sub Claim in the UserInfo Response MUST be verified to exactly match
+    # the sub Claim in the ID Token; if they do not match, the UserInfo Response
+    # values MUST NOT be used.
+    if "sub" not in user_info or user_info["sub"] != claims["sub"]:
+        raise OIDCError(
+            f"User information from {client.provider_key!r} does not match the"
+            f" ID token 'sub' claim."
+        )
+
+    return user_info
+
+
+_AuthenticationResult = collections.namedtuple(
+    "_AuthenticationResult", ["tokens", "claims", "user_info"]
+)
+
+
 def handle_authentication_callback(request, *, client, redirect_uri):
     """
     Handles the callback from an OpenID Connect Authorization Code Flow
@@ -459,7 +537,9 @@ def handle_authentication_callback(request, *, client, redirect_uri):
             The (relative) URL to redirect the user to after the authentication.
 
     Returns:
-        dict: The token response from the OpenID Connect provider.
+        _AuthenticationResult:
+            A named tuple with the tokens, claims, and user
+            information obtained from the authentication
 
     Raises:
         OAuth2Error: If the callback contains an error.
@@ -474,4 +554,11 @@ def handle_authentication_callback(request, *, client, redirect_uri):
         redirect_uri=redirect_uri,
     )
     claims = parse_id_token(token_response.get("id_token"), client=client)
-    return token_response, claims
+    user_info = get_user_info(
+        client=client, access_token=token_response["access_token"], claims=claims
+    )
+    return _AuthenticationResult(
+        tokens=token_response,
+        claims=claims,
+        user_info=user_info,
+    )

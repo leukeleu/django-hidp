@@ -106,6 +106,9 @@ class TestOIDCAuthenticationCallbackView(TestCase):
             {
                 "claims": "claims",
             },
+            {
+                "user_info": "user_info",
+            },
         ),
     )
     def test_calls_handle_authentication_callback(
