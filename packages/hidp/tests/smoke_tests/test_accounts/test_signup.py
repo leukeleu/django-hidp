@@ -39,6 +39,30 @@ class TestRegistrationView(TestCase):
         self.assertTrue(response.wsgi_request.user.is_authenticated)
         self.assertEqual(response.wsgi_request.user.email, "test@example.com")
 
+    def test_valid_registration_safe_next_param(self):
+        response = self.client.post(
+            self.signup_url,
+            {
+                "email": "test@example.com",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "next": "/example/",
+            },
+        )
+        self.assertRedirects(response, "/example/", fetch_redirect_response=False)
+
+    def test_valid_registration_unsafe_next_param(self):
+        response = self.client.post(
+            self.signup_url,
+            {
+                "email": "test@example.com",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "next": "https://example.com/",
+            },
+        )
+        self.assertRedirects(response, "/", fetch_redirect_response=False)
+
     def test_duplicate_email(self):
         """A user should not be able to sign up with an existing email."""
         response = self.client.post(
