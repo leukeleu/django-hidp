@@ -31,6 +31,11 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     template_name = "accounts/register.html"
     next_page = "/"
 
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            raise PermissionDenied("Logged-in users cannot register a new account.")
+        return super().post(request, *args, **kwargs)
+
     def form_valid(self, form):
         """
         Save the new user and log them in.

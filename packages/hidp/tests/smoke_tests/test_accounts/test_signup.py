@@ -78,3 +78,16 @@ class TestRegistrationView(TestCase):
             "email",
             "User with this Email address already exists.",
         )
+
+    def test_with_logged_in_user(self):
+        """A logged-in user should not be able to sign up again."""
+        self.client.force_login(self.test_user)
+        response = self.client.post(
+            self.signup_url,
+            {
+                "email": "test@example.com",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+            },
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
