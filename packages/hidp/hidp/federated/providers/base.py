@@ -115,6 +115,13 @@ class OIDCClient:
                     f"All endpoints must use TLS (https): {endpoint!r} does not."
                 )
 
+        if not self.has_pkce_support and client_secret is None:
+            raise ValueError(
+                f"Please provide a client secret."
+                f" {self.__class__.__name__!r} declares it does not support PKCE,"
+                " which means a client secret must be required for token exchange."
+            )
+
         if callback_base_url is not None and not _valid_callback_base_url(
             callback_base_url
         ):

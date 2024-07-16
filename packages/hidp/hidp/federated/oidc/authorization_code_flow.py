@@ -305,11 +305,21 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
         "redirect_uri": redirect_uri,
         "client_id": client.client_id,
     }
+    token_request_headers = {
+        "Accept": "application/json",
+        # Some providers (e.g. Microsoft) require the Origin header
+        # to be present and equal the redirect URI origin.
+        "Origin": redirect_uri_origin,
+    }
 
     if client.client_secret:
-        # Some providers require the client secret to be included
-        # in the token request.
-        token_request_data["client_secret"] = client.client_secret
+        # Some providers require the client secret to be included in the token request.
+        # The Client MUST authenticate to the Token Endpoint using the
+        # HTTP Basic method [...].
+        basic_auth_credentials = base64.b64encode(
+            f"{client.client_id}:{client.client_secret}".encode()
+        ).decode()
+        token_request_headers |= {"Authorization": f"Basic {basic_auth_credentials}"}
 
     if client.has_pkce_support:
         if "code_verifier" not in state:
@@ -323,12 +333,7 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
     return requests.post(
         client.token_endpoint,
         data=token_request_data,
-        headers={
-            "Accept": "application/json",
-            # Some providers (e.g. Microsoft) require the Origin header
-            # to be present and equal the redirect URI origin.
-            "Origin": redirect_uri_origin,
-        },
+        headers=token_request_headers,
         # Timeouts in seconds
         timeout=(
             5,  # Connect timeout
@@ -434,12 +439,20 @@ def parse_id_token(raw_id_token, *, client):
         # The token is valid, and not expired.
         # The required claims are available for further validation.
 
-        # Check the issuer after obtaining the claims.
+        # Check the issuer
         if claims["iss"] != (expected_issuer := client.get_issuer(claims=claims)):
             # The issuer is not the expected one.
             raise OIDCError(
                 f"ID Token from {client.provider_key!r} is not issued by"
                 f" {expected_issuer!r}, got {claims['iss']!r}."
+            )
+
+        # Check for the absence of the nonce claim. It is not sent in the
+        # authentication request, so it should not be present in the ID Token.
+        if "nonce" in claims:
+            raise OIDCError(
+                f"ID Token from {client.provider_key!r} contains an unexpected"
+                f" 'nonce' claim."
             )
 
         # Everything checks out.

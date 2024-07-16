@@ -108,7 +108,7 @@ class TestPrepareAuthenticationRequest(TestCase):
 
     def test_no_pkce_support(self):
         """Omits PKCE parameters when the client doesn't support it."""
-        client = NoPKCEOIDCClient(client_id="client_id")
+        client = NoPKCEOIDCClient(client_id="client_id", client_secret="client_secret")
         url = authorization_code_flow.prepare_authentication_request(
             self.request, client=client, redirect_uri="/redirect/"
         )
@@ -314,7 +314,7 @@ class TestObtainTokens(SimpleTestCase):
     def test_obtain_tokens_no_pkce(self, mock_requests_post):
         """Omits code_verifier when PKCE is not supported."""
         request = RequestFactory().get("/callback/")
-        client = NoPKCEOIDCClient(client_id="client_id")
+        client = NoPKCEOIDCClient(client_id="client_id", client_secret="client_secret")
         mock_requests_post.return_value.json.return_value = self.mock_response
 
         tokens = authorization_code_flow.obtain_tokens(
@@ -336,6 +336,7 @@ class TestObtainTokens(SimpleTestCase):
             headers={
                 "Accept": "application/json",
                 "Origin": "http://testserver",
+                "Authorization": "Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=",
             },
             timeout=(5, 30),
         )
@@ -419,12 +420,12 @@ class TestObtainTokens(SimpleTestCase):
                 "code": "code",
                 "redirect_uri": "https://example.com/redirect/",
                 "client_id": client.client_id,
-                "client_secret": client.client_secret,
                 "code_verifier": "test",
             },
             headers={
                 "Accept": "application/json",
                 "Origin": "https://example.com",
+                "Authorization": "Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=",
             },
             timeout=(5, 30),
         )
@@ -589,6 +590,26 @@ class TestParseIdToken(TestCase):
             exceptions.OIDCError,
             "ID Token from 'example' is not issued by 'https://example.com',"
             " got 'https://example.test'.",
+        ):
+            authorization_code_flow.parse_id_token(token, client=self.client)
+
+    def test_unexpected_nonce(self, mock_get_oidc_client_jwks):
+        """Raises an OIDCError when the nonce is incorrect."""
+        mock_get_oidc_client_jwks.return_value = self.key_set
+        token = self._get_token(
+            claims={
+                "sub": "subject",
+                "iss": self.client.issuer,
+                "aud": self.client.client_id,
+                "exp": time.time() + 3600,
+                "iat": time.time(),
+                "nonce": "unexpected_nonce",
+            },
+        )
+
+        with self.assertRaisesMessage(
+            exceptions.OIDCError,
+            "ID Token from 'example' contains an unexpected 'nonce' claim.",
         ):
             authorization_code_flow.parse_id_token(token, client=self.client)
 
