@@ -470,11 +470,12 @@ class TestParseIdToken(TestCase):
         return token.serialize()
 
     def test_unable_to_get_jwks(self, mock_get_oidc_client_jwks):
-        """Raises an OIDCError when the JWKs cannot be retrieved."""
+        """Raises an OIDCError when the signing keys cannot be retrieved."""
         mock_get_oidc_client_jwks.return_value = None
         with self.assertRaisesMessage(
             exceptions.OIDCError,
-            "Unable to get JWKs for 'example'. The ID Token cannot be validated.",
+            "Unable to get signing keys for 'example'."
+            " The ID Token cannot be validated.",
         ):
             authorization_code_flow.parse_id_token(
                 "id_token",

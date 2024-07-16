@@ -16,7 +16,7 @@ def configure_oidc_clients(*clients, eagerly_provision_jwk_store=False):
         *clients (OIDCClient):
             One or more OIDCClient instances to register.
         eagerly_provision_jwk_store (bool):
-            Whether to eagerly load the JWK data for the registered clients.
+            Whether to eagerly load the signing keys for the registered clients.
             This is useful to ensure that the keys are loaded at application startup
             instead of the first time they are needed.
 

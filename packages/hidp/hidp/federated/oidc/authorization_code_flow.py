@@ -382,7 +382,7 @@ def parse_id_token(raw_id_token, *, client):
     keys = jwks.get_oidc_client_jwks(client)
     if keys is None:
         raise OIDCError(
-            f"Unable to get JWKs for {client.provider_key!r}."
+            f"Unable to get signing keys for {client.provider_key!r}."
             " The ID Token cannot be validated."
         )
 
