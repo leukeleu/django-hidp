@@ -21,52 +21,33 @@ Does **not** include application management views. Applications can be managed
 using the Django Admin interface.
 """
 
-from django_ratelimit.decorators import ratelimit
 from oauth2_provider import views as oauth2_views
 
 from django.urls import path
+
+from hidp.rate_limit.decorators import rate_limit_default, rate_limit_strict
 
 app_name = "oauth2_provider"
 
 base_urlpatterns = [
     path(
         "authorize/",
-        ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
-            ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
-                ratelimit(key="ip", method=ratelimit.ALL, rate="100/15m")(
-                    oauth2_views.AuthorizationView.as_view()
-                )
-            )
-        ),
+        rate_limit_strict(oauth2_views.AuthorizationView.as_view()),
         name="authorize",
     ),
     path(
         "token/",
-        ratelimit(key="ip", method="POST", rate="10/s")(
-            ratelimit(key="ip", method="POST", rate="30/m")(
-                ratelimit(key="ip", method="POST", rate="100/15m")(
-                    oauth2_views.TokenView.as_view()
-                )
-            )
-        ),
+        rate_limit_strict(oauth2_views.TokenView.as_view()),
         name="token",
     ),
     path(
         "revoke_token/",
-        ratelimit(key="ip", method="POST", rate="10/s")(
-            ratelimit(key="ip", method="POST", rate="30/m")(
-                oauth2_views.RevokeTokenView.as_view()
-            )
-        ),
+        rate_limit_default(oauth2_views.RevokeTokenView.as_view()),
         name="revoke-token",
     ),
     path(
         "introspect/",
-        ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
-            ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
-                oauth2_views.IntrospectTokenView.as_view()
-            )
-        ),
+        rate_limit_default(oauth2_views.IntrospectTokenView.as_view()),
         name="introspect",
     ),
 ]
@@ -74,38 +55,22 @@ base_urlpatterns = [
 oidc_urlpatterns = [
     path(
         ".well-known/openid-configuration",
-        ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
-            ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
-                oauth2_views.ConnectDiscoveryInfoView.as_view()
-            )
-        ),
+        rate_limit_default(oauth2_views.ConnectDiscoveryInfoView.as_view()),
         name="oidc-connect-discovery-info",
     ),
     path(
         ".well-known/jwks.json",
-        ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
-            ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
-                oauth2_views.JwksInfoView.as_view()
-            )
-        ),
+        rate_limit_default(oauth2_views.JwksInfoView.as_view()),
         name="jwks-info",
     ),
     path(
         "userinfo/",
-        ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
-            ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
-                oauth2_views.UserInfoView.as_view()
-            )
-        ),
+        rate_limit_default(oauth2_views.UserInfoView.as_view()),
         name="user-info",
     ),
     path(
         "logout/",
-        ratelimit(key="ip", method=ratelimit.ALL, rate="10/s")(
-            ratelimit(key="ip", method=ratelimit.ALL, rate="30/m")(
-                oauth2_views.RPInitiatedLogoutView.as_view()
-            )
-        ),
+        rate_limit_default(oauth2_views.RPInitiatedLogoutView.as_view()),
         name="rp-initiated-logout",
     ),
 ]
