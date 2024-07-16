@@ -57,7 +57,7 @@ class TestJwksStore(TestCase):
     @mock.patch.object(jwks.requests, "get")
     def test_reluctantly_fetches_jwks_on_cache_miss(self, mock_get):
         """
-        Fetch the JWKS data from the OIDC provider when the data is missing
+        Fetch the signing keys from the OIDC provider when they are missing
         from the cache.
         """
         # Just raise an exception to stop the function early.
@@ -66,35 +66,37 @@ class TestJwksStore(TestCase):
         with self.assertLogs(logger=jwks.logger, level="WARNING") as logs:
             jwks_data = jwks.get_oidc_client_jwks(self.oidc_client)
 
-        # Complains about having to fetch JWKS data
+        # Complains about having to fetch signing keys
         self.assertEqual(
             logs.records[0].getMessage(),
-            "JWK data for 'example' is not cached,"
+            "Signing keys for 'example' are not cached,"
             " reluctantly fetching from 'https://example.com/jwks'.",
         )
 
-        # Fetches JWKS data from the OIDC provider
+        # Fetches signing keys from the OIDC provider
         mock_get.assert_called_once_with(
             self.oidc_client.jwks_uri,
             headers={"Accept": "application/json"},
             timeout=(5, 30),
         )
 
-        # Logs the failure to fetch JWKS data
+        # Logs the failure to fetch signing keys
         self.assertEqual(
             logs.records[1].getMessage(),
-            "Failed to fetch JWK data for 'example' from 'https://example.com/jwks'.",
+            "Failed to fetch signing keys for 'example' from 'https://example.com/jwks'.",
         )
 
-        # Return None after failing to fetch JWKS data
-        self.assertIsNone(jwks_data, "Expected None after failing to fetch JWKS data.")
+        # Return None after failing to fetch signing keys
+        self.assertIsNone(
+            jwks_data, "Expected None after failing to fetch signing keys."
+        )
 
         with self.subTest("Failure is cached"):
             # The second call doesn't try to fetch the data again.
             with self.assertNoLogs():
                 self.assertIsNone(
                     jwks.get_oidc_client_jwks(self.oidc_client),
-                    "Expected None after failing to fetch JWKS data.",
+                    "Expected None after failing to fetch signing keys.",
                 )
             mock_get.assert_called_once()  # No new requests are made
 
@@ -112,10 +114,12 @@ class TestJwksStore(TestCase):
 
         mock_get.assert_called()  # The request is made
 
-        self.assertIsNone(jwks_data, "Expected None after failing to fetch JWKS data.")
+        self.assertIsNone(
+            jwks_data, "Expected None after failing to fetch signing keys."
+        )
         self.assertEqual(
             logs.records[0].getMessage(),
-            "Error after fetching JWK data for 'example'"
+            "Error after fetching signing keys for 'example'"
             " from 'https://example.com/jwks': 404.",
         )
 
@@ -124,7 +128,7 @@ class TestJwksStore(TestCase):
             with self.assertNoLogs():
                 self.assertIsNone(
                     jwks.get_oidc_client_jwks(self.oidc_client),
-                    "Expected None after failing to fetch JWKS data.",
+                    "Expected None after failing to fetch signing keys.",
                 )
             mock_get.assert_called_once()  # No new requests are made
 
@@ -140,10 +144,12 @@ class TestJwksStore(TestCase):
         with self.assertLogs(logger=jwks.logger, level="ERROR") as logs:
             jwks_data = jwks.get_oidc_client_jwks(self.oidc_client)
 
-        self.assertIsNone(jwks_data, "Expected None after failing to fetch JWKS data.")
+        self.assertIsNone(
+            jwks_data, "Expected None after failing to fetch signing keys."
+        )
         self.assertEqual(
             logs.records[0].getMessage(),
-            "Failed to decode JWK data for 'example' from 'https://example.com/jwks'.",
+            "Failed to decode signing keys for 'example' from 'https://example.com/jwks'.",
         )
 
         with self.subTest("Failure is cached"):
@@ -151,14 +157,14 @@ class TestJwksStore(TestCase):
             with self.assertNoLogs():
                 self.assertIsNone(
                     jwks.get_oidc_client_jwks(self.oidc_client),
-                    "Expected None after failing to fetch JWKS data.",
+                    "Expected None after failing to fetch signing keys.",
                 )
             mock_get.assert_called_once()
 
     @mock.patch.object(jwks.requests, "get")
     def test_valid_response(self, mock_get):
         """
-        Return the JWKS data when the JWKS endpoint returns a valid response.
+        Return the signing keys when the JWKS endpoint returns a valid response.
         """
         # This test doubles as a test for successful request caching,
         # and also tests eager fetching.
@@ -197,7 +203,7 @@ class TestJwksStore(TestCase):
 
         self.assertEqual(
             logs.records[0].getMessage(),
-            "Failed to decode JWK data for 'example' from cache.",
+            "Failed to decode signing keys for 'example' from cache.",
         )
 
         # Falls back to fetching the data from the provider.
@@ -218,7 +224,7 @@ class RefreshJwks(SimpleTestCase):
         config.configure_oidc_clients(*self.oidc_clients)
 
     def test_refresh_registered_oidc_clients_jwks(self, mock_get_oidc_client_jwks):
-        """Eagerly fetches the JWKS data for all registered OIDC clients."""
+        """Eagerly fetches the signing keys for all registered OIDC clients."""
         jwks.refresh_registered_oidc_clients_jwks()
         mock_get_oidc_client_jwks.assert_has_calls(
             [mock.call(client, eager=True) for client in self.oidc_clients]
@@ -227,7 +233,7 @@ class RefreshJwks(SimpleTestCase):
     def test_refresh_oidc_clients_jwks_management_command(
         self, mock_get_oidc_client_jwks
     ):
-        """Eagerly fetches the JWKs data and logs the process to stdout."""
+        """Eagerly fetches the signing keys and logs the process to stdout."""
         stdout = io.StringIO()
         call_command("refresh_oidc_clients_jwks", stdout=stdout)
         mock_get_oidc_client_jwks.assert_has_calls(
@@ -235,7 +241,8 @@ class RefreshJwks(SimpleTestCase):
         )
         self.assertEqual(
             [
-                f"Fetching JWKs for '{client.provider_key}' from '{client.jwks_uri}'..."
+                f"Fetching signing keys for '{client.provider_key}'"
+                f" from '{client.jwks_uri}'..."
                 for client in self.oidc_clients
             ],
             stdout.getvalue().splitlines(),

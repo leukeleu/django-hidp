@@ -15,7 +15,7 @@ _JWKS_CACHE_KEY_PREFIX = "hidp:oidc_client_jwks"
 # to the JWKS endpoint during normal operation.
 # Keys can be fetched eagerly (and periodically) if freshness is a concern.
 _JWKS_DATA_CACHE_TIMEOUT = timedelta(days=7).total_seconds()
-# If an error occurs while fetching the JWKS data, cache the error to avoid
+# If an error occurs while fetching the signing keys, cache the error to avoid
 # repeated requests to the JWKS endpoint. The error may be temporary, so cache
 # it for a short period of time.
 _JWKS_ERROR_CACHE_TIMEOUT = timedelta(minutes=5).total_seconds()
@@ -28,13 +28,13 @@ logger = logging.getLogger(__name__)
 
 def get_oidc_client_jwks(client, *, eager=False):
     """
-    Retrieve the JWK data for an OIDC client by provider key.
+    Retrieve the signing keys for an OIDC client by provider key.
 
     Arguments:
         client (OIDCClient):
-            The provider key of the client to retrieve the JWK data for.
+            The provider key of the client to retrieve the signing keys for.
         eager (bool):
-            Whether to bypass the cache and fetch the JWK data directly
+            Whether to bypass the cache and fetch the signing keys directly
             from the provider's JWKS endpoint.
 
             Use this to ensure that the keys are fresh and up-to-date.
@@ -46,14 +46,14 @@ def get_oidc_client_jwks(client, *, eager=False):
 
     Returns:
         jwcrypto.jwk.JWKSet | None:
-            The JWK data for the OIDC client if available, or None if
-            the data could not be retrieved.
+            The signing keys for the OIDC client if available, or None if
+            the keys could not be retrieved.
 
     Raises:
         KeyError:
             If the client is not registered.
     """
-    # A client must be registered to retrieve its JWK data.
+    # A client must be registered to retrieve its signing keys.
     # There is no reason to fetch keys for an unregistered client.
     if client != oidc_clients.get_oidc_client(client.provider_key):
         # Only trust the given client if it's the exact same instance.
@@ -71,29 +71,30 @@ def get_oidc_client_jwks(client, *, eager=False):
                 return jwk.JWKSet.from_json(jwks_data)
             except jwk.InvalidJWKValue:
                 # The cached data could not be decoded. Very unlikely.
-                # Fall through to fetch the JWK data from the provider's JWKS endpoint.
+                # Fall through to fetch the signing keys from the provider's
+                # JWKS endpoint.
                 logger.exception(
-                    "Failed to decode JWK data for %r from cache.",
+                    "Failed to decode signing keys for %r from cache.",
                     client.provider_key,
                     extra={"jwks_data": jwks_data},
                 )
 
         elif jwks_data is None:
             # The cache key is set to None, this indicates that a previous
-            # attempt to fetch the JWK data failed. Return None to avoid
+            # attempt to fetch the signing keys failed. Return None to avoid
             # repeated requests to the JWKS endpoint.
             return None
 
         # The caller did not request eager fetching and the cache is empty.
-        # Complain about the cache miss and reluctantly fetch the JWK data.
+        # Complain about the cache miss and reluctantly fetch the signing keys.
         # This is an unwanted situation and should be avoided.
         logger.warning(
-            "JWK data for %r is not cached, reluctantly fetching from %r.",
+            "Signing keys for %r are not cached, reluctantly fetching from %r.",
             client.provider_key,
             client.jwks_uri,
         )
 
-    # Fetch the JWK data from the provider's JWKS endpoint.
+    # Fetch the signing keys from the provider's JWKS endpoint.
     try:
         response = requests.get(
             client.jwks_uri,
@@ -109,7 +110,7 @@ def get_oidc_client_jwks(client, *, eager=False):
     except requests.RequestException:
         # The request failed.
         logger.exception(
-            "Failed to fetch JWK data for %r from %r.",
+            "Failed to fetch signing keys for %r from %r.",
             client.provider_key,
             client.jwks_uri,
         )
@@ -122,7 +123,7 @@ def get_oidc_client_jwks(client, *, eager=False):
     except requests.RequestException:
         # The server returned an error response.
         logger.exception(
-            "Error after fetching JWK data for %r from %r: %s.",
+            "Error after fetching signing keys for %r from %r: %s.",
             client.provider_key,
             client.jwks_uri,
             response.status_code,
@@ -140,7 +141,7 @@ def get_oidc_client_jwks(client, *, eager=False):
     except jwk.JWException:
         # The response could not be decoded.
         logger.exception(
-            "Failed to decode JWK data for %r from %r.",
+            "Failed to decode signing keys for %r from %r.",
             client.provider_key,
             client.jwks_uri,
             extra={
@@ -150,18 +151,19 @@ def get_oidc_client_jwks(client, *, eager=False):
         cache.set(cache_key, None, timeout=_JWKS_ERROR_CACHE_TIMEOUT)
         return None
 
-    # Success! Cache the JWK data for future use.
+    # Success! Cache the signing keys for future use.
     cache.set(cache_key, response.text, timeout=_JWKS_DATA_CACHE_TIMEOUT)
     return jwks
 
 
 def refresh_registered_oidc_clients_jwks(stdout=None):
     """
-    Refresh the JWK data for all registered OIDC clients.
+    Refresh the signing keys for all registered OIDC clients.
     """
     for client in oidc_clients.get_registered_oidc_clients():
         if stdout:
             stdout.write(
-                f"Fetching JWKs for {client.provider_key!r} from {client.jwks_uri!r}..."
+                f"Fetching signing keys for {client.provider_key!r}"
+                f" from {client.jwks_uri!r}..."
             )
         get_oidc_client_jwks(client, eager=True)
