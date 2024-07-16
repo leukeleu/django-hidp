@@ -5,6 +5,16 @@
   <title>{% translate 'Log in' %}</title>
 </head>
 <body>
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+    <li>
+      {{ message }}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
   {% if request.user.is_authenticated %}
   <form action="{%  url 'hidp_accounts:logout' %}" method="post">
     {% csrf_token %}

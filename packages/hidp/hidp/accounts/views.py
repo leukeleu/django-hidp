@@ -1,5 +1,6 @@
 from django_ratelimit.decorators import ratelimit
 
+from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -66,6 +67,7 @@ class LoginView(auth_views.LoginView):
                 }
                 for provider in oidc_clients.get_registered_oidc_clients()
             ],
+            messages=messages.get_messages(self.request),
             **kwargs,
         )
 

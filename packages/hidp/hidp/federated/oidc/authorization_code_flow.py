@@ -34,7 +34,7 @@ from jwcrypto import jwt
 
 from ..constants import OIDC_STATES_SESSION_KEY
 from . import jwks
-from .exceptions import OAuth2Error, OIDCError
+from .exceptions import InvalidOIDCStateError, OAuth2Error, OIDCError
 
 
 def _build_absolute_uri(request, client, redirect_uri):
@@ -265,7 +265,10 @@ def validate_authentication_callback(request):
 
     state = _pop_state_from_session(request, state_key)
     if state is None:
-        raise OIDCError("Invalid 'state' parameter in the authentication response.")
+        # State is not present in the session (invalid or expired).
+        raise InvalidOIDCStateError(
+            "Invalid 'state' parameter in the authentication response."
+        )
 
     return code, state
 

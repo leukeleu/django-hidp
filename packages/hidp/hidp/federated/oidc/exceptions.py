@@ -15,3 +15,7 @@ class OAuth2Error(Exception):
 
 class OIDCError(OAuth2Error):
     pass
+
+
+class InvalidOIDCStateError(OIDCError):
+    pass
