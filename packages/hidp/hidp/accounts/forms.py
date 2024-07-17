@@ -6,9 +6,8 @@ class UserCreationForm(auth_forms.UserCreationForm):
     """
     Default UserCreationForm, allows user to register with username and password.
 
-    The username field is mapped to User.USERNAME_FIELD, this allows the
-    user model to be change the username field to an alternative field,
-    for example email.
+    The username field is mapped to `User.USERNAME_FIELD`. This makes it possible
+    to change the username field to a different one, such as an email address.
 
     The user is asked to enter the password twice to avoid typos.
     The password is validated using the validators configured in
@@ -24,11 +23,10 @@ class UserCreationForm(auth_forms.UserCreationForm):
 
 class AuthenticationForm(auth_forms.AuthenticationForm):
     """
-    Default AuthenticationForm, allows user to login with username and password.
+    Default AuthenticationForm, allows user to log in with username and password.
 
-    The username field is mapped to User.USERNAME_FIELD, this allows the
-    user model to be change the username field to an alternative field,
-    for example email.
+    The username field is mapped to `User.USERNAME_FIELD`. This makes it possible
+    to change the username field to a different one, such as an email address.
     """
 
     def __init__(self, request=None, *args, **kwargs):
