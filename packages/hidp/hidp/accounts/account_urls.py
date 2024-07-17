@@ -1,14 +1,14 @@
 """
 Authentication URLs
 
-Provides the URL patterns for the authentication views (login, logout).
+Provides the URL patterns for the accounts views (register, login, logout).
 
 Include this module in the root URL configuration:
 
-    from hidp.accounts import auth_urls
+    from hidp.accounts import account_urls
 
     urlpatterns = [
-        path("", include(auth_urls)),
+        path("", include(account_urls)),
     ]
 
 This module also defines the namespace `hidp_accounts` for these URLs.
@@ -24,7 +24,13 @@ from . import views
 
 app_name = "hidp_accounts"
 
-urlpatterns = [
+register_urls = [
+    path("signup/", views.RegistrationView.as_view(), name="register"),
+]
+
+auth_urls = [
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
 ]
+
+urlpatterns = register_urls + auth_urls

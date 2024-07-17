@@ -1,13 +1,32 @@
 from django.contrib.auth import forms as auth_forms
+from django.contrib.auth import get_user_model
+
+
+class UserCreationForm(auth_forms.UserCreationForm):
+    """
+    Default UserCreationForm, allows user to register with username and password.
+
+    The username field is mapped to `User.USERNAME_FIELD`. This makes it possible
+    to change the username field to a different one, such as an email address.
+
+    The user is asked to enter the password twice to avoid typos.
+    The password is validated using the validators configured in
+    `settings.AUTH_PASSWORD_VALIDATORS`.
+
+    Username is validated to ensure it is unique (in a case-insensitive way).
+    """
+
+    class Meta(auth_forms.UserCreationForm.Meta):
+        model = get_user_model()
+        fields = (model.USERNAME_FIELD,)
 
 
 class AuthenticationForm(auth_forms.AuthenticationForm):
     """
-    Default AuthenticationForm, allows user to login with username and password.
+    Default AuthenticationForm, allows user to log in with username and password.
 
-    The username field is mapped to User.USERNAME_FIELD, this allows the
-    user model to be change the username field to an alternative field,
-    for example email.
+    The username field is mapped to `User.USERNAME_FIELD`. This makes it possible
+    to change the username field to a different one, such as an email address.
     """
 
     def __init__(self, request=None, *args, **kwargs):

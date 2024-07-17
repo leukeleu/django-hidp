@@ -2,15 +2,57 @@ from django_ratelimit.decorators import ratelimit
 
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.views import generic
 
 from hidp.rate_limit.decorators import rate_limit_default, rate_limit_strict
 
 from ..config import oidc_clients
 from . import auth as hidp_auth
-from .forms import AuthenticationForm
+from .forms import AuthenticationForm, UserCreationForm
+
+
+@method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
+@method_decorator(ratelimit(key="ip", rate="5/m", method="POST"), name="post")
+@method_decorator(ratelimit(key="ip", rate="30/15m", method="POST"), name="post")
+class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
+    """
+    Display the registration form and handle the registration action.
+
+    If the form is submitted with valid data, a new user account will be created
+    and the user will be logged in and redirected to the location returned
+    by get_success_url().
+
+    Otherwise, the form will be displayed with an error message explaining the
+    reason for the failure and the user can try again.
+    """
+
+    form_class = UserCreationForm
+    template_name = "accounts/register.html"
+    next_page = "/"
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            raise PermissionDenied("Logged-in users cannot register a new account.")
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """
+        Save the new user and log them in.
+        """
+        user = form.save()
+        hidp_auth.login(
+            self.request,
+            hidp_auth.authenticate(
+                request=self.request,
+                username=user.get_username(),
+                password=form.cleaned_data["password1"],
+            ),
+        )
+        return HttpResponseRedirect(self.get_success_url())
 
 
 @method_decorator(

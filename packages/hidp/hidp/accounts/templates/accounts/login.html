@@ -53,5 +53,14 @@
 
   {% endfor %}
   {% endif %}
+
+  <hr>
+
+  <p>
+    {% url 'hidp_accounts:register' as register_url %}
+    {% blocktranslate with register_url=register_url %}
+    Don't have an account yet? <a href="{{ register_url }}">Sign up</a>.
+    {% endblocktranslate %}
+  </p>
 </body>
 </html>
