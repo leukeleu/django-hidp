@@ -15,6 +15,9 @@ from . import auth as hidp_auth
 from .forms import AuthenticationForm, UserCreationForm
 
 
+@method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
+@method_decorator(ratelimit(key="ip", rate="5/m", method="POST"), name="post")
+@method_decorator(ratelimit(key="ip", rate="30/15m", method="POST"), name="post")
 class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     """
     Display the registration form and handle the registration action.
