@@ -25,8 +25,8 @@ class UserCreationForm(auth_forms.UserCreationForm):
     """
 
     class Meta(auth_forms.UserCreationForm.Meta):
-        model = get_user_model()
-        fields = (model.USERNAME_FIELD,)
+        model = UserModel
+        fields = (UserModel.USERNAME_FIELD,)
 
 
 class AuthenticationForm(auth_forms.AuthenticationForm):
