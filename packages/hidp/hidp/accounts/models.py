@@ -144,6 +144,11 @@ class BaseUser(auth_models.AbstractUser):
 
             Defaults to ``None``.
 
+        agreed_to_tos (``DateTimeField``):
+            Date and time when the user agreed to the terms of service.
+
+            Defaults to ``None``
+
         last_modified (``DateTimeField``):
             Date and time when the user was last modified. Populated by Django when
             the user is saved.
@@ -162,6 +167,12 @@ class BaseUser(auth_models.AbstractUser):
     )
     # Store the last modification date
     last_modified = models.DateTimeField(_("last modified"), auto_now=True)
+    # Store when the user agreed to the terms of service
+    agreed_to_tos = models.DateTimeField(
+        _("agreed to terms of service"),
+        blank=True,
+        null=True,
+    )
 
     # Use the email field as the username field
     USERNAME_FIELD = "email"
