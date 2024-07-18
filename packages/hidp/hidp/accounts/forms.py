@@ -282,3 +282,33 @@ class PasswordResetRequestForm(auth_forms.PasswordResetForm):
                 context=context,
                 from_email=from_email,
             )
+
+
+class PasswordResetForm(auth_forms.SetPasswordForm):
+    """
+    Allows the user to set a new password without entering the old password.
+
+    The user is asked to enter a new password twice to avoid typos.
+    The password is validated using the validators configured in
+    `settings.AUTH_PASSWORD_VALIDATORS`.
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        """
+        Initialize the form with the given `user`.
+
+        The `user` is stored in an instance variable, to allow all
+        form methods to access the user.
+        """
+        super().__init__(user, *args, **kwargs)
+
+    def save(self, *, commit=True):
+        """
+        Save the new password for the user.
+
+        Args:
+            commit:
+                Whether to save the user to the database after
+                setting the password.
+        """
+        return super().save(commit=commit)
