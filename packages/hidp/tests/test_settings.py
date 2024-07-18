@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "hidp",
     "hidp.accounts",
     "hidp.federated",
+    "tests.custom_user",
 ]
 
 MIDDLEWARE = [
@@ -59,7 +60,7 @@ MIDDLEWARE = [
 
 USE_TZ = True
 
-AUTH_USER_MODEL = "hidp_accounts.User"
+AUTH_USER_MODEL = "custom_user.CustomUser"
 
 # Login and logout settings
 LOGIN_URL = "hidp_accounts:login"

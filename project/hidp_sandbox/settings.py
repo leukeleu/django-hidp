@@ -79,6 +79,8 @@ INSTALLED_APPS = [
     "hidp",
     "hidp.accounts",
     "hidp.federated",
+    # Project
+    "hidp_sandbox.accounts",
 ]
 
 MIDDLEWARE = [
@@ -134,7 +136,7 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Custom user model
-AUTH_USER_MODEL = "hidp_accounts.User"
+AUTH_USER_MODEL = "accounts.User"
 
 # Custom authentication backend
 AUTHENTICATION_BACKENDS = [
