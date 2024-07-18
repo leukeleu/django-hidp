@@ -36,6 +36,13 @@
     <button type="submit">{% translate 'Log in' %}</button>
   </form>
 
+  <p>
+    {% url 'hidp_accounts:password_reset_request' as password_reset_url %}
+    {% blocktranslate with password_reset_url=password_reset_url %}
+    <a href="{{ password_reset_url }}">Forgot your password?</a>
+    {% endblocktranslate %}
+  </p>
+
   {% if oidc_login_providers %}
   <hr>
 
