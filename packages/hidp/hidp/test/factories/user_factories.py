@@ -2,10 +2,12 @@ import factory
 
 from factory.django import DjangoModelFactory
 
+from django.conf import settings
+
 
 class UserFactory(DjangoModelFactory):
     class Meta:
-        model = "hidp_accounts.User"
+        model = settings.AUTH_USER_MODEL
         skip_postgeneration_save = True
 
     first_name = factory.Faker("first_name")

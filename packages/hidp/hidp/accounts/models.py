@@ -292,9 +292,3 @@ class BaseUser(auth_models.AbstractUser):
         Set the user's password field to a value that will never be a valid hash.
         """
         super().set_unusable_password()
-
-
-class User(BaseUser):
-    """
-    Concrete class that extends ``BaseUser``.
-    """
