@@ -33,4 +33,27 @@ auth_urls = [
     path("logout/", views.LogoutView.as_view(), name="logout"),
 ]
 
-urlpatterns = register_urls + auth_urls
+recover_urls = [
+    path(
+        "recover/",
+        views.PasswordResetRequestView.as_view(),
+        name="password_reset_request",
+    ),
+    path(
+        "recover/sent/",
+        views.PasswordResetEmailSentView.as_view(),
+        name="password_reset_email_sent",
+    ),
+    path(
+        "recover/<uidb64>/<token>/",
+        views.PasswordResetView.as_view(),
+        name="password_reset",
+    ),
+    path(
+        "recover/complete/",
+        views.PasswordResetCompleteView.as_view(),
+        name="password_reset_complete",
+    ),
+]
+
+urlpatterns = register_urls + auth_urls + recover_urls
