@@ -140,6 +140,10 @@ class PasswordResetRequestForm(auth_forms.PasswordResetForm):
         Args:
             email:
                 The email address to use for the user lookup.
+
+        Returns:
+            A generator that yields all active users, that have a usable password,
+            with the given email address (case-insensitive).
         """
         return super().get_users(email)
 
@@ -176,6 +180,13 @@ class PasswordResetRequestForm(auth_forms.PasswordResetForm):
         Return the password reset token for the given user.
 
         The token is used to create a link to the password reset page.
+
+        Args:
+            user:
+                User that requested the password reset.
+
+        Returns:
+            A token for the password reset page.
         """
         return self.password_reset_token_generator.make_token(user)
 
@@ -192,6 +203,9 @@ class PasswordResetRequestForm(auth_forms.PasswordResetForm):
                 request object is available.
             password_reset_view:
                 Name that reverses to the password reset view.
+
+        Returns:
+            An absolute URL to the password reset page for the given user.
         """
         return urljoin(
             base_url,
@@ -310,5 +324,8 @@ class PasswordResetForm(auth_forms.SetPasswordForm):
             commit:
                 Whether to save the user to the database after
                 setting the password.
+
+        Returns:
+            The user with the new password set.
         """
         return super().save(commit=commit)
