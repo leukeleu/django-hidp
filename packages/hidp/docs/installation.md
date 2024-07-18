@@ -42,14 +42,24 @@ MIDDLEWARE = [
 
 ## `AUTH_USER_MODEL`
 
-Configure a custom user model in your Django settings, e.g.:
+Define your own User model that inherits from HIdP's [``BaseUser``](project:./user-model.md).
 
 ```python
-AUTH_USER_MODEL = "hidp_accounts.User"
+from hidp.accounts.models import BaseUser
+
+class User(BaseUser):
+  ...
 ```
 
-Note: Extending the HIdP user model is also possible. If you intend to extend the user model, make sure to do this
-immediately, before running any migrations.
+Configure your custom user model in your Django settings, e.g.:
+
+```python
+AUTH_USER_MODEL = "yourapp.User"
+```
+
+:::{note}
+Make sure to do this immediately, before running any migrations.
+:::
 
 ## Login settings
 
