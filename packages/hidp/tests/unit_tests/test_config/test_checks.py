@@ -12,6 +12,7 @@ urlpatterns = []
         "django.contrib.contenttypes",
         "django.contrib.auth",
         "hidp.accounts",
+        "tests.custom_user",
     ],
     AUTH_USER_MODEL="auth.User",
     MIDDLEWARE=[],

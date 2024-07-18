@@ -82,8 +82,8 @@ def check_use_tz(**kwargs):
 
 # Make sure the user model is compatible with HIdP
 E004 = checks.Error(
-    "AUTH_USER_MODEL is not set to (a subclass of) hidp.accounts.models.BaseUser.",
-    hint="Set AUTH_USER_MODEL to 'hidp_accounts.User'.",
+    "AUTH_USER_MODEL is not set to a subclass of hidp.accounts.models.BaseUser.",
+    hint="Define your own subclass of BaseUser and set AUTH_USER_MODEL.",
 )
 
 
