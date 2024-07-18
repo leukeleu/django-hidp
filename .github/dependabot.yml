@@ -1,16 +1,16 @@
 version: 2
 updates:
   - package-ecosystem: 'pip'
-    directory: '/'
+    directory: '/packages/hidp'
     schedule:
       interval: 'weekly'
     versioning-strategy: increase-if-necessary
 
-  - package-ecosystem: 'npm'
-    directory: 'frontend'
+  - package-ecosystem: 'pip'
+    directory: '/project'
     schedule:
       interval: 'weekly'
-    versioning-strategy: increase
+    versioning-strategy: increase-if-necessary
 
   - package-ecosystem: 'github-actions'
     directory: '/'
