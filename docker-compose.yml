@@ -54,6 +54,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     logging: *default-logging
     # Use "command: 'debug-container'" to make the container sleep forever (instead of starting runserver).
     # This is useful for debugging the container, e.g. to run commands inside it, remove python packages, etc.
