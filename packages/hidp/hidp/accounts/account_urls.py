@@ -18,7 +18,7 @@ Include this namespace when reversing URLs, for example:
     reverse("hidp_accounts:login")
 """
 
-from django.urls import path
+from django.urls import include, path
 
 from . import views
 
@@ -33,27 +33,34 @@ auth_urls = [
     path("logout/", views.LogoutView.as_view(), name="logout"),
 ]
 
-recover_urls = [
+recover_password_urls = [
     path(
-        "recover/",
+        "",
         views.PasswordResetRequestView.as_view(),
         name="password_reset_request",
     ),
     path(
-        "recover/sent/",
+        "sent/",
         views.PasswordResetEmailSentView.as_view(),
         name="password_reset_email_sent",
     ),
     path(
-        "recover/<uidb64>/<token>/",
+        "<uidb64>/<token>/",
         views.PasswordResetView.as_view(),
         name="password_reset",
     ),
     path(
-        "recover/complete/",
+        "complete/",
         views.PasswordResetCompleteView.as_view(),
         name="password_reset_complete",
     ),
+]
+
+recover_urls = [
+    path(
+        "recover/password/",
+        include(recover_password_urls),
+    )
 ]
 
 urlpatterns = register_urls + auth_urls + recover_urls
