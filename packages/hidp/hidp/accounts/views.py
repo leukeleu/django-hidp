@@ -10,9 +10,8 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import generic
 
-from hidp.rate_limit.decorators import rate_limit_default, rate_limit_strict
-
 from ..config import oidc_clients
+from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
 from .forms import (
     AuthenticationForm,
@@ -194,6 +193,7 @@ class LogoutView(auth_views.LogoutView):
         return super().get(request, *args, **kwargs)
 
 
+@method_decorator(rate_limit_strict, name="dispatch")
 class PasswordResetRequestView(generic.FormView):
     """
     Display the password reset request form and handle the password
@@ -224,6 +224,7 @@ class PasswordResetEmailSentView(generic.TemplateView):
     template_name = "accounts/recovery/password_reset_email_sent.html"
 
 
+@method_decorator(rate_limit_default, name="dispatch")
 class PasswordResetView(auth_views.PasswordResetConfirmView):
     """
     Display the password reset form and handle the password reset action.
