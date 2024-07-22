@@ -2,5 +2,5 @@
 -e ../packages/hidp-pycqa
 
 # Redis
-hiredis~=2.3.2
+hiredis>=2.3,<3.1
 redis~=5.0.7
