@@ -24,6 +24,12 @@ class TestRegistrationView(TestCase):
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], UserCreationForm)
 
+    def test_get_tos(self):
+        """The terms of service should be displayed."""
+        response = self.client.get(reverse("hidp_accounts:tos"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/tos.html")
+
     def test_tos_required(self):
         """The user should agree to the terms of service."""
         response = self.client.post(

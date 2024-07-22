@@ -61,6 +61,14 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
         return HttpResponseRedirect(self.get_success_url())
 
 
+class TermsOfServiceView(generic.TemplateView):
+    """
+    Display the terms of service.
+    """
+
+    template_name = "accounts/tos.html"
+
+
 @method_decorator(
     ratelimit(key="post:username", rate="10/m", method="POST"), name="post"
 )
