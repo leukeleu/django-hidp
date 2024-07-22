@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.http import urlsafe_base64_decode
 from django.views import generic
 from django.views.decorators.cache import never_cache
 
@@ -135,6 +136,50 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.FormVie
         )
         # Stay on the same page after sending the email.
         return HttpResponseRedirect(self.request.get_full_path())
+
+
+@method_decorator(never_cache, name="dispatch")
+class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
+    """
+    Landing page for email verification links.
+
+    Contains a form that must be submitted to complete the verification process.
+    """
+
+    form_class = forms.EmailVerificationForm
+    template_name = "accounts/verification/verify_email.html"
+    token_generator = tokens.email_verification_token_generator
+
+    def dispatch(self, request, uidb64, token):
+        self.validlink = False
+        self.user = self.get_user(uidb64)
+        if self.token_generator.check_token(self.user, token):
+            self.validlink = True
+        return super().dispatch(request, uidb64, token)
+
+    @staticmethod
+    def get_user(uidb64):
+        try:
+            user = User.objects.get(pk=urlsafe_base64_decode(uidb64).decode())
+        except User.DoesNotExist:
+            user = None
+        return user
+
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            "user": self.user,
+        }
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            validlink=self.validlink,
+            **kwargs,
+        )
+
+    def form_valid(self, form):
+        form.save()
+        return HttpResponseRedirect(self.get_success_url())
 
 
 @method_decorator(
