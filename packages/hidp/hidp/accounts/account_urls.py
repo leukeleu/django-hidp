@@ -29,6 +29,14 @@ register_urls = [
     path("terms-of-service/", views.TermsOfServiceView.as_view(), name="tos"),
 ]
 
+verifications_urls = [
+    path(
+        "verify/<token>/sent/",
+        views.EmailVerificationRequiredView.as_view(),
+        name="email_verification_required",
+    ),
+]
+
 auth_urls = [
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
@@ -64,4 +72,4 @@ recover_urls = [
     )
 ]
 
-urlpatterns = register_urls + auth_urls + recover_urls
+urlpatterns = register_urls + verifications_urls + auth_urls + recover_urls

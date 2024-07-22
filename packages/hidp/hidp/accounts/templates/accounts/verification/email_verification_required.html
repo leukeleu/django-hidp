@@ -1,0 +1,27 @@
+{% load i18n %}
+<!doctype html>
+<html>
+<head>
+  <title>{% translate 'Verification required' %}</title>
+</head>
+<body>
+  {% if validlink %}
+  <h1>{% trans 'Verification required' %}</h1>
+
+  <p>{% blocktranslate %}
+  You need to verify your email address before you can log in.
+  {% endblocktranslate %}</p>
+
+  <p>{% blocktranslate %}
+  Please check your email for a message with a verification link. The email may take a few minutes to arrive.
+  If you don't see it, check your spam folder.
+  {% endblocktranslate %}</p>
+
+  {% else %}
+  <p>{% blocktranslate %}
+  The link you followed is invalid. It may have expired or been used already.
+  {% endblocktranslate %}</p>
+
+  {% endif %}
+</body>
+</html>
