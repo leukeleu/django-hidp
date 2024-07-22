@@ -58,3 +58,13 @@ class EmailVerificationRequestTokenGenerator(BaseEmailVerificationTokenGenerator
 
 
 email_verification_request_token_generator = EmailVerificationRequestTokenGenerator()
+
+
+class EmailVerificationTokenGenerator(BaseEmailVerificationTokenGenerator):
+    """Token to verify a user's email address."""
+
+    key_salt = "email-verification"
+    token_timeout = timedelta(days=1).total_seconds()
+
+
+email_verification_token_generator = EmailVerificationTokenGenerator()

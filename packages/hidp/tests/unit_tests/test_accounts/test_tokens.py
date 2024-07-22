@@ -65,3 +65,7 @@ class TestEmailVerificationRequestTokenGenerator(
     TestBaseEmailVerificationTokenGenerator
 ):
     token_generator = tokens.email_verification_request_token_generator
+
+
+class TestEmailVerificationTokenGenerator(TestBaseEmailVerificationTokenGenerator):
+    token_generator = tokens.email_verification_token_generator

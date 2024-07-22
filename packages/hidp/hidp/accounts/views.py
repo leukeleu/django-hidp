@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django_ratelimit.decorators import ratelimit
 
 from django.conf import settings
@@ -100,6 +102,78 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             validlink=self.validlink,
+            **kwargs,
+        )
+
+
+@method_decorator(rate_limit_default, name="dispatch")
+@method_decorator(never_cache, name="dispatch")
+class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
+    """
+    Landing page for email verification links.
+
+    Contains a form that must be submitted to complete the verification process.
+    """
+
+    form_class = forms.EmailVerificationForm
+    template_name = "accounts/verification/verify_email.html"
+    token_generator = tokens.email_verification_token_generator
+    success_url = reverse_lazy("hidp_accounts:email_verification_complete")
+
+    def dispatch(self, request, *, token):
+        email_hash = self.token_generator.check_token(token)
+        try:
+            # Find the user by the hash of their email address
+            self.user = (
+                User.objects.annotate(email_hash=MD5("email"))
+                .filter(is_active=True, email_verified__isnull=True)
+                .get(email_hash=email_hash)
+            )
+            self.validlink = True
+        except User.DoesNotExist:
+            self.validlink = False
+            self.user = None
+        return super().dispatch(request, token=token)
+
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            "user": self.user,
+        }
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            validlink=self.validlink,
+            **kwargs,
+        )
+
+    def form_valid(self, form):
+        form.save()
+        return HttpResponseRedirect(
+            str(self.success_url)
+            + (
+                f"?{urlencode({'next': redirect_url})}"
+                if (redirect_url := self.get_redirect_url())
+                else ""
+            )
+        )
+
+
+class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.TemplateView):
+    """
+    Display a message that the email address has been verified.
+    """
+
+    template_name = "accounts/verification/email_verification_complete.html"
+
+    def get_context_data(self, **kwargs):
+        login_url = resolve_url(settings.LOGIN_URL) + (
+            f"?{urlencode({'next': redirect_url})}"
+            if (redirect_url := self.get_redirect_url())
+            else ""
+        )
+        return super().get_context_data(
+            login_url=login_url,
             **kwargs,
         )
 

@@ -35,6 +35,16 @@ verifications_urls = [
         views.EmailVerificationRequiredView.as_view(),
         name="email_verification_required",
     ),
+    path(
+        "verify/<token>/verify/",
+        views.EmailVerificationView.as_view(),
+        name="verify_email",
+    ),
+    path(
+        "verify/complete/",
+        views.EmailVerificationCompleteView.as_view(),
+        name="email_verification_complete",
+    ),
 ]
 
 auth_urls = [
