@@ -1,9 +1,11 @@
-from urllib.parse import urljoin
+from urllib.parse import urlencode, urljoin
 
 from django import forms
+from django.contrib.auth import REDIRECT_FIELD_NAME, get_user_model
 from django.contrib.auth import forms as auth_forms
-from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import EmailMultiAlternatives
+from django.template import loader
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_bytes
@@ -11,6 +13,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.safestring import mark_safe
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
+
+from . import tokens
 
 UserModel = get_user_model()
 
@@ -60,6 +64,135 @@ class UserCreationForm(auth_forms.BaseUserCreationForm):
         if commit:
             user.save(update_fields=["agreed_to_tos"])
         return user
+
+
+class EmailVerificationLinkForm(forms.Form):
+    """
+    Request a new email verification link.
+
+    Attributes:
+        subject_template_name:
+            Template to use for the email subject.
+        email_template_name:
+            Template to use for the email body.
+        html_email_template_name:
+            The name of the template to use for the HTML email body.
+            Optional, defaults to `None`.
+        token_generator:
+            The token generator to use for generating the verification token.
+            Optional, defaults to `hidp.accounts.tokens.verification_token_generator`.
+    """
+
+    subject_template_name = "accounts/verification/email/verification_subject.txt"
+    email_template_name = "accounts/verification/email/verification_body.txt"
+    html_email_template_name = None
+    token_generator = tokens.email_verification_token_generator
+
+    def __init__(self, user, *args, **kwargs):
+        """
+        Initialize the form with the given `user`.
+
+        The `user` is stored in an instance variable, to allow all
+        form methods to access the user.
+        """
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def send_mail(self, *, to_email, context, from_email=None):
+        subject = loader.render_to_string(self.subject_template_name, context)
+        # Email subject *must not* contain newlines
+        subject = "".join(subject.splitlines())
+        body = loader.render_to_string(self.email_template_name, context)
+
+        email_message = EmailMultiAlternatives(subject, body, from_email, [to_email])
+        if self.html_email_template_name is not None:
+            html_email = loader.render_to_string(self.html_email_template_name, context)
+            email_message.attach_alternative(html_email, "text/html")
+
+        email_message.send()
+
+    def get_email_verification_token(self, user):
+        return self.token_generator.make_token(user)
+
+    def get_email_template_context(
+        self,
+        *,
+        user,
+        base_url,
+        verify_email_view,
+        post_verification_redirect=None,
+        extra_email_context=None,
+    ):
+        """
+        Return the context data for the email verification email.
+
+        Args:
+            user:
+                User that requested the email verification.
+            base_url:
+                Used to make an absolute URL to the email verification page.
+                Use `request.build_absolute_uri("/")` to populate this value if the
+                request object is available.
+            verify_email_view:
+                Name that reverses to the email verification view.
+            post_verification_redirect:
+                URL to redirect to after the email is verified. (Optional)
+            extra_email_context:
+                Extra context data to add to the email context.
+
+        Returns:
+            A dictionary with the following keys:
+
+            * `email`: The email address of the user.
+            * `user`: The user that requested the email verification.
+            * `verification_url`: The URL to the email verification page.
+            * Any additional data present in `extra_email_context`.
+        """
+        email_field_name = UserModel.get_email_field_name()
+        user_email = getattr(user, email_field_name)
+        verification_url = urljoin(
+            base_url,
+            reverse(
+                verify_email_view,
+                kwargs={
+                    "uidb64": urlsafe_base64_encode(force_bytes(user.pk)),
+                    "token": self.get_email_verification_token(user),
+                },
+            ),
+        )
+        if post_verification_redirect:
+            verification_url += (
+                f"?{urlencode({REDIRECT_FIELD_NAME: post_verification_redirect})}"
+            )
+        return {
+            "email": user_email,
+            "user": user,
+            "verification_url": verification_url,
+        } | (extra_email_context or {})
+
+    def save(
+        self,
+        base_url,
+        verify_email_view,
+        post_verification_redirect=None,
+        from_email=None,
+        extra_email_context=None,
+    ):
+        """
+        Send a new email verification link to the user.
+        """
+        context = self.get_email_template_context(
+            user=self.user,
+            base_url=base_url,
+            verify_email_view=verify_email_view,
+            post_verification_redirect=post_verification_redirect,
+            extra_email_context=extra_email_context,
+        )
+        self.send_mail(
+            context=context,
+            from_email=from_email,
+            to_email=context["email"],
+        )
 
 
 class AuthenticationForm(auth_forms.AuthenticationForm):
