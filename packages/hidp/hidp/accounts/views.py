@@ -182,6 +182,14 @@ class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
         return HttpResponseRedirect(self.get_success_url())
 
 
+class EmailVerificationCompleteView(generic.TemplateView):
+    """
+    Display a message that the email address has been verified.
+    """
+
+    template_name = "accounts/verification/email_verification_complete.html"
+
+
 @method_decorator(
     ratelimit(key="post:username", rate="10/m", method="POST"), name="post"
 )
