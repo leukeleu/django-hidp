@@ -2,18 +2,24 @@ from django_ratelimit.decorators import ratelimit
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.db.models.functions import MD5
 from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import generic
+from django.views.decorators.cache import never_cache
 
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
-from . import forms
+from . import forms, tokens
+
+User = get_user_model()
 
 
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
@@ -62,6 +68,42 @@ class TermsOfServiceView(generic.TemplateView):
     """
 
     template_name = "accounts/tos.html"
+
+
+@method_decorator(never_cache, name="dispatch")
+class EmailVerificationRequiredView(generic.TemplateView):
+    """
+    Display a notice that the user must verify their email address by
+    clicking a link in an email that was sent to them.
+    """
+
+    template_name = "accounts/verification/email_verification_required.html"
+    token_generator = tokens.email_verification_request_token_generator
+
+    def dispatch(self, request, *, token):
+        email_hash = self.token_generator.check_token(token)
+        try:
+            # Find the user by the hash of their email address, but only
+            # if the user is active and has not already verified their
+            # email address.
+            self.user = (
+                User.objects.annotate(email_hash=MD5("email"))
+                .exclude(
+                    Q(email_verified__isnull=False) | Q(is_active=False),
+                )
+                .get(email_hash=email_hash)
+            )
+            self.validlink = True
+        except User.DoesNotExist:
+            self.validlink = False
+            self.user = None
+        return super().dispatch(request, token=token)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            validlink=self.validlink,
+            **kwargs,
+        )
 
 
 @method_decorator(
