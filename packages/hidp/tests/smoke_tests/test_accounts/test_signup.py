@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from hidp.accounts.forms import UserCreationForm
 from hidp.test.factories import user_factories
@@ -57,8 +58,15 @@ class TestRegistrationView(TestCase):
         )
         self.assertRedirects(response, "/", fetch_redirect_response=False)
         # User should be created and logged in
-        self.assertTrue(response.wsgi_request.user.is_authenticated)
-        self.assertEqual(response.wsgi_request.user.email, "test@example.com")
+        user = response.wsgi_request.user
+        self.assertTrue(user.is_authenticated)
+        self.assertEqual(user.email, "test@example.com")
+        # Agreed to TOS
+        self.assertAlmostEqual(
+            timezone.now(),
+            response.wsgi_request.user.agreed_to_tos,
+            delta=timezone.timedelta(seconds=10),
+        )
 
     def test_valid_registration_safe_next_param(self):
         response = self.client.post(
