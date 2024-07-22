@@ -1,6 +1,6 @@
 from django.test import TestCase, override_settings
 
-from hidp.accounts.forms import AuthenticationForm
+from hidp.accounts.forms import AuthenticationForm, UserCreationForm
 from hidp.test.factories import user_factories
 
 
@@ -70,3 +70,31 @@ class TestAuthenticationForm(TestCase):
             # The user is authenticated, but not allowed to log in.
             self.assertEqual(form.get_user(), self.user)
             self.assertFormError(form, None, ["This account is inactive."])
+
+
+class TestOptionalTOSUserCreationFormForm(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        class NoTOSUserCreationForm(UserCreationForm):
+            """
+            UserCreationForm without the agreed_to_tos field.
+            """
+
+            agreed_to_tos = None
+
+        cls.form = NoTOSUserCreationForm
+
+    def test_save(self):
+        """
+        Does not set agreed_to_tos on the user.
+        """
+        form = self.form(
+            data={
+                "email": "info@example.com",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+            }
+        )
+        self.assertTrue(form.is_valid())
+        user = form.save()
+        self.assertIsNone(user.agreed_to_tos)

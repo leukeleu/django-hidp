@@ -46,6 +46,11 @@ class UserCreationForm(auth_forms.UserCreationForm):
 
     def save(self, *, commit=True):
         user = super().save(commit=commit)
+        if not self.cleaned_data.get("agreed_to_tos", False):
+            # Handle the case where agreed_to_tos is removed,
+            # or is made optional, by a subclass.
+            return user
+
         user.agreed_to_tos = timezone.now()
         if commit:
             user.save(update_fields=["agreed_to_tos"])
