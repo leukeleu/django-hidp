@@ -1,18 +1,24 @@
 from django_ratelimit.decorators import ratelimit
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import resolve_url
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import generic
 
-from hidp.rate_limit.decorators import rate_limit_default, rate_limit_strict
-
 from ..config import oidc_clients
+from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
-from .forms import AuthenticationForm, UserCreationForm
+from .forms import (
+    AuthenticationForm,
+    PasswordResetForm,
+    PasswordResetRequestForm,
+    UserCreationForm,
+)
 
 
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
@@ -185,3 +191,59 @@ class LogoutView(auth_views.LogoutView):
             # Redirect to target page once the session has been cleared.
             return HttpResponseRedirect(redirect_to)
         return super().get(request, *args, **kwargs)
+
+
+@method_decorator(rate_limit_strict, name="dispatch")
+class PasswordResetRequestView(generic.FormView):
+    """
+    Display the password reset request form and handle the password
+    reset request action.
+
+    Redirects to the password reset sent view if the form is submitted
+    with valid data.
+    """
+
+    form_class = PasswordResetRequestForm
+    template_name = "accounts/recovery/password_reset_request.html"
+    success_url = reverse_lazy("hidp_accounts:password_reset_email_sent")
+    password_reset_view = "hidp_accounts:password_reset"  # noqa: S105 (not a password)
+
+    def form_valid(self, form):
+        form.save(
+            base_url=self.request.build_absolute_uri("/"),
+            password_reset_view=self.password_reset_view,
+        )
+        return super().form_valid(form)
+
+
+class PasswordResetEmailSentView(generic.TemplateView):
+    """
+    Display a message that the password reset email has been sent.
+    """
+
+    template_name = "accounts/recovery/password_reset_email_sent.html"
+
+
+@method_decorator(rate_limit_default, name="dispatch")
+class PasswordResetView(auth_views.PasswordResetConfirmView):
+    """
+    Display the password reset form and handle the password reset action.
+    """
+
+    form_class = PasswordResetForm
+    template_name = "accounts/recovery/password_reset.html"
+    success_url = reverse_lazy("hidp_accounts:password_reset_complete")
+
+
+class PasswordResetCompleteView(auth_views.TemplateView):
+    """
+    Display a message that the password reset has been completed.
+    """
+
+    template_name = "accounts/recovery/password_reset_complete.html"
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            login_url=resolve_url(settings.LOGIN_URL),
+            **kwargs,
+        )
