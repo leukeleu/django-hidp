@@ -195,6 +195,39 @@ class EmailVerificationLinkForm(forms.Form):
         )
 
 
+class EmailVerificationForm(forms.Form):
+    """
+    Store the date and time when the user verified their email address.
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        """
+        Initialize the form with the given `user`.
+
+        The `user` is stored in an instance variable, to allow all
+        form methods to access the user.
+        """
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def save(self, *, commit=True):
+        """
+        Mark the user as verified.
+
+        Args:
+            commit:
+                Whether to save the user to the database after
+                marking the user as verified.
+
+        Returns:
+            The user with the email address verified.
+        """
+        if commit:
+            self.user.email_verified = timezone.now()
+            self.user.save(update_fields=["email_verified"])
+        return self.user
+
+
 class AuthenticationForm(auth_forms.AuthenticationForm):
     """
     Default AuthenticationForm, allows user to log in with username and password.
