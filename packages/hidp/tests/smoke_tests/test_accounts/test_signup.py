@@ -24,6 +24,20 @@ class TestRegistrationView(TestCase):
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], UserCreationForm)
 
+    def test_tos_required(self):
+        """The user should agree to the terms of service."""
+        response = self.client.post(
+            self.signup_url,
+            {
+                "email": "test@example.com",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+            },
+        )
+        self.assertFormError(
+            response.context["form"], "agreed_to_tos", "This field is required."
+        )
+
     def test_valid_registration(self):
         """A new user should be created and logged in."""
         response = self.client.post(
@@ -32,6 +46,7 @@ class TestRegistrationView(TestCase):
                 "email": "test@example.com",
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
             },
         )
         self.assertRedirects(response, "/", fetch_redirect_response=False)
@@ -46,6 +61,7 @@ class TestRegistrationView(TestCase):
                 "email": "test@example.com",
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
                 "next": "/example/",
             },
         )
@@ -58,6 +74,7 @@ class TestRegistrationView(TestCase):
                 "email": "test@example.com",
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
                 "next": "https://example.com/",
             },
         )
