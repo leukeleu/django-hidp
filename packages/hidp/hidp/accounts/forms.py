@@ -4,10 +4,12 @@ from django import forms
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.utils.safestring import mark_safe
+from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
 UserModel = get_user_model()
@@ -29,7 +31,12 @@ class UserCreationForm(auth_forms.UserCreationForm):
     """
 
     agreed_to_tos = forms.BooleanField(
-        label=_("I have read and accept the terms of service."),
+        label=mark_safe(  # noqa: S308 (safe string, no user input)
+            format_lazy(
+                _('I have read and accept the <a href="{url}">Terms of Service</a>.'),
+                url=reverse_lazy("hidp_accounts:tos"),
+            )
+        ),
         required=True,
     )
 
