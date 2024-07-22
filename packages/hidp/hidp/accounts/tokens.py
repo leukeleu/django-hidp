@@ -1,5 +1,7 @@
 import hashlib
 
+from datetime import timedelta
+
 from django.core import signing
 
 
@@ -43,3 +45,38 @@ class EmailVerificationRequestTokenGenerator:
 
 
 email_verification_request_token_generator = EmailVerificationRequestTokenGenerator()
+
+
+class EmailVerificationTokenGenerator:
+    key_salt = "hidp.accounts.tokens.VerifyEmailTokenGenerator"
+    token_timeout = timedelta(days=1).total_seconds()
+
+    def make_token(self, user):
+        return signing.dumps(
+            {"email": user.email},
+            salt=self.key_salt,
+        )
+
+    def check_token(self, user, token):
+        if not (user and token):
+            return False
+
+        try:
+            data = signing.loads(token, salt=self.key_salt, max_age=self.token_timeout)
+        except signing.BadSignature:
+            # Token is invalid
+            return False
+
+        if data.get("email") != user.email:
+            # Email in the token doesn't match the user's email
+            return False
+
+        if user.email_verified or not user.is_active:  # noqa: SIM103 (do not simplify)
+            # The user's email address is already verified or the user is
+            # deactivated, so the token is invalid.
+            return False
+
+        return True
+
+
+email_verification_token_generator = EmailVerificationTokenGenerator()
