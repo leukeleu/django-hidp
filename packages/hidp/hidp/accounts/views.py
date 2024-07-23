@@ -13,12 +13,7 @@ from django.views import generic
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
-from .forms import (
-    AuthenticationForm,
-    PasswordResetForm,
-    PasswordResetRequestForm,
-    UserCreationForm,
-)
+from . import forms
 
 
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
@@ -36,7 +31,7 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     reason for the failure and the user can try again.
     """
 
-    form_class = UserCreationForm
+    form_class = forms.UserCreationForm
     template_name = "accounts/register.html"
     next_page = "/"
 
@@ -85,7 +80,7 @@ class LoginView(auth_views.LoginView):
     """
 
     # The form class to use for authentication
-    form_class = AuthenticationForm
+    form_class = forms.AuthenticationForm
     # The template to use for displaying the login form
     template_name = "accounts/login.html"
 
@@ -211,7 +206,7 @@ class PasswordResetRequestView(generic.FormView):
     with valid data.
     """
 
-    form_class = PasswordResetRequestForm
+    form_class = forms.PasswordResetRequestForm
     template_name = "accounts/recovery/password_reset_request.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_email_sent")
     password_reset_view = "hidp_accounts:password_reset"  # noqa: S105 (not a password)
@@ -238,7 +233,7 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
     Display the password reset form and handle the password reset action.
     """
 
-    form_class = PasswordResetForm
+    form_class = forms.PasswordResetForm
     template_name = "accounts/recovery/password_reset.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_complete")
 
