@@ -1,6 +1,6 @@
 from django.test import TestCase, override_settings
 
-from hidp.accounts.forms import AuthenticationForm, UserCreationForm
+from hidp.accounts import forms
 from hidp.test.factories import user_factories
 
 
@@ -14,14 +14,14 @@ class TestAuthenticationForm(TestCase):
         cls.user = user_factories.UserFactory()
 
     def test_is_valid(self):
-        form = AuthenticationForm(
+        form = forms.AuthenticationForm(
             data={"username": self.user.email, "password": "P@ssw0rd!"}
         )
         self.assertTrue(form.is_valid())
         self.assertEqual(form.get_user(), self.user)
 
     def test_is_invalid(self):
-        form = AuthenticationForm(
+        form = forms.AuthenticationForm(
             data={"username": self.user.email, "password": "wrong"}
         )
         self.assertFalse(form.is_valid())
@@ -40,7 +40,7 @@ class TestAuthenticationForm(TestCase):
         self.user.save()
 
         with self.subTest("Default backend"):
-            form = AuthenticationForm(
+            form = forms.AuthenticationForm(
                 data={"username": self.user.email, "password": "P@ssw0rd!"}
             )
             self.assertFalse(form.is_valid())
@@ -63,7 +63,7 @@ class TestAuthenticationForm(TestCase):
                 ]
             ),
         ):
-            form = AuthenticationForm(
+            form = forms.AuthenticationForm(
                 data={"username": self.user.email, "password": "P@ssw0rd!"}
             )
             self.assertFalse(form.is_valid())
@@ -75,7 +75,7 @@ class TestAuthenticationForm(TestCase):
 class TestOptionalTOSUserCreationFormForm(TestCase):
     @classmethod
     def setUpTestData(cls):
-        class NoTOSUserCreationForm(UserCreationForm):
+        class NoTOSUserCreationForm(forms.UserCreationForm):
             """
             UserCreationForm without the agreed_to_tos field.
             """
