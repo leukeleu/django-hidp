@@ -171,13 +171,26 @@ class LoginView(auth_views.LoginView):
     def form_valid(self, form):
         """
         User has provided valid credentials and is allowed to log in.
+
         Persist the user and backend in the session and redirect to the
         success URL.
+
+        If the user's email address has not been verified, redirect them
+        to the email verification required flow.
         """
-        # This **replaces** the base implementation in order to use the
-        # HIdP login wrapper function, that performs additional checks.
-        hidp_auth.login(self.request, form.get_user())
-        return HttpResponseRedirect(self.get_success_url())
+        user = form.get_user()
+        if user.email_verified:
+            # Only log in the user if their email address has been verified.
+            hidp_auth.login(self.request, user)
+            return HttpResponseRedirect(self.get_success_url())
+
+        # If the user's email address is not yet verified
+        # redirect them to the email verification required page.
+        return HttpResponseRedirect(
+            email_verification.get_email_verification_required_url(
+                user, next_url=self.get_redirect_url()
+            )
+        )
 
 
 @method_decorator(rate_limit_default, name="dispatch")
