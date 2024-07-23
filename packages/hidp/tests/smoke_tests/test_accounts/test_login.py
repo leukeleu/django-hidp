@@ -4,6 +4,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from hidp.accounts import auth as hidp_auth
+from hidp.accounts.email_verification import get_email_verification_required_url
 from hidp.accounts.forms import AuthenticationForm
 from hidp.test.factories import user_factories
 
@@ -15,7 +16,7 @@ from hidp.test.factories import user_factories
 class TestLogin(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = user_factories.UserFactory()
+        cls.user = user_factories.VerifiedUserFactory()
         cls.login_url = reverse("hidp_accounts:login")
 
     def test_get_login(self):
@@ -35,6 +36,24 @@ class TestLogin(TestCase):
             },
         )
         mock_login.assert_called_once()
+
+    @mock.patch("hidp.accounts.views.hidp_auth.login", wraps=hidp_auth.login)
+    def test_valid_login_unverified_email(self, mock_login):
+        user = user_factories.UserFactory()
+        response = self.client.post(
+            self.login_url,
+            {
+                "username": user.email,
+                "password": "P@ssw0rd!",
+            },
+        )
+        # Does not log in the user
+        mock_login.assert_not_called()
+        self.assertRedirects(
+            response,
+            get_email_verification_required_url(user, next_url="/"),
+            fetch_redirect_response=False,
+        )
 
     def test_valid_login_default_redirect(self):
         response = self.client.post(

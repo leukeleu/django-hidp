@@ -3,6 +3,7 @@ import factory
 from factory.django import DjangoModelFactory
 
 from django.conf import settings
+from django.utils import timezone
 
 
 class UserFactory(DjangoModelFactory):
@@ -16,6 +17,10 @@ class UserFactory(DjangoModelFactory):
     password = factory.django.Password("P@ssw0rd!")
 
 
-class SuperUserFactory(UserFactory):
+class VerifiedUserFactory(UserFactory):
+    email_verified = factory.LazyFunction(timezone.now)
+
+
+class SuperUserFactory(VerifiedUserFactory):
     is_superuser = True
     is_staff = True

@@ -180,10 +180,18 @@ class LoginView(auth_views.LoginView):
         Persist the user and backend in the session and redirect to the
         success URL.
         """
-        # This **replaces** the base implementation in order to use the
-        # HIdP login wrapper function, that performs additional checks.
-        hidp_auth.login(self.request, form.get_user())
-        return HttpResponseRedirect(self.get_success_url())
+        user = form.get_user()
+        if user.email_verified:
+            # Only log in the user if their email address has been verified.
+            hidp_auth.login(self.request, user)
+            return HttpResponseRedirect(self.get_success_url())
+        # If the user's email address is not verified redirect them
+        # to the email verification required page.
+        return HttpResponseRedirect(
+            email_verification.get_email_verification_required_url(
+                user, next_url=self.get_success_url()
+            )
+        )
 
 
 @method_decorator(rate_limit_default, name="dispatch")
