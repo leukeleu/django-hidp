@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -54,6 +55,32 @@ class TestEmailVerificationRequiredView(TestCase):
             )
         )
         self._assert_response(response, validlink=False)
+
+    def test_post(self):
+        """
+        Send the verification email.
+        """
+        self.client.post(self.url)
+        # Verification email sent
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Verify your email address",
+        )
+
+    def test_post_invalid_token(self):
+        """
+        Does not send the verification email when the token is invalid.
+        """
+        self.client.post(
+            reverse(
+                "hidp_accounts:email_verification_required",
+                kwargs={"token": "invalid-value:invalid-signature"},
+            )
+        )
+        # Verification email not sent
+        self.assertEqual(len(mail.outbox), 0)
 
 
 class TestEmailVerificationView(TestCase):

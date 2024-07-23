@@ -97,10 +97,13 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
     """
     Display a notice that the user must verify their email address by
     clicking a link in an email that was sent to them.
+
+    The page also includes the option to request a new verification email.
     """
 
     template_name = "accounts/verification/email_verification_required.html"
     token_generator = tokens.email_verification_request_token_generator
+    verification_mailer = mailer.EmailVerificationMailer
 
     def dispatch(self, request, *, token):
         email_hash = self.token_generator.check_token(token)
@@ -120,6 +123,17 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
             validlink=self.validlink,
             **kwargs,
         )
+
+    def post(self, *args, **kwargs):
+        if self.validlink:
+            # Send the email verification email.
+            self.verification_mailer(
+                self.user,
+                base_url=self.request.build_absolute_uri("/"),
+                post_verification_redirect=self.get_redirect_url(),
+            ).send()
+        # Stay on the same page after sending the email.
+        return HttpResponseRedirect(self.request.get_full_path())
 
 
 @method_decorator(rate_limit_default, name="dispatch")
