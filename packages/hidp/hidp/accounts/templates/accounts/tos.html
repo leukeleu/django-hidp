@@ -1,0 +1,106 @@
+{% load i18n %}
+<!doctype html>
+<html>
+<head>
+  <title>{% translate "Terms of Service" %}</title>
+</head>
+<body>
+  <h1>{% translate "Terms of Service" %}</h1>
+
+  {% comment %}
+  NOTE: This is an EXAMPLE Terms of Service document.
+
+  This document is intended to serve as a placeholder and should
+  not be used as the final Terms of Service for your application.
+
+  You should consult with a legal professional to ensure that your
+  terms are compliant with all applicable laws and regulations
+  specific to your business and jurisdiction.
+
+  Customizing the Terms of Service to accurately reflect your policies,
+  data handling practices, and user agreements is essential for
+  legal compliance and user transparency.
+  {% endcomment %}
+
+  <p>{% blocktranslate %}
+  By creating an account with our system, you agree to abide by these Terms of Service.
+  If you do not agree to these terms, you may not create an account or use our services.
+  {% endblocktranslate %}</p>
+
+  <h2>{% translate "User Information" %}</h2>
+
+  <p>{% blocktranslate %}
+  When creating an account, you are required to provide your email address, which will serve as your username.
+  You may also provide additional information such as your first and last name.
+  All personal data will be stored securely and used solely for the purpose of providing our services.
+  {% endblocktranslate %}</p>
+
+  <h2>{% translate "Email Communication" %}</h2>
+
+  <p>{% blocktranslate %}
+  We will use your email address to send transactional emails necessary for the operation of your account.
+  This includes, but is not limited to, verification emails, password reset emails,
+  and other important notifications regarding your account.
+  {% endblocktranslate %}</p>
+
+  <h2>{% translate "Password Security" %}</h2>
+
+  <p>{% blocktranslate %}
+  Your password will be stored securely using industry-standard encryption methods.
+  You are responsible for maintaining the confidentiality of your password and for any activities
+  that occur under your account.
+  {% endblocktranslate %}</p>
+
+  <h2>{% translate "User Conduct" %}</h2>
+
+  <p>{% blocktranslate %}
+  You agree not to misuse the service in any way, including but not limited to:
+  {% endblocktranslate %}</p>
+
+  <ul>
+    <li>{% translate "Engaging in any illegal activities." %}</li>
+    <li>{% translate "Attempting to gain unauthorized access to other users' accounts or data." %}</li>
+    <li>{% translate "Disrupting or interfering with the normal operation of the service." %}</li>
+  </ul>
+
+  <h2>{% translate "Modifications to the Service" %}</h2>
+
+  <p>{% blocktranslate %}
+  We reserve the right to modify or discontinue, temporarily or permanently, the service (or any part thereof)
+  with or without notice. You agree that we shall not be liable to you or any third party for any modification,
+  suspension, or discontinuation of the service.
+  {% endblocktranslate %}</p>
+
+  <h2>{% translate "Disclaimer of Warranties" %}</h2>
+
+  <p>{% blocktranslate %}
+  The service is provided on an "as is" and "as available" basis. We disclaim all warranties of any kind,
+  whether express or implied, including but not limited to the implied warranties of merchantability,
+  fitness for a particular purpose, and non-infringement.
+  {% endblocktranslate %}</p>
+
+  <h2>{% translate "Changes to Terms" %}</h2>
+
+  <p>{% blocktranslate %}
+  We reserve the right to update or modify these terms at any time.
+  Any changes will be effective immediately upon posting the updated terms on our website.
+  It is your responsibility to review these terms periodically.
+  Your continued use of our services after any changes signifies your acceptance of the updated terms.
+  {% endblocktranslate %}</p>
+
+  <h2>{% translate "Termination" %}</h2>
+
+  <p>{% blocktranslate %}
+  We reserve the right to terminate or suspend your account at our sole discretion, without prior notice,
+  for conduct that we believe violates these terms or is harmful to other users of our services, us,
+  or third parties, or for any other reason.
+  {% endblocktranslate %}</p>
+
+  <h2>{% translate "Limitation of Liability" %}</h2>
+
+  <p>{% blocktranslate %}
+  To the fullest extent permitted by law, we will not be liable for any indirect, incidental, special, consequential,
+  or punitive damages arising out of or related to your use of our services.
+  {% endblocktranslate %}</p>
+</body>
+</html>

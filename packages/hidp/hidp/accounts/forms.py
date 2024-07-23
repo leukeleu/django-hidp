@@ -1,11 +1,16 @@
 from urllib.parse import urljoin
 
+from django import forms
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
+from django.utils.safestring import mark_safe
+from django.utils.text import format_lazy
+from django.utils.translation import gettext_lazy as _
 
 UserModel = get_user_model()
 
@@ -13,6 +18,7 @@ UserModel = get_user_model()
 class UserCreationForm(auth_forms.UserCreationForm):
     """
     Default UserCreationForm, allows user to register with username and password.
+    The user **must** agree to the terms of service to register.
 
     The username field is mapped to `User.USERNAME_FIELD`. This makes it possible
     to change the username field to a different one, such as an email address.
@@ -24,9 +30,31 @@ class UserCreationForm(auth_forms.UserCreationForm):
     Username is validated to ensure it is unique (in a case-insensitive way).
     """
 
+    agreed_to_tos = forms.BooleanField(
+        label=mark_safe(  # noqa: S308 (safe string, no user input)
+            format_lazy(
+                _('I have read and accept the <a href="{url}">Terms of Service</a>.'),
+                url=reverse_lazy("hidp_accounts:tos"),
+            )
+        ),
+        required=True,
+    )
+
     class Meta(auth_forms.UserCreationForm.Meta):
         model = UserModel
         fields = (UserModel.USERNAME_FIELD,)
+
+    def save(self, *, commit=True):
+        user = super().save(commit=commit)
+        if not self.cleaned_data.get("agreed_to_tos", False):
+            # Handle the case where agreed_to_tos is removed,
+            # or is made optional, by a subclass.
+            return user
+
+        user.agreed_to_tos = timezone.now()
+        if commit:
+            user.save(update_fields=["agreed_to_tos"])
+        return user
 
 
 class AuthenticationForm(auth_forms.AuthenticationForm):

@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
 from hidp.accounts.forms import UserCreationForm
 from hidp.test.factories import user_factories
@@ -24,8 +25,14 @@ class TestRegistrationView(TestCase):
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], UserCreationForm)
 
-    def test_valid_registration(self):
-        """A new user should be created and logged in."""
+    def test_get_tos(self):
+        """The terms of service should be displayed."""
+        response = self.client.get(reverse("hidp_accounts:tos"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "accounts/tos.html")
+
+    def test_tos_required(self):
+        """The user should agree to the terms of service."""
         response = self.client.post(
             self.signup_url,
             {
@@ -34,10 +41,32 @@ class TestRegistrationView(TestCase):
                 "password2": "P@ssw0rd!",
             },
         )
+        self.assertFormError(
+            response.context["form"], "agreed_to_tos", "This field is required."
+        )
+
+    def test_valid_registration(self):
+        """A new user should be created and logged in."""
+        response = self.client.post(
+            self.signup_url,
+            {
+                "email": "test@example.com",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
+            },
+        )
         self.assertRedirects(response, "/", fetch_redirect_response=False)
         # User should be created and logged in
-        self.assertTrue(response.wsgi_request.user.is_authenticated)
-        self.assertEqual(response.wsgi_request.user.email, "test@example.com")
+        user = response.wsgi_request.user
+        self.assertTrue(user.is_authenticated)
+        self.assertEqual(user.email, "test@example.com")
+        # Agreed to TOS
+        self.assertAlmostEqual(
+            timezone.now(),
+            response.wsgi_request.user.agreed_to_tos,
+            delta=timezone.timedelta(seconds=10),
+        )
 
     def test_valid_registration_safe_next_param(self):
         response = self.client.post(
@@ -46,6 +75,7 @@ class TestRegistrationView(TestCase):
                 "email": "test@example.com",
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
                 "next": "/example/",
             },
         )
@@ -58,6 +88,7 @@ class TestRegistrationView(TestCase):
                 "email": "test@example.com",
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
                 "next": "https://example.com/",
             },
         )

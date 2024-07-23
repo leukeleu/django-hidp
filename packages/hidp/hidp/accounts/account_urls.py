@@ -26,6 +26,7 @@ app_name = "hidp_accounts"
 
 register_urls = [
     path("signup/", views.RegistrationView.as_view(), name="register"),
+    path("terms-of-service/", views.TermsOfServiceView.as_view(), name="tos"),
 ]
 
 auth_urls = [
