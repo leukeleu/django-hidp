@@ -83,13 +83,19 @@ class TermsOfServiceView(generic.TemplateView):
     template_name = "accounts/tos.html"
 
 
+@method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(never_cache, name="dispatch")
-class EmailVerificationRequiredView(generic.TemplateView):
+class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.FormView):
     """
     Display a notice that the user must verify their email address by
     clicking a link in an email that was sent to them.
+
+    The page also includes a form that allows the user to request a new
+    verification email.
     """
 
+    form_class = forms.EmailVerificationLinkForm
+    next_page = "/"
     template_name = "accounts/verification/email_verification_required.html"
     token_generator = tokens.email_verification_request_token_generator
 
@@ -114,6 +120,21 @@ class EmailVerificationRequiredView(generic.TemplateView):
             validlink=self.validlink,
             **kwargs,
         )
+
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            "user": self.user,
+        }
+
+    def form_valid(self, form):
+        form.save(
+            base_url=self.request.build_absolute_uri("/"),
+            verify_email_view="hidp_accounts:verify_email",
+            post_verification_redirect=self.get_success_url(),
+        )
+        # Stay on the same page after sending the email.
+        return HttpResponseRedirect(self.request.get_full_path())
 
 
 @method_decorator(
