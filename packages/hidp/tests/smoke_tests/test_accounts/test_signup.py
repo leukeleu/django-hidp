@@ -1,11 +1,15 @@
 from http import HTTPStatus
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from hidp.accounts.email_verification import get_email_verification_required_url
 from hidp.accounts.forms import UserCreationForm
 from hidp.test.factories import user_factories
+
+User = get_user_model()
 
 
 @override_settings(
@@ -56,16 +60,22 @@ class TestRegistrationView(TestCase):
                 "agreed_to_tos": "on",
             },
         )
-        self.assertRedirects(response, "/", fetch_redirect_response=False)
-        # User should be created and logged in
-        user = response.wsgi_request.user
-        self.assertTrue(user.is_authenticated)
-        self.assertEqual(user.email, "test@example.com")
+        self.assertTrue(
+            User.objects.filter(email="test@example.com").exists(),
+            msg="Expected user to be created",
+        )
+        user = User.objects.get(email="test@example.com")
         # Agreed to TOS
         self.assertAlmostEqual(
             timezone.now(),
-            response.wsgi_request.user.agreed_to_tos,
+            user.agreed_to_tos,
             delta=timezone.timedelta(seconds=10),
+        )
+        # Redirected to verification required page
+        self.assertRedirects(
+            response,
+            get_email_verification_required_url(user, next_url="/"),
+            fetch_redirect_response=False,
         )
 
     def test_valid_registration_safe_next_param(self):
@@ -79,7 +89,16 @@ class TestRegistrationView(TestCase):
                 "next": "/example/",
             },
         )
-        self.assertRedirects(response, "/example/", fetch_redirect_response=False)
+        self.assertTrue(
+            User.objects.filter(email="test@example.com").exists(),
+            msg="Expected user to be created",
+        )
+        user = User.objects.get(email="test@example.com")
+        self.assertRedirects(
+            response,
+            get_email_verification_required_url(user, next_url="/example/"),
+            fetch_redirect_response=False,
+        )
 
     def test_valid_registration_unsafe_next_param(self):
         response = self.client.post(
@@ -92,7 +111,16 @@ class TestRegistrationView(TestCase):
                 "next": "https://example.com/",
             },
         )
-        self.assertRedirects(response, "/", fetch_redirect_response=False)
+        self.assertTrue(
+            User.objects.filter(email="test@example.com").exists(),
+            msg="Expected user to be created",
+        )
+        user = User.objects.get(email="test@example.com")
+        self.assertRedirects(
+            response,
+            get_email_verification_required_url(user, next_url="/"),
+            fetch_redirect_response=False,
+        )
 
     def test_duplicate_email(self):
         """A user should not be able to sign up with an existing email."""

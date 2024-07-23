@@ -17,7 +17,7 @@ from django.views.decorators.cache import never_cache
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
-from . import forms, tokens
+from . import email_verification, forms, tokens
 
 User = get_user_model()
 
@@ -30,8 +30,8 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     Display the registration form and handle the registration action.
 
     If the form is submitted with valid data, a new user account will be created
-    and the user will be logged in and redirected to the location returned
-    by get_success_url().
+    and the user will be redirected to a page informing them that they must verify
+    their email address.
 
     Otherwise, the form will be displayed with an error message explaining the
     reason for the failure and the user can try again.
@@ -48,18 +48,14 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
 
     def form_valid(self, form):
         """
-        Save the new user and log them in.
+        Save the new user and redirect to the email verification required page.
         """
         user = form.save()
-        hidp_auth.login(
-            self.request,
-            hidp_auth.authenticate(
-                request=self.request,
-                username=user.get_username(),
-                password=form.cleaned_data["password1"],
-            ),
+        return HttpResponseRedirect(
+            email_verification.get_email_verification_required_url(
+                user, next_url=self.get_success_url()
+            )
         )
-        return HttpResponseRedirect(self.get_success_url())
 
 
 class TermsOfServiceView(generic.TemplateView):
