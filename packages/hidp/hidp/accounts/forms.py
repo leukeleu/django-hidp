@@ -15,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 UserModel = get_user_model()
 
 
-class UserCreationForm(auth_forms.UserCreationForm):
+class UserCreationForm(auth_forms.BaseUserCreationForm):
     """
     Default UserCreationForm, allows user to register with username and password.
     The user **must** agree to the terms of service to register.
@@ -26,8 +26,6 @@ class UserCreationForm(auth_forms.UserCreationForm):
     The user is asked to enter the password twice to avoid typos.
     The password is validated using the validators configured in
     `settings.AUTH_PASSWORD_VALIDATORS`.
-
-    Username is validated to ensure it is unique (in a case-insensitive way).
     """
 
     agreed_to_tos = forms.BooleanField(
@@ -40,9 +38,16 @@ class UserCreationForm(auth_forms.UserCreationForm):
         required=True,
     )
 
-    class Meta(auth_forms.UserCreationForm.Meta):
+    class Meta:
         model = UserModel
         fields = (UserModel.USERNAME_FIELD,)
+
+    def _get_validation_exclusions(self):
+        # Exclude email from model validation (unique constraint),
+        # This will make the form valid even if the email is already in use.
+        # This results in a IntegrityError when saving the user, which
+        # must be handled by the view, to prevent user enumeration attacks.
+        return {"email", *super()._get_validation_exclusions()}
 
     def save(self, *, commit=True):
         user = super().save(commit=commit)

@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError
 from django.db.models import Q
 from django.db.models.functions import MD5
 from django.http import HttpResponseRedirect
@@ -50,7 +51,15 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
         """
         Save the new user and redirect to the email verification required page.
         """
-        user = form.save()
+        try:
+            user = form.save()
+        except IntegrityError:
+            # The user exists! Find the user by the email address and
+            # redirect them to the email verification required page.
+            # This is a security measure to prevent user enumeration.
+            # Use iexact to find the correct user, even if the email
+            # address differs in case.
+            user = User.objects.get(email__iexact=form.cleaned_data["email"])
         return HttpResponseRedirect(
             email_verification.get_email_verification_required_url(
                 user, next_url=self.get_success_url()
