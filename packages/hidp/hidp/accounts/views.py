@@ -222,6 +222,11 @@ class LoginView(auth_views.LoginView):
             return HttpResponseRedirect(self.get_success_url())
         # If the user's email address is not verified redirect them
         # to the email verification required page.
+        forms.EmailVerificationLinkForm(user=user).save(
+            base_url=self.request.build_absolute_uri("/"),
+            verify_email_view="hidp_accounts:verify_email",
+            post_verification_redirect=self.get_success_url(),
+        )
         return HttpResponseRedirect(
             email_verification.get_email_verification_required_url(
                 user, next_url=self.get_success_url()
