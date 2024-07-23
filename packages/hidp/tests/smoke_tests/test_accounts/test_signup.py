@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase, override_settings
+from django.test import TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -15,11 +15,10 @@ User = get_user_model()
 @override_settings(
     LANGUAGE_CODE="en",
 )
-class TestRegistrationView(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.test_user = user_factories.UserFactory()
-        cls.signup_url = reverse("hidp_accounts:register")
+class TestRegistrationView(TransactionTestCase):
+    def setUp(self):
+        self.test_user = user_factories.UserFactory(email="user@example.com")
+        self.signup_url = reverse("hidp_accounts:register")
 
     def test_get(self):
         """The registration form should be displayed."""
@@ -127,21 +126,53 @@ class TestRegistrationView(TestCase):
             get_email_verification_required_url(user),
         )
 
-    def test_duplicate_email(self):
-        """A user should not be able to sign up with an existing email."""
+    def test_duplicate_email_unverified(self):
+        """Signup using an exiting email should look like a successful signup."""
         response = self.client.post(
             self.signup_url,
             {
-                "email": self.test_user.email,
+                # Different case, still considered duplicate
+                "email": "USER@EXAMPLE.COM",
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
                 "agreed_to_tos": "on",
             },
+            follow=True,
         )
-        self.assertFormError(
-            response.context["form"],
-            "email",
-            "User with this Email address already exists.",
+        # Redirected to verification required page
+        self.assertRedirects(
+            response,
+            get_email_verification_required_url(self.test_user),
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
+        )
+
+    def test_duplicate_email_verified(self):
+        self.test_user.email_verified = timezone.now()
+        self.test_user.save()
+        response = self.client.post(
+            self.signup_url,
+            {
+                # Different case, still considered duplicate
+                "email": "USER@EXAMPLE.COM",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
+            },
+            follow=True,
+        )
+        # Redirected to verification required page
+        self.assertRedirects(
+            response,
+            get_email_verification_required_url(self.test_user),
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
         )
 
     def test_with_logged_in_user(self):
