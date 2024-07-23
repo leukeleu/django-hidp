@@ -138,6 +138,7 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.FormVie
         return HttpResponseRedirect(self.request.get_full_path())
 
 
+@method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(never_cache, name="dispatch")
 class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
     """
