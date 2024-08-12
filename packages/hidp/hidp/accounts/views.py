@@ -18,7 +18,7 @@ from django.views.decorators.cache import never_cache
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
-from . import email_verification, forms, tokens
+from . import email_verification, forms, mailer, tokens
 
 User = get_user_model()
 
@@ -54,12 +54,20 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
         try:
             user = form.save()
         except IntegrityError:
-            # The user exists! Find the user by the email address and
-            # redirect them to the email verification required page.
-            # This is a security measure to prevent user enumeration.
-            # Use iexact to find the correct user, even if the email
-            # address differs in case.
+            # The user exists! Find the user by the email address (case-insensitive).
             user = User.objects.get(email__iexact=form.cleaned_data["email"])
+            if not user.email_verified:
+                # Resend the email verification email.
+                ...  # TODO: Implement verification email
+            else:
+                # Email the user to inform them that they have an account.
+                mailer.AccountExistsMailer(
+                    user,
+                    base_url=self.request.build_absolute_uri("/"),
+                ).send()
+
+            # Redirect them to the email verification required page.
+            # This is a security measure to prevent user enumeration.
         return HttpResponseRedirect(
             email_verification.get_email_verification_required_url(
                 user, next_url=self.get_success_url()

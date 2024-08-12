@@ -121,7 +121,7 @@ class TestRegistrationView(TransactionTestCase):
             fetch_redirect_response=False,
         )
 
-    def test_duplicate_email(self):
+    def test_duplicate_email_unverified(self):
         """Signup using an exiting email should look like a successful signup."""
         response = self.client.post(
             self.signup_url,
@@ -132,12 +132,38 @@ class TestRegistrationView(TransactionTestCase):
                 "password2": "P@ssw0rd!",
                 "agreed_to_tos": "on",
             },
+            follow=True,
         )
         self.assertRedirects(
             response,
             get_email_verification_required_url(self.test_user, next_url="/"),
             fetch_redirect_response=False,
         )
+
+    def test_duplicate_email_verified(self):
+        """Verified users should get a reminder mail."""
+        self.test_user.email_verified = timezone.now()
+        self.test_user.save()
+        response = self.client.post(
+            self.signup_url,
+            {
+                # Different case, still considered duplicate
+                "email": "USER@EXAMPLE.COM",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
+            },
+            follow=True
+        )
+        self.assertRedirects(
+            response,
+            get_email_verification_required_url(self.test_user, next_url="/"),
+        )
+        # Sends an email notification to the user
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.to, [self.test_user.email])
+        self.assertEqual("Sign up request", message.subject)
 
     def test_with_logged_in_user(self):
         """A logged-in user should not be able to sign up again."""
