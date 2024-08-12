@@ -1,12 +1,20 @@
 # Installation
 
+HIdP can be installed in a couple of different ways, depending on your usecase.
+
+## Install as standalone Django application
+
+Create a new Django project and start a new app, for example `accounts`.
+
+## Settings
+
 First of all, make sure timezone support is enabled in your Django settings:
 
 ```python
 USE_TZ = True
 ```
 
-## `INSTALLED_APPS`
+### `INSTALLED_APPS`
 
 Add the following to `INSTALLED_APPS` in your Django settings:
 
@@ -17,14 +25,18 @@ INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.sessions",
     "django.contrib.messages",
+    # Headless Identity Provider
     "oauth2_provider",
     "hidp",
     "hidp.accounts",
+    "hidp.federated",
+    # Project
+    "accounts",
     ...,
 ]
 ```
 
-## `MIDDLEWARE`
+### `MIDDLEWARE`
 
 Enable the following middlewares in your Django settings:
 
@@ -40,28 +52,30 @@ MIDDLEWARE = [
 ]
 ```
 
-## `AUTH_USER_MODEL`
+### `AUTH_USER_MODEL`
 
-Define your own User model that inherits from HIdP's [``BaseUser``](project:./user-model.md).
+Add a custom `User` model to the `accounts` app you just created, that inherits from HIdP's [``BaseUser``](project:./user-model.md).
 
-```python
+```python models.py
 from hidp.accounts.models import BaseUser
 
 class User(BaseUser):
   ...
 ```
 
+After defining the model, run `./manage.py makemigrations accounts`.
+
+:::{warning}
+Make sure to define your custom `User` model immediately, before running any migrations.
+:::
+
 Configure your custom user model in your Django settings, e.g.:
 
 ```python
-AUTH_USER_MODEL = "yourapp.User"
+AUTH_USER_MODEL = "accounts.User"
 ```
 
-:::{note}
-Make sure to do this immediately, before running any migrations.
-:::
-
-## Login settings
+### Login settings
 
 Configure the login url and redirect urls in your Django settings:
 
@@ -71,7 +85,7 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 ```
 
-## OAuth2 Provider
+### OAuth2 Provider
 
 The OAuth2 / OIDC provider requires a private key to sign the tokens.
 
@@ -95,11 +109,38 @@ OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
 )
 ```
 
-Note:
+:::{note}
 Other ways to provide the private key are possible, e.g. using environment variables.
 Use whatever method is most suitable for your deployment.
+:::
 
-## URLs
+### OpenID Connect based login (social accounts)
+
+To enable users to login using an existing Google, Microsoft or any other provider that
+supports OpenID connect, include the `OIDCModelBackend` in `AUTHENTICATION_BACKENDS`.
+
+```python
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "hidp.federated.auth.backends.OIDCModelBackend",
+]
+```
+
+and register the clients for the desired providers:
+
+```python
+from hidp.federated.providers.google import GoogleOIDCClient
+from hidp.federated.providers.microsoft import MicrosoftOIDCClient
+
+hidp_config.configure_oidc_clients(
+    GoogleOIDCClient(client_id="your-client-id", client_secret="****"),
+    MicrosoftOIDCClient(client_id="your-client-id"),
+)
+```
+
+It is possible to write your own client if you need to support different providers.
+
+### URLs
 
 Include the HIdP URLs in your Django project's `ROOT_URLCONF` module, e.g. `urls.py`:
 
@@ -113,6 +154,33 @@ urlpatterns = [
     ...,
 ]
 ```
+
+### Cache
+
+HIdP requires a caching implementation, in order for the rate limits to properly work
+and to store OIDC Provider signing keys. See [Django's cache framework](https://docs.djangoproject.com/en/5.0/topics/cache/#django-s-cache-framework).
+
+For example a Redis cache:
+
+```python
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379",
+    },
+}
+```
+
+We also recommend the cached session backend:
+
+```python
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+```
+
+:::{note}
+This requires Redis to be running locally or on a remote machine. See [Redis](https://docs.djangoproject.com/en/5.0/topics/cache/#redis)
+for more information how to set it up.
+:::
 
 ## Database migrations
 
