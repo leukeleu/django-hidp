@@ -19,7 +19,7 @@ from django.views.decorators.cache import never_cache
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
-from . import email_verification, forms, tokens
+from . import email_verification, forms, mailer, tokens
 
 User = get_user_model()
 
@@ -42,6 +42,7 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     form_class = forms.UserCreationForm
     template_name = "accounts/register.html"
     next_page = "/"
+    verification_mailer = mailer.EmailVerificationMailer
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -57,6 +58,14 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
         except IntegrityError:
             # The user exists! Find the user by the email address (case-insensitive).
             user = User.objects.get(email__iexact=form.cleaned_data["email"])
+
+        if not user.email_verified:
+            # Send the email verification email.
+            self.verification_mailer(
+                user,
+                base_url=self.request.build_absolute_uri("/"),
+                post_verification_redirect=self.get_redirect_url(),
+            ).send()
 
         # Always redirect to the email verification required page.
         # This is a security measure to prevent user enumeration.
@@ -202,6 +211,9 @@ class LoginView(auth_views.LoginView):
     # instead of displaying the login form.
     redirect_authenticated_user = False
 
+    # Mailer class to use when a user's email address is not verified
+    verification_mailer = mailer.EmailVerificationMailer
+
     def get_context_data(self, **kwargs):
         """
         Additional context data for the login template.
@@ -266,8 +278,15 @@ class LoginView(auth_views.LoginView):
             hidp_auth.login(self.request, user)
             return HttpResponseRedirect(self.get_success_url())
 
-        # If the user's email address is not yet verified
-        # redirect them to the email verification required page.
+        # If the user's email address is not yet verified:
+        # Send the email verification email.
+        self.verification_mailer(
+            user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
+
+        # Then redirect them to the email verification required page.
         return HttpResponseRedirect(
             email_verification.get_email_verification_required_url(
                 user, next_url=self.get_redirect_url()

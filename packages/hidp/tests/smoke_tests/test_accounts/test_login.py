@@ -1,5 +1,6 @@
 from unittest import mock
 
+from django.core import mail
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -50,6 +51,13 @@ class TestLogin(TestCase):
         )
         # Does not log in the user
         mock_login.assert_not_called()
+        # Verification email sent
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Verify your email address",
+        )
         # Redirected to verification required page
         self.assertRedirects(
             response,

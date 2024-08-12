@@ -3,6 +3,8 @@ from urllib.parse import urljoin
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
 
+from hidp.accounts import email_verification
+
 
 class BaseMailer:
     """
@@ -80,3 +82,31 @@ class BaseMailer:
                 email templates (optional).
         """
         self._get_message(from_email, extra_context).send()
+
+
+class EmailVerificationMailer(BaseMailer):
+    subject_template_name = "accounts/verification/email/verification_subject.txt"
+    email_template_name = "accounts/verification/email/verification_body.txt"
+
+    def __init__(self, user, *, base_url, post_verification_redirect=None):
+        super().__init__(base_url=base_url)
+        self.user = user
+        self.post_verification_redirect = post_verification_redirect
+
+    def get_context(self, extra_context=None):
+        verification_url = urljoin(
+            self.base_url,
+            email_verification.get_verify_email_url(
+                self.user,
+                next_url=self.post_verification_redirect,
+            ),
+        )
+        return super().get_context(
+            {
+                "user": self.user,
+                "verification_url": verification_url,
+            }
+        )
+
+    def get_recipients(self):
+        return [self.user.email]

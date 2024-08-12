@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.test import TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -70,6 +71,13 @@ class TestRegistrationView(TransactionTestCase):
             timezone.now(),
             user.agreed_to_tos,
             delta=timezone.timedelta(seconds=10),
+        )
+        # Verification email sent
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Verify your email address",
         )
         # Redirected to verification required page
         self.assertRedirects(

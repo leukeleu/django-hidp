@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}
+{% blocktranslate %}You're receiving this email because you created an account with this email address.{% endblocktranslate %}
+
+{% translate "Please go to the following page and verify your email address:" %}
+
+{{ verification_url }}
+
+{% blocktranslate %}If you did not attempt to sign up, you can safely ignore this email.{% endblocktranslate %}
+{% endautoescape %}
