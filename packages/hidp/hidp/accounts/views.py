@@ -101,9 +101,6 @@ class EmailVerificationRequiredView(generic.TemplateView):
             # email address.
             self.user = (
                 User.objects.annotate(email_hash=MD5("email"))
-                .exclude(
-                    Q(email_verified__isnull=False) | Q(is_active=False),
-                )
                 .get(email_hash=email_hash)
             )
             self.validlink = True

@@ -43,22 +43,6 @@ class TestEmailVerificationRequiredView(TestCase):
         """
         self._assert_response(self.client.get(self.url))
 
-    def test_get_verified_user(self):
-        """
-        Valid token, but user is already verified.
-        """
-        self.user.email_verified = timezone.now()
-        self.user.save()
-        self._assert_response(self.client.get(self.url), validlink=False)
-
-    def test_get_deactivated_user(self):
-        """
-        Valid token, but user is deactivated.
-        """
-        self.user.is_active = False
-        self.user.save()
-        self._assert_response(self.client.get(self.url), validlink=False)
-
     def test_get_invalid_token(self):
         """
         Invalid token.
