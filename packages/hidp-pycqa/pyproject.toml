@@ -11,7 +11,7 @@ dependencies = [
   # Linting
   "check-manifest == 0.49",
   "readme-renderer ~= 43.0",
-  "ruff == 0.4.10",
+  "ruff == 0.5.5",
 
   # Testing
   "coverage ~= 7.1",
@@ -43,6 +43,7 @@ ignore = [
   "CPY001",  # copyright notice is not required
   "D",  # docstring checks are disabled
   "DJ008",  # __str__ methods are not required for models
+  "DOC",  # docstring checks are disabled
   "EM",  # error messages do not need to be assigned to a variable
   "FIX",  # tasks/issue can be fixed later
   "FURB101",  # open/read is OK, pathlib is not required
