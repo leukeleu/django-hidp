@@ -81,3 +81,25 @@ class BaseMailer:
                 email templates (optional).
         """
         self._get_message(from_email, extra_context).send()
+
+
+class AccountExistsMailer(BaseMailer):
+    subject_template_name = "accounts/verification/email/account_exists_subject.txt"
+    email_template_name = "accounts/verification/email/account_exists_body.txt"
+
+    def __init__(self, user, *, base_url):
+        super().__init__(base_url=base_url)
+        self.user = user
+
+    def get_context(self, extra_context=None):
+        return super().get_context(
+            {
+                "user": self.user,
+                "password_reset_url": urljoin(
+                    self.base_url, reverse("hidp_accounts:password_reset_request")
+                ),
+            }
+        )
+
+    def get_recipients(self):
+        return [self.user.email]
