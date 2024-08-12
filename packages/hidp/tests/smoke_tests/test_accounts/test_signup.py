@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.test import TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -58,6 +59,7 @@ class TestRegistrationView(TransactionTestCase):
                 "password2": "P@ssw0rd!",
                 "agreed_to_tos": "on",
             },
+            follow=True,
         )
         self.assertTrue(
             User.objects.filter(email="test@example.com").exists(),
@@ -74,7 +76,11 @@ class TestRegistrationView(TransactionTestCase):
         self.assertRedirects(
             response,
             get_email_verification_required_url(user, next_url="/"),
-            fetch_redirect_response=False,
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
         )
 
     def test_valid_registration_safe_next_param(self):
@@ -139,6 +145,11 @@ class TestRegistrationView(TransactionTestCase):
             get_email_verification_required_url(self.test_user, next_url="/"),
             fetch_redirect_response=False,
         )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
+        )
 
     def test_duplicate_email_verified(self):
         """Verified users should get a reminder mail."""
@@ -153,11 +164,16 @@ class TestRegistrationView(TransactionTestCase):
                 "password2": "P@ssw0rd!",
                 "agreed_to_tos": "on",
             },
-            follow=True
+            follow=True,
         )
         self.assertRedirects(
             response,
             get_email_verification_required_url(self.test_user, next_url="/"),
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
         )
         # Sends an email notification to the user
         self.assertEqual(len(mail.outbox), 1)

@@ -6,7 +6,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
-from django.db.models import Q
 from django.db.models.functions import MD5
 from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
@@ -99,12 +98,8 @@ class EmailVerificationRequiredView(generic.TemplateView):
             # Find the user by the hash of their email address, but only
             # if the user is active and has not already verified their
             # email address.
-            self.user = (
-                User.objects.annotate(email_hash=MD5("email"))
-                .exclude(
-                    Q(email_verified__isnull=False) | Q(is_active=False),
-                )
-                .get(email_hash=email_hash)
+            self.user = User.objects.annotate(email_hash=MD5("email")).get(
+                email_hash=email_hash
             )
             self.validlink = True
         except User.DoesNotExist:
