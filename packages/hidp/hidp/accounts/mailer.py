@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
+from django.urls import reverse
 
 from hidp.accounts import email_verification
 
@@ -105,6 +106,28 @@ class EmailVerificationMailer(BaseMailer):
             {
                 "user": self.user,
                 "verification_url": verification_url,
+            }
+        )
+
+    def get_recipients(self):
+        return [self.user.email]
+
+
+class AccountExistsMailer(BaseMailer):
+    subject_template_name = "accounts/verification/email/account_exists_subject.txt"
+    email_template_name = "accounts/verification/email/account_exists_body.txt"
+
+    def __init__(self, user, *, base_url):
+        super().__init__(base_url=base_url)
+        self.user = user
+
+    def get_context(self, extra_context=None):
+        return super().get_context(
+            {
+                "user": self.user,
+                "password_reset_url": urljoin(
+                    self.base_url, reverse("hidp_accounts:password_reset_request")
+                ),
             }
         )
 

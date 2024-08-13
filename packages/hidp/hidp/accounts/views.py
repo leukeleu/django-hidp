@@ -43,6 +43,7 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     template_name = "accounts/register.html"
     next_page = "/"
     verification_mailer = mailer.EmailVerificationMailer
+    account_exists_mailer = mailer.AccountExistsMailer
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -65,6 +66,12 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
                 user,
                 base_url=self.request.build_absolute_uri("/"),
                 post_verification_redirect=self.get_redirect_url(),
+            ).send()
+        else:
+            # Email the user to inform them that they have an account.
+            self.account_exists_mailer(
+                user,
+                base_url=self.request.build_absolute_uri("/"),
             ).send()
 
         # Always redirect to the email verification required page.

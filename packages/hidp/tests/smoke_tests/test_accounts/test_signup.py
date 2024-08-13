@@ -159,6 +159,7 @@ class TestRegistrationView(TransactionTestCase):
         )
 
     def test_duplicate_email_verified(self):
+        """Verified users should get a reminder mail."""
         self.test_user.email_verified = timezone.now()
         self.test_user.save()
         response = self.client.post(
@@ -182,6 +183,11 @@ class TestRegistrationView(TransactionTestCase):
             "You need to verify your email address before you can log in.",
             response.content.decode("utf-8"),
         )
+        # Sends an email notification to the user
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.to, [self.test_user.email])
+        self.assertEqual("Sign up request", message.subject)
 
     def test_with_logged_in_user(self):
         """A logged-in user should not be able to sign up again."""
