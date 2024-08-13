@@ -102,6 +102,7 @@ class TestRegistrationView(TestCase):
                 "email": self.test_user.email,
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
             },
         )
         self.assertFormError(
@@ -119,6 +120,7 @@ class TestRegistrationView(TestCase):
                 "email": "test@example.com",
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
             },
         )
         self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
