@@ -39,6 +39,8 @@ class UserCreationForm(auth_forms.UserCreationForm):
         ),
         required=True,
     )
+    # Remove the option to create an account with an unusable password.
+    usable_password = None
 
     class Meta(auth_forms.UserCreationForm.Meta):
         model = UserModel
