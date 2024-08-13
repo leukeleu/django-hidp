@@ -29,7 +29,6 @@
   <hr>
 
   <p>
-    {% url 'hidp_accounts:login' as login_url %}
     {% blocktranslate with login_url=login_url %}
     Already have an account? <a href="{{ login_url }}">Log in</a>.
     {% endblocktranslate %}

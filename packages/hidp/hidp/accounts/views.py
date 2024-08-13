@@ -45,6 +45,17 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     verification_mailer = mailer.EmailVerificationMailer
     account_exists_mailer = mailer.AccountExistsMailer
 
+    def get_context_data(self, **kwargs):
+        login_url = resolve_url(settings.LOGIN_URL) + (
+            f"?{urlencode({'next': redirect_url})}"
+            if (redirect_url := self.get_redirect_url())
+            else ""
+        )
+        return super().get_context_data(
+            login_url=login_url,
+            **kwargs,
+        )
+
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             raise PermissionDenied("Logged-in users cannot register a new account.")
@@ -252,6 +263,11 @@ class LoginView(auth_views.LoginView):
           The name of the current site (host name if `RequestSite` is used)
         * Any additional data present is `self.extra_context`
         """
+        register_url = reverse("hidp_accounts:register") + (
+            f"?{urlencode({'next': redirect_url})}"
+            if (redirect_url := self.get_redirect_url())
+            else ""
+        )
         return super().get_context_data(
             oidc_login_providers=[
                 {
@@ -266,6 +282,7 @@ class LoginView(auth_views.LoginView):
                 for provider in oidc_clients.get_registered_oidc_clients()
             ],
             messages=messages.get_messages(self.request),
+            register_url=register_url,
             **kwargs,
         )
 
