@@ -80,8 +80,8 @@ class TestRegistrationView(TransactionTestCase):
             "Verify your email address",
         )
         # Redirected to verification required page
-        self.assertRedirects(
-            response,
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
             get_email_verification_required_url(user),
         )
         # Verification required page
@@ -100,6 +100,7 @@ class TestRegistrationView(TransactionTestCase):
                 "agreed_to_tos": "on",
                 "next": "/example/",
             },
+            follow=True,
         )
         self.assertTrue(
             User.objects.filter(email="test@example.com").exists(),
@@ -107,8 +108,8 @@ class TestRegistrationView(TransactionTestCase):
         )
         user = User.objects.get(email="test@example.com")
         # Redirected to verification required page
-        self.assertRedirects(
-            response,
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
             get_email_verification_required_url(user, next_url="/example/"),
         )
 
@@ -122,6 +123,7 @@ class TestRegistrationView(TransactionTestCase):
                 "agreed_to_tos": "on",
                 "next": "https://example.com/",
             },
+            follow=True,
         )
         self.assertTrue(
             User.objects.filter(email="test@example.com").exists(),
@@ -129,8 +131,8 @@ class TestRegistrationView(TransactionTestCase):
         )
         user = User.objects.get(email="test@example.com")
         # Redirected to verification required page
-        self.assertRedirects(
-            response,
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
             get_email_verification_required_url(user),
         )
 
@@ -148,8 +150,8 @@ class TestRegistrationView(TransactionTestCase):
             follow=True,
         )
         # Redirected to verification required page
-        self.assertRedirects(
-            response,
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
             get_email_verification_required_url(self.test_user),
         )
         # Verification required page
@@ -174,8 +176,8 @@ class TestRegistrationView(TransactionTestCase):
             follow=True,
         )
         # Redirected to verification required page
-        self.assertRedirects(
-            response,
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
             get_email_verification_required_url(self.test_user),
         )
         # Verification required page

@@ -42,7 +42,7 @@ class TestEmailVerificationRequiredView(TestCase):
         """
         Works when the token is considered valid.
         """
-        self._assert_response(self.client.get(self.url))
+        self._assert_response(self.client.get(self.url, follow=True))
 
     def test_get_invalid_token(self):
         """
@@ -52,7 +52,8 @@ class TestEmailVerificationRequiredView(TestCase):
             reverse(
                 "hidp_accounts:email_verification_required",
                 kwargs={"token": "invalid-value:invalid-signature"},
-            )
+            ),
+            follow=True,
         )
         self._assert_response(response, validlink=False)
 
@@ -60,7 +61,10 @@ class TestEmailVerificationRequiredView(TestCase):
         """
         Send the verification email.
         """
-        self.client.post(self.url)
+        # Get the page first, to populate the session
+        response = self.client.get(self.url, follow=True)
+        # Post to the redirected URL
+        self.client.post(response.redirect_chain[-1][0], follow=True)
         # Verification email sent
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]
@@ -73,12 +77,16 @@ class TestEmailVerificationRequiredView(TestCase):
         """
         Does not send the verification email when the token is invalid.
         """
-        self.client.post(
+        # Get the page first, to populate the session
+        response = self.client.get(
             reverse(
                 "hidp_accounts:email_verification_required",
                 kwargs={"token": "invalid-value:invalid-signature"},
-            )
+            ),
+            follow=True,
         )
+        # Post to the redirected URL
+        self.client.post(response.redirect_chain[-1][0], follow=True)
         # Verification email not sent
         self.assertEqual(len(mail.outbox), 0)
 
@@ -112,7 +120,7 @@ class TestEmailVerificationView(TestCase):
         """
         Works when the token is considered valid.
         """
-        self._assert_response(self.client.get(self.url))
+        self._assert_response(self.client.get(self.url, follow=True))
 
     def test_get_invalid_token(self):
         """
@@ -122,7 +130,8 @@ class TestEmailVerificationView(TestCase):
             reverse(
                 "hidp_accounts:verify_email",
                 kwargs={"token": "invalid-value:invalid-signature"},
-            )
+            ),
+            follow=True,
         )
         self._assert_response(response, validlink=False)
 
@@ -132,7 +141,7 @@ class TestEmailVerificationView(TestCase):
         """
         self.user.is_active = False
         self.user.save()
-        response = self.client.get(self.url)
+        response = self.client.get(self.url, follow=True)
         self._assert_response(response, validlink=False)
 
     def test_already_verified_user(self):
@@ -141,14 +150,17 @@ class TestEmailVerificationView(TestCase):
         """
         self.user.email_verified = timezone.now()
         self.user.save()
-        response = self.client.get(self.url)
+        response = self.client.get(self.url, follow=True)
         self._assert_response(response, validlink=False)
 
     def test_post(self):
         """
         Update the user's email_verified field.
         """
-        response = self.client.post(self.url)
+        # Get the page first, to populate the session
+        response = self.client.get(self.url, follow=True)
+        # Post to the redirected URL
+        response = self.client.post(response.redirect_chain[-1][0], follow=True)
         self.user.refresh_from_db()
         self.assertIsNotNone(
             self.user.email_verified, msg="Expected email to be verified."
@@ -158,7 +170,7 @@ class TestEmailVerificationView(TestCase):
             timezone.now(),
             delta=timezone.timedelta(seconds=5),
         )
-        self.assertRedirects(
-            response,
+        self.assertURLEqual(
+            response.redirect_chain[-1][0],
             reverse("hidp_accounts:email_verification_complete"),
         )

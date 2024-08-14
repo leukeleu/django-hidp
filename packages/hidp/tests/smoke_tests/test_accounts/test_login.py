@@ -59,8 +59,8 @@ class TestLogin(TestCase):
             "Verify your email address",
         )
         # Redirected to verification required page
-        self.assertRedirects(
-            response,
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
             get_email_verification_required_url(user),
         )
         # Verification required page

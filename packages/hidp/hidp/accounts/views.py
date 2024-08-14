@@ -115,8 +115,21 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
     template_name = "accounts/verification/email_verification_required.html"
     token_generator = tokens.email_verification_request_token_generator
     verification_mailer = mailer.EmailVerificationMailer
+    token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
+    token_placeholder = "email"  # noqa: S105 (not a password)
 
     def dispatch(self, request, *, token):
+        if token == self.token_placeholder:
+            token = self.request.session.get(self.token_session_key)
+        else:
+            # Store the token in the session and redirect to the
+            # URL with a placeholder value.
+            self.request.session[self.token_session_key] = token
+            redirect_url = self.request.get_full_path().replace(
+                token, self.token_placeholder
+            )
+            return HttpResponseRedirect(redirect_url, status=308)
+
         email_hash = self.token_generator.check_token(token)
         try:
             # Find the user by the hash of their email address
@@ -160,8 +173,21 @@ class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
     template_name = "accounts/verification/verify_email.html"
     token_generator = tokens.email_verification_token_generator
     success_url = reverse_lazy("hidp_accounts:email_verification_complete")
+    token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
+    token_placeholder = "email"  # noqa: S105 (not a password)
 
     def dispatch(self, request, *, token):
+        if token == self.token_placeholder:
+            token = self.request.session.get(self.token_session_key)
+        else:
+            # Store the token in the session and redirect to the
+            # URL with a placeholder value.
+            self.request.session[self.token_session_key] = token
+            redirect_url = self.request.get_full_path().replace(
+                token, self.token_placeholder
+            )
+            return HttpResponseRedirect(redirect_url, status=308)
+
         email_hash = self.token_generator.check_token(token)
         try:
             # Find the user by the hash of their email address
