@@ -156,7 +156,13 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
                 base_url=self.request.build_absolute_uri("/"),
                 post_verification_redirect=self.get_redirect_url(),
             ).send()
-        # Stay on the same page after sending the email.
+            # Redirect to the email verification required page, with a new token.
+            return HttpResponseRedirect(
+                email_verification.get_email_verification_required_url(
+                    self.user, next_url=self.get_redirect_url()
+                )
+            )
+        # Invalid token, do nothing and redirect to the same page.
         return HttpResponseRedirect(self.request.get_full_path())
 
 
