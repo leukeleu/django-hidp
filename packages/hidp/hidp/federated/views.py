@@ -103,8 +103,6 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
         """
         Decide which flow the user should be redirected to next.
         """
-        view_name = None
-        token = None
         connection = OpenIdConnection.objects.get_by_provider_and_claims(
             provider_key=provider_key,
             issuer_claim=claims["iss"],
@@ -119,8 +117,19 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                 user_info=user_info,
             )
             view_name = "hidp_oidc_client:login"
-        elif request.user.is_anonymous:
-            # No user is logged in. Check if a user exists for the given email.
+        elif request.user.is_authenticated:
+            # `sub` claim does not match an existing user:
+            # Display a form allowing the user to link the OIDC account.
+            token = OIDCAccountLinkView.add_data_to_session(
+                request,
+                provider_key=provider_key,
+                claims=claims,
+                user_info=user_info,
+            )
+            view_name = "hidp_oidc_client:link_account"
+        else:
+            # `sub` claim does not match an existing user, and no user is logged in:
+            # Check if a user exists for the given email.
             user = UserModel.objects.filter(email__iexact=claims["email"]).first()
             if not user:
                 # `sub` and `email` claim do not match an existing user:
@@ -132,9 +141,17 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                     user_info=user_info,
                 )
                 view_name = "hidp_oidc_client:register"
-
-        if not view_name:
-            raise NotImplementedError("No view name was determined for the next step.")
+            else:
+                # `sub` claim does not match an existing user, but `email` claim does:
+                # Display a message instructing the user to log in to link the accounts.
+                messages.info(
+                    request,
+                    _(
+                        "You already have an account with this email address."
+                        " Please log in to link your account."
+                    ),
+                )
+                return reverse("hidp_accounts:login")
 
         # Prepare the URL parameters for the next view. Drop any None values.
         params = {

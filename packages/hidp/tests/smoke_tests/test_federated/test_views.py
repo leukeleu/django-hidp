@@ -261,6 +261,46 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         token = query["token"][0]
         self.assertIn(token, self.client.session)
 
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=(*_VALID_AUTH_CALLBACK, None),
+    )
+    def test_must_login_to_link_account(self, mock_handle_authentication_callback):
+        # A user with the same email address exists, but is not logged in
+        user_factories.UserFactory(email="user@example.com")
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(
+            [
+                "You already have an account with this email address."
+                " Please log in to link your account."
+            ],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+        self.assertRedirects(response, reverse("hidp_accounts:login"))
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=(*_VALID_AUTH_CALLBACK, None),
+    )
+    def test_redirect_to_link_account(self, mock_handle_authentication_callback):
+        # A user is logged in, but no connection exists. Continue to link account.
+        user = user_factories.VerifiedUserFactory()
+        self.client.force_login(user)
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        redirect = urllib.parse.urlparse(response.url)
+        self.assertEqual(redirect.path, reverse("hidp_oidc_client:link_account"))
+        query = urllib.parse.parse_qs(redirect.query)
+        self.assertIn("token", query)
+        token = query["token"][0]
+        self.assertIn(token, self.client.session)
+
 
 class OIDCTokenDataTestMixin:
     view_name = NotImplemented
