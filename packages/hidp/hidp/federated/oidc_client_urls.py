@@ -21,6 +21,11 @@ urlpatterns = [
         name="register",
     ),
     path(
+        "link-account/",
+        views.OIDCAccountLinkView.as_view(),
+        name="link_account",
+    ),
+    path(
         "login/",
         views.OIDCLoginView.as_view(),
         name="login",

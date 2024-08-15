@@ -1,0 +1,27 @@
+{% extends "hidp/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Link account' %}{% endblock %}
+
+{% block body %}
+  <h1>{% translate 'Link account' %}</h1>
+
+  <p>
+  {% blocktranslate with provider.name as provider %}
+  You are about to link your {{ provider }} account to your existing account.
+  {% endblocktranslate %}
+  </p>
+
+  <p>
+  {% blocktranslate with provider.name as provider %}
+  This will allow you to use your {{ provider }} account to log in to your existing account.
+  Are you sure you want to do this?
+  {% endblocktranslate %}
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% translate 'Link account' %}</button>
+  </form>
+{% endblock %}
