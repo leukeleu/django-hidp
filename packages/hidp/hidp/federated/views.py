@@ -1,10 +1,10 @@
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.http import (
     Http404,
     HttpResponseBadRequest,
     HttpResponseRedirect,
-    JsonResponse,
 )
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
@@ -14,8 +14,11 @@ from django.views.generic import FormView, View
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_strict
 from . import forms, tokens
+from .models import OpenIdConnection
 from .oidc import authorization_code_flow
 from .oidc.exceptions import InvalidOIDCStateError, OAuth2Error
+
+UserModel = get_user_model()
 
 
 class OIDCMixin:
@@ -81,9 +84,43 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
         "options",
     ]
 
+    def get_next_url(  # noqa: PLR6301 (no-self-use)
+        self,
+        *,
+        request,
+        provider_key,
+        claims,
+        user_info,
+    ):
+        """
+        Decide which flow the user should be redirected to next.
+        """
+        connection = (
+            OpenIdConnection.objects.select_related("user")
+            .filter(
+                provider_key=provider_key,
+                issuer_claim=claims["iss"],
+                subject_claim=claims["sub"],
+            )
+            .first()
+        )
+        if request.user.is_anonymous:
+            # No user is logged in. Check if a user exists for the given email.
+            user = UserModel.objects.filter(email__iexact=claims["email"]).first()
+            if not connection and not user:
+                # `sub` and `email` claim do not match an existing user:
+                # Redirect the user to the registration page.
+                token = OIDCRegistrationView.add_data_to_session(
+                    request,
+                    provider_key=provider_key,
+                    claims=claims,
+                    user_info=user_info,
+                )
+                return reverse("hidp_oidc_client:register") + f"?token={token}"
+
     def get(self, request, provider_key):
         try:
-            tokens, claims, user_info = (
+            _tokens, claims, user_info = (
                 authorization_code_flow.handle_authentication_callback(
                     request,
                     client=self.get_oidc_client(provider_key),
@@ -109,12 +146,13 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
             )
             return HttpResponseRedirect(reverse("hidp_accounts:login"))
 
-        return JsonResponse(
-            {
-                "tokens": tokens,
-                "claims": claims,
-                "user_info": user_info,
-            }
+        return HttpResponseRedirect(
+            self.get_next_url(
+                request=request,
+                provider_key=provider_key,
+                claims=claims,
+                user_info=user_info,
+            )
         )
 
 

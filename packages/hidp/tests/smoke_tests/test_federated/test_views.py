@@ -1,5 +1,6 @@
 import urllib.parse
 
+from http import HTTPStatus
 from unittest import mock
 
 from django.contrib import messages
@@ -84,6 +85,24 @@ class TestOIDCAuthenticationRequestView(TestCase):
         )
 
 
+_VALID_AUTH_CALLBACK = (
+    {
+        "id_token": "id_token",
+        "access_token": "access_token",
+        "token_type": "token_type",
+    },
+    {
+        "iss": "test_issuer",
+        "sub": "test_subject",
+        "email": "user@example.com",
+    },
+    {
+        "given_name": "Firstname",
+        "family_name": "Lastname",
+    },
+)
+
+
 class TestOIDCAuthenticationCallbackView(TestCase):
     def setUp(self):
         configure_oidc_clients(ExampleOIDCClient(client_id="test"))
@@ -104,19 +123,7 @@ class TestOIDCAuthenticationCallbackView(TestCase):
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
-        return_value=(
-            {
-                "id_token": "id_token",
-                "access_token": "access_token",
-                "token_type": "token_type",
-            },
-            {
-                "claims": "claims",
-            },
-            {
-                "user_info": "user_info",
-            },
-        ),
+        return_value=_VALID_AUTH_CALLBACK,
     )
     def test_calls_handle_authentication_callback(
         self, mock_handle_authentication_callback
@@ -124,9 +131,11 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         response = self.client.get(
             reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
             secure=True,
+            follow=False,
         )
         mock_handle_authentication_callback.assert_called_once()
-        self.assertEqual(response.status_code, 200)
+        # Redirects to the next url
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
@@ -181,6 +190,23 @@ class TestOIDCAuthenticationCallbackView(TestCase):
             response,
             reverse("hidp_accounts:login"),
         )
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=_VALID_AUTH_CALLBACK,
+    )
+    def test_redirect_to_register(self, mock_handle_authentication_callback):
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        redirect = urllib.parse.urlparse(response.url)
+        self.assertEqual(redirect.path, reverse("hidp_oidc_client:register"))
+        query = urllib.parse.parse_qs(redirect.query)
+        self.assertIn("token", query)
+        token = query["token"][0]
+        self.assertIn(token, self.client.session)
 
 
 class TestOIDCRegistrationView(TestCase):
