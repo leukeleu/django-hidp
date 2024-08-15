@@ -3,17 +3,22 @@ import urllib.parse
 from unittest import mock
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.http import HttpRequest
 from django.test import TestCase
 from django.urls import reverse
 
 from hidp.config import configure_oidc_clients
 from hidp.federated.constants import OIDC_STATES_SESSION_KEY
 from hidp.federated.oidc.exceptions import InvalidOIDCStateError, OAuth2Error, OIDCError
+from hidp.federated.views import OIDCRegistrationView
 
 from ...unit_tests.test_federated.test_providers.example import (
     ExampleOIDCClient,
     code_challenge_from_code_verifier,
 )
+
+UserModel = get_user_model()
 
 
 class TestOIDCAuthenticationRequestView(TestCase):
@@ -176,3 +181,70 @@ class TestOIDCAuthenticationCallbackView(TestCase):
             response,
             reverse("hidp_accounts:login"),
         )
+
+
+class TestOIDCRegistrationView(TestCase):
+    def test_requires_token(self):
+        response = self.client.get(reverse("hidp_oidc_client:register"))
+        self.assertEqual(
+            ["Expired or invalid token. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+
+    def test_invalid_token(self):
+        response = self.client.get(
+            reverse("hidp_oidc_client:register"), {"token": "invalid"}
+        )
+        self.assertEqual(
+            ["Expired or invalid token. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+
+    def _add_oidc_data_to_session(self, *, save=True):
+        session = self.client.session
+        request = HttpRequest()
+        request.session = session
+        token = OIDCRegistrationView.add_data_to_session(
+            request,
+            provider_key="test_provider",
+            claims={
+                "iss": "test_issuer",
+                "sub": "test_subject",
+                "email": "user@example.com",
+            },
+            user_info={
+                "given_name": "Firstname",
+                "family_name": "Lastname",
+            },
+        )
+        if save:
+            session.save()
+        return token
+
+    def test_valid_token_missing_session_data(self):
+        # Do not save the session to mimic an expired session or hijacked token
+        token = self._add_oidc_data_to_session(save=False)
+        response = self.client.get(
+            reverse("hidp_oidc_client:register"), {"token": token}
+        )
+        self.assertEqual(
+            ["Expired or invalid token. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+
+    def test_get_with_valid_token(self):
+        token = self._add_oidc_data_to_session()
+        response = self.client.get(
+            reverse("hidp_oidc_client:register"), {"token": token}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "federated/registration.html")
+
+    def test_post_with_valid_token(self):
+        token = self._add_oidc_data_to_session()
+        self.client.post(
+            reverse("hidp_oidc_client:register") + f"?token={token}",
+            {"agreed_to_tos": "on"},
+        )
+        user = UserModel.objects.filter(email="user@example.com").first()
+        self.assertIsNotNone(user, msg="Expected a user to be created.")

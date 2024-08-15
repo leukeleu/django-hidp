@@ -1,17 +1,19 @@
 from django.contrib import messages
+from django.contrib.auth import views as auth_views
 from django.http import (
     Http404,
     HttpResponseBadRequest,
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import View
+from django.views.generic import FormView, View
 
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_strict
+from . import forms, tokens
 from .oidc import authorization_code_flow
 from .oidc.exceptions import InvalidOIDCStateError, OAuth2Error
 
@@ -114,3 +116,60 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                 "user_info": user_info,
             }
         )
+
+
+class TokenDataMixin:
+    """
+    Mixin to set, retrieve and validate data to/from the session using a token.
+    """
+
+    token_generator = NotImplemented
+    invalid_token_message = _("Expired or invalid token. Please try again.")
+    invalid_token_redirect_url = reverse_lazy("hidp_accounts:login")
+
+    @classmethod
+    def add_data_to_session(cls, request, *, provider_key, claims, user_info):
+        token = cls.token_generator.make_token()
+        request.session[token] = {
+            "provider_key": provider_key,
+            "claims": claims,
+            "user_info": user_info,
+        }
+        return token
+
+    def dispatch(self, request, *args, **kwargs):
+        self.token = request.GET.get("token")
+        valid_token = self.token and self.token_generator.check_token(self.token)
+        self.token_data = valid_token and request.session.get(self.token)
+        if not valid_token or self.token_data is None:
+            messages.error(request, self.invalid_token_message)
+            return HttpResponseRedirect(self.invalid_token_redirect_url)
+        return super().dispatch(request, *args, **kwargs)
+
+
+@method_decorator(rate_limit_strict, name="dispatch")
+class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
+    """
+    Handles the registration process for a new user using an OpenID Connect
+    authentication response.
+    """
+
+    token_generator = tokens.OIDCRegistrationTokenGenerator()
+    form_class = forms.OIDCRegistrationForm
+    template_name = "federated/registration.html"
+    next_page = "/"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(
+            provider_key=self.token_data["provider_key"],
+            claims=self.token_data["claims"],
+            user_info=self.token_data["user_info"],
+        )
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        # Remove the token from the session after the form has been saved.
+        del self.request.session[self.token]
+        return super().form_valid(form)

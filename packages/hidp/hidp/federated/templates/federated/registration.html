@@ -1,0 +1,16 @@
+{% load i18n %}
+<!doctype html>
+<html>
+<head>
+  <title>{% translate 'Sign up' %}</title>
+</head>
+<body>
+  <h1>{% translate 'Create a new account' %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% translate 'Sign up' %}</button>
+  </form>
+</body>
+</html>
