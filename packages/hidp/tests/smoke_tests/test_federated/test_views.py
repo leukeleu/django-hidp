@@ -11,9 +11,10 @@ from django.test import TestCase
 from django.urls import reverse
 
 from hidp.config import configure_oidc_clients
+from hidp.federated import models, views
 from hidp.federated.constants import OIDC_STATES_SESSION_KEY
 from hidp.federated.oidc.exceptions import InvalidOIDCStateError, OAuth2Error, OIDCError
-from hidp.federated.views import OIDCRegistrationView
+from hidp.test.factories import user_factories
 
 from ...unit_tests.test_federated.test_providers.example import (
     ExampleOIDCClient,
@@ -237,20 +238,22 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         self.assertIn(token, self.client.session)
 
 
-class TestOIDCRegistrationView(TestCase):
-    def test_requires_token(self):
-        response = self.client.get(reverse("hidp_oidc_client:register"))
-        self.assertEqual(
-            ["Expired or invalid token. Please try again."],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
-        )
+class OIDCTokenDataTestMixin:
+    view_name = NotImplemented
+    view_class = NotImplemented
 
-    def test_invalid_token(self):
-        response = self.client.get(
-            reverse("hidp_oidc_client:register"), {"token": "invalid"}
+    @classmethod
+    def setUpTestData(cls):
+        cls.url = reverse(cls.view_name)
+
+    def _assert_invalid_token(self, *, token=None):
+        response = (
+            self.client.get(self.url)
+            if token is None
+            else self.client.get(self.url, {"token": token})
         )
         self.assertEqual(
-            ["Expired or invalid token. Please try again."],
+            [self.view_class.invalid_token_message],
             [m.message for m in messages.get_messages(response.wsgi_request)],
         )
 
@@ -258,12 +261,12 @@ class TestOIDCRegistrationView(TestCase):
         session = self.client.session
         request = HttpRequest()
         request.session = session
-        token = OIDCRegistrationView.add_data_to_session(
+        token = self.view_class.add_data_to_session(
             request,
-            provider_key="test_provider",
+            provider_key="example",
             claims={
-                "iss": "test_issuer",
-                "sub": "test_subject",
+                "iss": "example",
+                "sub": "test-subject",
                 "email": "user@example.com",
             },
             user_info={
@@ -275,29 +278,32 @@ class TestOIDCRegistrationView(TestCase):
             session.save()
         return token
 
+    def test_requires_token(self):
+        self._assert_invalid_token()
+
+    def test_invalid_token(self):
+        self._assert_invalid_token(token="invalid")
+
     def test_valid_token_missing_session_data(self):
         # Do not save the session to mimic an expired session or hijacked token
         token = self._add_oidc_data_to_session(save=False)
-        response = self.client.get(
-            reverse("hidp_oidc_client:register"), {"token": token}
-        )
-        self.assertEqual(
-            ["Expired or invalid token. Please try again."],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
-        )
+        self._assert_invalid_token(token=token)
+
+
+class TestOIDCRegistrationView(OIDCTokenDataTestMixin, TestCase):
+    view_class = views.OIDCRegistrationView
+    view_name = "hidp_oidc_client:register"
 
     def test_get_with_valid_token(self):
         token = self._add_oidc_data_to_session()
-        response = self.client.get(
-            reverse("hidp_oidc_client:register"), {"token": token}
-        )
+        response = self.client.get(self.url, {"token": token})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "hidp/federated/registration.html")
 
     def test_post_with_valid_token(self):
         token = self._add_oidc_data_to_session()
         response = self.client.post(
-            reverse("hidp_oidc_client:register") + f"?token={token}",
+            self.url + f"?token={token}",
             {"agreed_to_tos": "on"},
             follow=True,
         )
@@ -305,6 +311,66 @@ class TestOIDCRegistrationView(TestCase):
         self.assertIsNotNone(user, msg="Expected a user to be created.")
 
         self.assertIsNone(user.email_verified, msg="Expected email to be unverified.")
+
+        # Verification email sent
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Verify your email address",
+        )
+        # Redirected to verification required page
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            ),
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
+        )
+
+
+class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
+    view_class = views.OIDCLoginView
+    view_name = "hidp_oidc_client:login"
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = user_factories.VerifiedUserFactory()
+        cls.connection = models.OpenIdConnection.objects.create(
+            user=cls.user,
+            provider_key="example",
+            issuer_claim="example",
+            subject_claim="test-subject",
+        )
+
+    def setUp(self):
+        configure_oidc_clients(ExampleOIDCClient(client_id="example"))
+
+    def test_valid_login(self):
+        token = self._add_oidc_data_to_session()
+        response = self.client.get(self.url, {"token": token})
+        self.assertEqual(response.wsgi_request.user, self.user)
+
+    def test_valid_login_inactive_user(self):
+        self.user.is_active = False
+        self.user.save()
+        token = self._add_oidc_data_to_session()
+        response = self.client.get(self.url, {"token": token})
+        self.assertEqual(
+            ["Login failed. Invalid credentials."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+
+    def test_valid_login_unverified_user(self):
+        self.user.email_verified = None
+        self.user.save()
+        token = self._add_oidc_data_to_session()
+        response = self.client.get(self.url, {"token": token}, follow=True)
 
         # Verification email sent
         self.assertEqual(len(mail.outbox), 1)

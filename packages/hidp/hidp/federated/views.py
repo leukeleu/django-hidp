@@ -13,6 +13,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, View
 
+from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailer
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_strict
@@ -229,6 +230,60 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
         ).send()
 
         # Redirect to the email verification required page.
+        return HttpResponseRedirect(
+            email_verification.get_email_verification_required_url(
+                user, next_url=self.get_redirect_url()
+            )
+        )
+
+
+@method_decorator(rate_limit_strict, name="dispatch")
+class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
+    """
+    Handles the login process for a user using an OpenID Connect authentication
+    response.
+    """
+
+    token_generator = tokens.OIDCLoginTokenGenerator()
+    next_page = "/"
+    verification_mailer = mailer.EmailVerificationMailer
+
+    def get(self, request):
+        """
+        User has provided valid credentials and is allowed to log in.
+
+        Persist the user and backend in the session and redirect to the
+        success URL.
+
+        If the user's email address has not been verified, redirect them
+        to the email verification required flow.
+        """
+        user = hidp_auth.authenticate(
+            request,
+            provider_key=self.token_data["provider_key"],
+            issuer_claim=self.token_data["claims"]["iss"],
+            subject_claim=self.token_data["claims"]["sub"],
+        )
+        if user is None:
+            # The user could not be authenticated using the OIDC claims.
+            # The account is probably disabled. Just redirect to the login page.
+            messages.error(request, _("Login failed. Invalid credentials."))
+            return HttpResponseRedirect(reverse("hidp_accounts:login"))
+
+        if user.email_verified:
+            # Only log in the user if their email address has been verified.
+            hidp_auth.login(self.request, user)
+            return HttpResponseRedirect(self.get_success_url())
+
+        # If the user's email address is not yet verified:
+        # Send the email verification email.
+        self.verification_mailer(
+            user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
+
+        # Then redirect them to the email verification required page.
         return HttpResponseRedirect(
             email_verification.get_email_verification_required_url(
                 user, next_url=self.get_redirect_url()
