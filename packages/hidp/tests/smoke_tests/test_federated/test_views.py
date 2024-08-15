@@ -84,6 +84,19 @@ class TestOIDCAuthenticationRequestView(TestCase):
             fetch_redirect_response=False,
         )
 
+    def test_stores_next_url_with_state(self):
+        self.client.post(
+            reverse(
+                "hidp_oidc_client:authenticate", kwargs={"provider_key": "example"}
+            ),
+            {"next": "/next"},
+            secure=True,
+        )
+        state_key = next(iter(self.client.session[OIDC_STATES_SESSION_KEY]))
+        self.assertEqual(
+            self.client.session[OIDC_STATES_SESSION_KEY][state_key]["next_url"], "/next"
+        )
+
 
 _VALID_AUTH_CALLBACK = (
     {
@@ -123,7 +136,7 @@ class TestOIDCAuthenticationCallbackView(TestCase):
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
-        return_value=_VALID_AUTH_CALLBACK,
+        return_value=(*_VALID_AUTH_CALLBACK, None),
     )
     def test_calls_handle_authentication_callback(
         self, mock_handle_authentication_callback
@@ -136,6 +149,20 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         mock_handle_authentication_callback.assert_called_once()
         # Redirects to the next url
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=(*_VALID_AUTH_CALLBACK, "/next"),
+    )
+    def test_restores_next_url(self, mock_handle_authentication_callback):
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+            follow=False,
+        )
+        query = urllib.parse.parse_qs(urllib.parse.urlparse(response.url).query)
+        self.assertIn("next", query)
+        self.assertEqual(query["next"][0], "/next")
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
@@ -193,7 +220,7 @@ class TestOIDCAuthenticationCallbackView(TestCase):
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
-        return_value=_VALID_AUTH_CALLBACK,
+        return_value=(*_VALID_AUTH_CALLBACK, None),
     )
     def test_redirect_to_register(self, mock_handle_authentication_callback):
         response = self.client.get(

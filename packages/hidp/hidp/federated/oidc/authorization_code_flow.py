@@ -89,7 +89,7 @@ def _clamp_state_entries(states):
     )
 
 
-def _add_state_to_session(request, state_key):
+def _add_state_to_session(request, state_key, *, next_url=None):
     """
     Adds a state to the session, to be used in the authentication response.
     """
@@ -99,6 +99,7 @@ def _add_state_to_session(request, state_key):
     states[state_key] = {
         # Allow the state to expire after a certain amount of time.
         "created_at": time.time(),
+        "next_url": next_url,
     }
     request.session[OIDC_STATES_SESSION_KEY] = _clamp_state_entries(states)
 
@@ -197,7 +198,14 @@ def create_pkce_challenge(request, *, state_key):
     }
 
 
-def prepare_authentication_request(request, *, client, redirect_uri, **extra_params):
+def prepare_authentication_request(
+    request,
+    *,
+    client,
+    callback_url,
+    next_url=None,
+    **extra_params,
+):
     """
     Prepares an authentication request for an OpenID Connect Authorization Code Flow.
 
@@ -206,8 +214,10 @@ def prepare_authentication_request(request, *, client, redirect_uri, **extra_par
             The current HTTP request.
         client (OIDCClient):
             The OpenID Connect client to use for the authentication request.
-        redirect_uri (str):
+        callback_url (str):
             The (relative) URL to redirect the user to after the authentication.
+        next_url (str | None):
+            The URL to redirect the user to after completing the entire OIDC flow.
         extra_params (dict):
             Additional parameters to include in the authentication request.
 
@@ -217,12 +227,11 @@ def prepare_authentication_request(request, *, client, redirect_uri, **extra_par
     # 2.1.1. Client Prepares Authentication Request
     # https://openid.net/specs/openid-connect-basic-1_0.html#AuthenticationRequest
     state_key = secrets.token_urlsafe(32)
-    _add_state_to_session(request, state_key)
+    _add_state_to_session(request, state_key, next_url=next_url)
 
-    redirect_uri = _build_absolute_uri(request, client, redirect_uri)
     request_parameters = get_authentication_request_parameters(
         client_id=client.client_id,
-        redirect_uri=redirect_uri,
+        redirect_uri=_build_absolute_uri(request, client, callback_url),
         state=state_key,
         **extra_params,
     )
@@ -331,7 +340,7 @@ def validate_authentication_callback(request):
     return code, state
 
 
-def obtain_tokens(request, *, state, client, code, redirect_uri):
+def obtain_tokens(request, *, state, client, code, callback_url):
     """
     Obtains the tokens from an OpenID Connect Authorization Code Flow
     authentication request.
@@ -345,8 +354,8 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
             The OpenID Connect client to use for the authentication request.
         code (str):
             The code received in the callback from the authentication request.
-        redirect_uri (str):
-            The (relative) URL to redirect the user to after the authentication.
+        callback_url (str):
+            The (relative) URL to redirect the user to after authentication.
 
     Returns:
         dict: The token response from the OpenID Connect provider.
@@ -357,7 +366,7 @@ def obtain_tokens(request, *, state, client, code, redirect_uri):
     # 2.1.6.1. Client Sends Code
     # https://openid.net/specs/openid-connect-basic-1_0.html#TokenRequest
 
-    redirect_uri = _build_absolute_uri(request, client, redirect_uri)
+    redirect_uri = _build_absolute_uri(request, client, callback_url)
     redirect_uri_origin = "://".join(urlsplit(redirect_uri)[:2])
 
     token_request_data = {
@@ -593,11 +602,11 @@ def get_user_info(*, client, access_token, claims):
 
 
 _AuthenticationResult = collections.namedtuple(
-    "_AuthenticationResult", ["tokens", "claims", "user_info"]
+    "_AuthenticationResult", ["tokens", "claims", "user_info", "next_url"]
 )
 
 
-def handle_authentication_callback(request, *, client, redirect_uri):
+def handle_authentication_callback(request, *, client, callback_url):
     """
     Handles the callback from an OpenID Connect Authorization Code Flow
     authentication request.
@@ -607,8 +616,8 @@ def handle_authentication_callback(request, *, client, redirect_uri):
             The current HTTP request.
         client (OIDCClient):
             The OpenID Connect client to use for the authentication request.
-        redirect_uri (str):
-            The (relative) URL to redirect the user to after the authentication.
+        callback_url (str):
+            The (relative) URL to redirect the user to after authentication.
 
     Returns:
         _AuthenticationResult:
@@ -625,7 +634,7 @@ def handle_authentication_callback(request, *, client, redirect_uri):
         state=state,
         client=client,
         code=code,
-        redirect_uri=redirect_uri,
+        callback_url=callback_url,
     )
     claims = parse_id_token(token_response.get("id_token"), client=client)
     user_info = get_user_info(
@@ -635,4 +644,5 @@ def handle_authentication_callback(request, *, client, redirect_uri):
         tokens=token_response,
         claims=claims,
         user_info=user_info,
+        next_url=state.get("next_url"),
     )

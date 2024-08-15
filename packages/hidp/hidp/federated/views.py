@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
@@ -37,7 +39,7 @@ class OIDCMixin:
         except KeyError:
             raise Http404(f"OIDC Client not found: {provider_key!r}") from None
 
-    def get_redirect_uri(self, provider_key):
+    def get_callback_url(self, provider_key):
         return reverse(
             self.callback_pattern,
             kwargs={
@@ -47,7 +49,7 @@ class OIDCMixin:
 
 
 @method_decorator(rate_limit_strict, name="dispatch")
-class OIDCAuthenticationRequestView(OIDCMixin, View):
+class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View):
     """
     Initiates an OpenID Connect Authorization Code Flow authentication request.
     """
@@ -67,7 +69,8 @@ class OIDCAuthenticationRequestView(OIDCMixin, View):
             authorization_code_flow.prepare_authentication_request(
                 request,
                 client=self.get_oidc_client(provider_key),
-                redirect_uri=self.get_redirect_uri(provider_key),
+                callback_url=self.get_callback_url(provider_key),
+                next_url=self.get_redirect_url(),
             )
         )
 
@@ -91,6 +94,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
         provider_key,
         claims,
         user_info,
+        redirect_url=None,
     ):
         """
         Decide which flow the user should be redirected to next.
@@ -116,15 +120,18 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                     claims=claims,
                     user_info=user_info,
                 )
-                return reverse("hidp_oidc_client:register") + f"?token={token}"
+                params = {"token": token}
+                if redirect_url:
+                    params["next"] = redirect_url
+                return reverse("hidp_oidc_client:register") + f"?{urlencode(params)}"
 
     def get(self, request, provider_key):
         try:
-            _tokens, claims, user_info = (
+            _tokens, claims, user_info, next_url = (
                 authorization_code_flow.handle_authentication_callback(
                     request,
                     client=self.get_oidc_client(provider_key),
-                    redirect_uri=self.get_redirect_uri(provider_key),
+                    callback_url=self.get_callback_url(provider_key),
                 )
             )
         except InvalidOIDCStateError:
@@ -152,6 +159,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                 provider_key=provider_key,
                 claims=claims,
                 user_info=user_info,
+                redirect_url=next_url,
             )
         )
 

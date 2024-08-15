@@ -50,6 +50,7 @@
   {% for item in oidc_login_providers %}
   <form action="{{ item.url }}" method="POST">
     {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
     <button type="submit">
       {% blocktranslate with provider=item.provider.name %}
         Log in with {{ provider }}
