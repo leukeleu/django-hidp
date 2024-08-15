@@ -15,7 +15,28 @@ from django.utils.translation import gettext_lazy as _
 UserModel = get_user_model()
 
 
-class UserCreationForm(auth_forms.BaseUserCreationForm):
+class TermsOfServiceMixin:
+    @staticmethod
+    def create_agreed_to_tos_field():
+        label = mark_safe(  # noqa: S308 (safe string, no user input)
+            format_lazy(
+                _('I have read and accept the <a href="{url}">Terms of Service</a>.'),
+                url=reverse_lazy("hidp_accounts:tos"),
+            )
+        )
+        return forms.BooleanField(label=label, required=True)
+
+    def set_agreed_to_tos(self, user):
+        """
+        Populate the `agreed_to_tos` field, if the user agreed.
+        """
+        if self.cleaned_data.get("agreed_to_tos", False):
+            # Ensure the user has agreed to the terms of service.
+            # Subclasses may remove the field, or make it optional.
+            user.agreed_to_tos = timezone.now()
+
+
+class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
     """
     Default UserCreationForm, allows user to register with username and password.
     The user **must** agree to the terms of service to register.
@@ -28,15 +49,7 @@ class UserCreationForm(auth_forms.BaseUserCreationForm):
     `settings.AUTH_PASSWORD_VALIDATORS`.
     """
 
-    agreed_to_tos = forms.BooleanField(
-        label=mark_safe(  # noqa: S308 (safe string, no user input)
-            format_lazy(
-                _('I have read and accept the <a href="{url}">Terms of Service</a>.'),
-                url=reverse_lazy("hidp_accounts:tos"),
-            )
-        ),
-        required=True,
-    )
+    agreed_to_tos = TermsOfServiceMixin.create_agreed_to_tos_field()
     # Remove the option to create an account with an unusable password.
     usable_password = None
 
@@ -52,15 +65,10 @@ class UserCreationForm(auth_forms.BaseUserCreationForm):
         return {"email", *super()._get_validation_exclusions()}
 
     def save(self, *, commit=True):
-        user = super().save(commit=commit)
-        if not self.cleaned_data.get("agreed_to_tos", False):
-            # Handle the case where agreed_to_tos is removed,
-            # or is made optional, by a subclass.
-            return user
-
-        user.agreed_to_tos = timezone.now()
+        user = super().save(commit=False)
+        self.set_agreed_to_tos(user)
         if commit:
-            user.save(update_fields=["agreed_to_tos"])
+            user.save()
         return user
 
 
