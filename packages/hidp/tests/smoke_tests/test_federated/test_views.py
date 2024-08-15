@@ -107,7 +107,7 @@ _VALID_AUTH_CALLBACK = (
         "token_type": "token_type",
     },
     {
-        "iss": "test_issuer",
+        "iss": "example",
         "sub": "test_subject",
         "email": "user@example.com",
     },
@@ -232,6 +232,30 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         redirect = urllib.parse.urlparse(response.url)
         self.assertEqual(redirect.path, reverse("hidp_oidc_client:register"))
+        query = urllib.parse.parse_qs(redirect.query)
+        self.assertIn("token", query)
+        token = query["token"][0]
+        self.assertIn(token, self.client.session)
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=(*_VALID_AUTH_CALLBACK, None),
+    )
+    def test_redirect_to_login(self, mock_handle_authentication_callback):
+        user = user_factories.VerifiedUserFactory()
+        models.OpenIdConnection.objects.create(
+            user=user,
+            provider_key="example",
+            issuer_claim="example",
+            subject_claim="test_subject",
+        )
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        redirect = urllib.parse.urlparse(response.url)
+        self.assertEqual(redirect.path, reverse("hidp_oidc_client:login"))
         query = urllib.parse.parse_qs(redirect.query)
         self.assertIn("token", query)
         token = query["token"][0]

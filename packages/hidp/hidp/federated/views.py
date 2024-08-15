@@ -101,19 +101,26 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
         """
         Decide which flow the user should be redirected to next.
         """
-        connection = (
-            OpenIdConnection.objects.select_related("user")
-            .filter(
-                provider_key=provider_key,
-                issuer_claim=claims["iss"],
-                subject_claim=claims["sub"],
-            )
-            .first()
+        view_name = None
+        token = None
+        connection = OpenIdConnection.objects.get_by_provider_and_claims(
+            provider_key=provider_key,
+            issuer_claim=claims["iss"],
+            subject_claim=claims["sub"],
         )
-        if request.user.is_anonymous:
+        if connection:
+            # A connection exists for the given claims. This must be a login attempt.
+            token = OIDCLoginView.add_data_to_session(
+                request,
+                provider_key=provider_key,
+                claims=claims,
+                user_info=user_info,
+            )
+            view_name = "hidp_oidc_client:login"
+        elif request.user.is_anonymous:
             # No user is logged in. Check if a user exists for the given email.
             user = UserModel.objects.filter(email__iexact=claims["email"]).first()
-            if not connection and not user:
+            if not user:
                 # `sub` and `email` claim do not match an existing user:
                 # Redirect the user to the registration page.
                 token = OIDCRegistrationView.add_data_to_session(
@@ -122,10 +129,21 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                     claims=claims,
                     user_info=user_info,
                 )
-                params = {"token": token}
-                if redirect_url:
-                    params["next"] = redirect_url
-                return reverse("hidp_oidc_client:register") + f"?{urlencode(params)}"
+                view_name = "hidp_oidc_client:register"
+
+        if not view_name:
+            raise NotImplementedError("No view name was determined for the next step.")
+
+        # Prepare the URL parameters for the next view. Drop any None values.
+        params = {
+            key: value
+            for key, value in (
+                ("token", token),
+                ("next", redirect_url),
+            )
+            if value is not None
+        }
+        return reverse(view_name) + f"?{urlencode(params)}"
 
     def get(self, request, provider_key):
         try:
