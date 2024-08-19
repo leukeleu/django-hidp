@@ -11,6 +11,7 @@ This is Leukeleu's Headless Identity Provider
 :maxdepth: 2
 installation
 user-model
+management-commands
 rate-limiting
 :::
 
