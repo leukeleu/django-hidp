@@ -116,7 +116,7 @@ Use whatever method is most suitable for your deployment.
 
 ### OpenID Connect based login (social accounts)
 
-To enable users to login using an existing Google, Microsoft or any other provider that
+To enable users to log in using an existing Google, Microsoft or any other provider that
 supports OpenID connect, include the `OIDCModelBackend` in `AUTHENTICATION_BACKENDS`.
 
 ```python
