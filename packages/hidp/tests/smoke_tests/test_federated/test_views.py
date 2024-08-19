@@ -5,6 +5,7 @@ from unittest import mock
 
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.http import HttpRequest
 from django.test import TestCase
 from django.urls import reverse
@@ -295,9 +296,32 @@ class TestOIDCRegistrationView(TestCase):
 
     def test_post_with_valid_token(self):
         token = self._add_oidc_data_to_session()
-        self.client.post(
+        response = self.client.post(
             reverse("hidp_oidc_client:register") + f"?token={token}",
             {"agreed_to_tos": "on"},
+            follow=True,
         )
         user = UserModel.objects.filter(email="user@example.com").first()
         self.assertIsNotNone(user, msg="Expected a user to be created.")
+
+        self.assertIsNone(user.email_verified, msg="Expected email to be unverified.")
+
+        # Verification email sent
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Verify your email address",
+        )
+        # Redirected to verification required page
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            ),
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
+        )

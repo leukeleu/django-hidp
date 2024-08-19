@@ -13,6 +13,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, View
 
+from ..accounts import email_verification, mailer
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_strict
 from . import forms, tokens
@@ -204,6 +205,7 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
     form_class = forms.OIDCRegistrationForm
     template_name = "federated/registration.html"
     next_page = "/"
+    verification_mailer = mailer.EmailVerificationMailer
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -215,7 +217,20 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
         return kwargs
 
     def form_valid(self, form):
-        form.save()
+        user = form.save()
         # Remove the token from the session after the form has been saved.
         del self.request.session[self.token]
-        return super().form_valid(form)
+
+        # Send the email verification email.
+        self.verification_mailer(
+            user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
+
+        # Redirect to the email verification required page.
+        return HttpResponseRedirect(
+            email_verification.get_email_verification_required_url(
+                user, next_url=self.get_redirect_url()
+            )
+        )
