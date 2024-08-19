@@ -1,0 +1,23 @@
+{% load i18n %}
+<!doctype html>
+<html>
+<head>
+  <title>{% translate 'Verify email' %}</title>
+</head>
+<body>
+  {% if validlink %}
+  <h1>{% trans 'Verify email' %}</h1>
+  <form method="post">
+    {% csrf_token %}
+    <button>{% trans 'Verify email' %}</button>
+  </form>
+
+  {% else %}
+  <p>{% blocktranslate %}
+  The link you followed is invalid. It may have expired or been used already.
+  Try logging in to your account to resend the verification email.
+  {% endblocktranslate %}</p>
+
+  {% endif %}
+</body>
+</html>

@@ -1,21 +1,25 @@
 from http import HTTPStatus
 
-from django.test import TestCase, override_settings
+from django.contrib.auth import get_user_model
+from django.core import mail
+from django.test import TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from hidp.accounts.email_verification import get_email_verification_required_url
 from hidp.accounts.forms import UserCreationForm
 from hidp.test.factories import user_factories
+
+User = get_user_model()
 
 
 @override_settings(
     LANGUAGE_CODE="en",
 )
-class TestRegistrationView(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.test_user = user_factories.UserFactory()
-        cls.signup_url = reverse("hidp_accounts:register")
+class TestRegistrationView(TransactionTestCase):
+    def setUp(self):
+        self.test_user = user_factories.UserFactory(email="user@example.com")
+        self.signup_url = reverse("hidp_accounts:register")
 
     def test_get(self):
         """The registration form should be displayed."""
@@ -55,17 +59,35 @@ class TestRegistrationView(TestCase):
                 "password2": "P@ssw0rd!",
                 "agreed_to_tos": "on",
             },
+            follow=True,
         )
-        self.assertRedirects(response, "/", fetch_redirect_response=False)
-        # User should be created and logged in
-        user = response.wsgi_request.user
-        self.assertTrue(user.is_authenticated)
-        self.assertEqual(user.email, "test@example.com")
+        self.assertTrue(
+            User.objects.filter(email="test@example.com").exists(),
+            msg="Expected user to be created",
+        )
+        user = User.objects.get(email="test@example.com")
         # Agreed to TOS
         self.assertAlmostEqual(
             timezone.now(),
-            response.wsgi_request.user.agreed_to_tos,
+            user.agreed_to_tos,
             delta=timezone.timedelta(seconds=10),
+        )
+        # Verification email sent
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Verify your email address",
+        )
+        # Redirected to verification required page
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
+            get_email_verification_required_url(user),
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
         )
 
     def test_valid_registration_safe_next_param(self):
@@ -78,8 +100,18 @@ class TestRegistrationView(TestCase):
                 "agreed_to_tos": "on",
                 "next": "/example/",
             },
+            follow=True,
         )
-        self.assertRedirects(response, "/example/", fetch_redirect_response=False)
+        self.assertTrue(
+            User.objects.filter(email="test@example.com").exists(),
+            msg="Expected user to be created",
+        )
+        user = User.objects.get(email="test@example.com")
+        # Redirected to verification required page
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
+            get_email_verification_required_url(user, next_url="/example/"),
+        )
 
     def test_valid_registration_unsafe_next_param(self):
         response = self.client.post(
@@ -91,25 +123,73 @@ class TestRegistrationView(TestCase):
                 "agreed_to_tos": "on",
                 "next": "https://example.com/",
             },
+            follow=True,
         )
-        self.assertRedirects(response, "/", fetch_redirect_response=False)
+        self.assertTrue(
+            User.objects.filter(email="test@example.com").exists(),
+            msg="Expected user to be created",
+        )
+        user = User.objects.get(email="test@example.com")
+        # Redirected to verification required page
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
+            get_email_verification_required_url(user),
+        )
 
-    def test_duplicate_email(self):
-        """A user should not be able to sign up with an existing email."""
+    def test_duplicate_email_unverified(self):
+        """Signup using an exiting email should look like a successful signup."""
         response = self.client.post(
             self.signup_url,
             {
-                "email": self.test_user.email,
+                # Different case, still considered duplicate
+                "email": "USER@EXAMPLE.COM",
                 "password1": "P@ssw0rd!",
                 "password2": "P@ssw0rd!",
                 "agreed_to_tos": "on",
             },
+            follow=True,
         )
-        self.assertFormError(
-            response.context["form"],
-            "email",
-            "User with this Email address already exists.",
+        # Redirected to verification required page
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
+            get_email_verification_required_url(self.test_user),
         )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
+        )
+
+    def test_duplicate_email_verified(self):
+        """Verified users should get a reminder mail."""
+        self.test_user.email_verified = timezone.now()
+        self.test_user.save()
+        response = self.client.post(
+            self.signup_url,
+            {
+                # Different case, still considered duplicate
+                "email": "USER@EXAMPLE.COM",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
+            },
+            follow=True,
+        )
+        # Redirected to verification required page
+        self.assertURLEqual(
+            response.redirect_chain[0][0],
+            get_email_verification_required_url(self.test_user),
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
+        )
+        # Sends an email notification to the user
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.to, [self.test_user.email])
+        self.assertEqual("Sign up request", message.subject)
 
     def test_with_logged_in_user(self):
         """A logged-in user should not be able to sign up again."""

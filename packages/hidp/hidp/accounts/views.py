@@ -1,19 +1,27 @@
+from urllib.parse import urlencode
+
 from django_ratelimit.decorators import ratelimit
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.core.exceptions import PermissionDenied
+from django.db import IntegrityError
+from django.db.models.functions import MD5
 from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import generic
+from django.views.decorators.cache import never_cache
 
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
-from . import forms
+from . import email_verification, forms, mailer, tokens
+
+User = get_user_model()
 
 
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
@@ -24,8 +32,8 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     Display the registration form and handle the registration action.
 
     If the form is submitted with valid data, a new user account will be created
-    and the user will be logged in and redirected to the location returned
-    by get_success_url().
+    and the user will be redirected to a page informing them that they must verify
+    their email address.
 
     Otherwise, the form will be displayed with an error message explaining the
     reason for the failure and the user can try again.
@@ -34,6 +42,19 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     form_class = forms.UserCreationForm
     template_name = "accounts/register.html"
     next_page = "/"
+    verification_mailer = mailer.EmailVerificationMailer
+    account_exists_mailer = mailer.AccountExistsMailer
+
+    def get_context_data(self, **kwargs):
+        login_url = resolve_url(settings.LOGIN_URL) + (
+            f"?{urlencode({'next': redirect_url})}"
+            if (redirect_url := self.get_redirect_url())
+            else ""
+        )
+        return super().get_context_data(
+            login_url=login_url,
+            **kwargs,
+        )
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -42,18 +63,35 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
 
     def form_valid(self, form):
         """
-        Save the new user and log them in.
+        Save the new user and redirect to the email verification required page.
         """
-        user = form.save()
-        hidp_auth.login(
-            self.request,
-            hidp_auth.authenticate(
-                request=self.request,
-                username=user.get_username(),
-                password=form.cleaned_data["password1"],
-            ),
+        try:
+            user = form.save()
+        except IntegrityError:
+            # The user exists! Find the user by the email address (case-insensitive).
+            user = User.objects.get(email__iexact=form.cleaned_data["email"])
+
+        if not user.email_verified:
+            # Send the email verification email.
+            self.verification_mailer(
+                user,
+                base_url=self.request.build_absolute_uri("/"),
+                post_verification_redirect=self.get_redirect_url(),
+            ).send()
+        else:
+            # Email the user to inform them that they have an account.
+            self.account_exists_mailer(
+                user,
+                base_url=self.request.build_absolute_uri("/"),
+            ).send()
+
+        # Always redirect to the email verification required page.
+        # This is a security measure to prevent user enumeration.
+        return HttpResponseRedirect(
+            email_verification.get_email_verification_required_url(
+                user, next_url=self.get_redirect_url()
+            )
         )
-        return HttpResponseRedirect(self.get_success_url())
 
 
 class TermsOfServiceView(generic.TemplateView):
@@ -62,6 +100,155 @@ class TermsOfServiceView(generic.TemplateView):
     """
 
     template_name = "accounts/tos.html"
+
+
+@method_decorator(rate_limit_default, name="dispatch")
+@method_decorator(never_cache, name="dispatch")
+class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.TemplateView):
+    """
+    Display a notice that the user must verify their email address by
+    clicking a link in an email that was sent to them.
+
+    The page also includes the option to request a new verification email.
+    """
+
+    template_name = "accounts/verification/email_verification_required.html"
+    token_generator = tokens.email_verification_request_token_generator
+    verification_mailer = mailer.EmailVerificationMailer
+    token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
+    token_placeholder = "email"  # noqa: S105 (not a password)
+
+    def dispatch(self, request, *, token):
+        if token == self.token_placeholder:
+            token = self.request.session.get(self.token_session_key)
+        else:
+            # Store the token in the session and redirect to the
+            # URL with a placeholder value.
+            self.request.session[self.token_session_key] = token
+            redirect_url = self.request.get_full_path().replace(
+                token, self.token_placeholder
+            )
+            return HttpResponseRedirect(redirect_url, status=308)
+
+        email_hash = self.token_generator.check_token(token)
+        try:
+            # Find the user by the hash of their email address
+            self.user = User.objects.annotate(email_hash=MD5("email")).get(
+                email_hash=email_hash
+            )
+            self.validlink = True
+        except User.DoesNotExist:
+            self.validlink = False
+            self.user = None
+        return super().dispatch(request, token=token)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            validlink=self.validlink,
+            **kwargs,
+        )
+
+    def post(self, *args, **kwargs):
+        if self.validlink:
+            # Send the email verification email.
+            self.verification_mailer(
+                self.user,
+                base_url=self.request.build_absolute_uri("/"),
+                post_verification_redirect=self.get_redirect_url(),
+            ).send()
+            # Redirect to the email verification required page, with a new token.
+            return HttpResponseRedirect(
+                email_verification.get_email_verification_required_url(
+                    self.user, next_url=self.get_redirect_url()
+                )
+            )
+        # Invalid token, do nothing and redirect to the same page.
+        return HttpResponseRedirect(self.request.get_full_path())
+
+
+@method_decorator(rate_limit_default, name="dispatch")
+@method_decorator(never_cache, name="dispatch")
+class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
+    """
+    Landing page for email verification links.
+
+    Contains a form that must be submitted to complete the verification process.
+    """
+
+    form_class = forms.EmailVerificationForm
+    template_name = "accounts/verification/verify_email.html"
+    token_generator = tokens.email_verification_token_generator
+    success_url = reverse_lazy("hidp_accounts:email_verification_complete")
+    token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
+    token_placeholder = "email"  # noqa: S105 (not a password)
+
+    def dispatch(self, request, *, token):
+        if token == self.token_placeholder:
+            token = self.request.session.get(self.token_session_key)
+        else:
+            # Store the token in the session and redirect to the
+            # URL with a placeholder value.
+            self.request.session[self.token_session_key] = token
+            redirect_url = self.request.get_full_path().replace(
+                token, self.token_placeholder
+            )
+            return HttpResponseRedirect(redirect_url, status=308)
+
+        email_hash = self.token_generator.check_token(token)
+        try:
+            # Find the user by the hash of their email address
+            self.user = (
+                User.objects.annotate(email_hash=MD5("email"))
+                .filter(is_active=True, email_verified__isnull=True)
+                .get(email_hash=email_hash)
+            )
+            self.validlink = True
+        except User.DoesNotExist:
+            self.validlink = False
+            self.user = None
+        return super().dispatch(request, token=token)
+
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            "user": self.user,
+        }
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            validlink=self.validlink,
+            **kwargs,
+        )
+
+    def form_valid(self, form):
+        form.save()
+        return HttpResponseRedirect(
+            str(self.success_url)
+            + (
+                f"?{urlencode({'next': redirect_url})}"
+                if (redirect_url := self.get_redirect_url())
+                else ""
+            )
+        )
+
+
+class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.TemplateView):
+    """
+    Display a message that the email address has been verified.
+    """
+
+    template_name = "accounts/verification/email_verification_complete.html"
+
+    def get_context_data(self, **kwargs):
+        login_url = resolve_url(settings.LOGIN_URL) + (
+            f"?{urlencode({'next': redirect_url})}"
+            if (redirect_url := self.get_redirect_url())
+            else ""
+        )
+        return super().get_context_data(
+            login_url=login_url,
+            **kwargs,
+        )
 
 
 @method_decorator(
@@ -88,6 +275,9 @@ class LoginView(auth_views.LoginView):
     # instead of displaying the login form.
     redirect_authenticated_user = False
 
+    # Mailer class to use when a user's email address is not verified
+    verification_mailer = mailer.EmailVerificationMailer
+
     def get_context_data(self, **kwargs):
         """
         Additional context data for the login template.
@@ -105,6 +295,11 @@ class LoginView(auth_views.LoginView):
           The name of the current site (host name if `RequestSite` is used)
         * Any additional data present is `self.extra_context`
         """
+        register_url = reverse("hidp_accounts:register") + (
+            f"?{urlencode({'next': redirect_url})}"
+            if (redirect_url := self.get_redirect_url())
+            else ""
+        )
         return super().get_context_data(
             oidc_login_providers=[
                 {
@@ -119,6 +314,7 @@ class LoginView(auth_views.LoginView):
                 for provider in oidc_clients.get_registered_oidc_clients()
             ],
             messages=messages.get_messages(self.request),
+            register_url=register_url,
             **kwargs,
         )
 
@@ -139,13 +335,33 @@ class LoginView(auth_views.LoginView):
     def form_valid(self, form):
         """
         User has provided valid credentials and is allowed to log in.
+
         Persist the user and backend in the session and redirect to the
         success URL.
+
+        If the user's email address has not been verified, redirect them
+        to the email verification required flow.
         """
-        # This **replaces** the base implementation in order to use the
-        # HIdP login wrapper function, that performs additional checks.
-        hidp_auth.login(self.request, form.get_user())
-        return HttpResponseRedirect(self.get_success_url())
+        user = form.get_user()
+        if user.email_verified:
+            # Only log in the user if their email address has been verified.
+            hidp_auth.login(self.request, user)
+            return HttpResponseRedirect(self.get_success_url())
+
+        # If the user's email address is not yet verified:
+        # Send the email verification email.
+        self.verification_mailer(
+            user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
+
+        # Then redirect them to the email verification required page.
+        return HttpResponseRedirect(
+            email_verification.get_email_verification_required_url(
+                user, next_url=self.get_redirect_url()
+            )
+        )
 
 
 @method_decorator(rate_limit_default, name="dispatch")
