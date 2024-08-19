@@ -41,6 +41,9 @@ OAUTH2_PROVIDER = {
     # Enable OpenID Connect support.
     # Default in DOT is False.
     "OIDC_ENABLED": True,
+    # Enable and configure RP-Initiated Logout
+    # Default in DOT is False
+    "OIDC_RP_INITIATED_LOGOUT_ENABLED": True,
     "OIDC_RSA_PRIVATE_KEY": None,
     # A list of scopes that can be requested by clients, with descriptions.
     "SCOPES": {
