@@ -25,10 +25,35 @@ from . import email_verification, forms, mailer, tokens
 UserModel = get_user_model()
 
 
+class OIDCLoginContextMixin:
+    """
+    Mixin to provide context data for OIDC login providers.
+    """
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            oidc_login_providers=[
+                {
+                    "provider": provider,
+                    "url": reverse(
+                        "hidp_oidc_client:authenticate",
+                        kwargs={
+                            "provider_key": provider.provider_key,
+                        },
+                    ),
+                }
+                for provider in oidc_clients.get_registered_oidc_clients()
+            ],
+            **kwargs,
+        )
+
+
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
 @method_decorator(ratelimit(key="ip", rate="5/m", method="POST"), name="post")
 @method_decorator(ratelimit(key="ip", rate="30/15m", method="POST"), name="post")
-class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
+class RegistrationView(
+    auth_views.RedirectURLMixin, OIDCLoginContextMixin, generic.FormView
+):
     """
     Display the registration form and handle the registration action.
 
@@ -256,7 +281,7 @@ class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.Templat
     ratelimit(key="post:username", rate="10/m", method="POST"), name="post"
 )
 @method_decorator(rate_limit_strict, name="dispatch")
-class LoginView(auth_views.LoginView):
+class LoginView(OIDCLoginContextMixin, auth_views.LoginView):
     """
     Display the login form and handle the login action.
 
@@ -302,18 +327,6 @@ class LoginView(auth_views.LoginView):
             else ""
         )
         return super().get_context_data(
-            oidc_login_providers=[
-                {
-                    "provider": provider,
-                    "url": reverse(
-                        "hidp_oidc_client:authenticate",
-                        kwargs={
-                            "provider_key": provider.provider_key,
-                        },
-                    ),
-                }
-                for provider in oidc_clients.get_registered_oidc_clients()
-            ],
             messages=messages.get_messages(self.request),
             register_url=register_url,
             **kwargs,
