@@ -4,7 +4,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template import loader
 from django.urls import reverse
 
-from hidp.accounts import email_verification
+from . import email_verification
 
 
 class BaseMailer:

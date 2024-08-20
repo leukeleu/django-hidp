@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core import checks
 from django.urls import NoReverseMatch, reverse
 
-from hidp.accounts.models import BaseUser
+from ..accounts.models import BaseUser
 
 REQUIRED_APPS = [
     "django.contrib.contenttypes",

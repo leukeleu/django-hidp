@@ -25,8 +25,8 @@ from oauth2_provider import views as oauth2_views
 
 from django.urls import path
 
-from hidp.accounts.views import RPInitiatedLogoutView
-from hidp.rate_limit.decorators import rate_limit_default, rate_limit_strict
+from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
+from .views import RPInitiatedLogoutView
 
 app_name = "oauth2_provider"
 
