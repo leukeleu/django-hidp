@@ -5,6 +5,31 @@ from django.utils.translation import gettext_lazy as _
 from ..compat.uuid7 import uuid7
 
 
+class OpenIdConnectionQuerySet(models.QuerySet):
+    def get_by_provider_and_claims(self, provider_key, *, issuer_claim, subject_claim):
+        """
+        Get an OpenID connection by provider key and claims.
+        Prefetches the associated user along with the query.
+
+        Args:
+            provider_key (str): The provider key.
+            issuer_claim (str): The issuer claim.
+            subject_claim (str): The subject claim.
+
+        Returns:
+            OpenIdConnection: The OpenID connection if found, otherwise None.
+        """
+        return (
+            self.select_related("user")
+            .filter(
+                provider_key=provider_key,
+                issuer_claim=issuer_claim,
+                subject_claim=subject_claim,
+            )
+            .first()
+        )
+
+
 class OpenIdConnection(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid7, editable=False)
 
@@ -25,6 +50,9 @@ class OpenIdConnection(models.Model):
     # Unique identifier for the user at the identity provider (i.e. the "sub" claim)
     # Guaranteed to be unique together with the issuer_claim.
     subject_claim = models.CharField(max_length=255)
+
+    # Manager
+    objects = OpenIdConnectionQuerySet.as_manager()
 
     class Meta:
         # The sub (subject) and iss (issuer) Claims, used together,

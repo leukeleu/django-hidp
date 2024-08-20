@@ -9,7 +9,7 @@ class TestOpenIdConnectionModel(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory()
-        cls.oidc_data = models.OpenIdConnection.objects.create(
+        cls.connection = models.OpenIdConnection.objects.create(
             user=cls.user,
             provider_key="test-provider",
             issuer_claim="test-issuer",
@@ -30,7 +30,7 @@ class TestOpenIdConnectionModel(TestCase):
 
     def test_str(self):
         self.assertEqual(
-            str(self.oidc_data),
+            str(self.connection),
             (
                 f"user: '{self.user.id}'"
                 f" provider: 'test-provider'"
@@ -38,3 +38,13 @@ class TestOpenIdConnectionModel(TestCase):
                 f" sub: 'test-subject'"
             ),
         )
+
+    def test_get_by_provider_and_claims(self):
+        with self.assertNumQueries(1):
+            connection = models.OpenIdConnection.objects.get_by_provider_and_claims(
+                provider_key="test-provider",
+                issuer_claim="test-issuer",
+                subject_claim="test-subject",
+            )
+            self.assertEqual(connection, self.connection)
+            self.assertEqual(connection.user, self.user)
