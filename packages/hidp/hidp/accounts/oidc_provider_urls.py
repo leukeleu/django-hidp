@@ -25,6 +25,7 @@ from oauth2_provider import views as oauth2_views
 
 from django.urls import path
 
+from hidp.accounts.views import RPInitiatedLogoutView
 from hidp.rate_limit.decorators import rate_limit_default, rate_limit_strict
 
 app_name = "oauth2_provider"
@@ -70,7 +71,7 @@ oidc_urlpatterns = [
     ),
     path(
         "logout/",
-        rate_limit_default(oauth2_views.RPInitiatedLogoutView.as_view()),
+        rate_limit_default(RPInitiatedLogoutView.as_view()),
         name="rp-initiated-logout",
     ),
 ]

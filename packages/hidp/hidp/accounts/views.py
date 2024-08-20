@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 
 from django_ratelimit.decorators import ratelimit
+from oauth2_provider import views as oauth2_views
 
 from django.conf import settings
 from django.contrib import messages
@@ -466,3 +467,7 @@ class PasswordResetCompleteView(auth_views.TemplateView):
             login_url=resolve_url(settings.LOGIN_URL),
             **kwargs,
         )
+
+
+class RPInitiatedLogoutView(oauth2_views.RPInitiatedLogoutView):
+    template_name = "accounts/logout_confirm.html"
