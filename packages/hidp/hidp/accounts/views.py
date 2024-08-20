@@ -22,7 +22,7 @@ from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
 from . import email_verification, forms, mailer, tokens
 
-User = get_user_model()
+UserModel = get_user_model()
 
 
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
@@ -70,7 +70,7 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
             user = form.save()
         except IntegrityError:
             # The user exists! Find the user by the email address (case-insensitive).
-            user = User.objects.get(email__iexact=form.cleaned_data["email"])
+            user = UserModel.objects.get(email__iexact=form.cleaned_data["email"])
 
         if not user.email_verified:
             # Send the email verification email.
@@ -134,11 +134,11 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
         email_hash = self.token_generator.check_token(token)
         try:
             # Find the user by the hash of their email address
-            self.user = User.objects.annotate(email_hash=MD5("email")).get(
+            self.user = UserModel.objects.annotate(email_hash=MD5("email")).get(
                 email_hash=email_hash
             )
             self.validlink = True
-        except User.DoesNotExist:
+        except UserModel.DoesNotExist:
             self.validlink = False
             self.user = None
         return super().dispatch(request, token=token)
@@ -199,12 +199,12 @@ class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
         try:
             # Find the user by the hash of their email address
             self.user = (
-                User.objects.annotate(email_hash=MD5("email"))
+                UserModel.objects.annotate(email_hash=MD5("email"))
                 .filter(is_active=True, email_verified__isnull=True)
                 .get(email_hash=email_hash)
             )
             self.validlink = True
-        except User.DoesNotExist:
+        except UserModel.DoesNotExist:
             self.validlink = False
             self.user = None
         return super().dispatch(request, token=token)

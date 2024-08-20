@@ -10,9 +10,8 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import View
 
-from hidp.rate_limit.decorators import rate_limit_strict
-
 from ..config import oidc_clients
+from ..rate_limit.decorators import rate_limit_strict
 from .oidc import authorization_code_flow
 from .oidc.exceptions import InvalidOIDCStateError, OAuth2Error
 

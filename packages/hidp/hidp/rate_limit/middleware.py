@@ -1,7 +1,7 @@
 from django_ratelimit.exceptions import Ratelimited
 from django_ratelimit.middleware import RatelimitMiddleware as _RatelimitMiddleware
 
-from hidp.rate_limit.views import rate_limited
+from ..rate_limit.views import rate_limited
 
 
 class RateLimitMiddleware(_RatelimitMiddleware):
