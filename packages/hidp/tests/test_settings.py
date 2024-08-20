@@ -62,6 +62,12 @@ USE_TZ = True
 
 AUTH_USER_MODEL = "custom_user.CustomUser"
 
+# Custom authentication backend
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "hidp.federated.auth.backends.OIDCModelBackend",
+]
+
 # Login and logout settings
 LOGIN_URL = "hidp_accounts:login"
 LOGIN_REDIRECT_URL = "/"
