@@ -1,0 +1,35 @@
+{% load i18n %}
+<!doctype html>
+<html>
+<head>
+  <title>{% translate 'Log out' %}</title>
+</head>
+<body>
+  {% if not error %}
+
+  {% if application %}
+  <h1>{% translate 'Confirm Logout requested by' %}{{ application.name }}</h1>
+  {% else %}
+  <h1>{% translate 'Confirm Logout'%}</h1>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+
+    {% for field in form %}
+    {% if field.is_hidden %}
+      {{ field }}
+    {% endif %}
+    {% endfor %}
+
+    <button type="submit" value="Cancel">{% translate 'Cancel' %}</button>
+    <button type="submit" name="allow" value="Log out">{% translate 'Log out' %}</button>
+
+  </form>
+
+  {% else %}
+  <h1>{% translate 'Error' %}: {{ error.error }}</h1>
+  <p>{{ error.description }}</p>
+  {% endif %}
+</body>
+</html>
