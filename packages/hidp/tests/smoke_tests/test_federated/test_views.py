@@ -292,7 +292,7 @@ class TestOIDCRegistrationView(TestCase):
             reverse("hidp_oidc_client:register"), {"token": token}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "federated/registration.html")
+        self.assertTemplateUsed(response, "hidp/federated/registration.html")
 
     def test_post_with_valid_token(self):
         token = self._add_oidc_data_to_session()

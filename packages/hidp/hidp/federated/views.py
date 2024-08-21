@@ -203,7 +203,7 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
 
     token_generator = tokens.OIDCRegistrationTokenGenerator()
     form_class = forms.OIDCRegistrationForm
-    template_name = "federated/registration.html"
+    template_name = "hidp/federated/registration.html"
     next_page = "/"
     verification_mailer = mailer.EmailVerificationMailer
 
