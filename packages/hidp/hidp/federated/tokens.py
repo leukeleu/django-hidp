@@ -48,3 +48,10 @@ class OIDCLoginTokenGenerator(BaseTokenGenerator):
 
     key_salt = "oidc-login"
     token_timeout = timedelta(minutes=5).total_seconds()
+
+
+class OIDCAccountLinkTokenGenerator(BaseTokenGenerator):
+    """Token for the OIDC account linking process."""
+
+    key_salt = "oidc-account-link"
+    token_timeout = timedelta(minutes=15).total_seconds()
