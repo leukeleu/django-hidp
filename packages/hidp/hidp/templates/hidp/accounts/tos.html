@@ -1,10 +1,9 @@
+{% extends "hidp/base.html" %}
 {% load i18n %}
-<!doctype html>
-<html>
-<head>
-  <title>{% translate "Terms of Service" %}</title>
-</head>
-<body>
+
+{% block title %}{% translate "Terms of Service" %}{% endblock %}
+
+{% block body %}
   <h1>{% translate "Terms of Service" %}</h1>
 
   {% comment %}
@@ -102,5 +101,4 @@
   To the fullest extent permitted by law, we will not be liable for any indirect, incidental, special, consequential,
   or punitive damages arising out of or related to your use of our services.
   {% endblocktranslate %}</p>
-</body>
-</html>
+{% endblock %}

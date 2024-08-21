@@ -1,10 +1,9 @@
+{% extends "hidp/base.html" %}
 {% load i18n %}
-<!doctype html>
-<html>
-<head>
-  <title>{% translate 'Verify email' %}</title>
-</head>
-<body>
+
+{% block title %}{% translate 'Verify email' %}{% endblock %}
+
+{% block body %}
   {% if validlink %}
   <h1>{% trans 'Verify email' %}</h1>
   <form method="post">
@@ -19,5 +18,4 @@
   {% endblocktranslate %}</p>
 
   {% endif %}
-</body>
-</html>
+{% endblock %}
