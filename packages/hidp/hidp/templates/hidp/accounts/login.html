@@ -29,6 +29,14 @@
 
   <h1>{% translate 'Log in with username and password' %}</h1>
 
+  {% if request.limited %}
+  <p>
+    {% blocktranslate %}
+    Your login attempt has been rate limited. Additional security measures are in place for your protection.
+    {% endblocktranslate %}
+  </p>
+  {% endif %}
+
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
