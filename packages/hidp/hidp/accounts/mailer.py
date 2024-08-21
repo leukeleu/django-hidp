@@ -86,8 +86,8 @@ class BaseMailer:
 
 
 class EmailVerificationMailer(BaseMailer):
-    subject_template_name = "accounts/verification/email/verification_subject.txt"
-    email_template_name = "accounts/verification/email/verification_body.txt"
+    subject_template_name = "hidp/accounts/verification/email/verification_subject.txt"
+    email_template_name = "hidp/accounts/verification/email/verification_body.txt"
 
     def __init__(self, user, *, base_url, post_verification_redirect=None):
         super().__init__(base_url=base_url)
@@ -114,8 +114,10 @@ class EmailVerificationMailer(BaseMailer):
 
 
 class AccountExistsMailer(BaseMailer):
-    subject_template_name = "accounts/verification/email/account_exists_subject.txt"
-    email_template_name = "accounts/verification/email/account_exists_body.txt"
+    subject_template_name = (
+        "hidp/accounts/verification/email/account_exists_subject.txt"
+    )
+    email_template_name = "hidp/accounts/verification/email/account_exists_body.txt"
 
     def __init__(self, user, *, base_url):
         super().__init__(base_url=base_url)

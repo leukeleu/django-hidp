@@ -199,8 +199,8 @@ class PasswordResetRequestForm(auth_forms.PasswordResetForm):
             Defaults to `django.contrib.auth.tokens.default_token_generator`.
     """
 
-    subject_template_name = "accounts/recovery/email/password_reset_subject.txt"
-    email_template_name = "accounts/recovery/email/password_reset_body.txt"
+    subject_template_name = "hidp/accounts/recovery/email/password_reset_subject.txt"
+    email_template_name = "hidp/accounts/recovery/email/password_reset_body.txt"
     html_email_template_name = None
     password_reset_token_generator = default_token_generator
 

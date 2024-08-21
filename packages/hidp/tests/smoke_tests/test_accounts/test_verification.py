@@ -26,7 +26,7 @@ class TestEmailVerificationRequiredView(TestCase):
         """Convenience method to assert the response."""
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTemplateUsed(
-            response, "accounts/verification/email_verification_required.html"
+            response, "hidp/accounts/verification/email_verification_required.html"
         )
         self.assertIn("validlink", response.context)
         if validlink:
@@ -105,7 +105,9 @@ class TestEmailVerificationView(TestCase):
     def _assert_response(self, response, *, validlink=True):
         """Convenience method to assert the response."""
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertTemplateUsed(response, "accounts/verification/verify_email.html")
+        self.assertTemplateUsed(
+            response, "hidp/accounts/verification/verify_email.html"
+        )
         self.assertIn("validlink", response.context)
         if validlink:
             self.assertTrue(

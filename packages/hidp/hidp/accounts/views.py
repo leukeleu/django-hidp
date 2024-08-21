@@ -41,7 +41,7 @@ class RegistrationView(auth_views.RedirectURLMixin, generic.FormView):
     """
 
     form_class = forms.UserCreationForm
-    template_name = "accounts/register.html"
+    template_name = "hidp/accounts/register.html"
     next_page = "/"
     verification_mailer = mailer.EmailVerificationMailer
     account_exists_mailer = mailer.AccountExistsMailer
@@ -100,7 +100,7 @@ class TermsOfServiceView(generic.TemplateView):
     Display the terms of service.
     """
 
-    template_name = "accounts/tos.html"
+    template_name = "hidp/accounts/tos.html"
 
 
 @method_decorator(rate_limit_default, name="dispatch")
@@ -113,7 +113,7 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
     The page also includes the option to request a new verification email.
     """
 
-    template_name = "accounts/verification/email_verification_required.html"
+    template_name = "hidp/accounts/verification/email_verification_required.html"
     token_generator = tokens.email_verification_request_token_generator
     verification_mailer = mailer.EmailVerificationMailer
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
@@ -177,7 +177,7 @@ class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
     """
 
     form_class = forms.EmailVerificationForm
-    template_name = "accounts/verification/verify_email.html"
+    template_name = "hidp/accounts/verification/verify_email.html"
     token_generator = tokens.email_verification_token_generator
     success_url = reverse_lazy("hidp_accounts:email_verification_complete")
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
@@ -238,7 +238,7 @@ class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.Templat
     Display a message that the email address has been verified.
     """
 
-    template_name = "accounts/verification/email_verification_complete.html"
+    template_name = "hidp/accounts/verification/email_verification_complete.html"
 
     def get_context_data(self, **kwargs):
         login_url = resolve_url(settings.LOGIN_URL) + (
@@ -270,7 +270,7 @@ class LoginView(auth_views.LoginView):
     # The form class to use for authentication
     form_class = forms.AuthenticationForm
     # The template to use for displaying the login form
-    template_name = "accounts/login.html"
+    template_name = "hidp/accounts/login.html"
 
     # If the user is already authenticated, redirect to the success URL
     # instead of displaying the login form.
@@ -424,7 +424,7 @@ class PasswordResetRequestView(generic.FormView):
     """
 
     form_class = forms.PasswordResetRequestForm
-    template_name = "accounts/recovery/password_reset_request.html"
+    template_name = "hidp/accounts/recovery/password_reset_request.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_email_sent")
     password_reset_view = "hidp_accounts:password_reset"  # noqa: S105 (not a password)
 
@@ -441,7 +441,7 @@ class PasswordResetEmailSentView(generic.TemplateView):
     Display a message that the password reset email has been sent.
     """
 
-    template_name = "accounts/recovery/password_reset_email_sent.html"
+    template_name = "hidp/accounts/recovery/password_reset_email_sent.html"
 
 
 @method_decorator(rate_limit_default, name="dispatch")
@@ -451,7 +451,7 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
     """
 
     form_class = forms.PasswordResetForm
-    template_name = "accounts/recovery/password_reset.html"
+    template_name = "hidp/accounts/recovery/password_reset.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_complete")
 
 
@@ -460,7 +460,7 @@ class PasswordResetCompleteView(auth_views.TemplateView):
     Display a message that the password reset has been completed.
     """
 
-    template_name = "accounts/recovery/password_reset_complete.html"
+    template_name = "hidp/accounts/recovery/password_reset_complete.html"
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
@@ -470,4 +470,4 @@ class PasswordResetCompleteView(auth_views.TemplateView):
 
 
 class RPInitiatedLogoutView(oauth2_views.RPInitiatedLogoutView):
-    template_name = "accounts/logout_confirm.html"
+    template_name = "hidp/accounts/logout_confirm.html"

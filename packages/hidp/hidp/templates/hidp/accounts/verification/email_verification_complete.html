@@ -1,14 +1,12 @@
+{% extends "hidp/base.html" %}
 {% load i18n %}
-<!doctype html>
-<html>
-<head>
-  <title>{% translate 'Verification completed' %}</title>
-</head>
-<body>
+
+{% block title %}{% translate 'Verification completed' %}{% endblock %}
+
+{% block body %}
   <h1>{% trans 'Verification completed' %}</h1>
 
   <p>{% blocktranslate %}
   Your email address verified. You can now <a href="{{ login_url }}">log in</a>.
   {% endblocktranslate %}</p>
-</body>
-</html>
+{% endblock %}

@@ -1,10 +1,9 @@
+{% extends "hidp/base.html" %}
 {% load i18n %}
-<!doctype html>
-<html>
-<head>
-  <title>{% translate 'Log in' %}</title>
-</head>
-<body>
+
+{% block title %}{% translate 'Log in' %}{% endblock %}
+
+{% block body %}
   {% if messages %}
   <ul class="messages">
     {% for message in messages %}
@@ -68,5 +67,4 @@
     Don't have an account yet? <a href="{{ register_url }}">Sign up</a>.
     {% endblocktranslate %}
   </p>
-</body>
-</html>
+{% endblock %}

@@ -1,10 +1,9 @@
+{% extends "hidp/base.html" %}
 {% load i18n %}
-<!doctype html>
-<html>
-<head>
-  <title>{% translate 'Verification required' %}</title>
-</head>
-<body>
+
+{% block title %}{% translate 'Verification required' %}{% endblock %}
+
+{% block body %}
   {% if validlink %}
   <h1>{% trans 'Verification required' %}</h1>
 
@@ -28,5 +27,4 @@
   {% endblocktranslate %}</p>
 
   {% endif %}
-</body>
-</html>
+{% endblock %}

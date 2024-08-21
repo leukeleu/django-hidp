@@ -1,10 +1,9 @@
+{% extends "hidp/base.html" %}
 {% load i18n %}
-<!doctype html>
-<html>
-<head>
-  <title>{% translate 'Log out' %}</title>
-</head>
-<body>
+
+{% block title %}{% translate 'Log out' %}{% endblock %}
+
+{% block body %}
   {% if not error %}
 
   {% if application %}
@@ -31,5 +30,4 @@
   <h1>{% translate 'Error' %}: {{ error.error }}</h1>
   <p>{{ error.description }}</p>
   {% endif %}
-</body>
-</html>
+{% endblock %}
