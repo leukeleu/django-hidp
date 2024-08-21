@@ -17,7 +17,7 @@ class TestPasswordResetFlow(TestCase):
         """Render the password reset request form."""
         response = self.client.get(reverse("hidp_accounts:password_reset_request"))
         self.assertTemplateUsed(
-            response, "accounts/recovery/password_reset_request.html"
+            response, "hidp/accounts/recovery/password_reset_request.html"
         )
         self.assertIsInstance(response.context["form"], forms.PasswordResetRequestForm)
 
@@ -69,8 +69,8 @@ class TestPasswordResetFlow(TestCase):
     def test_user_request_password_reset_email(self):
         """A user can request a password reset email."""
         with (
-            self.assertTemplateUsed("accounts/recovery/email/password_reset_subject.txt"),
-            self.assertTemplateUsed("accounts/recovery/email/password_reset_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/recovery/email/password_reset_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/recovery/email/password_reset_body.txt"),
         ):  # fmt: skip
             response = self.client.post(
                 reverse("hidp_accounts:password_reset_request"),
@@ -95,7 +95,7 @@ class TestPasswordResetFlow(TestCase):
         )
         self.assertTemplateUsed(
             response,
-            "accounts/recovery/password_reset_email_sent.html",
+            "hidp/accounts/recovery/password_reset_email_sent.html",
         )
 
     def test_get_password_reset_url(self):
@@ -107,7 +107,7 @@ class TestPasswordResetFlow(TestCase):
         )
         response = self.client.get(password_reset_url, follow=True)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertTemplateUsed(response, "accounts/recovery/password_reset.html")
+        self.assertTemplateUsed(response, "hidp/accounts/recovery/password_reset.html")
         self.assertIn("validlink", response.context)
         self.assertTrue(
             response.context["validlink"], msg="Expected the link to be valid."
@@ -145,7 +145,7 @@ class TestPasswordResetFlow(TestCase):
         )
         self.assertTemplateUsed(
             response,
-            "accounts/recovery/password_reset_complete.html",
+            "hidp/accounts/recovery/password_reset_complete.html",
         )
 
         with self.subTest("The password reset URL is invalid after use."):

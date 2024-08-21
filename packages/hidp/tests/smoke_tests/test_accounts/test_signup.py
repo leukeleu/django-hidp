@@ -25,7 +25,7 @@ class TestRegistrationView(TransactionTestCase):
         """The registration form should be displayed."""
         response = self.client.get(self.signup_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "accounts/register.html")
+        self.assertTemplateUsed(response, "hidp/accounts/register.html")
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], UserCreationForm)
 
@@ -33,7 +33,7 @@ class TestRegistrationView(TransactionTestCase):
         """The terms of service should be displayed."""
         response = self.client.get(reverse("hidp_accounts:tos"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "accounts/tos.html")
+        self.assertTemplateUsed(response, "hidp/accounts/tos.html")
 
     def test_tos_required(self):
         """The user should agree to the terms of service."""

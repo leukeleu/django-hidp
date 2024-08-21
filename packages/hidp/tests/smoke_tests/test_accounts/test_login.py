@@ -23,7 +23,7 @@ class TestLogin(TestCase):
     def test_get_login(self):
         response = self.client.get(self.login_url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "accounts/login.html")
+        self.assertTemplateUsed(response, "hidp/accounts/login.html")
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], AuthenticationForm)
 
@@ -110,7 +110,7 @@ class TestLogin(TestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "accounts/login.html")
+        self.assertTemplateUsed(response, "hidp/accounts/login.html")
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], AuthenticationForm)
         self.assertFormError(
