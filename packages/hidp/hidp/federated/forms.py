@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.utils.translation import gettext_lazy as _
 
 from ..accounts.forms import TermsOfServiceMixin
 from .models import OpenIdConnection
@@ -53,3 +54,36 @@ class OIDCRegistrationForm(TermsOfServiceMixin, forms.ModelForm):
             user.save()
             user.connection.save()
         return user
+
+
+class OIDCAccountLinkForm(forms.ModelForm):
+    """
+    Link an existing user to an OpenIDConnection.
+    """
+
+    allow_link = forms.BooleanField(
+        label=_("Yes, I want to link this account."),
+        required=True,
+    )
+
+    def __init__(self, *, user, provider_key, claims, **kwargs):
+        self.user = user
+        self.provider_key = provider_key
+        self.claims = claims
+        super().__init__(**kwargs)
+
+    class Meta:
+        model = OpenIdConnection
+        fields = []
+
+    @transaction.atomic
+    def save(self, *, commit=True):
+        self.instance = OpenIdConnection(
+            user=self.user,
+            provider_key=self.provider_key,
+            issuer_claim=self.claims["iss"],
+            subject_claim=self.claims["sub"],
+        )
+        if commit:
+            self.instance.save()
+        return self.instance
