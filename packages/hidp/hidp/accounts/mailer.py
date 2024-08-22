@@ -107,6 +107,7 @@ class EmailVerificationMailer(BaseMailer):
                 "user": self.user,
                 "verification_url": verification_url,
             }
+            | (extra_context or {})
         )
 
     def get_recipients(self):
@@ -131,6 +132,7 @@ class AccountExistsMailer(BaseMailer):
                     self.base_url, reverse("hidp_accounts:password_reset_request")
                 ),
             }
+            | (extra_context or {})
         )
 
     def get_recipients(self):
