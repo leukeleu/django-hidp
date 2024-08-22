@@ -94,18 +94,20 @@ class EmailVerificationMailer(BaseMailer):
         self.user = user
         self.post_verification_redirect = post_verification_redirect
 
-    def get_context(self, extra_context=None):
-        verification_url = urljoin(
+    def get_verification_url(self):
+        return urljoin(
             self.base_url,
             email_verification.get_verify_email_url(
                 self.user,
                 next_url=self.post_verification_redirect,
             ),
         )
+
+    def get_context(self, extra_context=None):
         return super().get_context(
             {
                 "user": self.user,
-                "verification_url": verification_url,
+                "verification_url": self.get_verification_url(),
             }
             | (extra_context or {})
         )
