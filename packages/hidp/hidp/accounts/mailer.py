@@ -94,19 +94,22 @@ class EmailVerificationMailer(BaseMailer):
         self.user = user
         self.post_verification_redirect = post_verification_redirect
 
-    def get_context(self, extra_context=None):
-        verification_url = urljoin(
+    def get_verification_url(self):
+        return urljoin(
             self.base_url,
             email_verification.get_verify_email_url(
                 self.user,
                 next_url=self.post_verification_redirect,
             ),
         )
+
+    def get_context(self, extra_context=None):
         return super().get_context(
             {
                 "user": self.user,
-                "verification_url": verification_url,
+                "verification_url": self.get_verification_url(),
             }
+            | (extra_context or {})
         )
 
     def get_recipients(self):
@@ -123,14 +126,18 @@ class AccountExistsMailer(BaseMailer):
         super().__init__(base_url=base_url)
         self.user = user
 
+    def get_password_reset_url(self):
+        return (
+            urljoin(self.base_url, reverse("hidp_accounts:password_reset_request")),
+        )
+
     def get_context(self, extra_context=None):
         return super().get_context(
             {
                 "user": self.user,
-                "password_reset_url": urljoin(
-                    self.base_url, reverse("hidp_accounts:password_reset_request")
-                ),
+                "password_reset_url": self.get_password_reset_url(),
             }
+            | (extra_context or {})
         )
 
     def get_recipients(self):
