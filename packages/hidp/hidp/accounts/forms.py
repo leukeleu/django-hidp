@@ -405,3 +405,22 @@ class PasswordResetForm(auth_forms.SetPasswordForm):
             The user with the new password set.
         """
         return super().save(commit=commit)
+
+
+class RateLimitedAuthenticationForm(AuthenticationForm):
+    """
+    Authentication form that is used when a user is rate limited.
+    This form includes a simple "I am not a robot" checkbox to demonstrate
+    how additional protection can be added to an authentication form.
+
+    It is recommended to replace this form with a more robust implementation
+    that provides stronger protection against automated attacks.
+    """
+
+    i_am_not_a_robot = forms.BooleanField(
+        label=_("I am not a robot"),
+        required=True,
+        error_messages={
+            "required": _("Please confirm that you are not a robot."),
+        },
+    )

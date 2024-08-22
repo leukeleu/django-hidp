@@ -2,12 +2,19 @@ from unittest import mock
 
 from django.core import mail
 from django.test import TestCase, override_settings
+from django.test.client import ClientHandler
 from django.urls import reverse
 
 from hidp.accounts import auth as hidp_auth
 from hidp.accounts.email_verification import get_email_verification_required_url
-from hidp.accounts.forms import AuthenticationForm
+from hidp.accounts.forms import AuthenticationForm, RateLimitedAuthenticationForm
 from hidp.test.factories import user_factories
+
+
+class RateLimitedHandler(ClientHandler):
+    def get_response(self, request):
+        request.limited = True
+        return super().get_response(request)
 
 
 @override_settings(
@@ -121,3 +128,32 @@ class TestLogin(TestCase):
                 " Note that both fields may be case-sensitive."
             ),
         )
+
+    def test_rate_limited_login(self):
+        self.client.handler = RateLimitedHandler(enforce_csrf_checks=False)
+        response = self.client.post(
+            self.login_url,
+            {
+                "username": self.user.email,
+                "password": "P@ssw0rd!",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "hidp/accounts/login.html")
+        self.assertIn("form", response.context)
+        self.assertIsInstance(response.context["form"], RateLimitedAuthenticationForm)
+        self.assertFormError(
+            response.context["form"],
+            "i_am_not_a_robot",
+            ("Please confirm that you are not a robot."),
+        )
+
+        response = self.client.post(
+            self.login_url,
+            {
+                "username": self.user.email,
+                "password": "P@ssw0rd!",
+                "i_am_not_a_robot": "on",
+            },
+        )
+        self.assertRedirects(response, "/", fetch_redirect_response=False)

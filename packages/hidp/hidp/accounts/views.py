@@ -253,7 +253,7 @@ class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.Templat
 
 
 @method_decorator(
-    ratelimit(key="post:username", rate="10/m", method="POST"), name="post"
+    ratelimit(key="post:username", rate="10/m", method="POST", block=False), name="post"
 )
 @method_decorator(rate_limit_strict, name="dispatch")
 class LoginView(auth_views.LoginView):
@@ -269,6 +269,10 @@ class LoginView(auth_views.LoginView):
 
     # The form class to use for authentication
     form_class = forms.AuthenticationForm
+
+    # The form class to use when the user is rate limited
+    rate_limited_form_class = forms.RateLimitedAuthenticationForm
+
     # The template to use for displaying the login form
     template_name = "hidp/accounts/login.html"
 
@@ -332,6 +336,18 @@ class LoginView(auth_views.LoginView):
         3. `settings.LOGIN_REDIRECT_URL` if it is set.
         """
         return super().get_success_url()
+
+    def get_form_class(self):
+        """
+        Determine the form class to use for the view.
+        If the request is rate limited, return a form that requires the user to prove
+        they are not a bot.
+        Otherwise, return the normal authentication form.
+        """
+
+        if self.request.limited:
+            return self.rate_limited_form_class
+        return super().get_form_class()
 
     def form_valid(self, form):
         """
