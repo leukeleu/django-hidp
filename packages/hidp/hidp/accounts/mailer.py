@@ -1,8 +1,11 @@
 from urllib.parse import urljoin
 
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
 from . import email_verification
 
@@ -134,6 +137,49 @@ class AccountExistsMailer(BaseMailer):
     def get_context(self, extra_context=None):
         return super().get_context(
             {
+                "user": self.user,
+                "password_reset_url": self.get_password_reset_url(),
+            }
+            | (extra_context or {})
+        )
+
+    def get_recipients(self):
+        return [self.user.email]
+
+
+class PasswordResetRequestMailer(BaseMailer):
+    subject_template_name = "hidp/accounts/recovery/email/password_reset_subject.txt"
+    email_template_name = "hidp/accounts/recovery/email/password_reset_body.txt"
+    token_generator = default_token_generator
+
+    def __init__(self, user, *, base_url):
+        super().__init__(base_url=base_url)
+        self.user = user
+
+    def get_password_reset_url(self):
+        """
+        Return the URL to the password reset page for the given user.
+
+        Returns:
+            An absolute URL to the password reset page for the given user.
+        """
+        return urljoin(
+            self.base_url,
+            reverse(
+                "hidp_accounts:password_reset",
+                kwargs={
+                    "uidb64": urlsafe_base64_encode(force_bytes(self.user.pk)),
+                    "token": self.token_generator.make_token(self.user),
+                },
+            ),
+        )
+
+    def get_context(self, extra_context=None):
+        email_field_name = self.user.__class__.get_email_field_name()
+        user_email = getattr(self.user, email_field_name)
+        return super().get_context(
+            {
+                "email": user_email,
                 "user": self.user,
                 "password_reset_url": self.get_password_reset_url(),
             }
