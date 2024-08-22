@@ -419,20 +419,21 @@ class PasswordResetRequestView(generic.FormView):
     Display the password reset request form and handle the password
     reset request action.
 
-    Redirects to the password reset sent view if the form is submitted
-    with valid data.
+    Sends the password reset email and redirects to the password reset
+    sent view if the form is submitted with valid data.
     """
 
     form_class = forms.PasswordResetRequestForm
     template_name = "hidp/accounts/recovery/password_reset_request.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_email_sent")
-    password_reset_view = "hidp_accounts:password_reset"  # noqa: S105 (not a password)
+    password_reset_request_mailer = mailer.PasswordResetRequestMailer
 
     def form_valid(self, form):
-        form.save(
-            base_url=self.request.build_absolute_uri("/"),
-            password_reset_view=self.password_reset_view,
-        )
+        if user := form.get_user():
+            self.password_reset_request_mailer(
+                user=user,
+                base_url=self.request.build_absolute_uri("/"),
+            ).send()
         return super().form_valid(form)
 
 

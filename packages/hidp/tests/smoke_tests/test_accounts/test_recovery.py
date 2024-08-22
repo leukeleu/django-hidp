@@ -4,7 +4,7 @@ from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
-from hidp.accounts import forms
+from hidp.accounts import forms, mailer
 from hidp.test.factories import user_factories
 
 
@@ -82,11 +82,9 @@ class TestPasswordResetFlow(TestCase):
         self.assertEqual(message.to, [self.user.email])
         self.assertEqual(message.subject, "Password reset request")
         self.assertIn(
-            forms.PasswordResetRequestForm().get_password_reset_url(
-                user=self.user,
-                base_url="http://testserver",
-                password_reset_view="hidp_accounts:password_reset",
-            ),
+            mailer.PasswordResetRequestMailer(
+                user=self.user, base_url="http://testserver"
+            ).get_password_reset_url(),
             message.body,
         )
         self.assertRedirects(
@@ -100,11 +98,10 @@ class TestPasswordResetFlow(TestCase):
 
     def test_get_password_reset_url(self):
         """Render the password reset form."""
-        password_reset_url = forms.PasswordResetRequestForm().get_password_reset_url(
+        password_reset_url = mailer.PasswordResetRequestMailer(
             user=self.user,
             base_url="https://testserver",
-            password_reset_view="hidp_accounts:password_reset",
-        )
+        ).get_password_reset_url()
         response = self.client.get(password_reset_url, follow=True)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTemplateUsed(response, "hidp/accounts/recovery/password_reset.html")
@@ -116,11 +113,10 @@ class TestPasswordResetFlow(TestCase):
 
     def test_post_password_reset_url(self):
         """Reset the user's password."""
-        password_reset_url = forms.PasswordResetRequestForm().get_password_reset_url(
+        password_reset_url = mailer.PasswordResetRequestMailer(
             user=self.user,
             base_url="https://testserver",
-            password_reset_view="hidp_accounts:password_reset",
-        )
+        ).get_password_reset_url()
         # Need to get the password reset form first to populate a session value.
         response = self.client.get(
             password_reset_url,
