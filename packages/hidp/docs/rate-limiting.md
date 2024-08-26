@@ -1,9 +1,11 @@
 # Rate limiting
+
 HIdP uses the [django-ratelimit](https://django-ratelimit.readthedocs.io/en/stable/index.html)
 package to apply rate limiting on key pages, such as the login and registration pages,
 to prevent DDoS and brute force attacks.
 
 ## Default rate limits
+
 The default rate limits are:
 
 - 10 requests per second
@@ -21,7 +23,26 @@ or corporate networks. Since rate limiting is based on IP, lowering the default 
 could be disruptive. However, you can adjust the rate limits to be more strict
 if needed.
 
+## Login page "soft" rate limit
+
+The login page has an additional rate limit to prevent too many login attempts
+using the same username within a short period of time. This rate limit is
+**not** tied to the incomming IP address, allowing it to catch
+distributed attacks.
+
+Once triggered, it does **not** block subsequent requests to avoid locking
+legitimate users out of their accounts.
+
+Instead, when the rate limit is exceeded, the login form is replaced with the
+`RateLimitedAuthenticationForm`. This forms requires the user to check a box
+to prove they are not a robot before logging in.
+
+This measure is relatively easy to bypass, so it is recommended to override
+the `hidp.accounts.views.LoginView` and configure a custom `rate_limited_form_class`
+that implements a more robust countermeasure.
+
 ## Adding your own rate limits
+
 You can add additional rate limits to views like this:
 
 ```python
@@ -43,6 +64,7 @@ For more examples, see [django-ratelimit documentation](https://django-ratelimit
 :::
 
 ## Security considerations
+
 HIdP uses `ip` as the [ratelimit key](https://django-ratelimit.readthedocs.io/en/stable/keys.html#ratelimit-keys)
 for most rate limits. To ensure safety, it is crucial to that `REMOTE_ADDR` is resolved
 correctly, especially when Django is behind a load balancer or reverse proxy.
