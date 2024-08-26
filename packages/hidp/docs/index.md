@@ -12,6 +12,7 @@ This is Leukeleu's Headless Identity Provider
 installation
 configure-as-oidc-provider
 user-model
+templates
 management-commands
 rate-limiting
 :::
