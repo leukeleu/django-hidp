@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
 from django.http import (
     Http404,
     HttpResponseBadRequest,
@@ -16,6 +17,7 @@ from django.views.generic import FormView, View
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailer
 from ..config import oidc_clients
+from ..config.oidc_clients import get_oidc_client
 from ..rate_limit.decorators import rate_limit_strict
 from . import forms, tokens
 from .models import OpenIdConnection
@@ -101,8 +103,6 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
         """
         Decide which flow the user should be redirected to next.
         """
-        view_name = None
-        token = None
         connection = OpenIdConnection.objects.get_by_provider_and_claims(
             provider_key=provider_key,
             issuer_claim=claims["iss"],
@@ -117,8 +117,19 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                 user_info=user_info,
             )
             view_name = "hidp_oidc_client:login"
-        elif request.user.is_anonymous:
-            # No user is logged in. Check if a user exists for the given email.
+        elif request.user.is_authenticated:
+            # `sub` claim does not match an existing user:
+            # Display a form allowing the user to link the OIDC account.
+            token = OIDCAccountLinkView.add_data_to_session(
+                request,
+                provider_key=provider_key,
+                claims=claims,
+                user_info=user_info,
+            )
+            view_name = "hidp_oidc_client:link_account"
+        else:
+            # `sub` claim does not match an existing user, and no user is logged in:
+            # Check if a user exists for the given email.
             user = UserModel.objects.filter(email__iexact=claims["email"]).first()
             if not user:
                 # `sub` and `email` claim do not match an existing user:
@@ -130,9 +141,17 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                     user_info=user_info,
                 )
                 view_name = "hidp_oidc_client:register"
-
-        if not view_name:
-            raise NotImplementedError("No view name was determined for the next step.")
+            else:
+                # `sub` claim does not match an existing user, but `email` claim does:
+                # Display a message instructing the user to log in to link the accounts.
+                messages.info(
+                    request,
+                    _(
+                        "You already have an account with this email address."
+                        " Please log in to link your account."
+                    ),
+                )
+                return reverse("hidp_accounts:login")
 
         # Prepare the URL parameters for the next view. Drop any None values.
         params = {
@@ -207,7 +226,15 @@ class TokenDataMixin:
         self.token = request.GET.get("token")
         valid_token = self.token and self.token_generator.check_token(self.token)
         self.token_data = valid_token and request.session.get(self.token)
-        if not valid_token or self.token_data is None:
+        try:
+            self.provider = (
+                get_oidc_client(self.token_data["provider_key"])
+                if self.token_data
+                else None
+            )
+        except KeyError:
+            self.provider = None
+        if not valid_token or self.provider is None:
             messages.error(request, self.invalid_token_message)
             return HttpResponseRedirect(self.invalid_token_redirect_url)
         return super().dispatch(request, *args, **kwargs)
@@ -307,3 +334,41 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
                 user, next_url=self.get_redirect_url()
             )
         )
+
+
+@method_decorator(rate_limit_strict, name="dispatch")
+@method_decorator(login_required, name="dispatch")
+class OIDCAccountLinkView(TokenDataMixin, FormView):
+    """
+    Handles the account linking process for an existing user using an OpenID Connect
+    authentication response.
+    """
+
+    form_class = forms.OIDCAccountLinkForm
+    template_name = "hidp/federated/account_link.html"
+    success_url = "/"
+    token_generator = tokens.OIDCAccountLinkTokenGenerator()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(
+            user=self.request.user,
+            provider_key=self.token_data["provider_key"],
+            claims=self.token_data["claims"],
+        )
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(provider=self.provider, **kwargs)
+
+    def form_valid(self, form):
+        form.save()
+        # Remove the token from the session after the form has been saved.
+        del self.request.session[self.token]
+        messages.success(
+            self.request,
+            _("Successfully linked your {provider} account.").format(
+                provider=self.provider.name
+            ),
+        )
+        return super().form_valid(form)

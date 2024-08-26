@@ -261,6 +261,46 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         token = query["token"][0]
         self.assertIn(token, self.client.session)
 
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=(*_VALID_AUTH_CALLBACK, None),
+    )
+    def test_must_login_to_link_account(self, mock_handle_authentication_callback):
+        # A user with the same email address exists, but is not logged in
+        user_factories.UserFactory(email="user@example.com")
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(
+            [
+                "You already have an account with this email address."
+                " Please log in to link your account."
+            ],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+        self.assertRedirects(response, reverse("hidp_accounts:login"))
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=(*_VALID_AUTH_CALLBACK, None),
+    )
+    def test_redirect_to_link_account(self, mock_handle_authentication_callback):
+        # A user is logged in, but no connection exists. Continue to link account.
+        user = user_factories.VerifiedUserFactory()
+        self.client.force_login(user)
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        redirect = urllib.parse.urlparse(response.url)
+        self.assertEqual(redirect.path, reverse("hidp_oidc_client:link_account"))
+        query = urllib.parse.parse_qs(redirect.query)
+        self.assertIn("token", query)
+        token = query["token"][0]
+        self.assertIn(token, self.client.session)
+
 
 class OIDCTokenDataTestMixin:
     view_name = NotImplemented
@@ -269,6 +309,9 @@ class OIDCTokenDataTestMixin:
     @classmethod
     def setUpTestData(cls):
         cls.url = reverse(cls.view_name)
+
+    def setUp(self):
+        configure_oidc_clients(ExampleOIDCClient(client_id="test"))
 
     def _assert_invalid_token(self, *, token=None):
         response = (
@@ -372,9 +415,6 @@ class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
             subject_claim="test-subject",
         )
 
-    def setUp(self):
-        configure_oidc_clients(ExampleOIDCClient(client_id="example"))
-
     def test_valid_login(self):
         token = self._add_oidc_data_to_session()
         response = self.client.get(self.url, {"token": token})
@@ -414,4 +454,48 @@ class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
         self.assertInHTML(
             "You need to verify your email address before you can log in.",
             response.content.decode("utf-8"),
+        )
+
+
+class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
+    view_class = views.OIDCAccountLinkView
+    view_name = "hidp_oidc_client:link_account"
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.user = user_factories.VerifiedUserFactory()
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user)
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_accounts:login')}?next={self.url}",
+        )
+
+    def test_get_with_valid_token(self):
+        token = self._add_oidc_data_to_session()
+        response = self.client.get(self.url, {"token": token})
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "hidp/federated/account_link.html")
+
+    def test_post_with_valid_token(self):
+        token = self._add_oidc_data_to_session()
+        response = self.client.post(
+            self.url + f"?token={token}",
+            {"allow_link": "on"},
+            follow=True,
+        )
+        connection = models.OpenIdConnection.objects.filter(user=self.user).first()
+        self.assertIsNotNone(connection, msg="Expected connection to be created.")
+        self.assertEqual(
+            [
+                "Successfully linked your Example account.",
+            ],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
         )

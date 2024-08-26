@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from hidp.federated import forms
+from hidp.test.factories import user_factories
 
 
 class TestOIDCRegistrationForm(TestCase):
@@ -67,3 +68,36 @@ class TestOIDCRegistrationForm(TestCase):
         self.assertEqual(connection.provider_key, "test_provider")
         self.assertEqual(connection.issuer_claim, "test_issuer")
         self.assertEqual(connection.subject_claim, "test_subject")
+
+
+class TestOIDCAccountLinkForm(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.VerifiedUserFactory()
+
+    def test_requires_confirmation(self):
+        form = forms.OIDCAccountLinkForm(
+            data={},
+            user=self.user,
+            provider_key="test_provider",
+            claims={
+                "iss": "test_issuer",
+                "sub": "test_subject",
+            },
+        )
+        self.assertFormError(form, "allow_link", "This field is required.")
+
+    def test_creates_connection(self):
+        form = forms.OIDCAccountLinkForm(
+            data={"allow_link": "on"},
+            user=self.user,
+            provider_key="test_provider",
+            claims={
+                "iss": "test_issuer",
+                "sub": "test_subject",
+            },
+        )
+        self.assertTrue(form.is_valid(), msg="Expected form to be valid.")
+        form.save()
+        connection = self.user.openid_connections.first()
+        self.assertIsNotNone(connection, msg="Expected connection to be created.")
