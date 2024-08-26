@@ -96,6 +96,11 @@ class TestAuthenticate(TestCase):
         )
 
 
+@override_settings(
+    AUTHENTICATION_BACKENDS=[
+        "django.contrib.auth.backends.ModelBackend",
+    ]
+)
 class TestLogin(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -202,6 +207,11 @@ class TestLogin(TestCase):
                 auth.login(self.request, None)
 
 
+@override_settings(
+    AUTHENTICATION_BACKENDS=[
+        "django.contrib.auth.backends.ModelBackend",
+    ]
+)
 class TestLogout(TestCase):
     @classmethod
     def setUpTestData(cls):

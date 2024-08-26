@@ -41,3 +41,10 @@ class OIDCRegistrationTokenGenerator(BaseTokenGenerator):
 
     key_salt = "oidc-registration"
     token_timeout = timedelta(minutes=15).total_seconds()
+
+
+class OIDCLoginTokenGenerator(BaseTokenGenerator):
+    """Token for the OIDC login process."""
+
+    key_salt = "oidc-login"
+    token_timeout = timedelta(minutes=5).total_seconds()

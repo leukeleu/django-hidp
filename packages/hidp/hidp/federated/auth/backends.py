@@ -5,7 +5,7 @@ from ..models import OpenIdConnection
 
 
 class OIDCModelBackend(ModelBackend):
-    def authenticate(  # noqa: PLR6301 (could be staticmethod)
+    def authenticate(
         self,
         request=None,
         provider_key=None,
@@ -17,32 +17,22 @@ class OIDCModelBackend(ModelBackend):
             # skip authentication and let another backend handle it.
             return None
 
+        # Find an OpenID connection. This always runs a query regardless whether
+        # the provider_key is a registered OIDC provider or not.
+        connection = OpenIdConnection.objects.get_by_provider_and_claims(
+            provider_key=provider_key,
+            issuer_claim=issuer_claim,
+            subject_claim=subject_claim,
+        )
+
         try:
             # Check if the provider_key is a registered OIDC provider
             get_oidc_client(provider_key)
         except KeyError:
-            # Run a database query to reduce the timing difference between
-            # a registered and an unregistered OIDC provider.
-            # This should never happen in real-world scenarios, but it's
-            # a good practice if it somehow does.
-            OpenIdConnection.objects.filter(
-                provider_key=provider_key,
-                issuer_claim=issuer_claim,
-                subject_claim=subject_claim,
-            ).exists()
             return None
 
-        try:
-            # Return the user associated with the OpenID connection
-            # matching the provider_key, issuer_claim, and subject_claim
-            return (
-                OpenIdConnection.objects.select_related("user")
-                .get(
-                    provider_key=provider_key,
-                    issuer_claim=issuer_claim,
-                    subject_claim=subject_claim,
-                )
-                .user
-            )
-        except OpenIdConnection.DoesNotExist:
-            return None
+        if connection:
+            user = connection.user
+            if self.user_can_authenticate(user):
+                return user
+        return None

@@ -20,4 +20,9 @@ urlpatterns = [
         views.OIDCRegistrationView.as_view(),
         name="register",
     ),
+    path(
+        "login/",
+        views.OIDCLoginView.as_view(),
+        name="login",
+    ),
 ]
