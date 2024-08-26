@@ -89,10 +89,19 @@ class BaseUser(auth_models.AbstractUser):
         is_staff (``BooleanField``):
             Whether the user is a staff member (allowed to log into the admin site).
 
+            This field is used exclusively by Django's permissions system and
+            has no special meaning in HIdP. It is recommended to avoid direct use
+            of this field in your application code. Instead, rely on the permissions
+            features provided by Django.
+
             Defaults to ``False``.
 
         is_superuser (``BooleanField``):
             Whether the user is a superuser (allowed to do anything).
+
+            This field has no additional meaning in HIdP. It is recommended to avoid
+            direct use of this field in your application code. Instead, rely on Django's
+            group features to assign specific permissions groups of users.
 
             Defaults to ``False``.
 
