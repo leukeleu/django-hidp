@@ -1,19 +1,26 @@
 import urllib.parse
 
+from http import HTTPStatus
 from unittest import mock
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.core import mail
+from django.http import HttpRequest
 from django.test import TestCase
 from django.urls import reverse
 
 from hidp.config import configure_oidc_clients
 from hidp.federated.constants import OIDC_STATES_SESSION_KEY
 from hidp.federated.oidc.exceptions import InvalidOIDCStateError, OAuth2Error, OIDCError
+from hidp.federated.views import OIDCRegistrationView
 
 from ...unit_tests.test_federated.test_providers.example import (
     ExampleOIDCClient,
     code_challenge_from_code_verifier,
 )
+
+UserModel = get_user_model()
 
 
 class TestOIDCAuthenticationRequestView(TestCase):
@@ -78,6 +85,37 @@ class TestOIDCAuthenticationRequestView(TestCase):
             fetch_redirect_response=False,
         )
 
+    def test_stores_next_url_with_state(self):
+        self.client.post(
+            reverse(
+                "hidp_oidc_client:authenticate", kwargs={"provider_key": "example"}
+            ),
+            {"next": "/next"},
+            secure=True,
+        )
+        state_key = next(iter(self.client.session[OIDC_STATES_SESSION_KEY]))
+        self.assertEqual(
+            self.client.session[OIDC_STATES_SESSION_KEY][state_key]["next_url"], "/next"
+        )
+
+
+_VALID_AUTH_CALLBACK = (
+    {
+        "id_token": "id_token",
+        "access_token": "access_token",
+        "token_type": "token_type",
+    },
+    {
+        "iss": "test_issuer",
+        "sub": "test_subject",
+        "email": "user@example.com",
+    },
+    {
+        "given_name": "Firstname",
+        "family_name": "Lastname",
+    },
+)
+
 
 class TestOIDCAuthenticationCallbackView(TestCase):
     def setUp(self):
@@ -99,19 +137,7 @@ class TestOIDCAuthenticationCallbackView(TestCase):
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
-        return_value=(
-            {
-                "id_token": "id_token",
-                "access_token": "access_token",
-                "token_type": "token_type",
-            },
-            {
-                "claims": "claims",
-            },
-            {
-                "user_info": "user_info",
-            },
-        ),
+        return_value=(*_VALID_AUTH_CALLBACK, None),
     )
     def test_calls_handle_authentication_callback(
         self, mock_handle_authentication_callback
@@ -119,9 +145,25 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         response = self.client.get(
             reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
             secure=True,
+            follow=False,
         )
         mock_handle_authentication_callback.assert_called_once()
-        self.assertEqual(response.status_code, 200)
+        # Redirects to the next url
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=(*_VALID_AUTH_CALLBACK, "/next"),
+    )
+    def test_restores_next_url(self, mock_handle_authentication_callback):
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+            follow=False,
+        )
+        query = urllib.parse.parse_qs(urllib.parse.urlparse(response.url).query)
+        self.assertIn("next", query)
+        self.assertEqual(query["next"][0], "/next")
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
@@ -175,4 +217,111 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         self.assertRedirects(
             response,
             reverse("hidp_accounts:login"),
+        )
+
+    @mock.patch(
+        "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
+        return_value=(*_VALID_AUTH_CALLBACK, None),
+    )
+    def test_redirect_to_register(self, mock_handle_authentication_callback):
+        response = self.client.get(
+            reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
+            secure=True,
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        redirect = urllib.parse.urlparse(response.url)
+        self.assertEqual(redirect.path, reverse("hidp_oidc_client:register"))
+        query = urllib.parse.parse_qs(redirect.query)
+        self.assertIn("token", query)
+        token = query["token"][0]
+        self.assertIn(token, self.client.session)
+
+
+class TestOIDCRegistrationView(TestCase):
+    def test_requires_token(self):
+        response = self.client.get(reverse("hidp_oidc_client:register"))
+        self.assertEqual(
+            ["Expired or invalid token. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+
+    def test_invalid_token(self):
+        response = self.client.get(
+            reverse("hidp_oidc_client:register"), {"token": "invalid"}
+        )
+        self.assertEqual(
+            ["Expired or invalid token. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+
+    def _add_oidc_data_to_session(self, *, save=True):
+        session = self.client.session
+        request = HttpRequest()
+        request.session = session
+        token = OIDCRegistrationView.add_data_to_session(
+            request,
+            provider_key="test_provider",
+            claims={
+                "iss": "test_issuer",
+                "sub": "test_subject",
+                "email": "user@example.com",
+            },
+            user_info={
+                "given_name": "Firstname",
+                "family_name": "Lastname",
+            },
+        )
+        if save:
+            session.save()
+        return token
+
+    def test_valid_token_missing_session_data(self):
+        # Do not save the session to mimic an expired session or hijacked token
+        token = self._add_oidc_data_to_session(save=False)
+        response = self.client.get(
+            reverse("hidp_oidc_client:register"), {"token": token}
+        )
+        self.assertEqual(
+            ["Expired or invalid token. Please try again."],
+            [m.message for m in messages.get_messages(response.wsgi_request)],
+        )
+
+    def test_get_with_valid_token(self):
+        token = self._add_oidc_data_to_session()
+        response = self.client.get(
+            reverse("hidp_oidc_client:register"), {"token": token}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "hidp/federated/registration.html")
+
+    def test_post_with_valid_token(self):
+        token = self._add_oidc_data_to_session()
+        response = self.client.post(
+            reverse("hidp_oidc_client:register") + f"?token={token}",
+            {"agreed_to_tos": "on"},
+            follow=True,
+        )
+        user = UserModel.objects.filter(email="user@example.com").first()
+        self.assertIsNotNone(user, msg="Expected a user to be created.")
+
+        self.assertIsNone(user.email_verified, msg="Expected email to be unverified.")
+
+        # Verification email sent
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Verify your email address",
+        )
+        # Redirected to verification required page
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            ),
+        )
+        # Verification required page
+        self.assertInHTML(
+            "You need to verify your email address before you can log in.",
+            response.content.decode("utf-8"),
         )

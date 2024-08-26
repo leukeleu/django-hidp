@@ -111,7 +111,7 @@ class TestPrepareAuthenticationRequest(TestCase):
         """Omits PKCE parameters when the client doesn't support it."""
         client = NoPKCEOIDCClient(client_id="client_id", client_secret="client_secret")
         url = authorization_code_flow.prepare_authentication_request(
-            self.request, client=client, redirect_uri="/redirect/"
+            self.request, client=client, callback_url="/redirect/"
         )
         # Adds state to session
         self.assertIn(OIDC_STATES_SESSION_KEY, self.request.session)
@@ -131,7 +131,7 @@ class TestPrepareAuthenticationRequest(TestCase):
         """Uses the client's authorization endpoint and the request's domain."""
         client = ExampleOIDCClient(client_id="client_id")
         url = authorization_code_flow.prepare_authentication_request(
-            self.request, client=client, redirect_uri="/redirect/"
+            self.request, client=client, callback_url="/redirect/"
         )
         # Adds state to session
         self.assertIn(OIDC_STATES_SESSION_KEY, self.request.session)
@@ -166,7 +166,7 @@ class TestPrepareAuthenticationRequest(TestCase):
             callback_base_url="https://example.com/",
         )
         url = authorization_code_flow.prepare_authentication_request(
-            self.request, client=client, redirect_uri="/redirect/"
+            self.request, client=client, callback_url="/redirect/"
         )
         # Adds state to session
         self.assertIn(OIDC_STATES_SESSION_KEY, self.request.session)
@@ -224,7 +224,7 @@ class TestPrepareAuthenticationRequest(TestCase):
         authorization_code_flow.prepare_authentication_request(
             self.request,
             client=ExampleOIDCClient(client_id="client_id"),
-            redirect_uri="/redirect/",
+            callback_url="/redirect/",
         )
         # Total amount of states is limited
         self.assertEqual(25, len(self.request.session[OIDC_STATES_SESSION_KEY]))
@@ -378,7 +378,7 @@ class TestObtainTokens(SimpleTestCase):
             state={},
             client=client,
             code="code",
-            redirect_uri="/redirect/",
+            callback_url="/redirect/",
         )
 
         mock_requests_post.assert_called_once_with(
@@ -414,7 +414,7 @@ class TestObtainTokens(SimpleTestCase):
                 state={},
                 client=client,
                 code="code",
-                redirect_uri="/redirect/",
+                callback_url="/redirect/",
             )
 
     def test_obtain_tokens_no_secret(self, mock_requests_post):
@@ -428,7 +428,7 @@ class TestObtainTokens(SimpleTestCase):
             state={"code_verifier": "test"},
             client=client,
             code="code",
-            redirect_uri="/redirect/",
+            callback_url="/redirect/",
         )
 
         mock_requests_post.assert_called_once_with(
@@ -466,7 +466,7 @@ class TestObtainTokens(SimpleTestCase):
             state={"code_verifier": "test"},
             client=client,
             code="code",
-            redirect_uri="/redirect/",
+            callback_url="/redirect/",
         )
 
         mock_requests_post.assert_called_once_with(
@@ -832,9 +832,11 @@ class TestHandleAuthenticationCallback(TestCase):
         """Handles the authentication callback and returns the tokens."""
         client = ExampleOIDCClient(client_id="client_id")
 
-        tokens, claims, user_info = (
+        tokens, claims, user_info, _next_url = (
             authorization_code_flow.handle_authentication_callback(
-                self.request, client=client, redirect_uri="/redirect/"
+                self.request,
+                client=client,
+                callback_url="/redirect/",
             )
         )
 
@@ -844,7 +846,7 @@ class TestHandleAuthenticationCallback(TestCase):
             state={"code_verifier": "test"},
             client=client,
             code="code",
-            redirect_uri="/redirect/",
+            callback_url="/redirect/",
         )
         mock_parse_id_token.assert_called_once_with("id_token", client=client)
         mock_get_user_info.assert_called_once_with(

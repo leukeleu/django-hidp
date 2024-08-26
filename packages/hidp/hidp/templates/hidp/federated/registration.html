@@ -1,0 +1,14 @@
+{% extends "hidp/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Sign up' %}{% endblock %}
+
+{% block body %}
+  <h1>{% translate 'Create a new account' %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">{% translate 'Sign up' %}</button>
+  </form>
+{% endblock %}

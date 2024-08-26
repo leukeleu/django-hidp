@@ -1,19 +1,27 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth import views as auth_views
 from django.http import (
     Http404,
     HttpResponseBadRequest,
     HttpResponseRedirect,
-    JsonResponse,
 )
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import View
+from django.views.generic import FormView, View
 
+from ..accounts import email_verification, mailer
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_strict
+from . import forms, tokens
+from .models import OpenIdConnection
 from .oidc import authorization_code_flow
 from .oidc.exceptions import InvalidOIDCStateError, OAuth2Error
+
+UserModel = get_user_model()
 
 
 class OIDCMixin:
@@ -32,7 +40,7 @@ class OIDCMixin:
         except KeyError:
             raise Http404(f"OIDC Client not found: {provider_key!r}") from None
 
-    def get_redirect_uri(self, provider_key):
+    def get_callback_url(self, provider_key):
         return reverse(
             self.callback_pattern,
             kwargs={
@@ -42,7 +50,7 @@ class OIDCMixin:
 
 
 @method_decorator(rate_limit_strict, name="dispatch")
-class OIDCAuthenticationRequestView(OIDCMixin, View):
+class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View):
     """
     Initiates an OpenID Connect Authorization Code Flow authentication request.
     """
@@ -62,7 +70,8 @@ class OIDCAuthenticationRequestView(OIDCMixin, View):
             authorization_code_flow.prepare_authentication_request(
                 request,
                 client=self.get_oidc_client(provider_key),
-                redirect_uri=self.get_redirect_uri(provider_key),
+                callback_url=self.get_callback_url(provider_key),
+                next_url=self.get_redirect_url(),
             )
         )
 
@@ -79,13 +88,51 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
         "options",
     ]
 
+    def get_next_url(  # noqa: PLR6301 (no-self-use)
+        self,
+        *,
+        request,
+        provider_key,
+        claims,
+        user_info,
+        redirect_url=None,
+    ):
+        """
+        Decide which flow the user should be redirected to next.
+        """
+        connection = (
+            OpenIdConnection.objects.select_related("user")
+            .filter(
+                provider_key=provider_key,
+                issuer_claim=claims["iss"],
+                subject_claim=claims["sub"],
+            )
+            .first()
+        )
+        if request.user.is_anonymous:
+            # No user is logged in. Check if a user exists for the given email.
+            user = UserModel.objects.filter(email__iexact=claims["email"]).first()
+            if not connection and not user:
+                # `sub` and `email` claim do not match an existing user:
+                # Redirect the user to the registration page.
+                token = OIDCRegistrationView.add_data_to_session(
+                    request,
+                    provider_key=provider_key,
+                    claims=claims,
+                    user_info=user_info,
+                )
+                params = {"token": token}
+                if redirect_url:
+                    params["next"] = redirect_url
+                return reverse("hidp_oidc_client:register") + f"?{urlencode(params)}"
+
     def get(self, request, provider_key):
         try:
-            tokens, claims, user_info = (
+            _tokens, claims, user_info, next_url = (
                 authorization_code_flow.handle_authentication_callback(
                     request,
                     client=self.get_oidc_client(provider_key),
-                    redirect_uri=self.get_redirect_uri(provider_key),
+                    callback_url=self.get_callback_url(provider_key),
                 )
             )
         except InvalidOIDCStateError:
@@ -107,10 +154,83 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
             )
             return HttpResponseRedirect(reverse("hidp_accounts:login"))
 
-        return JsonResponse(
-            {
-                "tokens": tokens,
-                "claims": claims,
-                "user_info": user_info,
-            }
+        return HttpResponseRedirect(
+            self.get_next_url(
+                request=request,
+                provider_key=provider_key,
+                claims=claims,
+                user_info=user_info,
+                redirect_url=next_url,
+            )
+        )
+
+
+class TokenDataMixin:
+    """
+    Mixin to set, retrieve and validate data to/from the session using a token.
+    """
+
+    token_generator = NotImplemented
+    invalid_token_message = _("Expired or invalid token. Please try again.")
+    invalid_token_redirect_url = reverse_lazy("hidp_accounts:login")
+
+    @classmethod
+    def add_data_to_session(cls, request, *, provider_key, claims, user_info):
+        token = cls.token_generator.make_token()
+        request.session[token] = {
+            "provider_key": provider_key,
+            "claims": claims,
+            "user_info": user_info,
+        }
+        return token
+
+    def dispatch(self, request, *args, **kwargs):
+        self.token = request.GET.get("token")
+        valid_token = self.token and self.token_generator.check_token(self.token)
+        self.token_data = valid_token and request.session.get(self.token)
+        if not valid_token or self.token_data is None:
+            messages.error(request, self.invalid_token_message)
+            return HttpResponseRedirect(self.invalid_token_redirect_url)
+        return super().dispatch(request, *args, **kwargs)
+
+
+@method_decorator(rate_limit_strict, name="dispatch")
+class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
+    """
+    Handles the registration process for a new user using an OpenID Connect
+    authentication response.
+    """
+
+    token_generator = tokens.OIDCRegistrationTokenGenerator()
+    form_class = forms.OIDCRegistrationForm
+    template_name = "hidp/federated/registration.html"
+    next_page = "/"
+    verification_mailer = mailer.EmailVerificationMailer
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(
+            provider_key=self.token_data["provider_key"],
+            claims=self.token_data["claims"],
+            user_info=self.token_data["user_info"],
+        )
+        return kwargs
+
+    def form_valid(self, form):
+        user = form.save()
+        # Remove the token from the session after the form has been saved.
+        del self.request.session[self.token]
+
+        # Send the email verification email.
+        self.verification_mailer(
+            user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
+
+        # Redirect to the email verification required page.
+        return HttpResponseRedirect(
+            email_verification.get_email_verification_required_url(
+                user, next_url=self.get_redirect_url()
+            )
         )

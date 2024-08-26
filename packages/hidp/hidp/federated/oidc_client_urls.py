@@ -15,4 +15,9 @@ urlpatterns = [
         views.OIDCAuthenticationCallbackView.as_view(),
         name="callback",
     ),
+    path(
+        "register/",
+        views.OIDCRegistrationView.as_view(),
+        name="register",
+    ),
 ]

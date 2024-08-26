@@ -25,6 +25,25 @@
     <button type="submit">{% translate 'Sign up' %}</button>
   </form>
 
+  {% if oidc_login_providers %}
+  <hr>
+
+  <h1>{%  translate 'Register using a third-party service' %}</h1>
+
+  {% for item in oidc_login_providers %}
+  <form action="{{ item.url }}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <button type="submit">
+      {% blocktranslate with provider=item.provider.name %}
+        Register with {{ provider }}
+      {% endblocktranslate %}
+    </button>
+  </form>
+
+  {% endfor %}
+  {% endif %}
+
   <hr>
 
   <p>
