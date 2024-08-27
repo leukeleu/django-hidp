@@ -6,7 +6,6 @@ from django.test.client import ClientHandler
 from django.urls import reverse
 
 from hidp.accounts import auth as hidp_auth
-from hidp.accounts.email_verification import get_email_verification_required_url
 from hidp.accounts.forms import AuthenticationForm, RateLimitedAuthenticationForm
 from hidp.test.factories import user_factories
 
@@ -66,9 +65,11 @@ class TestLogin(TestCase):
             "Verify your email address",
         )
         # Redirected to verification required page
-        self.assertURLEqual(
-            response.redirect_chain[0][0],
-            get_email_verification_required_url(user),
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            ),
         )
         # Verification required page
         self.assertInHTML(

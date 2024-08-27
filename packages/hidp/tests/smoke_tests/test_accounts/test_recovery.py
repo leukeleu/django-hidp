@@ -81,11 +81,11 @@ class TestPasswordResetFlow(TestCase):
         message = mail.outbox[0]
         self.assertEqual(message.to, [self.user.email])
         self.assertEqual(message.subject, "Password reset request")
-        self.assertIn(
-            mailer.PasswordResetRequestMailer(
-                user=self.user, base_url="http://testserver"
-            ).get_password_reset_url(),
+        self.assertRegex(
             message.body,
+            # Matches the password reset URL:
+            # http://testserver/recover/password/MDE5MTkyY2UtODE0Yy03NjNlLTlhMGUtMmM1ODk3MGNkYTFj/cced4c-9a0766ea185039a6d293ff660c04007e/
+            r"http://testserver/recover/password/[0-9A-Za-z]+/[0-9a-z]+-[0-9a-f]+/",
         )
         self.assertRedirects(
             response,

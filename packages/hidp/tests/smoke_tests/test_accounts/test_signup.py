@@ -6,7 +6,6 @@ from django.test import TransactionTestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from hidp.accounts.email_verification import get_email_verification_required_url
 from hidp.accounts.forms import UserCreationForm
 from hidp.test.factories import user_factories
 
@@ -80,9 +79,11 @@ class TestRegistrationView(TransactionTestCase):
             "Verify your email address",
         )
         # Redirected to verification required page
-        self.assertURLEqual(
-            response.redirect_chain[0][0],
-            get_email_verification_required_url(user),
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            ),
         )
         # Verification required page
         self.assertInHTML(
@@ -106,11 +107,13 @@ class TestRegistrationView(TransactionTestCase):
             User.objects.filter(email="test@example.com").exists(),
             msg="Expected user to be created",
         )
-        user = User.objects.get(email="test@example.com")
         # Redirected to verification required page
-        self.assertURLEqual(
-            response.redirect_chain[0][0],
-            get_email_verification_required_url(user, next_url="/example/"),
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            )
+            + "?next=/example/",
         )
 
     def test_valid_registration_unsafe_next_param(self):
@@ -129,11 +132,12 @@ class TestRegistrationView(TransactionTestCase):
             User.objects.filter(email="test@example.com").exists(),
             msg="Expected user to be created",
         )
-        user = User.objects.get(email="test@example.com")
         # Redirected to verification required page
-        self.assertURLEqual(
-            response.redirect_chain[0][0],
-            get_email_verification_required_url(user),
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            ),
         )
 
     def test_duplicate_email_unverified(self):
@@ -150,9 +154,11 @@ class TestRegistrationView(TransactionTestCase):
             follow=True,
         )
         # Redirected to verification required page
-        self.assertURLEqual(
-            response.redirect_chain[0][0],
-            get_email_verification_required_url(self.test_user),
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            ),
         )
         # Verification required page
         self.assertInHTML(
@@ -176,9 +182,11 @@ class TestRegistrationView(TransactionTestCase):
             follow=True,
         )
         # Redirected to verification required page
-        self.assertURLEqual(
-            response.redirect_chain[0][0],
-            get_email_verification_required_url(self.test_user),
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required", kwargs={"token": "email"}
+            ),
         )
         # Verification required page
         self.assertInHTML(
