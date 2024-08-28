@@ -33,7 +33,7 @@ app_name = "oauth2_provider"
 base_urlpatterns = [
     path(
         "authorize/",
-        rate_limit_strict(oauth2_views.AuthorizationView.as_view()),
+        rate_limit_strict(oidc_provider_views.AuthorizationView.as_view()),
         name="authorize",
     ),
     path(

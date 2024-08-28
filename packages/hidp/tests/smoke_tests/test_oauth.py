@@ -3,7 +3,7 @@ import json
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from http import HTTPStatus
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, urlencode, urlsplit
 
 from jwcrypto import jwk, jwt
 from oauth2_provider.models import get_access_token_model, get_application_model
@@ -11,6 +11,7 @@ from oauth2_provider.models import get_access_token_model, get_application_model
 from django.conf import settings
 from django.core.signing import b64_encode
 from django.test import TestCase
+from django.urls import reverse
 from django.utils.timezone import now as tz_now
 
 from hidp.test.factories import user_factories
@@ -231,6 +232,37 @@ class TestOAuthFlow(TestCase):
             self.assertEqual(HTTPStatus.FOUND, response.status_code)
             self.assertURLEqual(
                 response["Location"], "https://127.0.0.1/?error=consent_required"
+            )
+
+    def test_authorize_create_prompt(self):
+        """prompt=create redirects to registration"""
+        with self.subTest("No user logged in"):
+            response = self.authorization_request(prompt="create")
+            next_url = (
+                f"{response.request['PATH_INFO']}"
+                f"?{response.request['QUERY_STRING']}"
+            ).replace("&prompt=create", "")
+            self.assertRedirects(
+                response,
+                (
+                    f"{reverse('hidp_accounts:register')}"
+                    f"?{urlencode({'next': next_url})}"
+                ),
+            )
+
+        with self.subTest("User logged in"):
+            self.client.force_login(self.user)
+            response = self.authorization_request(prompt="create")
+            next_url = (
+                f"{response.request['PATH_INFO']}"
+                f"?{response.request['QUERY_STRING']}"
+            ).replace("&prompt=create", "")
+            self.assertRedirects(
+                response,
+                (
+                    f"{reverse('hidp_accounts:register')}"
+                    f"?{urlencode({'next': next_url})}"
+                ),
             )
 
     def test_userinfo_limited_scope(self):
