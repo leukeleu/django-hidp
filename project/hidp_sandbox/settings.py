@@ -92,6 +92,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
+    "hidp.translations.middleware.UiLocalesMiddleware",
 ]
 
 ROOT_URLCONF = "hidp_sandbox.urls"
@@ -176,6 +177,10 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = "nl-nl"
+LANGUAGES = [
+    ("nl", "Nederlands"),
+    ("en", "English"),
+]
 
 TIME_ZONE = "Europe/Amsterdam"
 
