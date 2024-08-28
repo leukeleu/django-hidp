@@ -128,9 +128,80 @@ class TermsOfServiceView(generic.TemplateView):
     template_name = "hidp/accounts/tos.html"
 
 
+class EmailTokenMixin:
+    """
+    Mixin to handle email verification tokens in URLs.
+    """
+
+    token_generator = NotImplemented
+    token_session_key = NotImplemented
+    token_placeholder = "email"  # noqa: S105 (not a password)
+
+    def _remove_token_from_url(self, token):
+        """
+        Replace the token in the URL with a placeholder value, and
+        store the token in the session.
+
+        If the token is already the placeholder value, do nothing.
+        """
+        if token == self.token_placeholder:
+            # Token is already the placeholder value, so do nothing.
+            return None
+        # Store the token in the session and redirect to the
+        # URL with a placeholder value.
+        self.request.session[self.token_session_key] = token
+        redirect_url = self.request.get_full_path().replace(
+            token, self.token_placeholder
+        )
+        return HttpResponseRedirect(redirect_url, status=308)
+
+    def _get_user_queryset(self):  # noqa: PLR6301 (no-self-use)
+        """
+        Base queryset for finding the user by the token.
+
+        Override this method to customize the queryset, i.e. to
+        add additional filters or annotations.
+        """
+        return UserModel.objects.annotate(email_hash=MD5("email"))
+
+    def _get_user_from_token(self):
+        """
+        Find the user by the token in the session. If the token is invalid,
+        or missing, or the user does not exist, return None.
+        """
+        token = self.request.session.get(self.token_session_key)
+        if token is None:
+            return None
+        email_hash = self.token_generator.check_token(token)
+        # Find the user by the hash of their email address
+        return self._get_user_queryset().filter(email_hash=email_hash).first()
+
+    def dispatch(self, request, *, token):
+        """
+        Handle email verification tokens in URLs.
+
+        Makes sure the token is removed from the URL and stored in
+        the session.
+
+        Sets the `user` attribute to the user found by the token,
+        and the `validlink` attribute to whether the token is valid
+        (i.e. it resolves to a user).
+        """
+        response = self._remove_token_from_url(token)
+        if response:
+            return response
+        self.user = self._get_user_from_token()
+        self.validlink = self.user is not None
+        return super().dispatch(request, token=token)
+
+
 @method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(never_cache, name="dispatch")
-class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.TemplateView):
+class EmailVerificationRequiredView(
+    auth_views.RedirectURLMixin,
+    EmailTokenMixin,
+    generic.TemplateView,
+):
     """
     Display a notice that the user must verify their email address by
     clicking a link in an email that was sent to them.
@@ -142,31 +213,6 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
     token_generator = tokens.email_verification_request_token_generator
     verification_mailer = mailer.EmailVerificationMailer
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
-    token_placeholder = "email"  # noqa: S105 (not a password)
-
-    def dispatch(self, request, *, token):
-        if token == self.token_placeholder:
-            token = self.request.session.get(self.token_session_key)
-        else:
-            # Store the token in the session and redirect to the
-            # URL with a placeholder value.
-            self.request.session[self.token_session_key] = token
-            redirect_url = self.request.get_full_path().replace(
-                token, self.token_placeholder
-            )
-            return HttpResponseRedirect(redirect_url, status=308)
-
-        email_hash = self.token_generator.check_token(token)
-        try:
-            # Find the user by the hash of their email address
-            self.user = UserModel.objects.annotate(email_hash=MD5("email")).get(
-                email_hash=email_hash
-            )
-            self.validlink = True
-        except UserModel.DoesNotExist:
-            self.validlink = False
-            self.user = None
-        return super().dispatch(request, token=token)
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
@@ -194,7 +240,11 @@ class EmailVerificationRequiredView(auth_views.RedirectURLMixin, generic.Templat
 
 @method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(never_cache, name="dispatch")
-class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
+class EmailVerificationView(
+    auth_views.RedirectURLMixin,
+    EmailTokenMixin,
+    generic.FormView,
+):
     """
     Landing page for email verification links.
 
@@ -206,33 +256,13 @@ class EmailVerificationView(auth_views.RedirectURLMixin, generic.FormView):
     token_generator = tokens.email_verification_token_generator
     success_url = reverse_lazy("hidp_accounts:email_verification_complete")
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
-    token_placeholder = "email"  # noqa: S105 (not a password)
 
-    def dispatch(self, request, *, token):
-        if token == self.token_placeholder:
-            token = self.request.session.get(self.token_session_key)
-        else:
-            # Store the token in the session and redirect to the
-            # URL with a placeholder value.
-            self.request.session[self.token_session_key] = token
-            redirect_url = self.request.get_full_path().replace(
-                token, self.token_placeholder
-            )
-            return HttpResponseRedirect(redirect_url, status=308)
-
-        email_hash = self.token_generator.check_token(token)
-        try:
-            # Find the user by the hash of their email address
-            self.user = (
-                UserModel.objects.annotate(email_hash=MD5("email"))
-                .filter(is_active=True, email_verified__isnull=True)
-                .get(email_hash=email_hash)
-            )
-            self.validlink = True
-        except UserModel.DoesNotExist:
-            self.validlink = False
-            self.user = None
-        return super().dispatch(request, token=token)
+    def _get_user_queryset(self):
+        return (
+            super()
+            ._get_user_queryset()
+            .filter(is_active=True, email_verified__isnull=True)
+        )
 
     def get_form_kwargs(self):
         return {
