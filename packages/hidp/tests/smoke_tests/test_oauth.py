@@ -33,13 +33,23 @@ class TestOAuthFlow(TestCase):
         #   verify the token signature using the public key.
         #
         # This is the preferred setup for any (first-party) client application.
-        cls.application = Application.objects.create(
+        cls.trusted_application = Application.objects.create(
             name="Happy App",
             client_id="happy-app",
             client_type=Application.CLIENT_PUBLIC,
             client_secret="",
             authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
             skip_authorization=True,
+            redirect_uris="https://127.0.0.1/",
+            algorithm=Application.RS256_ALGORITHM,
+        )
+        cls.third_party_application = Application.objects.create(
+            name="Shady App",
+            client_id="shady-app",
+            client_type=Application.CLIENT_PUBLIC,
+            client_secret="",
+            authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+            skip_authorization=False,
             redirect_uris="https://127.0.0.1/",
             algorithm=Application.RS256_ALGORITHM,
         )
@@ -54,11 +64,13 @@ class TestOAuthFlow(TestCase):
             scope=scope,
             expires=tz_now() + timedelta(seconds=300),
             token="secret-access-token-key",
-            application=self.application,
+            application=self.trusted_application,
         )
         (client or self.client).defaults["HTTP_AUTHORIZATION"] = f"Bearer {token}"
 
-    def authorization_request(self, code_verifier="secret", **oauth_params):
+    def authorization_request(
+        self, code_verifier="secret", client_id="happy-app", **oauth_params
+    ):
         """Perform an authorization request"""
         # Utility method to perform an authorization request, used in the test
         # methods to simulate the authorization code grant flow.
@@ -77,7 +89,7 @@ class TestOAuthFlow(TestCase):
                 key: value
                 for key, value in {
                     "response_type": "code",
-                    "client_id": "happy-app",
+                    "client_id": client_id,
                     "scope": "openid profile email",
                     "redirect_uri": "https://127.0.0.1/",
                     "code_challenge": code_challenge,
@@ -195,6 +207,31 @@ class TestOAuthFlow(TestCase):
             r"%26code_challenge%3D[a-zA-Z0-9-_]+"
             r"%26code_challenge_method%3DS256$",
         )
+
+    def test_authorize_prompt_none(self):
+        """Test authorization endpoint can skip login prompt"""
+        with self.subTest("User is not logged in"):
+            response = self.authorization_request(prompt="none")
+            self.assertEqual(HTTPStatus.FOUND, response.status_code)
+            self.assertURLEqual(
+                response["Location"], "https://127.0.0.1/?error=login_required"
+            )
+
+        with self.subTest("User is logged in"):
+            self.client.force_login(self.user)
+            response = self.authorization_request(prompt="none")
+            self.assertEqual(HTTPStatus.FOUND, response.status_code)
+            self.assertRegex(
+                response["Location"], r"^https://127\.0\.0\.1/\?code=[A-z0-9]+$"
+            )
+
+        with self.subTest("Consent required"):
+            # User is logged in, but consent is required
+            response = self.authorization_request(prompt="none", client_id="shady-app")
+            self.assertEqual(HTTPStatus.FOUND, response.status_code)
+            self.assertURLEqual(
+                response["Location"], "https://127.0.0.1/?error=consent_required"
+            )
 
     def test_userinfo_limited_scope(self):
         self.set_client_access_token(scope="openid")
