@@ -78,6 +78,9 @@ class RegistrationView(
         )
         return super().get_context_data(
             login_url=login_url,
+            # Make sure logging out will return to the current page,
+            # including the query string.
+            logout_next_url=self.request.get_full_path(),
             **kwargs,
         )
 
