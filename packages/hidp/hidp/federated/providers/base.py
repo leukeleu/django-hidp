@@ -35,45 +35,85 @@ def _valid_endpoint(endpoint):
 
 
 class OIDCClient:
-    # Provider key, used to identify the provider in the application.
-    # This should be unique, descriptive, url-safe and, preferably, lowercase.
-    provider_key = NotImplemented  # type: str
-    # Provider name, used for display purposes. Will default to the capitalized
-    # provider key if not set.
-    name = None  # type: str | None
+    """
+    Base class that needs to be overridden and configured according to the
+    provider's specifications.
+
+    Attributes:
+        provider_key (``str``):
+            Provider key, used to identify the provider in the application.
+
+            This should be unique, descriptive, url-safe and, preferably, lowercase.
+
+        name (``str``, `optional`):
+            Provider name, used for display purposes. Will default to the capitalized
+            provider key if not set.
+
+        issuer (``str``):
+            OpenID Connect issuer URL.
+
+        authorization_endpoint (``str``):
+            OpenID Connect authorization endpoint URL.
+
+        token_endpoint (``str``):
+            OpenID Connect token endpoint URL.
+
+        userinfo_endpoint (``str``):
+            OpenID Connect userinfo endpoint URL.
+
+        jwks_uri (``str``):
+            OpenID Connect JWKS URI.
+
+        has_pkce_support (``boolean``):
+            Whether the provider supports PKCE (Proof Key for Code Exchange).
+
+            Note: Only set to True if the provider supports S256 as the code
+            challenge method.
+
+        client_id (``str``):
+            Provider assigned client ID.
+
+        client_secret (``str``, `optional`):
+            Provider assigned client secret, if required for token exchange.
+
+        callback_base_url (``str``, `optional`):
+            Alternative base URL to use instead of the one of the request when
+            constructing the callback URL.
+
+    """
+
+    provider_key = NotImplemented
+    name = None
 
     # OpenID Connect configuration, can usually be extracted from the
     # provider's discovery document, commonly found at:
     # https://<provider>/.well-known/openid-configuration
-    issuer = NotImplemented  # type: str
-    authorization_endpoint = NotImplemented  # type: str
-    token_endpoint = NotImplemented  # type: str
-    userinfo_endpoint = NotImplemented  # type: str
-    jwks_uri = NotImplemented  # type: str
+    issuer = NotImplemented
+    authorization_endpoint = NotImplemented
+    token_endpoint = NotImplemented
+    userinfo_endpoint = NotImplemented
+    jwks_uri = NotImplemented
 
-    # Whether the provider supports PKCE (Proof Key for Code Exchange).
     # Note: Only set to True if the provider supports S256 as the code challenge method.
     has_pkce_support = True
 
-    # Provider assigned client ID
-    client_id = None  # type: str
-    # Provider assigned client secret, if required for token exchange
-    client_secret = None  # type: str | None
-    # Alternative base URL to use instead of the one of the request when
-    # constructing the callback URL.
-    callback_base_url = None  # type: str | None
+    client_id = None
+    client_secret = None
+    callback_base_url = None
 
     def __init__(self, *, client_id, client_secret=None, callback_base_url=None):
         """
         Initialize the OpenID Connect client.
 
         Arguments:
-            client_id (str):
+            client_id (``str``):
                 The client ID provided by the OpenID Connect provider.
-            client_secret (str | None):
+
+            client_secret (``str``, `optional`):
                 The client secret provided by the OpenID Connect provider.
                 Leave as None if the provider does not require a client secret.
-            callback_base_url (str | None):
+
+            callback_base_url (``str``, `optional`):
                 Alternative base URL to use instead of the one of the request
                 when constructing the callback URL.
 
@@ -146,8 +186,12 @@ class OIDCClient:
         Only override this method if absolutely necessary.
 
         Arguments:
-            claims (dict):
+            claims (``dict``):
                 The claims from the ID token.
+
+        Returns:
+            ``str``:
+                The expected issuer URL based on the claims.
         """
         # Some providers (like Microsoft) have a different issuer
         # for each tenant. This method allows to return the expected
