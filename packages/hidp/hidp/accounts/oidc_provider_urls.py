@@ -26,14 +26,14 @@ from oauth2_provider import views as oauth2_views
 from django.urls import path
 
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
-from .views import RPInitiatedLogoutView
+from . import oidc_provider_views
 
 app_name = "oauth2_provider"
 
 base_urlpatterns = [
     path(
         "authorize/",
-        rate_limit_strict(oauth2_views.AuthorizationView.as_view()),
+        rate_limit_strict(oidc_provider_views.AuthorizationView.as_view()),
         name="authorize",
     ),
     path(
@@ -71,7 +71,7 @@ oidc_urlpatterns = [
     ),
     path(
         "logout/",
-        rate_limit_default(RPInitiatedLogoutView.as_view()),
+        rate_limit_default(oidc_provider_views.RPInitiatedLogoutView.as_view()),
         name="rp-initiated-logout",
     ),
 ]

@@ -1,7 +1,6 @@
 from urllib.parse import urlencode
 
 from django_ratelimit.decorators import ratelimit
-from oauth2_provider import views as oauth2_views
 
 from django.conf import settings
 from django.contrib import messages
@@ -79,6 +78,10 @@ class RegistrationView(
         )
         return super().get_context_data(
             login_url=login_url,
+            next=self.get_success_url(),
+            # Make sure logging out will return to the current page,
+            # including the query string.
+            logout_next_url=self.request.get_full_path(),
             **kwargs,
         )
 
@@ -497,7 +500,3 @@ class PasswordResetCompleteView(auth_views.TemplateView):
             login_url=resolve_url(settings.LOGIN_URL),
             **kwargs,
         )
-
-
-class RPInitiatedLogoutView(oauth2_views.RPInitiatedLogoutView):
-    template_name = "hidp/accounts/logout_confirm.html"
