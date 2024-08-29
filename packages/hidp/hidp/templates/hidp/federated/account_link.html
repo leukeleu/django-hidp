@@ -7,16 +7,17 @@
   <h1>{% translate 'Link account' %}</h1>
 
   <p>
-  {% blocktranslate with provider.name as provider %}
+  {% blocktranslate trimmed with provider.name as provider %}
   You are about to link your {{ provider }} account to your existing account.
   {% endblocktranslate %}
   </p>
 
   <p>
-  {% blocktranslate with provider.name as provider %}
+  {% blocktranslate trimmed with provider.name as provider %}
   This will allow you to use your {{ provider }} account to log in to your existing account.
-  Are you sure you want to do this?
   {% endblocktranslate %}
+
+  {% translate 'Are you sure you want to do this?' %}
   </p>
 
   <form method="post">

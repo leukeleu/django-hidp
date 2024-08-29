@@ -5,17 +5,19 @@
 
 {% block body %}
   {% if validlink %}
-  <h1>{% trans 'Verify email' %}</h1>
+  <h1>{% translate 'Verify email' %}</h1>
   <form method="post">
     {% csrf_token %}
-    <button>{% trans 'Verify email' %}</button>
+    <button>{% translate 'Verify email' %}</button>
   </form>
 
   {% else %}
-  <p>{% blocktranslate %}
-  The link you followed is invalid. It may have expired or been used already.
-  Try logging in to your account to resend the verification email.
-  {% endblocktranslate %}</p>
+  <p>
+    {% translate 'The link you followed is invalid. It may have expired or been used already.' %}
+  </p>
 
+  <p>
+    {% translate 'Log in to your account to receive a new verification email.' %}
+  </p>
   {% endif %}
 {% endblock %}

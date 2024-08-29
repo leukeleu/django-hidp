@@ -7,9 +7,13 @@
   {% if not error %}
 
   {% if application %}
-  <h1>{% translate 'Confirm Logout requested by' %}{{ application.name }}</h1>
+  <h1>
+    {% blocktranslate trimmed with application %}
+    Confirm Logout requested by {{ application }}
+    {% endblocktranslate %}
+  </h1>
   {% else %}
-  <h1>{% translate 'Confirm Logout'%}</h1>
+  <h1>{% translate 'Confirm Logout' %}</h1>
   {% endif %}
 
   <form method="post">
@@ -23,7 +27,6 @@
 
     <button type="submit" value="Cancel">{% translate 'Cancel' %}</button>
     <button type="submit" name="allow" value="Log out">{% translate 'Log out' %}</button>
-
   </form>
 
   {% else %}

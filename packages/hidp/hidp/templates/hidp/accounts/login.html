@@ -19,7 +19,7 @@
     {% csrf_token %}
     <input type="hidden" name="next" value="{% url 'hidp_accounts:login' %}">
     <p>
-      {% blocktranslate %}
+      {% blocktranslate trimmed %}
       You are currently logged in as {{ user }}.
       {% endblocktranslate %}
       <button type="submit">{% translate 'Log out' %}</button>
@@ -31,8 +31,9 @@
 
   {% if request.limited %}
   <p>
-    {% blocktranslate %}
-    Your login attempt has been rate limited. Additional security measures are in place for your protection.
+    {% blocktranslate trimmed %}
+    Your login attempt has been rate limited.
+    Additional security measures are in place for your protection.
     {% endblocktranslate %}
   </p>
   {% endif %}
@@ -44,24 +45,23 @@
   </form>
 
   <p>
-    {% url 'hidp_accounts:password_reset_request' as password_reset_url %}
-    {% blocktranslate with password_reset_url=password_reset_url %}
-    <a href="{{ password_reset_url }}">Forgot your password?</a>
-    {% endblocktranslate %}
+    <a href="{% url 'hidp_accounts:password_reset_request' %}">
+      {% translate 'Forgot your password?' %}
+    </a>
   </p>
 
   {% if oidc_login_providers %}
   <hr>
 
-  <h1>{%  translate 'Log in using a third-party service' %}</h1>
+  <h1>{% translate 'Log in using a third-party service' %}</h1>
 
   {% for item in oidc_login_providers %}
   <form action="{{ item.url }}" method="POST">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
     <button type="submit">
-      {% blocktranslate with provider=item.provider.name %}
-        Log in with {{ provider }}
+      {% blocktranslate trimmed with provider=item.provider.name %}
+      Log in with {{ provider }}
       {% endblocktranslate %}
     </button>
   </form>
@@ -72,8 +72,7 @@
   <hr>
 
   <p>
-    {% blocktranslate with register_url=register_url %}
-    Don't have an account yet? <a href="{{ register_url }}">Sign up</a>.
-    {% endblocktranslate %}
+    {% translate "Don't have an account yet?" %}
+    <a href="{{ register_url }}">{% translate 'Sign up' %}</a>
   </p>
 {% endblock %}
