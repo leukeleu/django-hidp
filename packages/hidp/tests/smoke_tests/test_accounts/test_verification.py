@@ -57,6 +57,19 @@ class TestEmailVerificationRequiredView(TestCase):
         )
         self._assert_response(response, validlink=False)
 
+    def test_no_token_in_session(self):
+        """
+        Placeholder token, no token in session.
+        """
+        response = self.client.get(
+            reverse(
+                "hidp_accounts:email_verification_required",
+                kwargs={"token": "email"},
+            ),
+            follow=True,
+        )
+        self._assert_response(response, validlink=False)
+
     def test_post(self):
         """
         Send the verification email.
@@ -132,6 +145,19 @@ class TestEmailVerificationView(TestCase):
             reverse(
                 "hidp_accounts:verify_email",
                 kwargs={"token": "invalid-value:invalid-signature"},
+            ),
+            follow=True,
+        )
+        self._assert_response(response, validlink=False)
+
+    def test_no_token_in_session(self):
+        """
+        Placeholder token, no token in session.
+        """
+        response = self.client.get(
+            reverse(
+                "hidp_accounts:verify_email",
+                kwargs={"token": "email"},
             ),
             follow=True,
         )
