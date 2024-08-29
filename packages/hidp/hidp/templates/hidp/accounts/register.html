@@ -19,6 +19,12 @@
     <p><button type="submit">{% translate 'Log out' %}</button></p>
   </form>
 
+  <p>
+    {% blocktranslate %}
+    Alternatively, you can <a href="{{ next }}">continue using your current account</a>.
+    {% endblocktranslate %}
+  </p>
+
   {% else %}
   <form method="post">
     {% csrf_token %}
