@@ -10,6 +10,7 @@ This is Leukeleu's Headless Identity Provider
 :::{toctree}
 :maxdepth: 2
 installation
+configure-oidc-clients
 configure-as-oidc-provider
 user-model
 templates
