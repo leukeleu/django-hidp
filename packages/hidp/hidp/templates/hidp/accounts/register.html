@@ -34,7 +34,7 @@
   {% if oidc_login_providers %}
   <hr>
 
-  <h1>{% translate 'Register using a third-party service' %}</h1>
+  <h1>{% translate 'Sign up using a trusted service' %}</h1>
 
   {% for item in oidc_login_providers %}
   <form action="{{ item.url }}" method="POST">
@@ -42,7 +42,7 @@
     <input type="hidden" name="next" value="{{ next }}">
     <button type="submit">
       {% blocktranslate trimmed with provider=item.provider.name %}
-      Register with {{ provider }}
+      Sign up using {{ provider }}
       {% endblocktranslate %}
     </button>
   </form>

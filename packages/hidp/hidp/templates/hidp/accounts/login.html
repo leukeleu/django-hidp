@@ -32,8 +32,8 @@
   {% if request.limited %}
   <p>
     {% blocktranslate trimmed %}
-    Your login attempt has been rate limited.
-    Additional security measures are in place for your protection.
+    Excessive login attempts have been detected for this account.
+    For your safety, additional security measures are now in place.
     {% endblocktranslate %}
   </p>
   {% endif %}
@@ -53,7 +53,7 @@
   {% if oidc_login_providers %}
   <hr>
 
-  <h1>{% translate 'Log in using a third-party service' %}</h1>
+  <h1>{% translate 'Log in using a trusted service' %}</h1>
 
   {% for item in oidc_login_providers %}
   <form action="{{ item.url }}" method="POST">

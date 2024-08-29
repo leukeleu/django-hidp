@@ -1,0 +1,322 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-29 09:37-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: hidp/accounts/forms.py
+#, python-brace-format
+msgid "I have read and accept the <a href=\"{url}\">Terms of Service</a>."
+msgstr ""
+
+#: hidp/accounts/forms.py
+msgid "Email"
+msgstr ""
+
+#: hidp/accounts/forms.py
+msgid "I am not a robot"
+msgstr ""
+
+#: hidp/accounts/forms.py
+msgid "Please confirm that you are not a robot."
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "email address"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "email verified"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "last modified"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "agreed to terms of service"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "user"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "users"
+msgstr ""
+
+#: hidp/federated/forms.py
+msgid "Yes, I want to link this account."
+msgstr ""
+
+#: hidp/federated/models.py
+msgid "OpenID connection"
+msgstr ""
+
+#: hidp/federated/models.py
+msgid "OpenID connections"
+msgstr ""
+
+#: hidp/federated/views.py
+msgid "You already have an account with this email address. Please log in to link your account."
+msgstr ""
+
+#: hidp/federated/views.py
+msgid "The authentication request has expired. Please try again."
+msgstr ""
+
+#: hidp/federated/views.py
+msgid "Unexpected error during authentication. Please try again."
+msgstr ""
+
+#: hidp/federated/views.py
+msgid "Expired or invalid token. Please try again."
+msgstr ""
+
+#: hidp/federated/views.py
+msgid "Login failed. Invalid credentials."
+msgstr ""
+
+#: hidp/federated/views.py
+#, python-brace-format
+msgid "Successfully linked your {provider} account."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+#: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
+#: hidp/templates/hidp/accounts/register.html
+msgid "Log in"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+#: hidp/templates/hidp/accounts/register.html
+#, python-format
+msgid "You are currently logged in as %(user)s."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+#: hidp/templates/hidp/accounts/logout_confirm.html
+#: hidp/templates/hidp/accounts/register.html
+msgid "Log out"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+msgid "Log in with username and password"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+msgid "Excessive login attempts have been detected for this account. For your safety, additional security measures are now in place."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+msgid "Forgot your password?"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+msgid "Log in using a trusted service"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+#, python-format
+msgid "Log in with %(provider)s"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+msgid "Don't have an account yet?"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+#: hidp/templates/hidp/accounts/register.html
+#: hidp/templates/hidp/federated/registration.html
+msgid "Sign up"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/logout_confirm.html
+msgid "Logout"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/logout_confirm.html
+#, python-format
+msgid "Logout requested by %(application)s"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/logout_confirm.html
+msgid "Cancel"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/logout_confirm.html
+msgid "Error"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
+msgid "You're receiving this email because you requested a password reset."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
+msgid "Please go to the following page and choose a new password:"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/email/password_reset_subject.txt
+msgid "Password reset request"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset.html
+#: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
+#: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
+#: hidp/templates/hidp/accounts/recovery/password_reset_request.html
+msgid "Reset password"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset.html
+msgid "Please enter your new password twice so we can verify you typed it in correctly."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset.html
+msgid "Change password"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset.html
+msgid "The password reset link was invalid, possibly because it has already been used. Please request a new password reset."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
+msgid "Your password has been set. You may go ahead and log in now."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
+msgid "We've emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
+msgid "If you don't receive an email, please make sure you've entered the address you registered with, and check your spam folder."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset_request.html
+msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/register.html
+#: hidp/templates/hidp/federated/registration.html
+msgid "Create a new account"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/register.html
+msgid "To create a new account, please log out first."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/register.html
+#, python-format
+msgid "Alternatively, you can <a href=\"%(next)s\">continue using your current account</a>."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/register.html
+msgid "Sign up using a trusted service"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/register.html
+#, python-format
+msgid "Sign up using %(provider)s"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/register.html
+msgid "Already have an account?"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/tos.html
+msgid "Terms of Service"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email/account_exists_body.txt
+msgid "You're receiving this email because you attempted to create an account using this email address. However, an account already exists with this email address. If you have forgotten your password, you can reset it using this link:"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email/account_exists_body.txt
+#: hidp/templates/hidp/accounts/verification/email/verification_body.txt
+msgid "If you did not attempt to sign up, you can safely ignore this email."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email/account_exists_subject.txt
+msgid "Sign up request"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email/verification_body.txt
+msgid "You're receiving this email because you created an account with this email address. Please go to the following page and verify your email address:"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email/verification_subject.txt
+msgid "Verify your email address"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email_verification_complete.html
+msgid "Verification completed"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email_verification_complete.html
+msgid "Your email address is now verified."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email_verification_complete.html
+#, python-format
+msgid "You can now <a href=\"%(login_url)s\">log in</a>."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email_verification_required.html
+msgid "Verification required"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email_verification_required.html
+msgid "You need to verify your email address before you can log in."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email_verification_required.html
+msgid "Please check your email for a message with a verification link. This message may take a few minutes to arrive. If you don't see it, check your spam folder. If you still can't find it, you can request a new verification email."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email_verification_required.html
+msgid "Resend verification email"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/email_verification_required.html
+#: hidp/templates/hidp/accounts/verification/verify_email.html
+msgid "The link you followed is invalid. It may have expired or been used already."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/verify_email.html
+msgid "Verify email"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/verify_email.html
+msgid "Log in to your account to receive a new verification email."
+msgstr ""
+
+#: hidp/templates/hidp/federated/account_link.html
+msgid "Link account"
+msgstr ""
+
+#: hidp/templates/hidp/federated/account_link.html
+#, python-format
+msgid "You are about to link your %(provider)s account to your existing account."
+msgstr ""
+
+#: hidp/templates/hidp/federated/account_link.html
+#, python-format
+msgid "This will allow you to use your %(provider)s account to log in to your existing account."
+msgstr ""
+
+#: hidp/templates/hidp/federated/account_link.html
+msgid "Are you sure you want to do this?"
+msgstr ""
