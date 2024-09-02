@@ -1,3 +1,5 @@
+import importlib
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import checks
@@ -10,11 +12,22 @@ REQUIRED_APPS = [
     "django.contrib.auth",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "oauth2_provider",
     "hidp",
     "hidp.accounts",
     "hidp.federated",
 ]
+
+_OAUTH2_PROVIDER_INSTALLED = importlib.util.find_spec("oauth2_provider") is not None
+
+if _OAUTH2_PROVIDER_INSTALLED:
+    # If oauth2_provider is installed, assume the user wants
+    # to enable the oidc_provider part of HIdP.
+    REQUIRED_APPS.extend(
+        [
+            "oauth2_provider",
+            "hidp.oidc_provider",
+        ]
+    )
 
 REQUIRED_MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -102,7 +115,6 @@ E005 = checks.Error(
 )
 
 
-@checks.register(Tags.settings)
 def check_oauth2_provider(**kwargs):
     oauth2_provider_settings = getattr(settings, "OAUTH2_PROVIDER", None)
     if (
@@ -112,6 +124,11 @@ def check_oauth2_provider(**kwargs):
     ):
         return [E005]
     return []
+
+
+if _OAUTH2_PROVIDER_INSTALLED:
+    # Only check for OAuth2 Provider settings if the app is installed
+    checks.register(Tags.settings)(check_oauth2_provider)
 
 
 # Make sure the urls are configured correctly

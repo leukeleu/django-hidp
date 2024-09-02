@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "hidp",
     "hidp.accounts",
     "hidp.federated",
+    "hidp.oidc_provider",
     # Custom user model
     "tests.custom_user",
     # Custom makemessages command
