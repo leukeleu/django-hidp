@@ -7,6 +7,7 @@ FROM python:$PYTHON_VERSION
 
 # Install extras packages
 RUN apt-get update && apt-get install -y \
+    gettext \
     sudo \
     watchman \
     && rm -rf /var/lib/apt/lists/*

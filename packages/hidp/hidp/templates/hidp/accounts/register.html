@@ -8,9 +8,8 @@
 
   {% if request.user.is_authenticated %}
   <p>
-    {% blocktranslate %}
-    You are currently logged in as {{ user }}. To create a new account, please log out first.
-    {% endblocktranslate %}
+    {% blocktranslate %}You are currently logged in as {{ user }}.{% endblocktranslate %}
+    {% translate 'To create a new account, please log out first.' %}
   </p>
 
   <form action="{%  url 'hidp_accounts:logout' %}" method="post">
@@ -20,7 +19,7 @@
   </form>
 
   <p>
-    {% blocktranslate %}
+    {% blocktranslate trimmed %}
     Alternatively, you can <a href="{{ next }}">continue using your current account</a>.
     {% endblocktranslate %}
   </p>
@@ -35,15 +34,15 @@
   {% if oidc_login_providers %}
   <hr>
 
-  <h1>{%  translate 'Register using a third-party service' %}</h1>
+  <h1>{% translate 'Sign up using a trusted service' %}</h1>
 
   {% for item in oidc_login_providers %}
   <form action="{{ item.url }}" method="POST">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
     <button type="submit">
-      {% blocktranslate with provider=item.provider.name %}
-        Register with {{ provider }}
+      {% blocktranslate trimmed with provider=item.provider.name %}
+      Sign up using {{ provider }}
       {% endblocktranslate %}
     </button>
   </form>
@@ -54,9 +53,8 @@
   <hr>
 
   <p>
-    {% blocktranslate with login_url=login_url %}
-    Already have an account? <a href="{{ login_url }}">Log in</a>.
-    {% endblocktranslate %}
+    {% translate 'Already have an account?' %}
+    <a href="{{ login_url }}">{% translate 'Log in' %}</a>
   </p>
   {% endif %}
 {% endblock %}

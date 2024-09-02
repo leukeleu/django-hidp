@@ -4,9 +4,10 @@
 {% block title %}{% translate 'Verification completed' %}{% endblock %}
 
 {% block body %}
-  <h1>{% trans 'Verification completed' %}</h1>
+  <h1>{% translate 'Verification completed' %}</h1>
 
-  <p>{% blocktranslate %}
-  Your email address verified. You can now <a href="{{ login_url }}">log in</a>.
-  {% endblocktranslate %}</p>
+  <p>
+  {% translate 'Your email address is now verified.' %}
+  {% blocktranslate %}You can now <a href="{{ login_url }}">log in</a>.{% endblocktranslate %}
+  </p>
 {% endblock %}

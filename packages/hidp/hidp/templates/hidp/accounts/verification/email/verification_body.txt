@@ -1,9 +1,11 @@
 {% load i18n %}{% autoescape off %}
-{% blocktranslate %}You're receiving this email because you created an account with this email address.{% endblocktranslate %}
+{% blocktranslate trimmed %}
+You're receiving this email because you created an account with this email address.
 
-{% translate "Please go to the following page and verify your email address:" %}
+Please go to the following page and verify your email address:
+{% endblocktranslate %}
 
 {{ verification_url }}
 
-{% blocktranslate %}If you did not attempt to sign up, you can safely ignore this email.{% endblocktranslate %}
+{% translate "If you did not attempt to sign up, you can safely ignore this email." %}
 {% endautoescape %}

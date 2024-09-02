@@ -1,9 +1,13 @@
 {% load i18n %}{% autoescape off %}
-{% blocktranslate %}You're receiving this email because you attempted to sign up using this email address.
+{% blocktranslate trimmed %}
+You're receiving this email because you attempted to create an account using this email address.
 
-However, an account already exists with this email address. If you have forgotten your password, you can reset it using the link below.{% endblocktranslate %}
+However, an account already exists with this email address.
+
+If you have forgotten your password, you can reset it using this link:
+{% endblocktranslate %}
 
 {{ password_reset_url }}
 
-{% blocktranslate %}If you did not attempt to sign up, you can safely ignore this email.{% endblocktranslate %}
+{% translate "If you did not attempt to sign up, you can safely ignore this email." %}
 {% endautoescape %}
