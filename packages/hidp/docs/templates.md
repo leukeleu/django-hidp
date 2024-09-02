@@ -23,8 +23,13 @@ HTML boilerplate for each page. Override this template to load custom CSS, scrip
 and set up a base layout.
 
 This template defines two blocks that all other templates depend on:
-- `title` - inside the HTML title tag
-- `body` - inside the HTML body tag
+- `title` - inside the HTML title tag.
+- `body` - inside the HTML body tag.
+
+This template also defines two blocks that you can extend to inject extra styles and/or
+scripts:
+- `extra_head` - inside the HTML head tag, after the `title` tag.
+- `extra_body` - inside the HTML body tag, below the `body` block.
 
 ## **accounts**
 
