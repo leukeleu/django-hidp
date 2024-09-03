@@ -25,6 +25,12 @@
       <button type="submit">{% translate 'Log out' %}</button>
     </p>
   </form>
+
+  <p>
+    <a href="{% url 'hidp_accounts:manage_account' %}">
+      {% translate 'Manage account' %}
+    </a>
+  </p>
   {% endif %}
 
   <h1>{% translate 'Log in with username and password' %}</h1>
