@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-08-29 09:37-0500\n"
+"POT-Creation-Date: 2024-08-29 09:45-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,302 +21,302 @@ msgstr ""
 #: hidp/accounts/forms.py
 #, python-brace-format
 msgid "I have read and accept the <a href=\"{url}\">Terms of Service</a>."
-msgstr ""
+msgstr "Ik heb de <a href=\"{url}\">Servicevoorwaarden</a> gelezen en accepteer ze."
 
 #: hidp/accounts/forms.py
 msgid "Email"
-msgstr ""
+msgstr "E-mailadres"
 
 #: hidp/accounts/forms.py
 msgid "I am not a robot"
-msgstr ""
+msgstr "Ik ben geen robot"
 
 #: hidp/accounts/forms.py
 msgid "Please confirm that you are not a robot."
-msgstr ""
+msgstr "Bevestig dat je geen robot bent."
 
 #: hidp/accounts/models.py
 msgid "email address"
-msgstr ""
+msgstr "e-mailadres"
 
 #: hidp/accounts/models.py
 msgid "email verified"
-msgstr ""
+msgstr "e-mailadres geverifieerd"
 
 #: hidp/accounts/models.py
 msgid "last modified"
-msgstr ""
+msgstr "laatst gewijzigd"
 
 #: hidp/accounts/models.py
 msgid "agreed to terms of service"
-msgstr ""
+msgstr "akkoord met de servicevoorwaarden"
 
 #: hidp/accounts/models.py
 msgid "user"
-msgstr ""
+msgstr "gebruiker"
 
 #: hidp/accounts/models.py
 msgid "users"
-msgstr ""
+msgstr "gebruikers"
 
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account."
-msgstr ""
+msgstr "Ja, ik wil dit account koppelen."
 
 #: hidp/federated/models.py
 msgid "OpenID connection"
-msgstr ""
+msgstr "OpenID-koppeling"
 
 #: hidp/federated/models.py
 msgid "OpenID connections"
-msgstr ""
+msgstr "OpenID-koppelingen"
 
 #: hidp/federated/views.py
 msgid "You already have an account with this email address. Please log in to link your account."
-msgstr ""
+msgstr "Je hebt al een account met dit e-mailadres. Log in om je account te koppelen."
 
 #: hidp/federated/views.py
 msgid "The authentication request has expired. Please try again."
-msgstr ""
+msgstr "Het authenticatieverzoek is verlopen. Probeer het opnieuw."
 
 #: hidp/federated/views.py
 msgid "Unexpected error during authentication. Please try again."
-msgstr ""
+msgstr "Onverwachte fout tijdens authenticatie. Probeer het opnieuw."
 
 #: hidp/federated/views.py
 msgid "Expired or invalid token. Please try again."
-msgstr ""
+msgstr "Verlopen of ongeldig token. Probeer het opnieuw."
 
 #: hidp/federated/views.py
 msgid "Login failed. Invalid credentials."
-msgstr ""
+msgstr "Inloggen mislukt. Ongeldige inloggegevens."
 
 #: hidp/federated/views.py
 #, python-brace-format
 msgid "Successfully linked your {provider} account."
-msgstr ""
+msgstr "Je {provider}-account is nu gekoppeld."
 
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
 #: hidp/templates/hidp/accounts/register.html
 msgid "Log in"
-msgstr ""
+msgstr "Inloggen"
 
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/register.html
 #, python-format
 msgid "You are currently logged in as %(user)s."
-msgstr ""
+msgstr "Je bent momenteel ingelogd als %(user)s."
 
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/register.html
 msgid "Log out"
-msgstr ""
+msgstr "Uitloggen"
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Log in with username and password"
-msgstr ""
+msgstr "Inloggen met gebruikersnaam en wachtwoord"
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Excessive login attempts have been detected for this account. For your safety, additional security measures are now in place."
-msgstr ""
+msgstr "Er zijn te veel inlogpogingen gedetecteerd voor dit account. Voor jouw veiligheid zijn er nu extra beveiligingsmaatregelen ingeschakeld."
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Forgot your password?"
-msgstr ""
+msgstr "Wachtwoord vergeten?"
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Log in using a trusted service"
-msgstr ""
+msgstr "Log in met een vertrouwde dienst"
 
 #: hidp/templates/hidp/accounts/login.html
 #, python-format
 msgid "Log in with %(provider)s"
-msgstr ""
+msgstr "Log in met %(provider)s"
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Don't have an account yet?"
-msgstr ""
+msgstr "Heb je nog geen account?"
 
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/register.html
 #: hidp/templates/hidp/federated/registration.html
 msgid "Sign up"
-msgstr ""
+msgstr "Registreer"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 msgid "Logout"
-msgstr ""
+msgstr "Uitloggen"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #, python-format
 msgid "Logout requested by %(application)s"
-msgstr ""
+msgstr "Uitloggen aangevraagd door %(application)s"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 msgid "Cancel"
-msgstr ""
+msgstr "Annuleren"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
 msgid "You're receiving this email because you requested a password reset."
-msgstr ""
+msgstr "Je ontvangt deze e-mail omdat je wachtwoord reset hebt aangevraagd."
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
 msgid "Please go to the following page and choose a new password:"
-msgstr ""
+msgstr "Ga naar de volgende pagina en kies een nieuw wachtwoord:"
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_subject.txt
 msgid "Password reset request"
-msgstr ""
+msgstr "Verzoek tot wachtwoord reset"
 
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
 #: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
 #: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
 #: hidp/templates/hidp/accounts/recovery/password_reset_request.html
 msgid "Reset password"
-msgstr ""
+msgstr "Wachtwoord resetten"
 
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
 msgid "Please enter your new password twice so we can verify you typed it in correctly."
-msgstr ""
+msgstr "Voer je nieuwe wachtwoord twee keer in, zodat we kunnen verifiëren dat je het correct hebt ingevoerd."
 
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
 msgid "Change password"
-msgstr ""
+msgstr "Wachtwoord wijzigen"
 
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
 msgid "The password reset link was invalid, possibly because it has already been used. Please request a new password reset."
-msgstr ""
+msgstr "De link om je wachtwoord te resetten is ongeldig, mogelijk omdat deze al is gebruikt. Vraag een nieuwe aan."
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
 msgid "Your password has been set. You may go ahead and log in now."
-msgstr ""
+msgstr "Je wachtwoord is ingesteld. Je kunt nu inloggen."
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
 msgid "We've emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly."
-msgstr ""
+msgstr "We hebben je een e-mail gestuurd met instructies voor het opnieuw instellen van je wachtwoord. Als er een account bestaat met het door jou ingevoerde e-mailadres zul je deze snel ontvangen."
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
 msgid "If you don't receive an email, please make sure you've entered the address you registered with, and check your spam folder."
-msgstr ""
+msgstr "Als je geen e-mail ontvangt, controleer dan of je het adres hebt ingevoerd waarmee je je hebt geregistreerd. Controleer ook je spam."
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_request.html
 msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr ""
+msgstr "Wachtwoord vergeten? Voer hieronder je e-mailadres in, dan sturen we je instructies om een nieuw wachtwoord in te stellen."
 
 #: hidp/templates/hidp/accounts/register.html
 #: hidp/templates/hidp/federated/registration.html
 msgid "Create a new account"
-msgstr ""
+msgstr "Maak een nieuw account"
 
 #: hidp/templates/hidp/accounts/register.html
 msgid "To create a new account, please log out first."
-msgstr ""
+msgstr "Om een nieuw account aan te maken moet je eerst uitloggen."
 
 #: hidp/templates/hidp/accounts/register.html
 #, python-format
 msgid "Alternatively, you can <a href=\"%(next)s\">continue using your current account</a>."
-msgstr ""
+msgstr "Je kunt ook <a href=\"%(next)s\">doorgaan met je huidige account</a>."
 
 #: hidp/templates/hidp/accounts/register.html
 msgid "Sign up using a trusted service"
-msgstr ""
+msgstr "Registreer met een vertrouwde dienst"
 
 #: hidp/templates/hidp/accounts/register.html
 #, python-format
 msgid "Sign up using %(provider)s"
-msgstr ""
+msgstr "Registreer met %(provider)s"
 
 #: hidp/templates/hidp/accounts/register.html
 msgid "Already have an account?"
-msgstr ""
+msgstr "Heb je al een account?"
 
 #: hidp/templates/hidp/accounts/tos.html
 msgid "Terms of Service"
-msgstr ""
+msgstr "Servicevoorwaarden"
 
 #: hidp/templates/hidp/accounts/verification/email/account_exists_body.txt
 msgid "You're receiving this email because you attempted to create an account using this email address. However, an account already exists with this email address. If you have forgotten your password, you can reset it using this link:"
-msgstr ""
+msgstr "Je ontvangt deze e-mail omdat je geprobeerd hebt een account aan te maken met dit e-mailadres. Er bestaat echter al een account met dit e-mailadres. Als je je wachtwoord bent vergeten, kun je deze resetten met de volgende link:"
 
 #: hidp/templates/hidp/accounts/verification/email/account_exists_body.txt
 #: hidp/templates/hidp/accounts/verification/email/verification_body.txt
 msgid "If you did not attempt to sign up, you can safely ignore this email."
-msgstr ""
+msgstr "Als je je niet geprobeerd hebt te registeren, kun je deze e-mail gewoon negeren."
 
 #: hidp/templates/hidp/accounts/verification/email/account_exists_subject.txt
 msgid "Sign up request"
-msgstr ""
+msgstr "Registratie verzoek"
 
 #: hidp/templates/hidp/accounts/verification/email/verification_body.txt
 msgid "You're receiving this email because you created an account with this email address. Please go to the following page and verify your email address:"
-msgstr ""
+msgstr "Je ontvangt deze e-mail omdat je een account hebt aangemaakt met dit e-mailadres. Ga naar de volgende pagina en verifieer je e-mailadres:"
 
 #: hidp/templates/hidp/accounts/verification/email/verification_subject.txt
 msgid "Verify your email address"
-msgstr ""
+msgstr "Verifieer je e-mailadres"
 
 #: hidp/templates/hidp/accounts/verification/email_verification_complete.html
 msgid "Verification completed"
-msgstr ""
+msgstr "Verificatie voltooid"
 
 #: hidp/templates/hidp/accounts/verification/email_verification_complete.html
 msgid "Your email address is now verified."
-msgstr ""
+msgstr "Je e-mailadres is nu geverifieerd."
 
 #: hidp/templates/hidp/accounts/verification/email_verification_complete.html
 #, python-format
 msgid "You can now <a href=\"%(login_url)s\">log in</a>."
-msgstr ""
+msgstr "Je kunt nu <a href=\"%(login_url)s\">inloggen</a>."
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
 msgid "Verification required"
-msgstr ""
+msgstr "Verificatie vereist"
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
 msgid "You need to verify your email address before you can log in."
-msgstr ""
+msgstr "Je moet je e-mailadres verifiëren voordat je kunt inloggen."
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
 msgid "Please check your email for a message with a verification link. This message may take a few minutes to arrive. If you don't see it, check your spam folder. If you still can't find it, you can request a new verification email."
-msgstr ""
+msgstr "Check of je een e-mail met een verificatielink hebt ontvangen. Het kan een paar minuten duren voordat deze verificatie-e-mail aankomt. Als je de e-mail niet ziet, controleer dan je spam folder. Als je de e-mail nog steeds niet kunt vinden, kun je een nieuwe verificatie-e-mail aanvragen."
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
 msgid "Resend verification email"
-msgstr ""
+msgstr "Verificatie-e-mail opnieuw verzenden"
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
 #: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "The link you followed is invalid. It may have expired or been used already."
-msgstr ""
+msgstr "De link die je hebt gevolgd is ongeldig. Het kan zijn dat deze is verlopen of al is gebruikt."
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "Verify email"
-msgstr ""
+msgstr "E-mailadres verifiëren"
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "Log in to your account to receive a new verification email."
-msgstr ""
+msgstr "Log in op je account om een nieuwe verificatie-e-mail te ontvangen."
 
 #: hidp/templates/hidp/federated/account_link.html
 msgid "Link account"
-msgstr ""
+msgstr "Account koppelen"
 
 #: hidp/templates/hidp/federated/account_link.html
 #, python-format
 msgid "You are about to link your %(provider)s account to your existing account."
-msgstr ""
+msgstr "Je staat op het punt je %(provider)s-account te koppelen aan je bestaande account."
 
 #: hidp/templates/hidp/federated/account_link.html
 #, python-format
 msgid "This will allow you to use your %(provider)s account to log in to your existing account."
-msgstr ""
+msgstr "Dit stelt je in staat om je %(provider)s-account te gebruiken om in te loggen op je bestaande account."
 
 #: hidp/templates/hidp/federated/account_link.html
 msgid "Are you sure you want to do this?"
-msgstr ""
+msgstr "Weet je zeker dat je dit wilt doen?"
