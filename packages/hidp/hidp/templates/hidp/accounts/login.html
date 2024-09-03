@@ -14,19 +14,6 @@
   </ul>
   {% endif %}
 
-  {% if request.user.is_authenticated %}
-  <form action="{%  url 'hidp_accounts:logout' %}" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{% url 'hidp_accounts:login' %}">
-    <p>
-      {% blocktranslate trimmed %}
-      You are currently logged in as {{ user }}.
-      {% endblocktranslate %}
-      <button type="submit">{% translate 'Log out' %}</button>
-    </p>
-  </form>
-  {% endif %}
-
   <h1>{% translate 'Log in with username and password' %}</h1>
 
   {% if request.limited %}

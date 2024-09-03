@@ -1,0 +1,21 @@
+{% extends "hidp/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Manage Account' %}{% endblock %}
+
+{% block body %}
+  <h1>{% translate 'Manage your account information' %}</h1>
+
+  {% if request.user.is_authenticated %}
+  <form action="{%  url 'hidp_accounts:logout' %}" method="post">
+    {% csrf_token %}
+    <p>
+      {% blocktranslate trimmed %}
+      You are currently logged in as {{ user }}.
+      {% endblocktranslate %}
+      <button type="submit">{% translate 'Log out' %}</button>
+    </p>
+  </form>
+  {% endif %}
+
+{% endblock %}
