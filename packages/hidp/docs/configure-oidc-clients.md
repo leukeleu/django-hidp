@@ -101,6 +101,7 @@ has not been tested and might require some customisation of the
 provided `MicrosoftOIDCClient`.
 :::
 
+(adding-support-for-other-oidc-providers)=
 ## Adding support for other OIDC Providers
 
 To support other OIDC providers, you can implement a custom client based on
