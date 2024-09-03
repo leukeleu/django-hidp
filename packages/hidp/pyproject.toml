@@ -11,11 +11,13 @@ requires-python = ">=3.11"
 dynamic = [
   "dependencies",
   "version",
+  "optional-dependencies",
 ]
 readme = "README.md"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+optional-dependencies.oidc_provider = { file = "requirements_oidc_provider.txt" }
 
 [tool.setuptools.packages.find]
 include = [

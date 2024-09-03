@@ -141,7 +141,7 @@ clean:
 ##
 
 ../../var/requirements_frozen.txt:
-	uv pip compile requirements.txt -q -o "${@}" --no-annotate --no-header
+	uv pip compile pyproject.toml --extra oidc_provider -q -o "${@}" --no-annotate --no-header
 	@echo "### Package dependencies :package:" >> ${GITHUB_STEP_SUMMARY}
 	@echo '```' >> ${GITHUB_STEP_SUMMARY}
 	@cat "${@}" >> ${GITHUB_STEP_SUMMARY}
