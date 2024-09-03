@@ -250,3 +250,9 @@ class RateLimitedAuthenticationForm(AuthenticationForm):
             "required": _("Please confirm that you are not a robot."),
         },
     )
+
+
+class EditUserForm(forms.ModelForm):
+    class Meta:
+        model = UserModel
+        fields = ("first_name", "last_name")

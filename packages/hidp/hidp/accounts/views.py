@@ -13,6 +13,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
 
@@ -532,9 +533,22 @@ class PasswordResetCompleteView(auth_views.TemplateView):
         )
 
 
-class ManageAccountView(OIDCLoginContextMixin, generic.TemplateView):
+class ManageAccountView(OIDCLoginContextMixin, generic.FormView):
     """
-    Display the manage account page.
+    Display the manage account form and handle the update action.
     """
 
+    form_class = forms.EditUserForm
     template_name = "hidp/accounts/management/manage_account.html"
+    success_url = reverse_lazy("hidp_accounts:manage_account")
+
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            "instance": self.request.user,
+        }
+
+    def form_valid(self, form):
+        form.save()
+        messages.success(self.request, _("Account updated successfully."))
+        return super().form_valid(form)

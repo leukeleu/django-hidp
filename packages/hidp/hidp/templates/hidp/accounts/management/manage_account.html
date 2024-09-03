@@ -6,6 +6,16 @@
 {% block body %}
   <h1>{% translate 'Manage your account information' %}</h1>
 
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+    <li>
+      {{ message }}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
   {% if request.user.is_authenticated %}
   <form action="{%  url 'hidp_accounts:logout' %}" method="post">
     {% csrf_token %}
@@ -17,5 +27,13 @@
     </p>
   </form>
   {% endif %}
+
+  <hr>
+  <form action="{% url 'hidp_accounts:manage_account' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {{ form.as_p }}
+    <button type="submit">{% translate 'Update' %}</button>
+  </form>
 
 {% endblock %}
