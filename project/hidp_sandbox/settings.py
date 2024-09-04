@@ -90,7 +90,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
-    "hidp.translations.middleware.UiLocalesMiddleware",
 ]
 
 ROOT_URLCONF = "hidp_sandbox.urls"
