@@ -27,3 +27,12 @@ Provider.
 :::{note}
 For more information, please see [cleartokens](https://django-oauth-toolkit.readthedocs.io/en/latest/management_commands.html#cleartokens)
 :::
+
+## remove_stale_unverified_accounts
+The ``remove_stale_unverified_accounts`` management command removes accounts that have
+not been verified within a specific number of days after creation.
+
+The following optional flags are available:
+- ``--days`` - Maximum number of days an account is allowed to be unverified: defaults to 90.
+- ``--dry-run`` - If `True`, returns the number of accounts that would be removed,
+without performing the removal. Defaults to `False`.
