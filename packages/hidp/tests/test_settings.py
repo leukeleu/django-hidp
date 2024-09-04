@@ -47,7 +47,10 @@ INSTALLED_APPS = [
     "hidp",
     "hidp.accounts",
     "hidp.federated",
+    # Custom user model
     "tests.custom_user",
+    # Custom makemessages command
+    "tests.translations",
 ]
 
 MIDDLEWARE = [
@@ -113,3 +116,8 @@ PASSWORD_HASHERS = [
 ]
 
 ROOT_URLCONF = "hidp.config.urls"
+
+# Help Django find and update HIdP's message catalogs
+LOCALE_PATHS = [
+    BASE_DIR / "packages" / "hidp" / "hidp" / "locale",
+]
