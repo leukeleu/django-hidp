@@ -3,9 +3,12 @@ help:
 	@echo "The following commands are meant to be run inside the python container:"
 	@echo
 	@echo "  make test - Run lint, django-checks, migrationtest and coveragetest"
+	@echo "  make messages - Update the message catalog"
+	@echo "  make compilemessages - Compile the message catalog"
 	@echo "  make lint - Check syntax and style"
 	@echo "  make lintfix - Automatically fix syntax and style issues"
 	@echo "  make migrationtest - Check if there are any model changes without migrations"
+	@echo "  make checkmessages - Check if the message catalog is up to date and compile it"
 	@echo "  make unittests - Run unit tests with coverage"
 	@echo "  make coveragetest - Generate coverage report"
 	@echo "  make coverage - Generate test coverage html report"
@@ -16,7 +19,7 @@ help:
 	@echo
 
 .PHONY: test
-test: lint django-checks migrationtest coveragetest checkmanifest checksetup
+test: lint django-checks migrationtest checkmessages coveragetest checkmanifest checksetup
 
 .PHONY: lint
 lint:
@@ -34,6 +37,21 @@ lintfix:
 migrationtest:
 	# Check if there are any model changes without migrations
 	./manage.py makemigrations --dry-run --no-input --check --settings tests.test_settings
+
+.PHONY: messages
+messages:
+	# Update the message catalog
+	./manage.py makemessages
+
+.PHONY: compilemessages
+compilemessages:
+	# Update and compile the message catalog
+	./manage.py compilemessages
+
+.PHONY: checkmessages
+checkmessages: messages
+	@./Makefile.tasks.sh check-locale-diff
+	@./Makefile.tasks.sh check-fuzzy-translations
 
 tests ?= tests
 .PHONY: unittests
@@ -68,7 +86,7 @@ checksetup: build
 	twine check ../../var/dist/*.whl
 
 .PHONY: build
-build: clean
+build: clean compilemessages
 	# Build the package
 	python -m build --installer uv --outdir ../../var/dist
 
