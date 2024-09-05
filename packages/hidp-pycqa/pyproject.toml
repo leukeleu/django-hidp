@@ -32,6 +32,7 @@ extend-exclude = [
 [tool.ruff.lint]
 select = [
   "ALL",  # enable all rules
+  "D213",  # require summary on second line for multi line docstrings
 ]
 preview = true  # even the experimental ones
 ignore = [
@@ -41,7 +42,8 @@ ignore = [
   "COM812",  # trailing commas in function calls are not required
   "COM819",  # trailing comma in tuple is allowed
   "CPY001",  # copyright notice is not required
-  "D",  # docstring checks are disabled
+  "D1",  # Do not yet require docstrings
+  "D212",  # summary is on the second line for multi line docstrings (D213)
   "DJ008",  # __str__ methods are not required for models
   "DOC",  # docstring checks are disabled
   "EM",  # error messages do not need to be assigned to a variable
@@ -100,6 +102,9 @@ extend-ignore-names = [
 
 [tool.ruff.lint.pycodestyle]
 max-doc-length = 88
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.lint.pylint]
 max-args = 10  # default is 5

@@ -56,7 +56,7 @@ class TestOAuthFlow(TestCase):
         )
 
     def set_client_access_token(self, client=None, user=None, scope=""):
-        """Add an access token to the test client"""
+        """Add an access token to the test client."""
         # Utility method to add an access token to the test client, used in
         # the test methods to simulate a logged-in user.
 
@@ -72,7 +72,7 @@ class TestOAuthFlow(TestCase):
     def authorization_request(
         self, code_verifier="secret", client_id="happy-app", **oauth_params
     ):
-        """Perform an authorization request"""
+        """Perform an authorization request."""
         # Utility method to perform an authorization request, used in the test
         # methods to simulate the authorization code grant flow.
 
@@ -102,7 +102,7 @@ class TestOAuthFlow(TestCase):
         )
 
     def test_authorize_authentication_required(self):
-        """Authorization endpoint requires authentication"""
+        """Authorization endpoint requires authentication."""
         # User is not logged in
         response = self.authorization_request()
 
@@ -128,7 +128,7 @@ class TestOAuthFlow(TestCase):
         )
 
     def test_code_grant_token_exchange(self):
-        """Test authorization flow"""
+        """Test authorization flow."""
         code_verifier = "secret"
         self.client.force_login(self.user)  # User is logged in
         response = self.authorization_request(code_verifier)
@@ -193,7 +193,7 @@ class TestOAuthFlow(TestCase):
         self.assertEqual(str(self.user.id), claims["sub"])
 
     def test_authorize_login_prompt(self):
-        """Test authorization endpoint can force login prompt"""
+        """Test authorization endpoint can force login prompt."""
         self.client.force_login(self.user)  # User is logged in
         response = self.authorization_request(prompt="login")
 
@@ -210,7 +210,7 @@ class TestOAuthFlow(TestCase):
         )
 
     def test_authorize_prompt_none(self):
-        """Test authorization endpoint can skip login prompt"""
+        """Test authorization endpoint can skip login prompt."""
         with self.subTest("User is not logged in"):
             response = self.authorization_request(prompt="none")
             self.assertEqual(HTTPStatus.FOUND, response.status_code)
@@ -235,7 +235,7 @@ class TestOAuthFlow(TestCase):
             )
 
     def test_authorize_create_prompt(self):
-        """prompt=create redirects to registration"""
+        """prompt=create redirects to registration."""
         with self.subTest("No user logged in"):
             response = self.authorization_request(prompt="create")
             next_url = (

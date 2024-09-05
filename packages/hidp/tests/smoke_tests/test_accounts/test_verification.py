@@ -39,15 +39,11 @@ class TestEmailVerificationRequiredView(TestCase):
             )
 
     def test_valid_get(self):
-        """
-        Works when the token is considered valid.
-        """
+        """Works when the token is considered valid."""
         self._assert_response(self.client.get(self.url, follow=True))
 
     def test_get_invalid_token(self):
-        """
-        Invalid token.
-        """
+        """Invalid token."""
         response = self.client.get(
             reverse(
                 "hidp_accounts:email_verification_required",
@@ -58,9 +54,7 @@ class TestEmailVerificationRequiredView(TestCase):
         self._assert_response(response, validlink=False)
 
     def test_no_token_in_session(self):
-        """
-        Placeholder token, no token in session.
-        """
+        """Placeholder token, no token in session."""
         response = self.client.get(
             reverse(
                 "hidp_accounts:email_verification_required",
@@ -71,9 +65,7 @@ class TestEmailVerificationRequiredView(TestCase):
         self._assert_response(response, validlink=False)
 
     def test_post(self):
-        """
-        Send the verification email.
-        """
+        """Send the verification email."""
         # Get the page first, to populate the session
         response = self.client.get(self.url, follow=True)
         # Post to the redirected URL
@@ -87,9 +79,7 @@ class TestEmailVerificationRequiredView(TestCase):
         )
 
     def test_post_invalid_token(self):
-        """
-        Does not send the verification email when the token is invalid.
-        """
+        """Does not send the verification email when the token is invalid."""
         # Get the page first, to populate the session
         response = self.client.get(
             reverse(
@@ -132,15 +122,11 @@ class TestEmailVerificationView(TestCase):
             )
 
     def test_valid_get(self):
-        """
-        Works when the token is considered valid.
-        """
+        """Works when the token is considered valid."""
         self._assert_response(self.client.get(self.url, follow=True))
 
     def test_get_invalid_token(self):
-        """
-        Invalid token.
-        """
+        """Invalid token."""
         response = self.client.get(
             reverse(
                 "hidp_accounts:verify_email",
@@ -151,9 +137,7 @@ class TestEmailVerificationView(TestCase):
         self._assert_response(response, validlink=False)
 
     def test_no_token_in_session(self):
-        """
-        Placeholder token, no token in session.
-        """
+        """Placeholder token, no token in session."""
         response = self.client.get(
             reverse(
                 "hidp_accounts:verify_email",
@@ -164,27 +148,21 @@ class TestEmailVerificationView(TestCase):
         self._assert_response(response, validlink=False)
 
     def test_inactive_user(self):
-        """
-        Inactive user.
-        """
+        """Inactive user."""
         self.user.is_active = False
         self.user.save()
         response = self.client.get(self.url, follow=True)
         self._assert_response(response, validlink=False)
 
     def test_already_verified_user(self):
-        """
-        Already verified user.
-        """
+        """Already verified user."""
         self.user.email_verified = timezone.now()
         self.user.save()
         response = self.client.get(self.url, follow=True)
         self._assert_response(response, validlink=False)
 
     def test_post(self):
-        """
-        Update the user's email_verified field.
-        """
+        """Update the user's email_verified field."""
         # Get the page first, to populate the session
         response = self.client.get(self.url, follow=True)
         # Post to the redirected URL

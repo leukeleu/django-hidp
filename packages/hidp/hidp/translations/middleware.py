@@ -31,7 +31,7 @@ class UiLocalesMiddleware:
 
     As a workaround for a bug in Django Oauth Toolkit, the middleware also makes sure
     that the 'ui_locales' query parameter is removed from the URL.
-    """
+    """  # noqa: D205
 
     LANGUAGE_COOKIE_NAME = "hidp_language"
 

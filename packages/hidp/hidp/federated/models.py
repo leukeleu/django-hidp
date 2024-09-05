@@ -9,6 +9,7 @@ class OpenIdConnectionQuerySet(models.QuerySet):
     def get_by_provider_and_claims(self, provider_key, *, issuer_claim, subject_claim):
         """
         Get an OpenID connection by provider key and claims.
+
         Prefetches the associated user along with the query.
 
         Args:

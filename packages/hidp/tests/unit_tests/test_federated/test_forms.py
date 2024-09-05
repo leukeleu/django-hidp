@@ -24,26 +24,20 @@ class TestOIDCRegistrationForm(TestCase):
         )
 
     def test_data_from_claims_and_user_info(self):
-        """
-        The form is populated from the OIDC claims and user info.
-        """
+        """The form is populated from the OIDC claims and user info."""
         form = self._create_form()
         self.assertEqual(form.initial["email"], "user@example.com")
         self.assertEqual(form.initial["first_name"], "Firstname")
         self.assertEqual(form.initial["last_name"], "Lastname")
 
     def test_tos_required(self):
-        """
-        Terms of service must be agreed to.
-        """
+        """Terms of service must be agreed to."""
         form = self._create_form(data={})
         self.assertFalse(form.is_valid(), msg="Expected form to be invalid.")
         self.assertFormError(form, "agreed_to_tos", "This field is required.")
 
     def test_email_field_disabled(self):
-        """
-        Email field is disabled to prevent the user from changing it.
-        """
+        """Email field is disabled to prevent the user from changing it."""
         form = self._create_form(
             data={
                 "email": "fake@example.com",
@@ -54,9 +48,7 @@ class TestOIDCRegistrationForm(TestCase):
         self.assertEqual(form.instance.email, "user@example.com")
 
     def test_creates_user_and_connection(self):
-        """
-        The form creates a user and OpenIdConnection from OIDC claims and user info.
-        """
+        """The form creates a user and OpenIdConnection from OIDC claims and user info."""  # noqa: E501, W505
         form = self._create_form(data={"agreed_to_tos": "on"})
         self.assertTrue(form.is_valid(), msg="Expected form to be valid.")
         user = form.save()

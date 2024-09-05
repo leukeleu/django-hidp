@@ -1,6 +1,4 @@
-"""
-Microsoft OpenID Connect provider.
-"""
+"""Microsoft OpenID Connect provider."""
 
 from . import base
 

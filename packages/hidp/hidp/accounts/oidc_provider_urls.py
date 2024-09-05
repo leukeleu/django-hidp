@@ -1,5 +1,5 @@
 """
-OAuth2 Provider URLs
+OAuth2 Provider URLs.
 
 Provides the URL patterns for OAuth2 and OpenID Connect (OIDC) endpoints.
 

@@ -1,14 +1,10 @@
-"""
-Provide the basic interface, and some common functionality, for all providers.
-"""
+"""Provide the basic interface, and some common functionality, for all providers."""
 
 import urllib.parse
 
 
 def _valid_provider_key(provider_key):
-    """
-    The provider key is valid when URL-encoding it does not change the value.
-    """
+    """The provider key is valid when URL-encoding it does not change the value."""
     return urllib.parse.quote(provider_key) == provider_key
 
 
@@ -17,16 +13,14 @@ def _valid_callback_base_url(callback_base_url):
     The callback base url is valid when the scheme is available and set to https,
     a netloc is present, the path is empty or points to the root, and all
     other parts are empty.
-    """
+    """  # noqa: D205
     scheme, netloc, path, query, fragment = urllib.parse.urlsplit(callback_base_url)
     path = path.rstrip("/")  # Remove trailing slash so "/" becomes ""
     return scheme == "https" and netloc and not (path or query or fragment)
 
 
 def _valid_endpoint(endpoint):
-    """
-    Communication with endpoints MUST utilize TLS.
-    """
+    """Communication with endpoints MUST utilize TLS."""
     # In order to prevent man-in-the-middle attacks, the authorization
     # server MUST require the use of TLS with [...] for any request sent
     # to the authorization and token endpoints.
@@ -80,7 +74,7 @@ class OIDCClient:
             Alternative base URL to use instead of the one of the request when
             constructing the callback URL.
 
-    """
+    """  # noqa: D205
 
     provider_key = NotImplemented
     name = None

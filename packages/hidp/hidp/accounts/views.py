@@ -25,9 +25,7 @@ UserModel = get_user_model()
 
 
 class OIDCLoginContextMixin:
-    """
-    Mixin to provide context data for OIDC login providers.
-    """
+    """Mixin to provide context data for OIDC login providers."""
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
@@ -91,9 +89,7 @@ class RegistrationView(
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        """
-        Save the new user and redirect to the email verification required page.
-        """
+        """Save the new user and redirect to the email verification required page."""
         try:
             user = form.save()
         except IntegrityError:
@@ -124,17 +120,13 @@ class RegistrationView(
 
 
 class TermsOfServiceView(generic.TemplateView):
-    """
-    Display the terms of service.
-    """
+    """Display the terms of service."""
 
     template_name = "hidp/accounts/tos.html"
 
 
 class EmailTokenMixin:
-    """
-    Mixin to handle email verification tokens in URLs.
-    """
+    """Mixin to handle email verification tokens in URLs."""
 
     token_generator = NotImplemented
     token_session_key = NotImplemented
@@ -146,7 +138,7 @@ class EmailTokenMixin:
         store the token in the session.
 
         If the token is already the placeholder value, do nothing.
-        """
+        """  # noqa: D205
         if token == self.token_placeholder:
             # Token is already the placeholder value, so do nothing.
             return None
@@ -171,7 +163,7 @@ class EmailTokenMixin:
         """
         Find the user by the token in the session. If the token is invalid,
         or missing, or the user does not exist, return None.
-        """
+        """  # noqa: D205
         token = self.request.session.get(self.token_session_key)
         if token is None:
             return None
@@ -210,7 +202,7 @@ class EmailVerificationRequiredView(
     clicking a link in an email that was sent to them.
 
     The page also includes the option to request a new verification email.
-    """
+    """  # noqa: D205
 
     template_name = "hidp/accounts/verification/email_verification_required.html"
     token_generator = tokens.email_verification_request_token_generator
@@ -292,9 +284,7 @@ class EmailVerificationView(
 
 
 class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.TemplateView):
-    """
-    Display a message that the email address has been verified.
-    """
+    """Display a message that the email address has been verified."""
 
     template_name = "hidp/accounts/verification/email_verification_complete.html"
 
@@ -386,11 +376,11 @@ class LoginView(OIDCLoginContextMixin, auth_views.LoginView):
     def get_form_class(self):
         """
         Determine the form class to use for the view.
+
         If the request is rate limited, return a form that requires the user to prove
         they are not a bot.
         Otherwise, return the normal authentication form.
         """
-
         if self.request.limited:
             return self.rate_limited_form_class
         return super().get_form_class()
@@ -462,9 +452,7 @@ class LogoutView(auth_views.LogoutView):
         return super().get_redirect_url()
 
     def post(self, request, *args, **kwargs):
-        """
-        Log out the user and redirect to the success URL.
-        """
+        """Log out the user and redirect to the success URL."""
         # This **replaces** the base implementation in order to use the
         # HIdP logout wrapper, for good measure.
         hidp_auth.logout(request)
@@ -483,7 +471,7 @@ class PasswordResetRequestView(generic.FormView):
 
     Sends the password reset email and redirects to the password reset
     sent view if the form is submitted with valid data.
-    """
+    """  # noqa: D205
 
     form_class = forms.PasswordResetRequestForm
     template_name = "hidp/accounts/recovery/password_reset_request.html"
@@ -500,18 +488,14 @@ class PasswordResetRequestView(generic.FormView):
 
 
 class PasswordResetEmailSentView(generic.TemplateView):
-    """
-    Display a message that the password reset email has been sent.
-    """
+    """Display a message that the password reset email has been sent."""
 
     template_name = "hidp/accounts/recovery/password_reset_email_sent.html"
 
 
 @method_decorator(rate_limit_default, name="dispatch")
 class PasswordResetView(auth_views.PasswordResetConfirmView):
-    """
-    Display the password reset form and handle the password reset action.
-    """
+    """Display the password reset form and handle the password reset action."""
 
     form_class = forms.PasswordResetForm
     template_name = "hidp/accounts/recovery/password_reset.html"
@@ -519,9 +503,7 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
 
 
 class PasswordResetCompleteView(auth_views.TemplateView):
-    """
-    Display a message that the password reset has been completed.
-    """
+    """Display a message that the password reset has been completed."""
 
     template_name = "hidp/accounts/recovery/password_reset_complete.html"
 

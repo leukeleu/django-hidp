@@ -76,18 +76,14 @@ class TestOptionalTOSUserCreationFormForm(TestCase):
     @classmethod
     def setUpTestData(cls):
         class NoTOSUserCreationForm(forms.UserCreationForm):
-            """
-            UserCreationForm without the agreed_to_tos field.
-            """
+            """UserCreationForm without the agreed_to_tos field."""
 
             agreed_to_tos = None
 
         cls.form = NoTOSUserCreationForm
 
     def test_save(self):
-        """
-        Does not set agreed_to_tos on the user.
-        """
+        """Does not set agreed_to_tos on the user."""
         form = self.form(
             data={
                 "email": "info@example.com",

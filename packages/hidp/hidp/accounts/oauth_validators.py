@@ -39,7 +39,7 @@ class OAuth2Validator(oauth2_validators.OAuth2Validator):
         Determine if the user is logged in. If so, silent login
         *should* be possible. This is then further validated in
         validate_silent_authorization.
-        """
+        """  # noqa: D205
         # Assign the user to the oauthlib request object.
         request.user = _get_user_from_oauthlib_request(request)
         # Silently authenticate the user if the user is logged in.
@@ -48,6 +48,7 @@ class OAuth2Validator(oauth2_validators.OAuth2Validator):
     def validate_silent_authorization(self, request):  # noqa: PLR6301 (no-self-use)
         """
         Determine if the logged-in user has authorized the application.
+
         If so, silent authorization is possible.
         """
         # validate_silent_login is called before validate_silent_authorization,

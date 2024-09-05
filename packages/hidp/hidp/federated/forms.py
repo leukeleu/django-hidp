@@ -10,9 +10,7 @@ UserModel = get_user_model()
 
 
 class OIDCRegistrationForm(TermsOfServiceMixin, forms.ModelForm):
-    """
-    Create a user and OpenIDConnection from OIDC claims and user info.
-    """
+    """Create a user and OpenIDConnection from OIDC claims and user info."""
 
     agreed_to_tos = TermsOfServiceMixin.create_agreed_to_tos_field()
 
@@ -57,9 +55,7 @@ class OIDCRegistrationForm(TermsOfServiceMixin, forms.ModelForm):
 
 
 class OIDCAccountLinkForm(forms.ModelForm):
-    """
-    Link an existing user to an OpenIDConnection.
-    """
+    """Link an existing user to an OpenIDConnection."""
 
     allow_link = forms.BooleanField(
         label=_("Yes, I want to link this account."),

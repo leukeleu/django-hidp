@@ -1,6 +1,4 @@
-"""
-Configuration for Django OAuth Toolkit (DOT) in the HIdP application.
-"""
+"""Configuration for Django OAuth Toolkit (DOT) in the HIdP application."""
 
 from datetime import timedelta
 
@@ -70,7 +68,6 @@ def get_oauth2_provider_settings(
     optimized for the HIdP application.
 
     Arguments:
-
         OIDC_RSA_PRIVATE_KEY: str
             The private RSA key used for OpenID Connect (OIDC) support.
 
@@ -86,7 +83,7 @@ def get_oauth2_provider_settings(
         configuration values and assign the result to the OAUTH2_PROVIDER setting:
 
             OAUTH2_PROVIDER = configure(OIDC_RSA_PRIVATE_KEY=...)
-    """
+    """  # noqa: D205
     return OAUTH2_PROVIDER | {
         "OIDC_RSA_PRIVATE_KEY": OIDC_RSA_PRIVATE_KEY,
     }
