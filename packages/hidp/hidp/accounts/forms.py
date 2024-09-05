@@ -160,7 +160,6 @@ class AuthenticationForm(auth_forms.AuthenticationForm):
         and override `AuthenticationForm.messages['inactive']`.
 
         Note:
-
         The default backend (`django.contrib.auth.backends.ModelBackend`) does
         not authenticate inactive users, and will not call this method for
         inactive users.

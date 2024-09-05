@@ -70,7 +70,6 @@ def get_oauth2_provider_settings(
     optimized for the HIdP application.
 
     Arguments:
-
         OIDC_RSA_PRIVATE_KEY: str
             The private RSA key used for OpenID Connect (OIDC) support.
 

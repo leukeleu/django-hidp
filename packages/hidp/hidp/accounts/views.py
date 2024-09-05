@@ -390,7 +390,6 @@ class LoginView(OIDCLoginContextMixin, auth_views.LoginView):
         they are not a bot.
         Otherwise, return the normal authentication form.
         """
-
         if self.request.limited:
             return self.rate_limited_form_class
         return super().get_form_class()

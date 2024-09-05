@@ -25,7 +25,8 @@ else:
     _last_counter_v7 = 0  # 42-bit counter
 
     def uuid7():
-        """Generate a UUID from a Unix timestamp in milliseconds and random bits.
+        """
+        Generate a UUID from a Unix timestamp in milliseconds and random bits.
 
         UUIDv7 objects feature monotonicity within a millisecond.
         """

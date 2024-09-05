@@ -35,7 +35,6 @@ class TestAuthenticate(TestCase):
         Returns the user object if the credentials are valid.
         Does not log in the user.
         """
-
         user = auth.authenticate(
             request=self.request,
             email=self.user.email,
@@ -55,7 +54,6 @@ class TestAuthenticate(TestCase):
         Returns None if the credentials are invalid and sends the
         `django.contrib.auth.user_login_failed` signal.
         """
-
         user = auth.authenticate(
             request=self.request,
             email=self.user.email,
@@ -78,7 +76,6 @@ class TestAuthenticate(TestCase):
         Returns None if the user is not allowed to log in and sends the
         `django.contrib.auth.user_login_failed` signal.
         """
-
         self.user.is_active = False
         self.user.save(update_fields=["is_active"])
 
@@ -171,7 +168,6 @@ class TestLogin(TestCase):
         The wrapped `django.contrib.auth.login` function raises an exception if the user
         is not an instance of `AbstractBaseUser`.
         """
-
         with (
             self.subTest("request.user is absent"),
             self.assertRaisesMessage(

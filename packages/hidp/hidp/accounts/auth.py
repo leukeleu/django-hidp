@@ -31,7 +31,6 @@ def authenticate(request, **credentials):
     Returns `None` if the credentials are invalid, or access is denied,
     and sends the `django.contrib.auth.user_login_failed` signal.
     """
-
     # Wrap Django's authenticate, without altering its behavior, to add
     # a detailed docstring and provide a consistent interface for the
     # `hidp.accounts.auth` module.
@@ -77,7 +76,6 @@ def login(request, user, backend=None):
     Django listens to this signal to update the `last_login` field of the
     user object (if the field exists) with the current date and time.
     """
-
     # Be explicit about the expected type of the user argument. Do not handle
     # None values, unlike Django, to avoid unexpected behavior.
     # See also:
@@ -98,7 +96,6 @@ def logout(request):
     the session is flushed. This allows listeners to access the user
     and the request before the session is reset.
     """
-
     # Wrap Django's logout, without altering its behavior, to add
     # a detailed docstring and provide a consistent interface for the
     # `hidp.accounts.auth` module.

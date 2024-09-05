@@ -53,7 +53,6 @@ def remove_stale_unverified_accounts(*, days=90, dry_run=False):
             The number of accounts that are deleted, or would be deleted
             if `dry_run` is `True`
     """
-
     unverified_users = UserModel.objects.filter(
         email_verified__isnull=True,
         date_joined__lt=timezone.now() - timedelta(days=days),
