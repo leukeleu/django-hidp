@@ -93,6 +93,7 @@ msgstr "Inloggen"
 
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/register.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
 #, python-format
 msgid "You are currently logged in as %(user)s."
 msgstr "Je bent momenteel ingelogd als %(user)s."
@@ -100,6 +101,7 @@ msgstr "Je bent momenteel ingelogd als %(user)s."
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/register.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Log out"
 msgstr "Uitloggen"
 
@@ -309,3 +311,11 @@ msgstr "Dit stelt je in staat om je %(provider)s-account te gebruiken om in te l
 #: hidp/templates/hidp/federated/account_link.html
 msgid "Are you sure you want to do this?"
 msgstr "Weet je zeker dat je dit wilt doen?"
+
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Manage your account information"
+msgstr "Beheer je accountinformatie"
+
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Manage account"
+msgstr "Account beheren"

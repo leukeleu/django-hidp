@@ -92,6 +92,7 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/register.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
 #, python-format
 msgid "You are currently logged in as %(user)s."
 msgstr ""
@@ -99,6 +100,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/register.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Log out"
 msgstr ""
 
@@ -307,4 +309,12 @@ msgstr ""
 
 #: hidp/templates/hidp/federated/account_link.html
 msgid "Are you sure you want to do this?"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Manage your account information"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Manage account"
 msgstr ""
