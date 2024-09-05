@@ -266,7 +266,7 @@ if SENTRY_DSN and SENTRY_ENVIRONMENT:
 
 
 class InternalIPList:
-    """A fake list that checks if a given ip address is local (loopback) or internal (private)."""  # noqa: E501, W505
+    """Fake list of all local (loopback) and internal (private) IP addresses."""
 
     def __contains__(self, item):
         address = ipaddress.ip_address(item)

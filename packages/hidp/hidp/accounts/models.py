@@ -19,7 +19,7 @@ class UserManager(auth_models.UserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):  # noqa: D417
+    def create_user(self, email, password=None, **extra_fields):
         """
         Create a new user with the given email and password.
 
@@ -32,6 +32,7 @@ class UserManager(auth_models.UserManager):
         Args:
             email (``str``): The email address of the user.
             password (``str``, `optional`): The password of the user.
+            **extra_fields: Additional fields to set on the user.
 
         Returns:
             ``User``: The newly created user.
@@ -43,7 +44,7 @@ class UserManager(auth_models.UserManager):
             **extra_fields,
         )
 
-    def create_superuser(self, email, password=None, **extra_fields):  # noqa: D417
+    def create_superuser(self, email, password=None, **extra_fields):
         """
         Create a new superuser with the given email and password.
 
@@ -53,6 +54,7 @@ class UserManager(auth_models.UserManager):
         Args:
             email (``str``): The email address of the user.
             password (``str``, `optional`): The password of the user.
+            **extra_fields: Additional fields to set on the user.
 
         Returns:
             ``User``: The newly created superuser.
@@ -202,17 +204,19 @@ class BaseUser(auth_models.AbstractUser):
     @property
     def is_anonymous(self):
         """
-        ``bool``: Always ``False`` (as opposed to always ``True``
-        for ``AnonymousUser``).
-        """  # noqa: D205
+        Helper property to find out if user is anonymous or authenticated.
+
+        ``bool``: Always ``False``. As opposed to always ``True`` for ``AnonymousUser``.
+        """
         return super().is_anonymous
 
     @property
     def is_authenticated(self):
         """
-        ``bool``: Always ``True`` (as opposed to always ``False``
-        for ``AnonymousUser``).
-        """  # noqa: D205
+        Helper property to find out if user is anonymous or authenticated.
+
+        ``bool``: Always ``True``. As opposed to always ``False`` for ``AnonymousUser``.
+        """
         return super().is_authenticated
 
     def check_password(self, raw_password):

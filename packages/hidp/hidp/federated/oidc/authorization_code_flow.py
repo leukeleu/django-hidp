@@ -1,7 +1,4 @@
-"""
-Functions to handle the OpenID Connect Authorization Code Flow,
-with support for the optional PKCE extension.
-"""  # noqa: D205
+"""Functions to handle the OIDC Authorization Code Flow, with optional PKCE support."""
 
 # 2.1.  Code Flow
 #
@@ -127,8 +124,7 @@ def get_authentication_request_parameters(
     *, client_id, redirect_uri, state, scope="openid email profile", **extra_params
 ):
     """
-    Returns a dictionary with parameters for an OpenID Connect
-    Authorization Code Flow authentication request.
+    Prepares the parameters for an authentication request.
 
     Arguments:
         client_id (str):
@@ -144,7 +140,7 @@ def get_authentication_request_parameters(
 
     Returns:
         dict: The parameters for the authentication request.
-    """  # noqa: D205
+    """
     # 2.1.1.1. Request Parameters
     # https://openid.net/specs/openid-connect-basic-1_0.html#RequestParameters
     return extra_params | {
@@ -158,12 +154,11 @@ def get_authentication_request_parameters(
 
 def create_pkce_challenge(request, *, state_key):
     """
-    Returns a dictionary with parameters for the Proof Key for Code Exchange
-    (PKCE) extension to an OpenID Connect Authorization Code Flow.
+    Prepares the PKCE challenge for an authentication request.
 
-    Associates the code verifier with the state, to be used in the token
-    exchange request.
-    """  # noqa: D205
+    Associates the code verifier with the state so it can be sent to
+    the token endpoint for verification during the token exchange.
+    """
     # 4.1. Client Creates a Code Verifier
     # code_verifier [is a] [...] random STRING with a minimum length
     # of 43 characters and a maximum length of 128 characters.
@@ -278,8 +273,7 @@ def _pop_state_from_session(request, state_key):
 
 def validate_authentication_callback(request):
     """
-    Validates the callback from an OpenID Connect Authorization Code Flow
-    authentication request.
+    Validates the callback from an OIDC authentication request.
 
     Arguments:
         request (HttpRequest):
@@ -292,7 +286,7 @@ def validate_authentication_callback(request):
     Raises:
         OAuth2Error: If the callback contains an error.
         OIDCError: If the callback is invalid.
-    """  # noqa: D205
+    """
     # 2.1.5. Authorization Server Sends End-User Back to Client
     # Once the authorization is determined, the Authorization Server
     # returns a successful response or an error response.
@@ -341,8 +335,7 @@ def validate_authentication_callback(request):
 
 def obtain_tokens(request, *, state, client, code, callback_url):
     """
-    Obtains the tokens from an OpenID Connect Authorization Code Flow
-    authentication request.
+    Obtains the tokens from an OIDC authentication request.
 
     Arguments:
         request (HttpRequest):
@@ -358,7 +351,7 @@ def obtain_tokens(request, *, state, client, code, callback_url):
 
     Returns:
         dict: The token response from the OpenID Connect provider.
-    """  # noqa: D205
+    """
     # 2.1.6. Client Obtains ID Token and Access Token
     # https://openid.net/specs/openid-connect-basic-1_0.html#ObtainingTokens
 
@@ -413,8 +406,7 @@ def obtain_tokens(request, *, state, client, code, callback_url):
 
 def parse_id_token(raw_id_token, *, client):
     """
-    Asserts that the given ID Token is valid and issued by the expected
-    OpenID Connect provider.
+    Asserts that the given ID Token is valid and issued by the expected OIDC provider.
 
     Arguments:
         raw_id_token (str):
@@ -428,7 +420,7 @@ def parse_id_token(raw_id_token, *, client):
     Raises:
         OIDCError: If the ID Token is invalid. The authentication process
                    should be aborted and the token should not be used.
-    """  # noqa: D205
+    """
     # 2.2. ID Token
     # The ID Token is a security token that contains Claims about the
     # authentication of an End-User by an Authorization Server when using a
@@ -607,8 +599,7 @@ _AuthenticationResult = collections.namedtuple(
 
 def handle_authentication_callback(request, *, client, callback_url):
     """
-    Handles the callback from an OpenID Connect Authorization Code Flow
-    authentication request.
+    Handles the callback from an OIDC authentication request.
 
     Arguments:
         request (HttpRequest):
@@ -626,7 +617,7 @@ def handle_authentication_callback(request, *, client, callback_url):
     Raises:
         OAuth2Error: If the callback contains an error.
         OIDCError: If the callback is invalid.
-    """  # noqa: D205
+    """
     code, state = validate_authentication_callback(request)
     token_response = obtain_tokens(
         request,

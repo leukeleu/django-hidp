@@ -45,10 +45,7 @@ class TestJwksStore(TestCase):
         cache.clear()
 
     def test_get_jwks_for_unregistered_client(self):
-        """
-        Raise KeyError when the client is not the same instance
-        as the registered client.
-        """  # noqa: D205
+        """If the client is not registered, raise a KeyError."""
         with self.assertRaisesMessage(
             KeyError, "Client is not registered for 'example'."
         ):
@@ -56,10 +53,7 @@ class TestJwksStore(TestCase):
 
     @mock.patch.object(jwks.requests, "get")
     def test_reluctantly_fetches_jwks_on_cache_miss(self, mock_get):
-        """
-        Fetch the signing keys from the OIDC provider when they are missing
-        from the cache.
-        """  # noqa: D205
+        """If signing keys are not cached, fetch them from the OIDC provider."""
         # Just raise an exception to stop the function early.
         # This test doubles as a test for request failure.
         mock_get.side_effect = [requests.RequestException("error")]

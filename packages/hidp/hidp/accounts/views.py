@@ -135,11 +135,10 @@ class EmailTokenMixin:
 
     def _remove_token_from_url(self, token):
         """
-        Replace the token in the URL with a placeholder value, and
-        store the token in the session.
+        Move the token from the URL to the session and redirect to the placeholder URL.
 
-        If the token is already the placeholder value, do nothing.
-        """  # noqa: D205
+        If the url already is the placeholder URL, do nothing.
+        """
         if token == self.token_placeholder:
             # Token is already the placeholder value, so do nothing.
             return None
@@ -162,9 +161,12 @@ class EmailTokenMixin:
 
     def _get_user_from_token(self):
         """
-        Find the user by the token in the session. If the token is invalid,
-        or missing, or the user does not exist, return None.
-        """  # noqa: D205
+        Find the user associated with the token in the session.
+
+        Returns:
+            UserModel | None:
+                The user if the token is valid, otherwise None.
+        """
         token = self.request.session.get(self.token_session_key)
         if token is None:
             return None
@@ -199,11 +201,10 @@ class EmailVerificationRequiredView(
     generic.TemplateView,
 ):
     """
-    Display a notice that the user must verify their email address by
-    clicking a link in an email that was sent to them.
+    Display a notice that the user must verify their email address.
 
-    The page also includes the option to request a new verification email.
-    """  # noqa: D205
+    Can be used to resend the email verification email by sending a POST request.
+    """
 
     template_name = "hidp/accounts/verification/email_verification_required.html"
     token_generator = tokens.email_verification_request_token_generator
@@ -467,12 +468,11 @@ class LogoutView(auth_views.LogoutView):
 @method_decorator(rate_limit_strict, name="dispatch")
 class PasswordResetRequestView(generic.FormView):
     """
-    Display the password reset request form and handle the password
-    reset request action.
+    Display and handle the password reset request form.
 
     Sends the password reset email and redirects to the password reset
     sent view if the form is submitted with valid data.
-    """  # noqa: D205
+    """
 
     form_class = forms.PasswordResetRequestForm
     template_name = "hidp/accounts/recovery/password_reset_request.html"
