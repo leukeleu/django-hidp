@@ -16,20 +16,26 @@ runs:
 
     - name: Install system packages (gettext)
       run: |
+        echo ::group::System setup
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends gettext
+        echo ::endgroup::
       shell: bash
 
     - name: Install uv
       run: |
+        echo ::group::Install uv
         python -m pip install --root-user-action=ignore -U uv
+        echo ::endgroup::
       working-directory: ${{ inputs.working-directory }}
       shell: bash
 
     - name: Install dependencies
       run: |
+        echo ::group::Create/activate virtualenv
         uv venv ~/.venv
         source ~/.venv/bin/activate
+        echo ::endgroup::
         make install-pipeline
       working-directory: ${{ inputs.working-directory }}
       shell: bash
