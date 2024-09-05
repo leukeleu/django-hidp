@@ -1,14 +1,10 @@
-"""
-Provide the basic interface, and some common functionality, for all providers.
-"""
+"""Provide the basic interface, and some common functionality, for all providers."""
 
 import urllib.parse
 
 
 def _valid_provider_key(provider_key):
-    """
-    The provider key is valid when URL-encoding it does not change the value.
-    """
+    """The provider key is valid when URL-encoding it does not change the value."""
     return urllib.parse.quote(provider_key) == provider_key
 
 
@@ -24,9 +20,7 @@ def _valid_callback_base_url(callback_base_url):
 
 
 def _valid_endpoint(endpoint):
-    """
-    Communication with endpoints MUST utilize TLS.
-    """
+    """Communication with endpoints MUST utilize TLS."""
     # In order to prevent man-in-the-middle attacks, the authorization
     # server MUST require the use of TLS with [...] for any request sent
     # to the authorization and token endpoints.

@@ -1,5 +1,5 @@
 """
-Authentication URLs
+Authentication URLs.
 
 Provides the URL patterns for the accounts views (register, login, logout).
 

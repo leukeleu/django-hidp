@@ -25,9 +25,7 @@ UserModel = get_user_model()
 
 
 class OIDCLoginContextMixin:
-    """
-    Mixin to provide context data for OIDC login providers.
-    """
+    """Mixin to provide context data for OIDC login providers."""
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
@@ -91,9 +89,7 @@ class RegistrationView(
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        """
-        Save the new user and redirect to the email verification required page.
-        """
+        """Save the new user and redirect to the email verification required page."""
         try:
             user = form.save()
         except IntegrityError:
@@ -124,17 +120,13 @@ class RegistrationView(
 
 
 class TermsOfServiceView(generic.TemplateView):
-    """
-    Display the terms of service.
-    """
+    """Display the terms of service."""
 
     template_name = "hidp/accounts/tos.html"
 
 
 class EmailTokenMixin:
-    """
-    Mixin to handle email verification tokens in URLs.
-    """
+    """Mixin to handle email verification tokens in URLs."""
 
     token_generator = NotImplemented
     token_session_key = NotImplemented
@@ -292,9 +284,7 @@ class EmailVerificationView(
 
 
 class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.TemplateView):
-    """
-    Display a message that the email address has been verified.
-    """
+    """Display a message that the email address has been verified."""
 
     template_name = "hidp/accounts/verification/email_verification_complete.html"
 
@@ -386,6 +376,7 @@ class LoginView(OIDCLoginContextMixin, auth_views.LoginView):
     def get_form_class(self):
         """
         Determine the form class to use for the view.
+
         If the request is rate limited, return a form that requires the user to prove
         they are not a bot.
         Otherwise, return the normal authentication form.
@@ -461,9 +452,7 @@ class LogoutView(auth_views.LogoutView):
         return super().get_redirect_url()
 
     def post(self, request, *args, **kwargs):
-        """
-        Log out the user and redirect to the success URL.
-        """
+        """Log out the user and redirect to the success URL."""
         # This **replaces** the base implementation in order to use the
         # HIdP logout wrapper, for good measure.
         hidp_auth.logout(request)
@@ -499,18 +488,14 @@ class PasswordResetRequestView(generic.FormView):
 
 
 class PasswordResetEmailSentView(generic.TemplateView):
-    """
-    Display a message that the password reset email has been sent.
-    """
+    """Display a message that the password reset email has been sent."""
 
     template_name = "hidp/accounts/recovery/password_reset_email_sent.html"
 
 
 @method_decorator(rate_limit_default, name="dispatch")
 class PasswordResetView(auth_views.PasswordResetConfirmView):
-    """
-    Display the password reset form and handle the password reset action.
-    """
+    """Display the password reset form and handle the password reset action."""
 
     form_class = forms.PasswordResetForm
     template_name = "hidp/accounts/recovery/password_reset.html"
@@ -518,9 +503,7 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
 
 
 class PasswordResetCompleteView(auth_views.TemplateView):
-    """
-    Display a message that the password reset has been completed.
-    """
+    """Display a message that the password reset has been completed."""
 
     template_name = "hidp/accounts/recovery/password_reset_complete.html"
 

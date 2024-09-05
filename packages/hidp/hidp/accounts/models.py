@@ -7,9 +7,7 @@ from ..compat.uuid7 import uuid7
 
 
 class UserManager(auth_models.UserManager):
-    """
-    Custom user manager that uses email as the username field.
-    """
+    """Custom user manager that uses email as the username field."""
 
     use_in_migrations = True
 
@@ -308,7 +306,5 @@ class BaseUser(auth_models.AbstractUser):
         super().set_password(raw_password)
 
     def set_unusable_password(self):
-        """
-        Set the user's password field to a value that will never be a valid hash.
-        """
+        """Set the user's password field to a value that will never be a valid hash."""
         super().set_unusable_password()

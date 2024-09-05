@@ -90,9 +90,7 @@ def _clamp_state_entries(states):
 
 
 def _add_state_to_session(request, state_key, *, next_url=None):
-    """
-    Adds a state to the session, to be used in the authentication response.
-    """
+    """Adds a state to the session, to be used in the authentication response."""
     # Multiple concurrent authentication requests might be happening at the
     # same time. A dictionary is used to store the state for each request.
     states = request.session.get(OIDC_STATES_SESSION_KEY, {})
@@ -264,6 +262,7 @@ def _cull_expired_states(states):
 def _pop_state_from_session(request, state_key):
     """
     Returns the state stored in the session for the given state ID.
+
     The state is removed from the session once it has been retrieved.
     If the state is not found, returns None.
     """

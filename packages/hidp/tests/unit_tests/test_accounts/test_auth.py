@@ -111,9 +111,7 @@ class TestLogin(TestCase):
         "django.contrib.auth.signals.user_logged_in.send", wraps=user_logged_in.send
     )
     def test_success(self, mock_user_logged_in):
-        """
-        Logs in the user and sets the user in the request's session.
-        """
+        """Logs in the user and sets the user in the request's session."""
         auth.login(self.request, self.user)
 
         self.assertEqual(self.request.session[SESSION_KEY], str(self.user.pk))
@@ -132,9 +130,7 @@ class TestLogin(TestCase):
         "django.contrib.auth.signals.user_logged_in.send", wraps=user_logged_in.send
     )
     def test_inactive_user(self, mock_user_logged_in):
-        """
-        Does not verify that the user is allowed to log in.
-        """
+        """Does not verify that the user is allowed to log in."""
         self.user.is_active = False
         self.user.save(update_fields=["is_active"])
 
@@ -223,9 +219,7 @@ class TestLogout(TestCase):
         wraps=user_logged_out.send,
     )
     def test_logout_without_login(self, mock_user_logged_out):
-        """
-        Resets the session regardless of whether a user is logged in.
-        """
+        """Resets the session regardless of whether a user is logged in."""
         self.request.session["test"] = "test"
         session_key = self.request.session.session_key
         auth.logout(self.request)
@@ -244,9 +238,7 @@ class TestLogout(TestCase):
         wraps=user_logged_out.send,
     )
     def test_logout_after_login(self, mock_user_logged_out):
-        """
-        Logs out the user and removes the user from the request's session.
-        """
+        """Logs out the user and removes the user from the request's session."""
         # Log in the user.
         auth.login(self.request, self.user)
         session_key = self.request.session.session_key

@@ -1,5 +1,5 @@
 """
-Generate time-sortable UUIDs (version 7) (RFC 9562)
+Generate time-sortable UUIDs (version 7) (RFC 9562).
 
 Provides a `uuid7` function that's either directly imported from Python's `uuid` module
 (if it's available) or an implementation based on a pull request to add it to CPython.

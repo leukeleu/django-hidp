@@ -24,9 +24,7 @@ class TestBaseEmailVerificationTokenGenerator(TestCase):
         cls.token = cls.token_generator.make_token(cls.user)
 
     def test_make_token(self):
-        """
-        The token is a signed base64 encoded MD5 sum of the user's email address.
-        """
+        """The token is a signed base64 encoded MD5 sum of the user's email address."""
         value, _sep, _signature = self.token.partition(":")
         self.assertEqual(
             value,
@@ -43,15 +41,11 @@ class TestBaseEmailVerificationTokenGenerator(TestCase):
         )
 
     def test_check_invalid_token(self):
-        """
-        An invalid token returns none
-        """
+        """An invalid token returns none."""
         self.assertIsNone(self.token_generator.check_token("garbage-in:garbage-out"))
 
     def test_check_valid_token(self):
-        """
-        A valid token returns the MD5 sum of the email address.
-        """
+        """A valid token returns the MD5 sum of the email address."""
         self.assertEqual(
             self.token_generator.check_token(self.token),
             hashlib.md5(

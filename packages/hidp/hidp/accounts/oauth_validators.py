@@ -48,6 +48,7 @@ class OAuth2Validator(oauth2_validators.OAuth2Validator):
     def validate_silent_authorization(self, request):  # noqa: PLR6301 (no-self-use)
         """
         Determine if the logged-in user has authorized the application.
+
         If so, silent authorization is possible.
         """
         # validate_silent_login is called before validate_silent_authorization,

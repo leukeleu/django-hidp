@@ -16,9 +16,7 @@ class TestDjangoAdmin(TestCase):
         cls.superuser = user_factories.SuperUserFactory()
 
     def test_django_admin_as_user(self):
-        """
-        Redirects to login page if user is not a staff or superuser
-        """
+        """Redirects to login page if user is not a staff or superuser."""
         self.client.force_login(self.user)
         response = self.client.get("/django-admin/")
         self.assertRedirects(
@@ -28,9 +26,7 @@ class TestDjangoAdmin(TestCase):
         )
 
     def test_django_admin_as_superuser(self):
-        """
-        Superuser can access the Django admin
-        """
+        """Superuser can access the Django admin."""
         self.client.force_login(self.superuser)
         response = self.client.get("/django-admin/")
         self.assertEqual(response.status_code, HTTPStatus.OK)

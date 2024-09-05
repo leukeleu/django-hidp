@@ -22,9 +22,7 @@ class TermsOfServiceMixin:
         return forms.BooleanField(label=label, required=True)
 
     def set_agreed_to_tos(self, user):
-        """
-        Populate the `agreed_to_tos` field, if the user agreed.
-        """
+        """Populate the `agreed_to_tos` field, if the user agreed."""
         if self.cleaned_data.get("agreed_to_tos", False):
             # Ensure the user has agreed to the terms of service.
             # Subclasses may remove the field, or make it optional.
@@ -34,6 +32,7 @@ class TermsOfServiceMixin:
 class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
     """
     Default UserCreationForm, allows user to register with username and password.
+
     The user **must** agree to the terms of service to register.
 
     The username field is mapped to `User.USERNAME_FIELD`. This makes it possible
@@ -68,9 +67,7 @@ class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
 
 
 class EmailVerificationForm(forms.Form):
-    """
-    Store the date and time when the user verified their email address.
-    """
+    """Store the date and time when the user verified their email address."""
 
     def __init__(self, user, *args, **kwargs):
         """
@@ -235,6 +232,7 @@ class PasswordResetForm(auth_forms.SetPasswordForm):
 class RateLimitedAuthenticationForm(AuthenticationForm):
     """
     Authentication form that is used when a user is rate limited.
+
     This form includes a simple "I am not a robot" checkbox to demonstrate
     how additional protection can be added to an authentication form.
 

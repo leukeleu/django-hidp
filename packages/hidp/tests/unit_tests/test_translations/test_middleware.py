@@ -15,9 +15,7 @@ class TestUiLocalesMiddleware(TestCase):
         self.middleware = UiLocalesMiddleware(self.get_response)
 
     def test_no_preference(self):
-        """
-        Do nothing if there is no language preference.
-        """
+        """Do nothing if there is no language preference."""
         active_language = translation.get_language()
         response = self.middleware(self.client.get("/"))
         self.assertEqual(
@@ -27,9 +25,7 @@ class TestUiLocalesMiddleware(TestCase):
         self.assertEqual(active_language, translation.get_language())
 
     def test_drops_ui_locales_param(self):
-        """
-        Removes the 'ui_locales' query parameter, keeps the rest.
-        """
+        """Removes the 'ui_locales' query parameter, keeps the rest."""
         # This is a workaround for a bug in Django OAuth Toolkit:
         # https://github.com/jazzband/django-oauth-toolkit/issues/1468
         request = self.client.get("/?ui_locales=fr&foo=bar")
@@ -60,9 +56,7 @@ class TestUiLocalesMiddleware(TestCase):
         )
 
     def test_picks_first_supported_language(self):
-        """
-        Picks the first supported language if multiple are provided.
-        """
+        """Picks the first supported language if multiple are provided."""
         request = self.client.get("/?ui_locales=de fr-be en")
         response = self.middleware(request)
         # Sets the language cookie.
@@ -73,9 +67,7 @@ class TestUiLocalesMiddleware(TestCase):
         )
 
     def test_ignores_unsupported_language(self):
-        """
-        Does not set the language cookie if the language is not supported.
-        """
+        """Does not set the language cookie if the language is not supported."""
         request = self.client.get("/?ui_locales=de")
         response = self.middleware(request)
         # Does not set the language cookie.
@@ -85,9 +77,7 @@ class TestUiLocalesMiddleware(TestCase):
         )
 
     def test_activates_language(self):
-        """
-        Activates the language if it is supported.
-        """
+        """Activates the language if it is supported."""
         request = self.client.get("/", HTTP_COOKIE="hidp_language=fr")
         response = self.middleware(request)
         self.assertEqual(
@@ -100,9 +90,7 @@ class TestUiLocalesMiddleware(TestCase):
         )
 
     def test_does_not_activate_unsupported_language(self):
-        """
-        Does not activate the language if it is not supported.
-        """
+        """Does not activate the language if it is not supported."""
         request = self.client.get("/", HTTP_COOKIE="hidp_language=de")
         response = self.middleware(request)
         self.assertEqual(

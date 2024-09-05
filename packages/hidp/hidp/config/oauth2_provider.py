@@ -1,6 +1,4 @@
-"""
-Configuration for Django OAuth Toolkit (DOT) in the HIdP application.
-"""
+"""Configuration for Django OAuth Toolkit (DOT) in the HIdP application."""
 
 from datetime import timedelta
 

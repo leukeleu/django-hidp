@@ -1,6 +1,4 @@
-"""
-Google OpenID Connect provider.
-"""
+"""Google OpenID Connect provider."""
 
 from . import base
 

@@ -157,9 +157,7 @@ def get_oidc_client_jwks(client, *, eager=False):
 
 
 def refresh_registered_oidc_clients_jwks(stdout=None):
-    """
-    Refresh the signing keys for all registered OIDC clients.
-    """
+    """Refresh the signing keys for all registered OIDC clients."""
     for client in oidc_clients.get_registered_oidc_clients():
         if stdout:
             stdout.write(

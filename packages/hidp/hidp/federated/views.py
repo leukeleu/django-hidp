@@ -54,9 +54,7 @@ class OIDCMixin:
 
 @method_decorator(rate_limit_strict, name="dispatch")
 class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View):
-    """
-    Initiates an OpenID Connect Authorization Code Flow authentication request.
-    """
+    """Initiates an OpenID Connect Authorization Code Flow authentication request."""
 
     http_method_names = [
         "post",
@@ -100,9 +98,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
         user_info,
         redirect_url=None,
     ):
-        """
-        Decide which flow the user should be redirected to next.
-        """
+        """Decide which flow the user should be redirected to next."""
         connection = OpenIdConnection.objects.get_by_provider_and_claims(
             provider_key=provider_key,
             issuer_claim=claims["iss"],
@@ -204,9 +200,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
 
 
 class TokenDataMixin:
-    """
-    Mixin to set, retrieve and validate data to/from the session using a token.
-    """
+    """Mixin to set, retrieve and validate data to/from the session using a token."""
 
     token_generator = NotImplemented
     invalid_token_message = _("Expired or invalid token. Please try again.")

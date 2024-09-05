@@ -11,9 +11,7 @@ from . import email_verification
 
 
 class BaseMailer:
-    """
-    Base class for sending templated emails.
-    """
+    """Base class for sending templated emails."""
 
     subject_template_name = NotImplemented
     email_template_name = NotImplemented
@@ -21,6 +19,8 @@ class BaseMailer:
 
     def __init__(self, *, base_url):
         """
+        Initialize the mailer.
+
         Args:
             base_url:
                 The base URL to use when generating links in the email.
@@ -38,9 +38,7 @@ class BaseMailer:
         return context | (extra_context or {})
 
     def get_recipients(self):
-        """
-        Return a list of email addresses to send the email to
-        """
+        """Return a list of email addresses to send the email to."""
         raise NotImplementedError  # pragma: no cover
 
     def _get_subject(self, context):

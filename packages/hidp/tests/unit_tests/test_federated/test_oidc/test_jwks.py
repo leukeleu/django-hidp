@@ -102,9 +102,7 @@ class TestJwksStore(TestCase):
 
     @mock.patch.object(jwks.requests, "get")
     def test_handles_error_response(self, mock_get):
-        """
-        Log an exception when the JWKS endpoint returns an error response.
-        """
+        """Log an exception when the JWKS endpoint returns an error response."""
         mock_get.return_value = _mock_response(b"Not Found", status_code=404)
 
         with self.assertLogs(logger=jwks.logger, level="ERROR") as logs:
@@ -134,9 +132,7 @@ class TestJwksStore(TestCase):
 
     @mock.patch.object(jwks.requests, "get")
     def tests_handles_invalid_response(self, mock_get):
-        """
-        Log an exception when the JWKS endpoint returns an invalid response.
-        """
+        """Log an exception when the JWKS endpoint returns an invalid response."""
         mock_get.return_value = _mock_response(
             b"This is not JSON, you must be mistaken."
         )
@@ -163,9 +159,7 @@ class TestJwksStore(TestCase):
 
     @mock.patch.object(jwks.requests, "get")
     def test_valid_response(self, mock_get):
-        """
-        Return the signing keys when the JWKS endpoint returns a valid response.
-        """
+        """Return the signing keys when the JWKS endpoint returns a valid response."""
         # This test doubles as a test for successful request caching,
         # and also tests eager fetching.
         mock_get.return_value = _mock_response(self.key_set.encode())
@@ -192,9 +186,7 @@ class TestJwksStore(TestCase):
     @mock.patch.object(jwks.requests, "get")
     @mock.patch.object(jwks.cache, "get")
     def test_invalid_cache_value(self, mock_cache_get, mock_requests_get):
-        """
-        Log an exception when the cache contains an invalid value.
-        """
+        """Log an exception when the cache contains an invalid value."""
         mock_cache_get.return_value = b"This is not JSON, you must be mistaken."
         mock_requests_get.return_value = _mock_response(self.key_set.encode())
 

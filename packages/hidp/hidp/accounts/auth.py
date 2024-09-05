@@ -39,8 +39,7 @@ def authenticate(request, **credentials):
 
 def login(request, user, backend=None):
     """
-    Logs in the given user, persisting the user and backend in the
-    request's session.
+    Logs in the given user, persisting the user and backend in the request's session.
 
     Assumes that sessions are enabled, e.g. by the
     `django.contrib.sessions.middleware.SessionMiddleware` middleware.
