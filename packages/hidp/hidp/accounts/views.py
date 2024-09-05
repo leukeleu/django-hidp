@@ -519,3 +519,21 @@ class ManageAccountView(LoginRequiredMixin, generic.TemplateView):
     """Display the manage account page."""
 
     template_name = "hidp/accounts/management/manage_account.html"
+
+
+class EditAccountView(LoginRequiredMixin, generic.FormView):
+    """Display the edit user form and handle the edit user action."""
+
+    template_name = "hidp/accounts/management/edit_account.html"
+    form_class = forms.EditUserForm
+    success_url = reverse_lazy("hidp_accounts:edit_account")
+
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            "instance": self.request.user,
+        }
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)

@@ -84,6 +84,7 @@ recover_urls = [
 
 management_urls = [
     path("manage/", views.ManageAccountView.as_view(), name="manage_account"),
+    path("manage/edit-account/", views.EditAccountView.as_view(), name="edit_account"),
 ]
 
 urlpatterns = (
