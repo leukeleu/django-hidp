@@ -31,7 +31,7 @@ class BaseMailer:
         """
         Return a dictionary of context variables to use when rendering the
         email templates.
-        """
+        """  # noqa: D205
         context = {
             "base_url": self.base_url,
         }

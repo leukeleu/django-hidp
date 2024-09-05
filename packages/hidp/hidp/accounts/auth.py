@@ -30,7 +30,7 @@ def authenticate(request, **credentials):
 
     Returns `None` if the credentials are invalid, or access is denied,
     and sends the `django.contrib.auth.user_login_failed` signal.
-    """
+    """  # noqa: D205
     # Wrap Django's authenticate, without altering its behavior, to add
     # a detailed docstring and provide a consistent interface for the
     # `hidp.accounts.auth` module.

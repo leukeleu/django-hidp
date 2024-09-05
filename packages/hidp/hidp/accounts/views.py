@@ -138,7 +138,7 @@ class EmailTokenMixin:
         store the token in the session.
 
         If the token is already the placeholder value, do nothing.
-        """
+        """  # noqa: D205
         if token == self.token_placeholder:
             # Token is already the placeholder value, so do nothing.
             return None
@@ -163,7 +163,7 @@ class EmailTokenMixin:
         """
         Find the user by the token in the session. If the token is invalid,
         or missing, or the user does not exist, return None.
-        """
+        """  # noqa: D205
         token = self.request.session.get(self.token_session_key)
         if token is None:
             return None
@@ -202,7 +202,7 @@ class EmailVerificationRequiredView(
     clicking a link in an email that was sent to them.
 
     The page also includes the option to request a new verification email.
-    """
+    """  # noqa: D205
 
     template_name = "hidp/accounts/verification/email_verification_required.html"
     token_generator = tokens.email_verification_request_token_generator
@@ -471,7 +471,7 @@ class PasswordResetRequestView(generic.FormView):
 
     Sends the password reset email and redirects to the password reset
     sent view if the form is submitted with valid data.
-    """
+    """  # noqa: D205
 
     form_class = forms.PasswordResetRequestForm
     template_name = "hidp/accounts/recovery/password_reset_request.html"

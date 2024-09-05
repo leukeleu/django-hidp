@@ -195,9 +195,7 @@ class TestPrepareAuthenticationRequest(TestCase):
         )
 
     def test_create_pkce_challenge_no_state(self):
-        """
-        It is not possible to create a PKCE challenge without first adding a state.
-        """
+        """It is not possible to create a PKCE challenge without first adding a state."""  # noqa: E501, W505
         with self.assertRaisesMessage(
             ValueError,
             "Missing state in session. State must be added before"
@@ -208,9 +206,7 @@ class TestPrepareAuthenticationRequest(TestCase):
             )
 
     def test_limit_concurrent_authentication_requests(self):
-        """
-        The total number of concurrent authentication requests (states) is limited.
-        """
+        """The total number of concurrent authentication requests (states) is limited."""  # noqa: E501, W505
         # States *without* creation time (precaution for old/invalid states)
         states = [{} for _ in range(25)]
         # States with a creation time in the past

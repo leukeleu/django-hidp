@@ -7,7 +7,7 @@ class Command(makemessages.Command):
     """
     Wraps Django's makemessages command to create translation files for
     the HIdP application.
-    """
+    """  # noqa: D205
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

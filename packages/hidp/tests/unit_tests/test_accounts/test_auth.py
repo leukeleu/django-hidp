@@ -34,7 +34,7 @@ class TestAuthenticate(TestCase):
         """
         Returns the user object if the credentials are valid.
         Does not log in the user.
-        """
+        """  # noqa: D205
         user = auth.authenticate(
             request=self.request,
             email=self.user.email,
@@ -53,7 +53,7 @@ class TestAuthenticate(TestCase):
         """
         Returns None if the credentials are invalid and sends the
         `django.contrib.auth.user_login_failed` signal.
-        """
+        """  # noqa: D205
         user = auth.authenticate(
             request=self.request,
             email=self.user.email,
@@ -75,7 +75,7 @@ class TestAuthenticate(TestCase):
         """
         Returns None if the user is not allowed to log in and sends the
         `django.contrib.auth.user_login_failed` signal.
-        """
+        """  # noqa: D205
         self.user.is_active = False
         self.user.save(update_fields=["is_active"])
 

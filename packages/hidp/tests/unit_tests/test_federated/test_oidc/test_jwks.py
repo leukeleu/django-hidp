@@ -48,7 +48,7 @@ class TestJwksStore(TestCase):
         """
         Raise KeyError when the client is not the same instance
         as the registered client.
-        """
+        """  # noqa: D205
         with self.assertRaisesMessage(
             KeyError, "Client is not registered for 'example'."
         ):
@@ -59,7 +59,7 @@ class TestJwksStore(TestCase):
         """
         Fetch the signing keys from the OIDC provider when they are missing
         from the cache.
-        """
+        """  # noqa: D205
         # Just raise an exception to stop the function early.
         # This test doubles as a test for request failure.
         mock_get.side_effect = [requests.RequestException("error")]

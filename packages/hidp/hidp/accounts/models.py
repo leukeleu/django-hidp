@@ -19,7 +19,7 @@ class UserManager(auth_models.UserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, password=None, **extra_fields):  # noqa: D417
         """
         Create a new user with the given email and password.
 
@@ -43,7 +43,7 @@ class UserManager(auth_models.UserManager):
             **extra_fields,
         )
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email, password=None, **extra_fields):  # noqa: D417
         """
         Create a new superuser with the given email and password.
 
@@ -204,7 +204,7 @@ class BaseUser(auth_models.AbstractUser):
         """
         ``bool``: Always ``False`` (as opposed to always ``True``
         for ``AnonymousUser``).
-        """
+        """  # noqa: D205
         return super().is_anonymous
 
     @property
@@ -212,7 +212,7 @@ class BaseUser(auth_models.AbstractUser):
         """
         ``bool``: Always ``True`` (as opposed to always ``False``
         for ``AnonymousUser``).
-        """
+        """  # noqa: D205
         return super().is_authenticated
 
     def check_password(self, raw_password):
@@ -241,7 +241,7 @@ class BaseUser(auth_models.AbstractUser):
         """
         super().clean()
 
-    def email_user(self, subject, message, from_email=None, **kwargs):
+    def email_user(self, subject, message, from_email=None, **kwargs):  # noqa: D417
         """
         Email this user with the given subject and message.
 

@@ -46,7 +46,7 @@ class TestUiLocalesMiddleware(TestCase):
         """
         Sets the language cookie if 'ui_locales' is present,
         and the language is supported
-        """
+        """  # noqa: D205, D415
         request = self.client.get("/?ui_locales=fr")
         response = self.middleware(request)
         # Sets the language cookie.

@@ -83,7 +83,7 @@ def get_oauth2_provider_settings(
         configuration values and assign the result to the OAUTH2_PROVIDER setting:
 
             OAUTH2_PROVIDER = configure(OIDC_RSA_PRIVATE_KEY=...)
-    """
+    """  # noqa: D205
     return OAUTH2_PROVIDER | {
         "OIDC_RSA_PRIVATE_KEY": OIDC_RSA_PRIVATE_KEY,
     }

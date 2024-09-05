@@ -1,7 +1,7 @@
 """
 Functions to handle the OpenID Connect Authorization Code Flow,
 with support for the optional PKCE extension.
-"""
+"""  # noqa: D205
 
 # 2.1.  Code Flow
 #
@@ -144,7 +144,7 @@ def get_authentication_request_parameters(
 
     Returns:
         dict: The parameters for the authentication request.
-    """
+    """  # noqa: D205
     # 2.1.1.1. Request Parameters
     # https://openid.net/specs/openid-connect-basic-1_0.html#RequestParameters
     return extra_params | {
@@ -163,7 +163,7 @@ def create_pkce_challenge(request, *, state_key):
 
     Associates the code verifier with the state, to be used in the token
     exchange request.
-    """
+    """  # noqa: D205
     # 4.1. Client Creates a Code Verifier
     # code_verifier [is a] [...] random STRING with a minimum length
     # of 43 characters and a maximum length of 128 characters.
@@ -292,7 +292,7 @@ def validate_authentication_callback(request):
     Raises:
         OAuth2Error: If the callback contains an error.
         OIDCError: If the callback is invalid.
-    """
+    """  # noqa: D205
     # 2.1.5. Authorization Server Sends End-User Back to Client
     # Once the authorization is determined, the Authorization Server
     # returns a successful response or an error response.
@@ -358,7 +358,7 @@ def obtain_tokens(request, *, state, client, code, callback_url):
 
     Returns:
         dict: The token response from the OpenID Connect provider.
-    """
+    """  # noqa: D205
     # 2.1.6. Client Obtains ID Token and Access Token
     # https://openid.net/specs/openid-connect-basic-1_0.html#ObtainingTokens
 
@@ -428,7 +428,7 @@ def parse_id_token(raw_id_token, *, client):
     Raises:
         OIDCError: If the ID Token is invalid. The authentication process
                    should be aborted and the token should not be used.
-    """
+    """  # noqa: D205
     # 2.2. ID Token
     # The ID Token is a security token that contains Claims about the
     # authentication of an End-User by an Authorization Server when using a
@@ -626,7 +626,7 @@ def handle_authentication_callback(request, *, client, callback_url):
     Raises:
         OAuth2Error: If the callback contains an error.
         OIDCError: If the callback is invalid.
-    """
+    """  # noqa: D205
     code, state = validate_authentication_callback(request)
     token_response = obtain_tokens(
         request,

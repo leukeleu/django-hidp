@@ -66,7 +66,7 @@ class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View
         Prepare the authentication request parameters, update the session state
         with the required information, and redirect the user to the OpenID Connect
         provider's authorization endpoint.
-        """
+        """  # noqa: D205
         return HttpResponseRedirect(
             authorization_code_flow.prepare_authentication_request(
                 request,
@@ -82,7 +82,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
     """
     Handles the callback response from an OpenID Connect Authorization Code Flow
     authentication request. This handles both successful and failed responses.
-    """
+    """  # noqa: D205
 
     http_method_names = [
         "get",
@@ -239,7 +239,7 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
     """
     Handles the registration process for a new user using an OpenID Connect
     authentication response.
-    """
+    """  # noqa: D205
 
     token_generator = tokens.OIDCRegistrationTokenGenerator()
     form_class = forms.OIDCRegistrationForm
@@ -281,7 +281,7 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
     """
     Handles the login process for a user using an OpenID Connect authentication
     response.
-    """
+    """  # noqa: D205
 
     token_generator = tokens.OIDCLoginTokenGenerator()
     next_page = "/"
@@ -336,7 +336,7 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
     """
     Handles the account linking process for an existing user using an OpenID Connect
     authentication response.
-    """
+    """  # noqa: D205
 
     form_class = forms.OIDCAccountLinkForm
     template_name = "hidp/federated/account_link.html"
