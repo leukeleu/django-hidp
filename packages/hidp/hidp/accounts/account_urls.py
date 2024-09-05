@@ -82,4 +82,10 @@ recover_urls = [
     )
 ]
 
-urlpatterns = register_urls + verifications_urls + auth_urls + recover_urls
+management_urls = [
+    path("manage/", views.ManageAccountView.as_view(), name="manage_account"),
+]
+
+urlpatterns = (
+    register_urls + verifications_urls + auth_urls + recover_urls + management_urls
+)

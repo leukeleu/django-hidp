@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.db.models.functions import MD5
@@ -512,3 +513,9 @@ class PasswordResetCompleteView(auth_views.TemplateView):
             login_url=resolve_url(settings.LOGIN_URL),
             **kwargs,
         )
+
+
+class ManageAccountView(LoginRequiredMixin, generic.TemplateView):
+    """Display the manage account page."""
+
+    template_name = "hidp/accounts/management/manage_account.html"
