@@ -74,3 +74,10 @@ class TestEditAccountView(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, "New")
         self.assertEqual(self.user.last_name, "Name")
+
+        # Success message should be displayed
+        self.assertInHTML(
+            "Account updated successfully."
+            '<a href="/manage/edit-account/" aria-label="Dismiss">✕</a>',
+            response.content.decode("utf-8"),
+        )

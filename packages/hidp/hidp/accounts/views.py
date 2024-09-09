@@ -528,6 +528,14 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
     form_class = forms.EditUserForm
     success_url = reverse_lazy("hidp_accounts:edit_account")
 
+    def get_success_url(self):
+        return self.success_url + "?success"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["show_success_message"] = "success" in self.request.GET
+        return context
+
     def get_form_kwargs(self):
         return {
             **super().get_form_kwargs(),

@@ -6,6 +6,12 @@
 {% block body %}
   <h1>{% translate 'Edit your account information' %}</h1>
 
+  {% if show_success_message %}
+  <ul>
+    <li>{% translate 'Account updated successfully.' %} <a href="{{ request.path }}" aria-label="{% translate 'Dismiss' %}">✕</a></li>
+  </ul>
+  {% endif %}
+
   <form action="{% url 'hidp_accounts:edit_account' %}" method="post">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
