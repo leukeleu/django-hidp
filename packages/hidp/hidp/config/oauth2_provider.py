@@ -55,7 +55,7 @@ OAUTH2_PROVIDER = {
     },
     "DEFAULT_SCOPES": ["openid"],
     # Custom OAuth2Validator that maps OIDC scopes to the correct user attributes
-    "OAUTH2_VALIDATOR_CLASS": "hidp.accounts.oauth_validators.OAuth2Validator",
+    "OAUTH2_VALIDATOR_CLASS": "hidp.oidc_provider.oauth_validators.OAuth2Validator",
 }
 
 

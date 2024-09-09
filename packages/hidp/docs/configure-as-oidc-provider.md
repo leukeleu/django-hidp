@@ -1,11 +1,67 @@
 # Configure as OIDC Provider
 
-To configure HIdP as an OIDC Provider, please make sure you followed all the steps in
+To configure HIdP as an OpenID Connect (OIDC) Provider, please make sure you followed all the steps in
 [Installation](project:./installation.md) and you have created a superuser.
 
 :::{note}
 The OIDC Provider part of HIdP is based on [Django OAuth Toolkit](https://django-oauth-toolkit.readthedocs.io/en/latest/)
 :::
+
+## Installation
+Install with pip
+
+```
+pip install hidp[oidc_provider]
+```
+
+Add the following to `INSTALLED_APPS` in your Django settings:
+
+```python
+INSTALLED_APPS = [
+    ...
+    # Headless Identity Provider
+    "oauth2_provider",
+    "hidp.oidc_provider",
+    ...
+]
+```
+
+## Generate private key
+
+The OAuth2 / OIDC provider requires a private key to sign the tokens.
+
+Use the following command to generate a private key:
+
+```bash
+openssl genrsa -out 'oidc.key' 4096
+```
+
+Store the private key in a secure location (keep it secret, out of version control etc.) and update the Django settings
+to provide the contents of the private key to the OAuth2 provider:
+
+```python
+import pathlib
+
+from hidp import config as hidp_config
+
+OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
+    # Read the private key from a file.
+    OIDC_RSA_PRIVATE_KEY=pathlib.Path("/path/to/oidc.key").read_text(),
+)
+```
+
+:::{note}
+Other ways to provide the private key are possible, e.g. using environment variables.
+Use whatever method is most suitable for your deployment.
+:::
+
+## Database migrations
+
+Run the database migrations:
+
+```bash
+python manage.py migrate
+```
 
 ## Add Application
 

@@ -27,6 +27,7 @@ class TestConfigChecks(TestCase):
             [
                 checks.E001,
             ],
+            msg="Expected an error because of missing required apps.",
         )
 
     def test_required_middlewares_not_installed(self):

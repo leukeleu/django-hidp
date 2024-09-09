@@ -1,12 +1,23 @@
 # Installation
 
-HIdP can be installed in a couple of different ways, depending on your usecase.
+Headless Identity Provider is an all-in-one solution for your user management needs.
 
-## Install as standalone Django application
+HIdP provides all the default Django authentication functionalities and more:
+- Registration (including email verification)
+- OpenID Connect (OIDC) Clients (Google and Microsoft included)
+- Rate limiting
+- Can be used as a standalone OpenID Connect (OIDC) provider (see [Configure as Identity Provider](project:configure-as-oidc-provider.md))
 
-Create a new Django project and start a new app, for example `accounts`.
+
+## Install with pip
+```
+pip install hidp
+```
 
 ## Settings
+:::{note}
+It is recommended to add a new app, for example `accounts`, where you can customize HIdP's models, views and templates.
+:::
 
 First of all, make sure timezone support is enabled in your Django settings:
 
@@ -26,7 +37,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     # Headless Identity Provider
-    "oauth2_provider",
     "hidp",
     "hidp.accounts",
     "hidp.federated",
@@ -85,35 +95,6 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 ```
 
-### OAuth2 Provider
-
-The OAuth2 / OIDC provider requires a private key to sign the tokens.
-
-Use the following command to generate a private key:
-
-```bash
-openssl genrsa -out 'oidc.key' 4096
-```
-
-Store the private key in a secure location (keep it secret, out of version control etc.) and update the Django settings
-to provide the contents of the private key to the OAuth2 provider:
-
-```python
-import pathlib
-
-from hidp import config as hidp_config
-
-OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
-    # Read the private key from a file.
-    OIDC_RSA_PRIVATE_KEY=pathlib.Path("/path/to/oidc.key").read_text(),
-)
-```
-
-:::{note}
-Other ways to provide the private key are possible, e.g. using environment variables.
-Use whatever method is most suitable for your deployment.
-:::
-
 ### OpenID Connect based login (social accounts)
 
 To enable users to log in using an existing Google, Microsoft or any other provider that
@@ -138,7 +119,8 @@ hidp_config.configure_oidc_clients(
 )
 ```
 
-It is possible to write your own client if you need to support different providers.
+It is possible to write your own client if you need to support different providers,
+see [Adding support for other OIDC Providers](project:configure-oidc-clients.md#adding-support-for-other-oidc-providers).
 
 ### URLs
 

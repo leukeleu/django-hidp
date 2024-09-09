@@ -3,7 +3,7 @@ from unittest import mock
 from django.test import RequestFactory, TestCase, override_settings
 from django.utils import translation
 
-from hidp.translations.middleware import UiLocalesMiddleware
+from hidp.oidc_provider.middleware import UiLocalesMiddleware
 
 
 @override_settings(LANGUAGES=[("en", "English"), ("fr", "French")])
