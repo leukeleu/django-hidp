@@ -27,7 +27,7 @@ from . import email_verification, forms, mailer, tokens
 UserModel = get_user_model()
 
 
-class OIDCLoginContextMixin:
+class OIDCContextMixin:
     """Mixin to provide context data for OIDC login providers."""
 
     oidc_error_messages = {
@@ -68,9 +68,7 @@ class OIDCLoginContextMixin:
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
 @method_decorator(ratelimit(key="ip", rate="5/m", method="POST"), name="post")
 @method_decorator(ratelimit(key="ip", rate="30/15m", method="POST"), name="post")
-class RegistrationView(
-    auth_views.RedirectURLMixin, OIDCLoginContextMixin, generic.FormView
-):
+class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.FormView):
     """
     Display the registration form and handle the registration action.
 
@@ -324,7 +322,7 @@ class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.Templat
     ratelimit(key="post:username", rate="10/m", method="POST", block=False), name="post"
 )
 @method_decorator(rate_limit_strict, name="dispatch")
-class LoginView(OIDCLoginContextMixin, auth_views.LoginView):
+class LoginView(OIDCContextMixin, auth_views.LoginView):
     """
     Display the login form and handle the login action.
 
