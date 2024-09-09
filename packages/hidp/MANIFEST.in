@@ -1,4 +1,5 @@
 include Makefile
+include Makefile.tasks.sh
 include manage.py
 include requirements.txt
 include requirements_local.txt
