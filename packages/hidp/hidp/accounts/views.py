@@ -3,7 +3,6 @@ from urllib.parse import urlencode
 from django_ratelimit.decorators import ratelimit
 
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,8 +13,11 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
+
+from hidp.federated.constants import OIDCError
 
 from ..config import oidc_clients
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
@@ -28,7 +30,23 @@ UserModel = get_user_model()
 class OIDCLoginContextMixin:
     """Mixin to provide context data for OIDC login providers."""
 
+    oidc_error_messages = {
+        OIDCError.ACCOUNT_EXISTS: _(
+            "You already have an account with this email address."
+            " Please log in to link your account."
+        ),
+        OIDCError.REQUEST_EXPIRED: _(
+            "The authentication request has expired. Please try again."
+        ),
+        OIDCError.UNEXPECTED_ERROR: _(
+            "An unexpected error occurred during authentication. Please try again."
+        ),
+        OIDCError.INVALID_TOKEN: _("Expired or invalid token. Please try again."),
+        OIDCError.INVALID_CREDENTIALS: _("Login failed. Invalid credentials."),
+    }
+
     def get_context_data(self, **kwargs):
+        oidc_error = self.request.GET.get("oidc_error", None)
         return super().get_context_data(
             oidc_login_providers=[
                 {
@@ -42,6 +60,7 @@ class OIDCLoginContextMixin:
                 }
                 for provider in oidc_clients.get_registered_oidc_clients()
             ],
+            oidc_error_message=self.oidc_error_messages.get(oidc_error, oidc_error),
             **kwargs,
         )
 
@@ -355,7 +374,6 @@ class LoginView(OIDCLoginContextMixin, auth_views.LoginView):
             else ""
         )
         return super().get_context_data(
-            messages=messages.get_messages(self.request),
             register_url=register_url,
             **kwargs,
         )

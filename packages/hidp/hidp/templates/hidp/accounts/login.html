@@ -4,15 +4,13 @@
 {% block title %}{% translate 'Log in' %}{% endblock %}
 
 {% block body %}
-  {% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-    <li>
-      {{ message }}
-    </li>
-    {% endfor %}
-  </ul>
-  {% endif %}
+{% if oidc_error_message %}
+<ul>
+  <li>
+    {{ oidc_error_message }}
+  </li>
+</ul>
+{% endif %}
 
   <h1>{% translate 'Log in with username and password' %}</h1>
 

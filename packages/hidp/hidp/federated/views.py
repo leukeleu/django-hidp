@@ -1,6 +1,5 @@
 from urllib.parse import urlencode
 
-from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
@@ -11,8 +10,9 @@ from django.http import (
 )
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, View
+
+from hidp.federated.constants import OIDCError
 
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailer
@@ -140,14 +140,10 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
             else:
                 # `sub` claim does not match an existing user, but `email` claim does:
                 # Display a message instructing the user to log in to link the accounts.
-                messages.info(
-                    request,
-                    _(
-                        "You already have an account with this email address."
-                        " Please log in to link your account."
-                    ),
+                return (
+                    reverse("hidp_accounts:login")
+                    + f"?oidc_error={OIDCError.ACCOUNT_EXISTS}"
                 )
-                return reverse("hidp_accounts:login")
 
         # Prepare the URL parameters for the next view. Drop any None values.
         params = {
@@ -174,19 +170,17 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
             # The user might have tampered with the state parameter, the session
             # might have expired or the authentication request might have expired.
             # Redirect the user to the login page to try again.
-            messages.error(
-                request,
-                _("The authentication request has expired. Please try again."),
+            return HttpResponseRedirect(
+                reverse("hidp_accounts:login")
+                + f"?oidc_error={OIDCError.REQUEST_EXPIRED}"
             )
-            return HttpResponseRedirect(reverse("hidp_accounts:login"))
         except OAuth2Error:
             # One of many things went wrong during the authentication process.
             # Redirect the user to the login page to try again.
-            messages.error(
-                request,
-                _("Unexpected error during authentication. Please try again."),
+            return HttpResponseRedirect(
+                reverse("hidp_accounts:login")
+                + f"?oidc_error={OIDCError.UNEXPECTED_ERROR}"
             )
-            return HttpResponseRedirect(reverse("hidp_accounts:login"))
 
         return HttpResponseRedirect(
             self.get_next_url(
@@ -203,7 +197,6 @@ class TokenDataMixin:
     """Mixin to set, retrieve and validate data to/from the session using a token."""
 
     token_generator = NotImplemented
-    invalid_token_message = _("Expired or invalid token. Please try again.")
     invalid_token_redirect_url = reverse_lazy("hidp_accounts:login")
 
     @classmethod
@@ -229,8 +222,10 @@ class TokenDataMixin:
         except KeyError:
             self.provider = None
         if not valid_token or self.provider is None:
-            messages.error(request, self.invalid_token_message)
-            return HttpResponseRedirect(self.invalid_token_redirect_url)
+            return HttpResponseRedirect(
+                self.invalid_token_redirect_url
+                + f"?oidc_error={OIDCError.INVALID_TOKEN}"
+            )
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -306,8 +301,10 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
         if user is None:
             # The user could not be authenticated using the OIDC claims.
             # The account is probably disabled. Just redirect to the login page.
-            messages.error(request, _("Login failed. Invalid credentials."))
-            return HttpResponseRedirect(reverse("hidp_accounts:login"))
+            return HttpResponseRedirect(
+                reverse("hidp_accounts:login")
+                + f"?oidc_error={OIDCError.INVALID_CREDENTIALS}"
+            )
 
         if user.email_verified:
             # Only log in the user if their email address has been verified.
@@ -359,10 +356,7 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
         form.save()
         # Remove the token from the session after the form has been saved.
         del self.request.session[self.token]
-        messages.success(
-            self.request,
-            _("Successfully linked your {provider} account.").format(
-                provider=self.provider.name
-            ),
-        )
+
+        # TODO: Add message through query param (HIDP-147)
+
         return super().form_valid(form)
