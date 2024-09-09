@@ -1,6 +1,5 @@
 import contextlib
 
-from django.http import HttpResponseRedirect
 from django.utils import translation
 
 
@@ -24,14 +23,19 @@ def _get_language_from_ui_locales(request):
     return None
 
 
+def _get_language_from_request(request):
+    return _get_language_from_ui_locales(request) or _get_language_from_cookie(request)
+
+
 class UiLocalesMiddleware:
     """
-    Middleware that sets a cookie and activated the language based on the 'ui_locales'
-    query parameter.
+    Handle the 'ui_locales' query parameter and set the language accordingly.
 
-    As a workaround for a bug in Django Oauth Toolkit, the middleware also makes sure
-    that the 'ui_locales' query parameter is removed from the URL.
-    """  # noqa: D205
+    If the 'ui_locales' parameter contains a supported language, it is activated
+    and stored in a cookie for future requests.
+
+    Otherwise, the language is set to the one stored in the cookie, if any.
+    """
 
     LANGUAGE_COOKIE_NAME = "hidp_language"
 
@@ -39,26 +43,9 @@ class UiLocalesMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if "ui_locales" in request.GET:
-            # Remove the ui_locales query parameter from the URL.
-            # This is a workaround for a bug in Django OAuth Toolkit:
-            # https://github.com/jazzband/django-oauth-toolkit/issues/1468
-            query = request.GET.copy()
-            query.pop("ui_locales")
-            request.META["QUERY_STRING"] = query.urlencode()
-            response = HttpResponseRedirect(request.build_absolute_uri())
-
-            # Set the language cookie if the language is supported.
-            if language := _get_language_from_ui_locales(request):
-                # Set the language cookie.
-                response.set_cookie(
-                    self.LANGUAGE_COOKIE_NAME,
-                    language,
-                )
-
-            return response
-
-        if language := _get_language_from_cookie(request):
+        if language := _get_language_from_request(request):
             translation.activate(language)
-
+            response = self.get_response(request)
+            response.set_cookie(UiLocalesMiddleware.LANGUAGE_COOKIE_NAME, language)
+            return response
         return self.get_response(request)
