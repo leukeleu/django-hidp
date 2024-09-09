@@ -86,6 +86,23 @@ override this template to provide your own Terms of Service or disable the
 `agreed_to_tos` field by overriding the `UserCreationForm`.
 :::
 
+### **management**
+
+All templates related to account management can be found
+in `templates/hidp/accounts/management`.
+
+#### manage_account.html
+
+Rendered by the `ManageAccountView`.
+
+#### edit_account.html
+
+Rendered by the `EditAccountView`.
+
+This template gets passed the following context variables:
+- `form` - A form that allows users to update their first and last name.
+- `show_success_message` - `True` if the account was updated successfully.
+
 ### **recovery**
 
 All templates related to password recovery can be found
