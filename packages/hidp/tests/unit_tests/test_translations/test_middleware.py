@@ -1,5 +1,6 @@
 from unittest import mock
 
+from django.http import HttpResponse
 from django.test import RequestFactory, TestCase, override_settings
 from django.utils import translation
 
@@ -11,7 +12,7 @@ class TestUiLocalesMiddleware(TestCase):
     client_class = RequestFactory
 
     def setUp(self):
-        self.get_response = mock.Mock()
+        self.get_response = mock.Mock(return_value=HttpResponse())
         self.middleware = UiLocalesMiddleware(self.get_response)
 
     def test_no_preference(self):
@@ -23,23 +24,9 @@ class TestUiLocalesMiddleware(TestCase):
             self.get_response.return_value,
         )
         self.assertEqual(active_language, translation.get_language())
-
-    def test_drops_ui_locales_param(self):
-        """Removes the 'ui_locales' query parameter, keeps the rest."""
-        # This is a workaround for a bug in Django OAuth Toolkit:
-        # https://github.com/jazzband/django-oauth-toolkit/issues/1468
-        request = self.client.get("/?ui_locales=fr&foo=bar")
-        response = self.middleware(request)
-        # Does not call get_response
-        self.get_response.assert_not_called()
-        # Redirects to the same URL without the 'ui_locales' query parameter.
-        self.assertEqual(
-            response.status_code,
-            302,
-        )
-        self.assertEqual(
-            response.url,
-            f'http://{request.META["SERVER_NAME"]}/?foo=bar',
+        self.assertNotIn(
+            "hidp_language",
+            response.cookies,
         )
 
     def test_sets_cookie_for_supported_langauge(self):
@@ -100,4 +87,17 @@ class TestUiLocalesMiddleware(TestCase):
         self.assertNotEqual(
             translation.get_language(),
             "de",
+        )
+
+    def test_prefers_query_string_over_cookie(self):
+        """Prefers the query string over the cookie."""
+        request = self.client.get("/?ui_locales=fr", HTTP_COOKIE="hidp_language=en")
+        response = self.middleware(request)
+        self.assertEqual(
+            response.cookies["hidp_language"].value,
+            "fr",
+        )
+        self.assertEqual(
+            translation.get_language(),
+            "fr",
         )
