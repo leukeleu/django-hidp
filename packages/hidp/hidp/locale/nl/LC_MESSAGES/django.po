@@ -146,6 +146,7 @@ msgid "Logout requested by %(application)s"
 msgstr "Uitloggen aangevraagd door %(application)s"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
+#: hidp/templates/hidp/accounts/management/edit_account.html
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -319,3 +320,24 @@ msgstr "Beheer je accountinformatie"
 #: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Manage account"
 msgstr "Account beheren"
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Edit account"
+msgstr "Account bewerken"
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+msgid "Edit your account information"
+msgstr "Bewerk je accountinformatie"
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+msgid "Save"
+msgstr "Opslaan"
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+msgid "Account updated successfully."
+msgstr "Accountinformatie succesvol bijgewerkt."
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+msgid "Dismiss"
+msgstr "Sluiten"

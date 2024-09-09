@@ -145,6 +145,7 @@ msgid "Logout requested by %(application)s"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
+#: hidp/templates/hidp/accounts/management/edit_account.html
 msgid "Cancel"
 msgstr ""
 
@@ -317,4 +318,25 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Manage account"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Edit account"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+msgid "Edit your account information"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+msgid "Save"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+msgid "Account updated successfully."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
+msgid "Dismiss"
 msgstr ""
