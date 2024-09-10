@@ -1,3 +1,5 @@
+import logging
+
 from urllib.parse import urlencode
 
 from django_ratelimit.decorators import ratelimit
@@ -24,6 +26,7 @@ from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
 from . import email_verification, forms, mailer, tokens
 
+logger = logging.getLogger(__name__)
 UserModel = get_user_model()
 
 
@@ -497,10 +500,15 @@ class PasswordResetRequestView(generic.FormView):
 
     def form_valid(self, form):
         if user := form.get_user():
-            self.password_reset_request_mailer(
-                user=user,
-                base_url=self.request.build_absolute_uri("/"),
-            ).send()
+            try:
+                self.password_reset_request_mailer(
+                    user=user,
+                    base_url=self.request.build_absolute_uri("/"),
+                ).send()
+            except Exception:
+                # Do not leak the existence of the user. Log the error and
+                # continue as if the email was sent successfully.
+                logger.exception("Failed to send password reset email.")
         return super().form_valid(form)
 
 

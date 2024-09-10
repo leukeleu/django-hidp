@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from unittest import mock
 
 from django.core import mail
 from django.test import TestCase
@@ -95,6 +96,23 @@ class TestPasswordResetFlow(TestCase):
             response,
             "hidp/accounts/recovery/password_reset_email_sent.html",
         )
+
+    @mock.patch(
+        "hidp.accounts.views.mailer.PasswordResetRequestMailer.send",
+        side_effect=Exception,
+    )
+    def test_password_reset_email_error(self, mock_send):
+        """Errors are logged when sending the password reset email."""
+        # This is a fix for Django's CVE-2024-45231. The email backend
+        # might raise an exception when sending an email, which could
+        # be used to enumerate valid email addresses.
+        with self.assertLogs("hidp.accounts.views", level="ERROR") as cm:
+            self.client.post(
+                reverse("hidp_accounts:password_reset_request"),
+                {"email": self.user.email},
+            )
+        self.assertIn("Failed to send password reset email.", cm.records[0].msg)
+        self.assertEqual(0, len(mail.outbox))
 
     def test_get_password_reset_url(self):
         """Render the password reset form."""
