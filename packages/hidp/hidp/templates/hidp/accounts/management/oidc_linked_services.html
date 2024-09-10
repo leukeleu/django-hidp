@@ -1,0 +1,25 @@
+{% extends "hidp/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Manage linked trusted services' %}{% endblock %}
+
+{% block body %}
+  <h1>{% translate 'Manage your linked trusted services' %}</h1>
+
+  {% if oidc_available_providers %}
+  <h2>{% translate 'Available services' %}</h2>
+  {% for item in oidc_available_providers %}
+  <form action="{{ item.url }}" method="POST">
+    {% csrf_token %}
+    <button type="submit">
+      {% blocktranslate trimmed with provider=item.provider.name %}
+      Link with {{ provider }}
+      {% endblocktranslate %}
+    </button>
+  </form>
+  {% endfor %}
+  {% endif %}
+
+  <hr>
+  <a href="{% url 'hidp_accounts:manage_account' %}">{% translate 'Back' %}</a>
+{% endblock %}

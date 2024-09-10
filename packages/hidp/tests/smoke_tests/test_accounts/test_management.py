@@ -4,7 +4,9 @@ from django.test import TestCase
 from django.urls import reverse
 
 from hidp.accounts.forms import EditUserForm
+from hidp.config.oidc_clients import configure_oidc_clients
 from hidp.test.factories import user_factories
+from tests.unit_tests.test_federated.test_providers.example import ExampleOIDCClient
 
 
 class TestManageAccountView(TestCase):
@@ -79,5 +81,40 @@ class TestEditAccountView(TestCase):
         self.assertInHTML(
             "Account updated successfully."
             '<a href="/manage/edit-account/" aria-label="Dismiss">✕</a>',
+            response.content.decode("utf-8"),
+        )
+
+
+class TestOIDCLinkedServicesView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory()
+        cls.oidc_linked_services_url = reverse("hidp_accounts:oidc_linked_services")
+
+    def setUp(self):
+        configure_oidc_clients(ExampleOIDCClient(client_id="test"))
+
+    def test_login_required(self):
+        """Anonymous users should be redirected to the login page."""
+        response = self.client.get(self.oidc_linked_services_url)
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_accounts:login')}?next={self.oidc_linked_services_url}",
+        )
+
+    def test_available_services(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.oidc_linked_services_url)
+
+        self.assertInHTML(
+            "Available services",
+            response.content.decode("utf-8"),
+        )
+        self.assertContains(
+            response,
+            '<form action="/login/oidc/authenticate/example/" method="POST">',
+        )
+        self.assertInHTML(
+            "<button type='submit'>Link with Example</button>",
             response.content.decode("utf-8"),
         )
