@@ -55,6 +55,8 @@ SILENCED_SYSTEM_CHECKS = [
     # These are all handled by nginx, so Django doesn't need to worry about them
     "security.W004",  # You have not set a value for the SECURE_HSTS_SECONDS setting
     "security.W008",  # SECURE_SSL_REDIRECT setting is not set to True
+    "hidp.E005",  # OAUTH2_PROVIDER is not configured correctly
+    "hidp.E008",  # INSTALLED_APPS does not include the required OIDC provider apps.
     *config.getliteral("app", "silenced_system_checks", fallback=[]),
 ]
 
