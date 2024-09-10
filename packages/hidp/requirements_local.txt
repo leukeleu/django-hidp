@@ -1,5 +1,5 @@
 -r docs/requirements.txt
--e .
+-e .[oidc_provider]
 -e ../hidp-pycqa
 
 # Develop and test with PostgreSQL

@@ -69,3 +69,11 @@ class TestConfigChecks(TestCase):
                 checks.E006,
             ],
         )
+
+    def test_oidc_provider_apps_not_installed(self):
+        self.assertEqual(
+            checks.check_oidc_provider_installed_apps(),
+            [
+                checks.E008,
+            ],
+        )

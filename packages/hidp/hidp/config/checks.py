@@ -16,17 +16,10 @@ REQUIRED_APPS = [
     "hidp.federated",
 ]
 
-_OAUTH2_PROVIDER_INSTALLED = importlib.util.find_spec("oauth2_provider") is not None
-
-if _OAUTH2_PROVIDER_INSTALLED:
-    # If oauth2_provider is installed, assume the user wants
-    # to enable the oidc_provider part of HIdP.
-    REQUIRED_APPS.extend(
-        [
-            "oauth2_provider",
-            "hidp.oidc_provider",
-        ]
-    )
+OIDC_PROVIDER_REQUIRED_APPS = [
+    "oauth2_provider",
+    "hidp.oidc_provider",
+]
 
 REQUIRED_MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -129,11 +122,6 @@ def check_oauth2_provider(**kwargs):
     return []
 
 
-if _OAUTH2_PROVIDER_INSTALLED:
-    # Only check for OAuth2 Provider settings if the app is installed
-    checks.register(Tags.settings)(check_oauth2_provider)
-
-
 # Make sure the urls are configured correctly
 E006 = checks.Error(
     "Unable to reverse the 'hidp_accounts:login' URL.",
@@ -152,3 +140,25 @@ def check_login_url(**kwargs):
     except NoReverseMatch:
         return [E006]
     return []
+
+
+E008 = checks.Error(
+    "INSTALLED_APPS does not include the required OIDC provider apps.",
+    hint="INSTALLED_APPS should include the following apps: {}.".format(
+        ", ".join(f"{app_name!r}" for app_name in OIDC_PROVIDER_REQUIRED_APPS)
+    ),
+    id="hidp.E008",
+)
+
+
+def check_oidc_provider_installed_apps(**kwargs):
+    for app_name in OIDC_PROVIDER_REQUIRED_APPS:
+        if app_name not in settings.INSTALLED_APPS:
+            return [E008]
+    return []
+
+
+if importlib.util.find_spec("oauth2_provider") is not None:
+    # Only enable the OIDC provider checks if OAuth2 Provider is installed
+    checks.register(Tags.settings)(check_oauth2_provider)
+    checks.register(Tags.dependencies)(check_oidc_provider_installed_apps)
