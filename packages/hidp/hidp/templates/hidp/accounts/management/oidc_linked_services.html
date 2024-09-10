@@ -6,6 +6,24 @@
 {% block body %}
   <h1>{% translate 'Manage your linked trusted services' %}</h1>
 
+  {% if oidc_error_message %}
+  <ul>
+    <li>
+      {{ oidc_error_message }}
+    </li>
+  </ul>
+  {% endif %}
+
+  {% if successfully_linked_provider %}
+  <ul>
+    <li>{% blocktranslate trimmed with provider=successfully_linked_provider.name%}
+      Successfully linked your {{ provider }} account.
+      {% endblocktranslate %}
+      <a href="{{ request.path }}" aria-label="{% translate 'Dismiss' %}">✕</a>
+    </li>
+  </ul>
+  {% endif %}
+
   {% if oidc_linked_providers %}
   <h2>{% translate 'Linked services' %}</h2>
   {% for item in oidc_linked_providers %}
