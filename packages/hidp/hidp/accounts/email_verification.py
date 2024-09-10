@@ -36,8 +36,7 @@ def get_verify_email_url(user, *, next_url=""):
 
 def remove_stale_unverified_accounts(*, days=90, dry_run=False):
     """
-    Remove accounts that have not been verified within a specific number of days
-    after creation.
+    Remove accounts that are not verified within a given number of days after creation.
 
     Args:
         days (int):
@@ -52,7 +51,7 @@ def remove_stale_unverified_accounts(*, days=90, dry_run=False):
         int:
             The number of accounts that are deleted, or would be deleted
             if `dry_run` is `True`
-    """  # noqa: D205
+    """
     unverified_users = UserModel.objects.filter(
         email_verified__isnull=True,
         date_joined__lt=timezone.now() - timedelta(days=days),

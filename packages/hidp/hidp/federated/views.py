@@ -63,10 +63,12 @@ class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View
 
     def post(self, request, *, provider_key):
         """
+        Handle the OIDC authentication request.
+
         Prepare the authentication request parameters, update the session state
         with the required information, and redirect the user to the OpenID Connect
         provider's authorization endpoint.
-        """  # noqa: D205
+        """
         return HttpResponseRedirect(
             authorization_code_flow.prepare_authentication_request(
                 request,
@@ -80,9 +82,10 @@ class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View
 @method_decorator(rate_limit_strict, name="dispatch")
 class OIDCAuthenticationCallbackView(OIDCMixin, View):
     """
-    Handles the callback response from an OpenID Connect Authorization Code Flow
-    authentication request. This handles both successful and failed responses.
-    """  # noqa: D205
+    Handle the callback from an OIDC authentication request.
+
+    This view is used for both successful and failed authentication attempts.
+    """
 
     http_method_names = [
         "get",
@@ -236,10 +239,7 @@ class TokenDataMixin:
 
 @method_decorator(rate_limit_strict, name="dispatch")
 class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
-    """
-    Handles the registration process for a new user using an OpenID Connect
-    authentication response.
-    """  # noqa: D205
+    """Register a new user using the OIDC provider's claims and user info."""
 
     token_generator = tokens.OIDCRegistrationTokenGenerator()
     form_class = forms.OIDCRegistrationForm
@@ -278,10 +278,7 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
 
 @method_decorator(rate_limit_strict, name="dispatch")
 class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
-    """
-    Handles the login process for a user using an OpenID Connect authentication
-    response.
-    """  # noqa: D205
+    """Log in a user using the OIDC provider's claims."""
 
     token_generator = tokens.OIDCLoginTokenGenerator()
     next_page = "/"
@@ -333,10 +330,7 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
 @method_decorator(rate_limit_strict, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 class OIDCAccountLinkView(TokenDataMixin, FormView):
-    """
-    Handles the account linking process for an existing user using an OpenID Connect
-    authentication response.
-    """  # noqa: D205
+    """Link an existing user account to an OIDC account."""
 
     form_class = forms.OIDCAccountLinkForm
     template_name = "hidp/federated/account_link.html"

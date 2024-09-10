@@ -28,10 +28,7 @@ class BaseMailer:
         self.base_url = base_url
 
     def get_context(self, extra_context=None):
-        """
-        Return a dictionary of context variables to use when rendering the
-        email templates.
-        """  # noqa: D205
+        """Return a dictionary of context variables for the email templates."""
         context = {
             "base_url": self.base_url,
         }

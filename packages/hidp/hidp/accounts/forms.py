@@ -169,7 +169,7 @@ class AuthenticationForm(auth_forms.AuthenticationForm):
 
 
 class PasswordResetRequestForm(forms.Form):
-    """Start the password reset process for a user, by requesting a password reset email."""  # noqa: E501, W505
+    """Start the password reset process by requesting a password reset email."""
 
     email = forms.EmailField(
         label=_("Email"),

@@ -4,12 +4,12 @@ from django.contrib.auth.base_user import AbstractBaseUser
 
 def authenticate(request, **credentials):
     """
-    Attempts to authenticate (but **not** log in) a user using all configured
-    authentication backends (`settings.AUTHENTICATION_BACKENDS`) with the
-    provided credentials.
+    Attempts to authenticate a user using all configured authentication backends.
 
-    Iterates over each backend until it finds one that accepts the credentials,
-    leading to three possible outcomes:
+    Note that this does **not** log the user in. It only verifies the credentials.
+
+    Iterates over each backend in `settings.AUTHENTICATION_BACKENDS` until it finds
+    one that accepts the credentials, leading to three possible outcomes:
 
     1. `None` is returned:
        The backend could not verify the credentials. The credentials may be
@@ -30,7 +30,7 @@ def authenticate(request, **credentials):
 
     Returns `None` if the credentials are invalid, or access is denied,
     and sends the `django.contrib.auth.user_login_failed` signal.
-    """  # noqa: D205
+    """
     # Wrap Django's authenticate, without altering its behavior, to add
     # a detailed docstring and provide a consistent interface for the
     # `hidp.accounts.auth` module.

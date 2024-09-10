@@ -48,7 +48,7 @@ class TestOIDCRegistrationForm(TestCase):
         self.assertEqual(form.instance.email, "user@example.com")
 
     def test_creates_user_and_connection(self):
-        """The form creates a user and OpenIdConnection from OIDC claims and user info."""  # noqa: E501, W505
+        """The form creates a user and OpenIdConnection from claims and user info."""
         form = self._create_form(data={"agreed_to_tos": "on"})
         self.assertTrue(form.is_valid(), msg="Expected form to be valid.")
         user = form.save()

@@ -38,9 +38,15 @@ class BaseEmailVerificationTokenGenerator:
 
     def check_token(self, token):
         """
-        Verify the token and return the hash of the email address used to generate it.
+        Verify a token.
 
-        Returns None if the token is invalid or expired.
+        Args:
+            token (str): The token to verify.
+
+        Returns:
+              str | None:
+                The hash of the email address used to generate the token,
+                or `None` if the token is invalid or expired.
         """
         try:
             return signing.b64_decode(

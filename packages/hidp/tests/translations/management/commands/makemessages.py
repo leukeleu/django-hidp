@@ -4,10 +4,7 @@ from django.core.management.commands import makemessages
 
 
 class Command(makemessages.Command):
-    """
-    Wraps Django's makemessages command to create translation files for
-    the HIdP application.
-    """  # noqa: D205
+    """Wraps Django's makemessages command to create translation files for HIdP."""
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
