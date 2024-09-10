@@ -5,6 +5,7 @@ from django.urls import reverse
 
 from hidp.accounts.forms import EditUserForm
 from hidp.config.oidc_clients import configure_oidc_clients
+from hidp.federated.models import OpenIdConnection
 from hidp.test.factories import user_factories
 from tests.unit_tests.test_federated.test_providers.example import ExampleOIDCClient
 
@@ -116,5 +117,25 @@ class TestOIDCLinkedServicesView(TestCase):
         )
         self.assertInHTML(
             "<button type='submit'>Link with Example</button>",
+            response.content.decode("utf-8"),
+        )
+
+    def test_linked_services(self):
+        OpenIdConnection.objects.create(
+            user=self.user,
+            provider_key="example",
+            issuer_claim="example",
+            subject_claim="test-subject",
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(self.oidc_linked_services_url)
+
+        self.assertInHTML(
+            "Linked services",
+            response.content.decode("utf-8"),
+        )
+        self.assertInHTML(
+            "Linked with Example",
             response.content.decode("utf-8"),
         )

@@ -583,6 +583,13 @@ class OIDCLinkedServicesView(
         ).values_list("provider_key", flat=True)
 
         return super().get_context_data(
+            oidc_linked_providers=self._build_provider_url_list(
+                [
+                    provider
+                    for provider in oidc_clients.get_registered_oidc_clients()
+                    if provider.provider_key in oidc_linked_provider_keys
+                ]
+            ),
             oidc_available_providers=self._build_provider_url_list(
                 [
                     provider
