@@ -3,7 +3,6 @@ import urllib.parse
 from http import HTTPStatus
 from unittest import mock
 
-from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.http import HttpRequest
@@ -174,14 +173,12 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         response = self.client.get(
             reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
             secure=True,
+            follow=True,
         )
-        self.assertEqual(
-            ["The authentication request has expired. Please try again."],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
-        )
-        self.assertRedirects(
-            response,
-            reverse("hidp_accounts:login"),
+        self.assertTemplateUsed(response, "hidp/accounts/login.html")
+        self.assertInHTML(
+            "The authentication request has expired. Please try again.",
+            response.content.decode("utf-8"),
         )
 
     @mock.patch(
@@ -192,14 +189,12 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         response = self.client.get(
             reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
             secure=True,
+            follow=True,
         )
-        self.assertEqual(
-            ["Unexpected error during authentication. Please try again."],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
-        )
-        self.assertRedirects(
-            response,
-            reverse("hidp_accounts:login"),
+        self.assertTemplateUsed(response, "hidp/accounts/login.html")
+        self.assertInHTML(
+            "An unexpected error occurred during authentication. Please try again.",
+            response.content.decode("utf-8"),
         )
 
     @mock.patch(
@@ -210,14 +205,12 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         response = self.client.get(
             reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
             secure=True,
+            follow=True,
         )
-        self.assertEqual(
-            ["Unexpected error during authentication. Please try again."],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
-        )
-        self.assertRedirects(
-            response,
-            reverse("hidp_accounts:login"),
+        self.assertTemplateUsed(response, "hidp/accounts/login.html")
+        self.assertInHTML(
+            "An unexpected error occurred during authentication. Please try again.",
+            response.content.decode("utf-8"),
         )
 
     @mock.patch(
@@ -271,15 +264,13 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         response = self.client.get(
             reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
             secure=True,
+            follow=True,
         )
-        self.assertEqual(
-            [
-                "You already have an account with this email address."
-                " Please log in to link your account."
-            ],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
+        self.assertInHTML(
+            "You already have an account with this email address."
+            " Please log in to link your account.",
+            response.content.decode("utf-8"),
         )
-        self.assertRedirects(response, reverse("hidp_accounts:login"))
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
@@ -315,13 +306,14 @@ class OIDCTokenDataTestMixin:
 
     def _assert_invalid_token(self, *, token=None):
         response = (
-            self.client.get(self.url)
+            self.client.get(self.url, follow=True)
             if token is None
-            else self.client.get(self.url, {"token": token})
+            else self.client.get(self.url, {"token": token}, follow=True)
         )
-        self.assertEqual(
-            [self.view_class.invalid_token_message],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
+        self.assertTemplateUsed(response, "hidp/accounts/login.html")
+        self.assertInHTML(
+            "Expired or invalid token. Please try again.",
+            response.content.decode("utf-8"),
         )
 
     def _add_oidc_data_to_session(self, *, save=True):
@@ -424,10 +416,11 @@ class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
         self.user.is_active = False
         self.user.save()
         token = self._add_oidc_data_to_session()
-        response = self.client.get(self.url, {"token": token})
-        self.assertEqual(
-            ["Login failed. Invalid credentials."],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
+        response = self.client.get(self.url, {"token": token}, follow=True)
+        self.assertTemplateUsed(response, "hidp/accounts/login.html")
+        self.assertInHTML(
+            "Login failed. Invalid credentials.",
+            response.content.decode("utf-8"),
         )
 
     def test_valid_login_unverified_user(self):
@@ -486,16 +479,12 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
 
     def test_post_with_valid_token(self):
         token = self._add_oidc_data_to_session()
-        response = self.client.post(
+        response = self.client.post(  # noqa: F841
             self.url + f"?token={token}",
             {"allow_link": "on"},
             follow=True,
         )
         connection = models.OpenIdConnection.objects.filter(user=self.user).first()
         self.assertIsNotNone(connection, msg="Expected connection to be created.")
-        self.assertEqual(
-            [
-                "Successfully linked your Example account.",
-            ],
-            [m.message for m in messages.get_messages(response.wsgi_request)],
-        )
+
+        # TODO: Add assertion for message in template when message is added via query params (HIDP-147) # noqa: E501, W505

@@ -46,12 +46,13 @@ This template gets passed the following context variables:
 information per provider:
   - `provider` - Registered OIDC provider.
   - `url` - Authentication URL for the OIDC provider.
+- `oidc_error_message` - Error message from the OIDC Authentication flow in case
+something went wrong.
 - `self.redirect_field_name` (i.e. `next`) - The URL to redirect to after login (if
 present in the request).
 - `site` - The current site instance (`RequestSite` if `django.contrib.sites` is
 not installed).
 - `site_name` - The name of the current site (host name if `RequestSite` is used)
-- `messages` - messages from `django.contrib.messages`.
 - `register_url` - URL to the sign up page, with a next param if `redirect_url` is
 available.
 - Any additional data present is `self.extra_context`.
