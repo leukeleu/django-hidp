@@ -48,6 +48,7 @@ E001 = checks.Error(
     hint="INSTALLED_APPS should include the following apps: {}.".format(
         ", ".join(f"{app_name!r}" for app_name in REQUIRED_APPS)
     ),
+    id="hidp.E001",
 )
 
 
@@ -65,6 +66,7 @@ E002 = checks.Error(
     hint="MIDDLEWARE should include the following middleware: {}.".format(
         ", ".join(f"{middleware!r}" for middleware in REQUIRED_MIDDLEWARE)
     ),
+    id="hidp.E002",
 )
 
 
@@ -81,6 +83,7 @@ def check_middleware(**kwargs):
 E003 = checks.Error(
     "USE_TZ is not set to True.",
     hint="Set USE_TZ to True.",
+    id="hidp.E003",
 )
 
 
@@ -95,6 +98,7 @@ def check_use_tz(**kwargs):
 E004 = checks.Error(
     "AUTH_USER_MODEL is not set to a subclass of hidp.accounts.models.BaseUser.",
     hint="Define your own subclass of BaseUser and set AUTH_USER_MODEL.",
+    id="hidp.E004",
 )
 
 
@@ -110,6 +114,7 @@ def check_user_model(**kwargs):
 E005 = checks.Error(
     "OAUTH2_PROVIDER is not configured correctly.",
     hint="Use hidp.config.get_oauth2_provider_settings() to configure OAUTH2_PROVIDER.",
+    id="hidp.E005",
 )
 
 
@@ -136,6 +141,7 @@ E006 = checks.Error(
         "Include hidp.config.urls in your ROOT_URLCONF,"
         " or define custom URLs using the 'hidp_accounts' namespace."
     ),
+    id="hidp.E006",
 )
 
 
