@@ -26,6 +26,11 @@ urlpatterns = [
         name="link_account",
     ),
     path(
+        "unlink-account/<str:provider_key>/",
+        views.OIDCAccountUnlinkView.as_view(),
+        name="unlink_account",
+    ),
+    path(
         "login/",
         views.OIDCLoginView.as_view(),
         name="login",

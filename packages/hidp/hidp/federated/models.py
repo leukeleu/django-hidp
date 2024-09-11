@@ -30,6 +30,22 @@ class OpenIdConnectionQuerySet(models.QuerySet):
             .first()
         )
 
+    def get_by_user_and_provider(self, user, provider_key):
+        """
+        Get an OpenID connection by user and provider key.
+
+        Args:
+            user (User): The user.
+            provider_key (str): The provider key.
+
+        Returns:
+            OpenIdConnection: The OpenID connection if found, otherwise None.
+        """
+        try:
+            return self.select_related("user").get(user=user, provider_key=provider_key)
+        except self.model.DoesNotExist:
+            return None
+
 
 class OpenIdConnection(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid7, editable=False)

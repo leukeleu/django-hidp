@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import (
     Http404,
     HttpResponseBadRequest,
@@ -11,12 +12,11 @@ from django.http import (
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, View
+from django.views.generic import DeleteView, FormView, View
 
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailer
 from ..config import oidc_clients
-from ..config.oidc_clients import get_oidc_client
 from ..federated.constants import OIDCError
 from ..rate_limit.decorators import rate_limit_strict
 from . import forms, tokens
@@ -37,7 +37,8 @@ class OIDCMixin:
             return HttpResponseBadRequest("Insecure request")
         return super().dispatch(request, *args, **kwargs)
 
-    def get_oidc_client(self, provider_key):  # noqa: PLR6301 (no-self-use)
+    @staticmethod
+    def get_oidc_client_or_404(provider_key):
         try:
             return oidc_clients.get_oidc_client(provider_key)
         except KeyError:
@@ -116,7 +117,7 @@ class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View
         return HttpResponseRedirect(
             authorization_code_flow.prepare_authentication_request(
                 request,
-                client=self.get_oidc_client(provider_key),
+                client=self.get_oidc_client_or_404(provider_key),
                 callback_url=self.get_callback_url(provider_key),
                 next_url=self.get_redirect_url(),
             )
@@ -208,7 +209,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
             _tokens, claims, user_info, next_url = (
                 authorization_code_flow.handle_authentication_callback(
                     request,
-                    client=self.get_oidc_client(provider_key),
+                    client=self.get_oidc_client_or_404(provider_key),
                     callback_url=self.get_callback_url(provider_key),
                 )
             )
@@ -401,3 +402,26 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
         del self.request.session[self.token]
 
         return super().form_valid(form)
+
+
+class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
+    """Unlink an OIDC client from an existing user account."""
+
+    form_class = forms.OIDCAccountUnlinkForm
+    template_name = "hidp/federated/account_unlink.html"
+    success_url = reverse_lazy("hidp_accounts:oidc_linked_services")
+
+    def get_object(self, queryset=None):
+        provider_key = self.kwargs["provider_key"]
+        self.provider = OIDCMixin.get_oidc_client_or_404(provider_key)
+
+        connection = OpenIdConnection.objects.get_by_user_and_provider(
+            user=self.request.user, provider_key=provider_key
+        )
+        if connection is None:
+            raise Http404(f"No OpenID Connection found for {provider_key!r}")
+
+        return connection
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(provider=self.provider, **kwargs)

@@ -579,7 +579,8 @@ class OIDCLinkedServicesView(
                     provider
                     for provider in oidc_clients.get_registered_oidc_clients()
                     if provider.provider_key in oidc_linked_provider_keys
-                ]
+                ],
+                url_name="hidp_oidc_client:unlink_account",
             ),
             oidc_available_providers=self._build_provider_url_list(
                 [
