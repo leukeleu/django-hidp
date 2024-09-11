@@ -59,23 +59,23 @@ msgstr ""
 msgid "OpenID connections"
 msgstr ""
 
-#: hidp/accounts/views.py hidp/federated/views.py
+#: hidp/federated/views.py
 msgid "You already have an account with this email address. Please log in to link your account."
 msgstr ""
 
-#: hidp/accounts/views.py hidp/federated/views.py
+#: hidp/federated/views.py
 msgid "The authentication request has expired. Please try again."
 msgstr ""
 
-#: hidp/accounts/views.py hidp/federated/views.py
+#: hidp/federated/views.py
 msgid "An unexpected error occurred during authentication. Please try again."
 msgstr ""
 
-#: hidp/accounts/views.py hidp/federated/views.py
+#: hidp/federated/views.py
 msgid "Expired or invalid token. Please try again."
 msgstr ""
 
-#: hidp/accounts/views.py hidp/federated/views.py
+#: hidp/federated/views.py
 msgid "Login failed. Invalid credentials."
 msgstr ""
 
