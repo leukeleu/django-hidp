@@ -79,11 +79,6 @@ msgstr ""
 msgid "Login failed. Invalid credentials."
 msgstr ""
 
-#: hidp/federated/views.py
-#, python-brace-format
-msgid "Successfully linked your {provider} account."
-msgstr ""
-
 #: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
 #: hidp/templates/hidp/accounts/register.html
@@ -338,5 +333,42 @@ msgid "Account updated successfully."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Dismiss"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+msgid "Manage linked trusted services"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+msgid "Manage your linked trusted services"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Linked services"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#, python-format
+msgid "Linked with %(provider)s"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+msgid "Available services"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#, python-format
+msgid "Link with %(provider)s"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+msgid "Back"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#, python-format
+msgid "Successfully linked your %(provider)s account."
 msgstr ""

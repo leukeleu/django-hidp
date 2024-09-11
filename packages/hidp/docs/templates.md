@@ -104,6 +104,19 @@ This template gets passed the following context variables:
 - `form` - A form that allows users to update their first and last name.
 - `show_success_message` - `True` if the account was updated successfully.
 
+#### oidc_linked_services.html
+
+Rendered by the `OIDCLinkedServicesView`.
+
+This template gets passed the following context variables:
+- `oidc_linked_providers` - List of OIDC Clients that are already linked to the
+user's account.
+- `oidc_available_providers` - List of OIDC Clients that can be linked to the
+user's account.
+- `successfully_linked_provider` - Name of provider that was successfully linked.
+- `oidc_error_message` - Error message from the OIDC Authentication flow in case
+something went wrong.
+
 ### **recovery**
 
 All templates related to password recovery can be found
@@ -218,6 +231,9 @@ Rendered by the `OIDCAccountLinkView`.
 This template gets passed the following context variables:
 - `form` - The account link form.
 - `provider` - The OIDC provider that the user is linking their account to.
+
+Redirects to `OIDCLinkedServicesView` after successfully linking the account to the
+OIDC provider.
 
 ### registration.html
 

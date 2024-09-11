@@ -310,7 +310,6 @@ class OIDCTokenDataTestMixin:
             if token is None
             else self.client.get(self.url, {"token": token}, follow=True)
         )
-        self.assertTemplateUsed(response, "hidp/accounts/login.html")
         self.assertInHTML(
             "Expired or invalid token. Please try again.",
             response.content.decode("utf-8"),
@@ -479,7 +478,7 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
 
     def test_post_with_valid_token(self):
         token = self._add_oidc_data_to_session()
-        response = self.client.post(  # noqa: F841
+        response = self.client.post(
             self.url + f"?token={token}",
             {"allow_link": "on"},
             follow=True,
@@ -487,4 +486,14 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
         connection = models.OpenIdConnection.objects.filter(user=self.user).first()
         self.assertIsNotNone(connection, msg="Expected connection to be created.")
 
-        # TODO: Add assertion for message in template when message is added via query params (HIDP-147) # noqa: E501, W505
+        # Redirected to linked services page
+        self.assertRedirects(
+            response,
+            reverse("hidp_accounts:oidc_linked_services") + "?success=example",
+        )
+        # Linked services page
+        self.assertInHTML(
+            "Successfully linked your Example account."
+            '<a href="/manage/linked-services/" aria-label="Dismiss">✕</a>',
+            response.content.decode("utf-8"),
+        )

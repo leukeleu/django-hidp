@@ -22,6 +22,7 @@ from django.views.decorators.cache import never_cache
 from hidp.federated.constants import OIDCError
 
 from ..config import oidc_clients
+from ..federated.models import OpenIdConnection
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
 from . import email_verification, forms, mailer, tokens
@@ -48,21 +49,27 @@ class OIDCContextMixin:
         OIDCError.INVALID_CREDENTIALS: _("Login failed. Invalid credentials."),
     }
 
+    @staticmethod
+    def _build_provider_url_list(providers, url_name="hidp_oidc_client:authenticate"):
+        return [
+            {
+                "provider": provider,
+                "url": reverse(
+                    url_name,
+                    kwargs={
+                        "provider_key": provider.provider_key,
+                    },
+                ),
+            }
+            for provider in providers
+        ]
+
     def get_context_data(self, **kwargs):
         oidc_error = self.request.GET.get("oidc_error", None)
         return super().get_context_data(
-            oidc_login_providers=[
-                {
-                    "provider": provider,
-                    "url": reverse(
-                        "hidp_oidc_client:authenticate",
-                        kwargs={
-                            "provider_key": provider.provider_key,
-                        },
-                    ),
-                }
-                for provider in oidc_clients.get_registered_oidc_clients()
-            ],
+            oidc_login_providers=self._build_provider_url_list(
+                oidc_clients.get_registered_oidc_clients()
+            ),
             oidc_error_message=self.oidc_error_messages.get(oidc_error, oidc_error),
             **kwargs,
         )
@@ -539,7 +546,7 @@ class PasswordResetCompleteView(auth_views.TemplateView):
         )
 
 
-class ManageAccountView(LoginRequiredMixin, generic.TemplateView):
+class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateView):
     """Display the manage account page."""
 
     template_name = "hidp/accounts/management/manage_account.html"
@@ -569,3 +576,42 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)
+
+
+class OIDCLinkedServicesView(
+    LoginRequiredMixin, OIDCContextMixin, generic.TemplateView
+):
+    """Display the linked services page."""
+
+    template_name = "hidp/accounts/management/oidc_linked_services.html"
+
+    def get_context_data(self, **kwargs):
+        oidc_linked_provider_keys = OpenIdConnection.objects.filter(
+            user=self.request.user,
+        ).values_list("provider_key", flat=True)
+
+        try:
+            provider_key = self.request.GET.get("success")
+            successfully_linked_provider = (
+                oidc_clients.get_oidc_client(provider_key) if provider_key else None
+            )
+        except KeyError:
+            successfully_linked_provider = None
+
+        return super().get_context_data(
+            successfully_linked_provider=successfully_linked_provider,
+            oidc_linked_providers=self._build_provider_url_list(
+                [
+                    provider
+                    for provider in oidc_clients.get_registered_oidc_clients()
+                    if provider.provider_key in oidc_linked_provider_keys
+                ]
+            ),
+            oidc_available_providers=self._build_provider_url_list(
+                [
+                    provider
+                    for provider in oidc_clients.get_registered_oidc_clients()
+                    if provider.provider_key not in oidc_linked_provider_keys
+                ]
+            ),
+        )

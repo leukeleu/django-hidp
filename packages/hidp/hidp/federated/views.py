@@ -331,8 +331,12 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
 
     form_class = forms.OIDCAccountLinkForm
     template_name = "hidp/federated/account_link.html"
-    success_url = "/"
+    success_url = reverse_lazy("hidp_accounts:oidc_linked_services")
     token_generator = tokens.OIDCAccountLinkTokenGenerator()
+    invalid_token_redirect_url = reverse_lazy("hidp_accounts:oidc_linked_services")
+
+    def get_success_url(self):
+        return super().get_success_url() + f"?success={self.provider.provider_key}"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -350,7 +354,5 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
         form.save()
         # Remove the token from the session after the form has been saved.
         del self.request.session[self.token]
-
-        # TODO: Add message through query param (HIDP-147)
 
         return super().form_valid(form)

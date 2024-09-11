@@ -21,5 +21,8 @@
   <hr>
 
   <a href="{% url 'hidp_accounts:edit_account' %}">{% translate 'Edit account' %}</a>
+  {% if oidc_login_providers %}
+  <a href="{% url 'hidp_accounts:oidc_linked_services' %}">{% translate 'Linked services' %}</a>
+  {% endif %}
 
 {% endblock %}
