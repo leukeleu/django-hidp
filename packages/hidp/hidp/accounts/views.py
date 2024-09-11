@@ -19,9 +19,8 @@ from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
 
-from hidp.federated.constants import OIDCError
-
 from ..config import oidc_clients
+from ..federated.constants import OIDCError
 from ..federated.models import OpenIdConnection
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
