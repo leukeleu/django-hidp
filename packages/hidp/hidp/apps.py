@@ -7,5 +7,5 @@ class HidpChecksMixin:
         from .config import checks  # noqa: F401, PLC0415
 
 
-class AccountsConfig(HidpChecksMixin, AppConfig):
+class HidpConfig(HidpChecksMixin, AppConfig):
     name = "hidp"
