@@ -411,6 +411,9 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
     template_name = "hidp/federated/account_unlink.html"
     success_url = reverse_lazy("hidp_accounts:oidc_linked_services")
 
+    def get_success_url(self):
+        return super().get_success_url() + f"?removed={self.provider.provider_key}"
+
     def get_object(self, queryset=None):
         provider_key = self.kwargs["provider_key"]
         self.provider = OIDCMixin.get_oidc_client_or_404(provider_key)

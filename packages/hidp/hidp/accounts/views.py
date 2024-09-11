@@ -572,8 +572,17 @@ class OIDCLinkedServicesView(
         except KeyError:
             successfully_linked_provider = None
 
+        try:
+            provider_key = self.request.GET.get("removed")
+            removed_provider = (
+                oidc_clients.get_oidc_client(provider_key) if provider_key else None
+            )
+        except KeyError:
+            removed_provider = None
+
         return super().get_context_data(
             successfully_linked_provider=successfully_linked_provider,
+            removed_provider=removed_provider,
             oidc_linked_providers=self._build_provider_url_list(
                 [
                     provider

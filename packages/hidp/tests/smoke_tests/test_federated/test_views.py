@@ -543,7 +543,13 @@ class TestOIDCAccountUnlinkView(TestCase):
         # Redirected to linked services page
         self.assertRedirects(
             response,
-            reverse("hidp_accounts:oidc_linked_services"),
+            reverse("hidp_accounts:oidc_linked_services") + "?removed=example",
+        )
+        # Linked services page
+        self.assertInHTML(
+            "Successfully unlinked your Example account."
+            '<a href="/manage/linked-services/" aria-label="Dismiss">✕</a>',
+            response.content.decode("utf-8"),
         )
 
     def test_valid_provider_no_connection(self):
