@@ -114,6 +114,7 @@ user's account.
 - `oidc_available_providers` - List of OIDC Clients that can be linked to the
 user's account.
 - `successfully_linked_provider` - Name of provider that was successfully linked.
+- `removed_provider` - Name of provider that was successfully removed.
 - `oidc_error_message` - Error message from the OIDC Authentication flow in case
 something went wrong.
 
@@ -249,6 +250,17 @@ This template gets passed the following context variables:
 - `provider` - The OIDC provider that the user is linking their account to.
 
 Redirects to `OIDCLinkedServicesView` after successfully linking the account to the
+OIDC provider.
+
+### account_unlink.html
+
+Rendered by the `OIDCAccountUnlinkView`.
+
+This template gets passed the following context variables:
+- `form` - The account unlink form.
+- `provider` - The OIDC provider that the user is unlinking.
+
+Redirects to `OIDCLinkedServicesView` after successfully unlinking the account from the
 OIDC provider.
 
 ### registration.html
