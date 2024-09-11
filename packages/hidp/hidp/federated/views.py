@@ -12,12 +12,11 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, View
 
-from hidp.federated.constants import OIDCError
-
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailer
 from ..config import oidc_clients
 from ..config.oidc_clients import get_oidc_client
+from ..federated.constants import OIDCError
 from ..rate_limit.decorators import rate_limit_strict
 from . import forms, tokens
 from .models import OpenIdConnection
