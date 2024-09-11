@@ -240,6 +240,7 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
     template_name = "hidp/federated/registration.html"
     next_page = "/"
     verification_mailer = mailer.EmailVerificationMailer
+    invalid_token_redirect_url = reverse_lazy("hidp_accounts:register")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
