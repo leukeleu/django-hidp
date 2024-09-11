@@ -6,6 +6,14 @@
 {% block body %}
   <h1>{% translate 'Create a new account' %}</h1>
 
+  {% if oidc_error_message %}
+  <ul>
+    <li>
+      {{ oidc_error_message }}
+    </li>
+  </ul>
+  {% endif %}
+
   {% if request.user.is_authenticated %}
   <p>
     {% blocktranslate %}You are currently logged in as {{ user }}.{% endblocktranslate %}
