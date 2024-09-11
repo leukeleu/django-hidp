@@ -10,6 +10,7 @@ from django.http import (
 )
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, View
 
 from ..accounts import auth as hidp_auth
@@ -48,6 +49,50 @@ class OIDCMixin:
             kwargs={
                 "provider_key": provider_key,
             },
+        )
+
+
+class OIDCContextMixin:
+    """Mixin to provide context data for OIDC login providers."""
+
+    oidc_error_messages = {
+        OIDCError.ACCOUNT_EXISTS: _(
+            "You already have an account with this email address."
+            " Please log in to link your account."
+        ),
+        OIDCError.REQUEST_EXPIRED: _(
+            "The authentication request has expired. Please try again."
+        ),
+        OIDCError.UNEXPECTED_ERROR: _(
+            "An unexpected error occurred during authentication. Please try again."
+        ),
+        OIDCError.INVALID_TOKEN: _("Expired or invalid token. Please try again."),
+        OIDCError.INVALID_CREDENTIALS: _("Login failed. Invalid credentials."),
+    }
+
+    @staticmethod
+    def _build_provider_url_list(providers, url_name="hidp_oidc_client:authenticate"):
+        return [
+            {
+                "provider": provider,
+                "url": reverse(
+                    url_name,
+                    kwargs={
+                        "provider_key": provider.provider_key,
+                    },
+                ),
+            }
+            for provider in providers
+        ]
+
+    def get_context_data(self, **kwargs):
+        oidc_error = self.request.GET.get("oidc_error", None)
+        return super().get_context_data(
+            oidc_login_providers=self._build_provider_url_list(
+                oidc_clients.get_registered_oidc_clients()
+            ),
+            oidc_error_message=self.oidc_error_messages.get(oidc_error, oidc_error),
+            **kwargs,
         )
 
 
