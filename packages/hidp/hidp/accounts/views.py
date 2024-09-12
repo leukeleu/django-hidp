@@ -505,6 +505,15 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
 
     form_class = forms.PasswordChangeForm
     template_name = "hidp/accounts/management/password_change.html"
+    success_url = reverse_lazy("hidp_accounts:change_password_done")
+
+
+class PasswordChangeDoneView(auth_views.TemplateView):
+    """Display a message that the password change has been completed."""
+
+    template_name = "hidp/accounts/management/password_change_done.html"
+
+
 class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateView):
     """Display the manage account page."""
 

@@ -184,3 +184,6 @@ class TestPasswordChangeView(TestCase):
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("new_password"))
 
+        # Redirect to the success page
+        self.assertRedirects(response, reverse("hidp_accounts:change_password_done"))
+        self.assertTemplateUsed("hidp/accounts/management/password_change_done.html")

@@ -95,6 +95,11 @@ management_urls = [
         views.PasswordChangeView.as_view(),
         name="change_password",
     ),
+    path(
+        "manage/change-password/done/",
+        views.PasswordChangeDoneView.as_view(),
+        name="change_password_done",
+    ),
 ]
 
 urlpatterns = (
