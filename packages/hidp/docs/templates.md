@@ -117,6 +117,22 @@ user's account.
 - `oidc_error_message` - Error message from the OIDC Authentication flow in case
 something went wrong.
 
+#### password_change.html
+
+Rendered by the `PasswordChangeView`.
+
+This template gets passed the following context variables:
+- `form` - A form that allows users to change their password. The user also needs to
+enter their old password to verify the user's identity.
+
+Redirects to `PasswordChangeDoneView` after successfully changing the password.
+
+#### password_change_done.html
+
+Rendered by the `PasswordChangeDoneView`.
+
+Shows a simple message letting the user know that their password has been changed.
+
 ### **recovery**
 
 All templates related to password recovery can be found
