@@ -507,6 +507,12 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     template_name = "hidp/accounts/management/password_change.html"
     success_url = reverse_lazy("hidp_accounts:change_password_done")
 
+    def dispatch(self, request, *args, **kwargs):
+        # TODO: Let users set a password if they don't have one (HIdP-158)
+        if request.user.is_authenticated and not request.user.has_usable_password():
+            return HttpResponseRedirect(reverse("hidp_accounts:manage_account"))
+        return super().dispatch(request, *args, **kwargs)
+
 
 class PasswordChangeDoneView(auth_views.TemplateView):
     """Display a message that the password change has been completed."""

@@ -156,6 +156,14 @@ class TestPasswordChangeView(TestCase):
             f"{reverse('hidp_accounts:login')}?next={self.change_password_url}",
         )
 
+    def test_redirect_user_without_usable_password(self):
+        """Users without a usable password should be redirected to the manage page."""
+        self.user.set_unusable_password()
+        self.user.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.change_password_url, follow=True)
+        self.assertRedirects(response, reverse("hidp_accounts:manage_account"))
+
     def test_get(self):
         """The password change page should be displayed for authenticated users."""
         self.client.force_login(self.user)
