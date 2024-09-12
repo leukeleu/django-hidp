@@ -142,6 +142,7 @@ msgstr "Uitloggen aangevraagd door %(application)s"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/password_change.html
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -173,6 +174,9 @@ msgid "Please enter your new password twice so we can verify you typed it in cor
 msgstr "Voer je nieuwe wachtwoord twee keer in, zodat we kunnen verifiëren dat je het correct hebt ingevoerd."
 
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/password_change.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
 msgid "Change password"
 msgstr "Wachtwoord wijzigen"
 
@@ -326,6 +330,7 @@ msgid "Edit your account information"
 msgstr "Bewerk je accountinformatie"
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/password_change.html
 msgid "Save"
 msgstr "Opslaan"
 
@@ -366,6 +371,7 @@ msgid "Link with %(provider)s"
 msgstr "Koppel met %(provider)s"
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
 msgid "Back"
 msgstr "Terug"
 
@@ -373,3 +379,7 @@ msgstr "Terug"
 #, python-format
 msgid "Successfully linked your %(provider)s account."
 msgstr "Je %(provider)s-account is nu gekoppeld."
+
+#: hidp/templates/hidp/accounts/management/password_change_done.html
+msgid "Your password has been changed."
+msgstr "Je wachtwoord is gewijzigd."

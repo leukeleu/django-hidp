@@ -141,6 +141,7 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/password_change.html
 msgid "Cancel"
 msgstr ""
 
@@ -172,6 +173,9 @@ msgid "Please enter your new password twice so we can verify you typed it in cor
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/password_change.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
 msgid "Change password"
 msgstr ""
 
@@ -325,6 +329,7 @@ msgid "Edit your account information"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/password_change.html
 msgid "Save"
 msgstr ""
 
@@ -365,10 +370,15 @@ msgid "Link with %(provider)s"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
 msgid "Back"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #, python-format
 msgid "Successfully linked your %(provider)s account."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/password_change_done.html
+msgid "Your password has been changed."
 msgstr ""
