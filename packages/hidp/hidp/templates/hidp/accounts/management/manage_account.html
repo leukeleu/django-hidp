@@ -24,5 +24,6 @@
   {% if oidc_login_providers %}
   <a href="{% url 'hidp_accounts:oidc_linked_services' %}">{% translate 'Linked services' %}</a>
   {% endif %}
+  <a href="{% url 'hidp_accounts:change_password' %}">{% translate 'Change password' %}</a>
 
 {% endblock %}

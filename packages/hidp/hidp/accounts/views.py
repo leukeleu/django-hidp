@@ -500,6 +500,11 @@ class PasswordResetCompleteView(auth_views.TemplateView):
         )
 
 
+class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
+    """Display the password change form and handle the password change action."""
+
+    form_class = forms.PasswordChangeForm
+    template_name = "hidp/accounts/management/password_change.html"
 class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateView):
     """Display the manage account page."""
 
