@@ -225,6 +225,40 @@ class PasswordResetForm(auth_forms.SetPasswordForm):
         return super().save(commit=commit)
 
 
+class PasswordChangeForm(auth_forms.PasswordChangeForm):
+    """
+    Allows the user to change their password by entering the old password.
+
+    The user is asked to enter the old password, and a new password twice
+    to avoid typos. The old password is used to verify the user's identity.
+    The new password is validated using the validators configured in
+    `settings.AUTH_PASSWORD_VALIDATORS`.
+    """
+
+    def __init__(self, user, *args, **kwargs):
+        """
+        Initialize the form with the given `user`.
+
+        The `user` is stored in an instance variable, to allow all
+        form methods to access the user.
+        """
+        super().__init__(user, *args, **kwargs)
+
+    def save(self, *, commit=True):
+        """
+        Save the new password for the user.
+
+        Args:
+            commit:
+                Whether to save the user to the database after
+                setting the password.
+
+        Returns:
+            The user with the new password set.
+        """
+        return super().save(commit=commit)
+
+
 class RateLimitedAuthenticationForm(AuthenticationForm):
     """
     Authentication form that is used when a user is rate limited.

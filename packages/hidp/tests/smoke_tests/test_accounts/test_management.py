@@ -139,3 +139,59 @@ class TestOIDCLinkedServicesView(TestCase):
             "Linked with Example",
             response.content.decode("utf-8"),
         )
+
+
+class TestPasswordChangeView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory()
+        cls.change_password_url = reverse("hidp_accounts:change_password")
+
+    def test_login_required(self):
+        """Anonymous users should be redirected to the login page."""
+        self.client.logout()
+        response = self.client.get(self.change_password_url)
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_accounts:login')}?next={self.change_password_url}",
+        )
+
+    def test_redirect_user_without_usable_password(self):
+        """Users without a usable password should be redirected to the manage page."""
+        self.user.set_unusable_password()
+        self.user.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.change_password_url, follow=True)
+        self.assertRedirects(response, reverse("hidp_accounts:manage_account"))
+
+    def test_get(self):
+        """The password change page should be displayed for authenticated users."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.change_password_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/password_change.html"
+        )
+        self.assertIn("form", response.context)
+        self.assertTrue(response.context["form"].fields["old_password"].required)
+
+    def test_change_password(self):
+        """The user's password should be updated."""
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.change_password_url,
+            {
+                "old_password": "P@ssw0rd!",
+                "new_password1": "new_password",
+                "new_password2": "new_password",
+            },
+            follow=True,
+        )
+
+        # User's password should be updated
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("new_password"))
+
+        # Redirect to the success page
+        self.assertRedirects(response, reverse("hidp_accounts:change_password_done"))
+        self.assertTemplateUsed("hidp/accounts/management/password_change_done.html")
