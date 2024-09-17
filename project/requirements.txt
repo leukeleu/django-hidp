@@ -1,6 +1,5 @@
 Django~=4.2
 django-email-bandit~=2.0.0
-djangorestframework~=3.14.0
 django-filter~=24.2
 leukeleu-django-checks~=1.2
 psycopg2-binary~=2.9.6

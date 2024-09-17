@@ -42,9 +42,11 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
+    "rest_framework",
     "oauth2_provider",
     "hidp",
     "hidp.accounts",
+    "hidp.api",
     "hidp.federated",
     "hidp.oidc_provider",
     # Custom user model

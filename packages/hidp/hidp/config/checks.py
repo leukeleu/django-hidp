@@ -19,6 +19,8 @@ REQUIRED_APPS = [
 OIDC_PROVIDER_REQUIRED_APPS = [
     "oauth2_provider",
     "hidp.oidc_provider",
+    "rest_framework",
+    "hidp.api",
 ]
 
 REQUIRED_MIDDLEWARE = [
