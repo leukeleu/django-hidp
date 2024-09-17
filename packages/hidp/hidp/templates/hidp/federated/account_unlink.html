@@ -1,0 +1,32 @@
+{% extends "hidp/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Unlink account' %}{% endblock %}
+
+{% block body %}
+  <h1>{% translate 'Unlink account' %}</h1>
+
+  <p>
+  {% blocktranslate trimmed with provider.name as provider %}
+  You are about to unlink your {{ provider }} account from your account.
+  {% endblocktranslate %}
+  </p>
+
+  <p>
+  {% blocktranslate trimmed with provider.name as provider %}
+  This will remove the possibility to use your {{ provider }} account to log in.
+  {% endblocktranslate %}
+
+  {% translate 'Are you sure you want to do this?' %}
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">
+      {% blocktranslate trimmed with provider.name as provider %}
+      Unlink {{ provider }}
+      {% endblocktranslate%}
+    </button>
+  </form>
+{% endblock %}

@@ -3,7 +3,11 @@ from unittest import mock
 from django.test import SimpleTestCase
 
 from hidp.config import configure_oidc_clients
-from hidp.config.oidc_clients import get_oidc_client, get_registered_oidc_clients
+from hidp.config.oidc_clients import (
+    get_oidc_client,
+    get_oidc_client_or_none,
+    get_registered_oidc_clients,
+)
 
 from ..test_federated.test_providers.example import ExampleOIDCClient
 
@@ -99,3 +103,19 @@ class TestOIDCClientsRegistry(SimpleTestCase):
             # Mutating the returned list should not affect the registry.
             registered_clients[0] = None
             self.assertEqual(clients, get_registered_oidc_clients())
+
+    def test_get_oidc_client_or_none(self):
+        """Retrieving a client or None should return the client or None."""
+        configure_oidc_clients(ExampleOIDCClient(client_id="test"))
+
+        with self.subTest("Registered client"):
+            client = get_oidc_client_or_none("example")
+            self.assertIsInstance(client, ExampleOIDCClient)
+
+        with self.subTest("Unknown client"):
+            client = get_oidc_client_or_none("non-existent")
+            self.assertIsNone(client)
+
+        with self.subTest("None key"):
+            client = get_oidc_client_or_none(None)
+            self.assertIsNone(client)

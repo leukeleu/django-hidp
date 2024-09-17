@@ -1,3 +1,5 @@
+import contextlib
+
 from ..federated.oidc import jwks
 from ..federated.providers.base import OIDCClient
 
@@ -58,6 +60,23 @@ def get_oidc_client(provider_key):
         raise KeyError(
             f"No OIDC client registered for provider key: {provider_key!r}"
         ) from None
+
+
+def get_oidc_client_or_none(provider_key):
+    """
+    Retrieve an OIDC client by provider key or None if provider can not be found.
+
+    Arguments:
+        provider_key (str):
+            The provider key of the client to retrieve.
+
+    Returns:
+        OIDCClient | None:
+            The OIDC client instance or None.
+    """
+    with contextlib.suppress(KeyError):
+        return get_oidc_client(provider_key) if provider_key else None
+    return None
 
 
 def get_registered_oidc_clients():

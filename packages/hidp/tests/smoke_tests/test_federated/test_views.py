@@ -497,3 +497,66 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
             '<a href="/manage/linked-services/" aria-label="Dismiss">✕</a>',
             response.content.decode("utf-8"),
         )
+
+
+class TestOIDCAccountUnlinkView(TestCase):
+    view_name = "hidp_oidc_client:unlink_account"
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.VerifiedUserFactory()
+        cls.url = reverse(cls.view_name, kwargs={"provider_key": "example"})
+        configure_oidc_clients(ExampleOIDCClient(client_id="test"))
+        cls.connection = models.OpenIdConnection.objects.create(
+            user=cls.user,
+            provider_key="example",
+            issuer_claim="example",
+            subject_claim="test-subject",
+        )
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.user)
+
+    def test_requires_login(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_accounts:login')}?next={self.url}",
+        )
+
+    def test_get_with_invalid_provider(self):
+        response = self.client.get(
+            reverse(self.view_name, kwargs={"provider_key": "unknown"})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_get_with_valid_provider(self):
+        response = self.client.get(self.url)
+        self.assertTemplateUsed(response, "hidp/federated/account_unlink.html")
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_with_valid_provider(self):
+        response = self.client.post(self.url, {"allow_unlink": "on"}, follow=True)
+
+        # Redirected to linked services page
+        self.assertRedirects(
+            response,
+            reverse("hidp_accounts:oidc_linked_services") + "?removed=example",
+        )
+        # Linked services page
+        self.assertInHTML(
+            "Successfully unlinked your Example account."
+            '<a href="/manage/linked-services/" aria-label="Dismiss">✕</a>',
+            response.content.decode("utf-8"),
+        )
+
+    def test_valid_provider_no_connection(self):
+        other_user = user_factories.VerifiedUserFactory()
+        self.client.force_login(other_user)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.post(self.url, {"allow_unlink": "on"})
+        self.assertEqual(response.status_code, 404)

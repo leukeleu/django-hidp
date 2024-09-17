@@ -83,3 +83,12 @@ class OIDCAccountLinkForm(forms.ModelForm):
         if commit:
             self.instance.save()
         return self.instance
+
+
+class OIDCAccountUnlinkForm(forms.Form):
+    """Unlink an OpenIDConnection from a user."""
+
+    allow_unlink = forms.BooleanField(
+        label=_("Yes, I want to unlink this account."),
+        required=True,
+    )

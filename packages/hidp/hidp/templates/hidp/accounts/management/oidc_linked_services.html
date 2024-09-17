@@ -22,6 +22,14 @@
       <a href="{{ request.path }}" aria-label="{% translate 'Dismiss' %}">✕</a>
     </li>
   </ul>
+  {% elif removed_provider %}
+  <ul>
+    <li>{% blocktranslate trimmed with provider=removed_provider.name %}
+      Successfully unlinked your {{ provider }} account.
+      {% endblocktranslate %}
+      <a href="{{ request.path }}" aria-label="{% translate 'Dismiss' %}">✕</a>
+    </li>
+  </ul>
   {% endif %}
 
   {% if oidc_linked_providers %}
@@ -31,6 +39,7 @@
     {% blocktranslate trimmed with provider=item.provider.name %}
     Linked with {{ provider }}
     {% endblocktranslate %}
+    <a href="{{ item.url }}" aria-label="{% translate 'Unlink' %}">{% translate 'Unlink' %}</a>
   </p>
   {% endfor %}
   {% endif %}

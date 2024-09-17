@@ -136,7 +136,8 @@ class TestOIDCLinkedServicesView(TestCase):
             response.content.decode("utf-8"),
         )
         self.assertInHTML(
-            "Linked with Example",
+            "Linked with Example"
+            '<a href="/login/oidc/unlink-account/example/" aria-label="Unlink">Unlink</a>',  # noqa: E501
             response.content.decode("utf-8"),
         )
 
