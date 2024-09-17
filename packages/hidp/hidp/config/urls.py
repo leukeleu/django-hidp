@@ -12,4 +12,5 @@ urlpatterns = [
 if "hidp.oidc_provider" in settings.INSTALLED_APPS:
     urlpatterns += [
         path("o/", include("hidp.oidc_provider.urls")),
+        path("api/", include("hidp.api.urls")),
     ]
