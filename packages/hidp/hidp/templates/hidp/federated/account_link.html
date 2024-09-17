@@ -22,7 +22,6 @@
 
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">{% translate 'Link account' %}</button>
+    <button type="submit" name="allow_link" value="true">{% translate 'Link account' %}</button>
   </form>
 {% endblock %}

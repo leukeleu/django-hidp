@@ -22,8 +22,7 @@
 
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">
+    <button type="submit" name="allow_unlink" value="true">
       {% blocktranslate trimmed with provider.name as provider %}
       Unlink {{ provider }}
       {% endblocktranslate%}
