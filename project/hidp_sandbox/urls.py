@@ -3,8 +3,6 @@ from django.views.generic.base import RedirectView
 
 from hidp.config import urls as hidp_urls
 
-from .router import router
-
 urlpatterns = [
     # Project
     path(
@@ -13,5 +11,4 @@ urlpatterns = [
         name="root",
     ),
     path("", include(hidp_urls)),
-    *router.urls,
 ]
