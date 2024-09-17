@@ -261,14 +261,12 @@ class TokenDataMixin:
         self.token = request.GET.get("token")
         valid_token = self.token and self.token_generator.check_token(self.token)
         self.token_data = valid_token and request.session.get(self.token)
-        try:
-            self.provider = (
-                get_oidc_client(self.token_data["provider_key"])
-                if self.token_data
-                else None
-            )
-        except KeyError:
-            self.provider = None
+        self.provider = (
+            oidc_clients.get_oidc_client_or_none(self.token_data["provider_key"])
+            if self.token_data
+            else None
+        )
+
         if not valid_token or self.provider is None:
             return HttpResponseRedirect(
                 self.invalid_token_redirect_url
