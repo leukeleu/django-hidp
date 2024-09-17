@@ -4,4 +4,4 @@ django-filter~=24.2
 leukeleu-django-checks~=1.2
 psycopg2-binary~=2.9.6
 sentry-sdk~=2.0
--e ../packages/hidp
+-e ../packages/hidp[oidc_provider]
