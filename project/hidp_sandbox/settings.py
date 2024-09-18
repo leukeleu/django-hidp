@@ -159,6 +159,18 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
+    {
+        "NAME": "hidp.accounts.password_validators.DigitValidator",
+    },
+    {
+        "NAME": "hidp.accounts.password_validators.UppercaseValidator",
+    },
+    {
+        "NAME": "hidp.accounts.password_validators.LowercaseValidator",
+    },
+    {
+        "NAME": "hidp.accounts.password_validators.SymbolValidator",
+    },
 ]
 
 # Login and logout settings
