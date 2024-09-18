@@ -581,7 +581,7 @@ def get_user_info(*, client, access_token, claims):
     # https://openid.net/specs/openid-connect-basic-1_0.html#UserInfoResponse
     try:
         # The UserInfo Claims MUST be returned as the members of a JSON object.
-        user_info = response.json()
+        user_info = client.normalize_userinfo(userinfo=response.json())
     except json.JSONDecodeError:
         raise OIDCError(
             f"Failed to parse user information from {client.provider_key!r}"
