@@ -77,11 +77,20 @@ class EmailVerificationForm(forms.ModelForm):
         """
         Initialize the form for the given user.
 
-        The `user` is stored in an instance variable, to allow all
-        form methods to access the user.
+        Remove the first and last name fields if they are both already filled in. This
+        is possible when the user is created using an OIDC connection, and the given
+        name and family name are provided by the OIDC provider.
+
+        If they are not filled in, they are required.
         """
         super().__init__(*args, **kwargs)
 
+        if self.instance.first_name and self.instance.last_name:
+            self.fields.pop("first_name")
+            self.fields.pop("last_name")
+        else:
+            self.fields["first_name"].required = True
+            self.fields["last_name"].required = True
 
     def save(self, *, commit=True):
         """
