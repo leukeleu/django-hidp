@@ -66,18 +66,22 @@ class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
         return user
 
 
-class EmailVerificationForm(forms.Form):
+class EmailVerificationForm(forms.ModelForm):
     """Store the date and time when the user verified their email address."""
 
-    def __init__(self, user, *args, **kwargs):
+    class Meta:
+        model = UserModel
+        fields = ["first_name", "last_name"]
+
+    def __init__(self, *args, **kwargs):
         """
-        Initialize the form with the given `user`.
+        Initialize the form for the given user.
 
         The `user` is stored in an instance variable, to allow all
         form methods to access the user.
         """
         super().__init__(*args, **kwargs)
-        self.user = user
+
 
     def save(self, *, commit=True):
         """
@@ -91,10 +95,8 @@ class EmailVerificationForm(forms.Form):
         Returns:
             The user with the email address verified.
         """
-        if commit:
-            self.user.email_verified = timezone.now()
-            self.user.save(update_fields=["email_verified"])
-        return self.user
+        self.instance.email_verified = timezone.now()
+        return super().save(commit=commit)
 
 
 class AuthenticationForm(auth_forms.AuthenticationForm):

@@ -6,8 +6,14 @@
 {% block body %}
   {% if validlink %}
   <h1>{% translate 'Verify email' %}</h1>
+
+  {% if form.first_name and form.last_name %}
+  <p>{% translate 'Please fill in your first and last name.' %}</p>
+  {% endif %}
+
   <form method="post">
     {% csrf_token %}
+    {{ form.as_p }}
     <button>{% translate 'Verify email' %}</button>
   </form>
 
