@@ -376,12 +376,19 @@ def obtain_tokens(request, *, state, client, code, callback_url):
 
     if client.client_secret:
         # Some providers require the client secret to be included in the token request.
-        # The Client MUST authenticate to the Token Endpoint using the
-        # HTTP Basic method [...].
-        basic_auth_credentials = base64.b64encode(
-            f"{client.client_id}:{client.client_secret}".encode()
-        ).decode()
-        token_request_headers |= {"Authorization": f"Basic {basic_auth_credentials}"}
+        if client.has_basic_auth_support:
+            # The Client MUST authenticate to the Token Endpoint using the
+            # HTTP Basic method [...].
+            basic_auth_credentials = base64.b64encode(
+                f"{client.client_id}:{client.client_secret}".encode()
+            ).decode()
+            token_request_headers |= {
+                "Authorization": f"Basic {basic_auth_credentials}"
+            }
+        else:
+            # Some providers (e.g. LinkedIn) require the client secret to be included
+            # in the request body instead.
+            token_request_data |= {"client_secret": client.client_secret}
 
     if client.has_pkce_support:
         if "code_verifier" not in state:
@@ -626,6 +633,12 @@ def handle_authentication_callback(request, *, client, callback_url):
         code=code,
         callback_url=callback_url,
     )
+    if "error" in token_response:
+        raise OAuth2Error(
+            token_response["error"],
+            description=token_response.get("error_description"),
+            uri=token_response.get("error_uri"),
+        )
     claims = parse_id_token(token_response.get("id_token"), client=client)
     user_info = get_user_info(
         client=client, access_token=token_response["access_token"], claims=claims
