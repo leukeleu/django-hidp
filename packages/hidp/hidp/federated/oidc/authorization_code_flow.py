@@ -226,6 +226,7 @@ def prepare_authentication_request(
         client_id=client.client_id,
         redirect_uri=_build_absolute_uri(request, client, callback_url),
         state=state_key,
+        scope=client.scope,
         **extra_params,
     )
 
