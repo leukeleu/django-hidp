@@ -200,3 +200,26 @@ class OIDCClient:
         # for each tenant. This method allows to return the expected
         # issuer based on the claims.
         return self.issuer
+
+    @staticmethod
+    def normalize_userinfo(*, userinfo):
+        """
+        Normalize the data from the userinfo endpoint to the standard format.
+
+        This method should only be overridden if absolutely necessary.
+
+        Arguments:
+            userinfo (``dict``):
+                The raw data from the userinfo endpoint.
+
+        Returns:
+            ``dict``:
+                The normalized userinfo data.
+        """
+        # Some providers return user information in a different format.
+        #
+        # For example, Facebook uses 'id' instead of 'sub' and 'first_name' &
+        # 'last_name' instead of 'given_name' & 'family_name'.
+        #
+        # Remap the keys to the standard claims if necessary.
+        return userinfo
