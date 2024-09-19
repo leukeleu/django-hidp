@@ -454,18 +454,23 @@ class PasswordResetRequestView(generic.FormView):
     template_name = "hidp/accounts/recovery/password_reset_request.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_email_sent")
     password_reset_request_mailer = mailer.PasswordResetRequestMailer
+    set_password_mailer = mailer.SetPasswordMailer
 
     def form_valid(self, form):
         if user := form.get_user():
+            if user.has_usable_password():
+                mailer_class = self.password_reset_request_mailer
+            else:
+                mailer_class = self.set_password_mailer
             try:
-                self.password_reset_request_mailer(
+                mailer_class(
                     user=user,
                     base_url=self.request.build_absolute_uri("/"),
                 ).send()
             except Exception:
                 # Do not leak the existence of the user. Log the error and
                 # continue as if the email was sent successfully.
-                logger.exception("Failed to send password reset email.")
+                logger.exception("Failed to send password (re)set email.")
         return super().form_valid(form)
 
 

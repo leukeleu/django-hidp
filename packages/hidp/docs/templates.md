@@ -188,7 +188,7 @@ in `templates/hidp/accounts/recovery/email`.
 
 ##### password_reset_body.txt
 
-Sent by the `PasswordResetRequestView`.
+Sent by the `PasswordResetRequestView` for users that have a password set.
 
 This template gets passed the following context variable:
 - `password_reset_url` - URL to `PasswordResetView`.
@@ -196,6 +196,17 @@ This template gets passed the following context variable:
 ##### password_reset_subject.txt
 
 The subject of the email is set with this template: `password_reset_subject.txt`.
+
+##### set_password_body.txt
+
+Sent by the `SetPasswordView` for users that don't have a password set.
+
+This template gets passed the following context variable:
+- `password_reset_url` - URL to `SetPasswordView`.
+
+##### set_password_subject.txt
+
+The subject of the email is set with this template: `set_password_subject.txt`.
 
 ### **verification**
 

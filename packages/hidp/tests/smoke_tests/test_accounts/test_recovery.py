@@ -53,18 +53,33 @@ class TestPasswordResetFlow(TestCase):
         )
 
     def test_user_without_a_password_request_password_reset_email(self):
-        """A user without a password cannot request a password reset email."""
         self.user.set_unusable_password()
         self.user.save()
-        response = self.client.post(
-            reverse("hidp_accounts:password_reset_request"),
-            {"email": self.user.email},
+        """A user without a password receives the set password email."""
+        with (
+            self.assertTemplateUsed("hidp/accounts/recovery/email/set_password_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/recovery/email/set_password_body.txt"),
+        ):  # fmt: skip
+            response = self.client.post(
+                reverse("hidp_accounts:password_reset_request"),
+                {"email": self.user.email},
+                follow=True,
+            )
+        self.assertEqual(1, len(mail.outbox))
+        message = mail.outbox[0]
+        self.assertEqual(message.to, [self.user.email])
+        self.assertEqual(message.subject, "Set password request")
+        self.assertIn(
+            reverse("hidp_accounts:set_password"),
+            message.body,
         )
-        self.assertEqual(0, len(mail.outbox))
         self.assertRedirects(
             response,
             reverse("hidp_accounts:password_reset_email_sent"),
-            fetch_redirect_response=True,
+        )
+        self.assertTemplateUsed(
+            response,
+            "hidp/accounts/recovery/password_reset_email_sent.html",
         )
 
     def test_user_request_password_reset_email(self):
@@ -111,7 +126,7 @@ class TestPasswordResetFlow(TestCase):
                 reverse("hidp_accounts:password_reset_request"),
                 {"email": self.user.email},
             )
-        self.assertIn("Failed to send password reset email.", cm.records[0].msg)
+        self.assertIn("Failed to send password (re)set email.", cm.records[0].msg)
         self.assertEqual(0, len(mail.outbox))
 
     def test_get_password_reset_url(self):
