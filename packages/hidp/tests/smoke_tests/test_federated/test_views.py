@@ -362,7 +362,11 @@ class TestOIDCRegistrationView(OIDCTokenDataTestMixin, TestCase):
         token = self._add_oidc_data_to_session()
         response = self.client.post(
             self.url + f"?token={token}",
-            {"agreed_to_tos": "on"},
+            {
+                "first_name": "Firstname",
+                "last_name": "Lastname",
+                "agreed_to_tos": "on",
+            },
             follow=True,
         )
         user = UserModel.objects.filter(email="user@example.com").first()
