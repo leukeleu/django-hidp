@@ -93,6 +93,16 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 ```
 
+:::{note}
+HIdP comes with a set of extra password validators that can be added to
+`settings.AUTH_PASSWORD_VALIDATORS` if desired. The options are:
+
+- DigitValidator - at least 1 digit (0-9).
+- UppercaseValidator - at least 1 uppercase character (A-Z).
+- LowercaseValidator - at least 1 lowercase character (a-z).
+- SymbolValidator - at least 1 symbol (!"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~).
+
+:::
 ### OpenID Connect based login (social accounts)
 
 To enable users to log in using an existing Google, Microsoft or any other provider that

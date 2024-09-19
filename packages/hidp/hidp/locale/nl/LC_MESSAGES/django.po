@@ -416,3 +416,37 @@ msgstr "Dit haalt de mogelijkheid weg om je %(provider)s-account te gebruiken om
 #, python-format
 msgid "Unlink %(provider)s"
 msgstr "Ontkoppel %(provider)s"
+
+#: hidp/accounts/password_validators.py
+msgid "This password does not contain any digits (0-9)."
+msgstr "Dit wachtwoord bevat geen cijfers (0-9)."
+
+#: hidp/accounts/password_validators.py
+msgid "Your password must contain at least 1 digit (0-9)."
+msgstr "Uw wachtwoord moet minstens 1 cijfer bevatten (0-9)."
+
+#: hidp/accounts/password_validators.py
+msgid "This password does not contain any uppercase characters (A-Z)."
+msgstr "Dit wachtwoord bevat geen hoofdletters (A-Z)."
+
+#: hidp/accounts/password_validators.py
+msgid "Your password must contain at least 1 uppercase character (A-Z)."
+msgstr "Uw wachtwoord moet minstens 1 hoofdletter bevatten (A-Z)."
+
+#: hidp/accounts/password_validators.py
+msgid "This password does not contain any lowercase characters (a-z)."
+msgstr "Dit wachtwoord bevat geen kleine letters (a-z)."
+
+#: hidp/accounts/password_validators.py
+msgid "Your password must contain at least 1 lowercase character (a-z)."
+msgstr "Uw wachtwoord moet minstens 1 kleine letter bevatten (a-z)."
+
+#: hidp/accounts/password_validators.py
+#, python-format
+msgid "This password does not contain any special characters (%s)."
+msgstr "Dit wachtwoord bevat geen speciale tekens (%s)."
+
+#: hidp/accounts/password_validators.py
+#, python-format
+msgid "Your password must contain at least 1 special character (%s)."
+msgstr "Uw wachtwoord moet minstens 1 speciaal teken bevatten (%s)."
