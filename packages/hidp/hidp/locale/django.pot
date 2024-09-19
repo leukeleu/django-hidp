@@ -415,3 +415,37 @@ msgstr ""
 #, python-format
 msgid "Unlink %(provider)s"
 msgstr ""
+
+#: hidp/accounts/password_validators.py
+msgid "This password does not contain any digits (0-9)."
+msgstr ""
+
+#: hidp/accounts/password_validators.py
+msgid "Your password must contain at least 1 digit (0-9)."
+msgstr ""
+
+#: hidp/accounts/password_validators.py
+msgid "This password does not contain any uppercase characters (A-Z)."
+msgstr ""
+
+#: hidp/accounts/password_validators.py
+msgid "Your password must contain at least 1 uppercase character (A-Z)."
+msgstr ""
+
+#: hidp/accounts/password_validators.py
+msgid "This password does not contain any lowercase characters (a-z)."
+msgstr ""
+
+#: hidp/accounts/password_validators.py
+msgid "Your password must contain at least 1 lowercase character (a-z)."
+msgstr ""
+
+#: hidp/accounts/password_validators.py
+#, python-format
+msgid "This password does not contain any special characters (%s)."
+msgstr ""
+
+#: hidp/accounts/password_validators.py
+#, python-format
+msgid "Your password must contain at least 1 special character (%s)."
+msgstr ""
