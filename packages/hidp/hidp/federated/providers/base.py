@@ -100,6 +100,9 @@ class OIDCClient:
     client_id = None
     client_secret = None
     callback_base_url = None
+    # Note: Most providers should support these scopes. If not, (e.g. Facebook) override
+    #       the attribute in the subclass.
+    scope = "openid email profile"
 
     def __init__(self, *, client_id, client_secret=None, callback_base_url=None):
         """
