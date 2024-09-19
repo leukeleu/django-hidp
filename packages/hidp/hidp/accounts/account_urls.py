@@ -82,23 +82,36 @@ recover_urls = [
     )
 ]
 
-management_urls = [
-    path("manage/", views.ManageAccountView.as_view(), name="manage_account"),
-    path("manage/edit-account/", views.EditAccountView.as_view(), name="edit_account"),
+account_urls = [
+    path("", views.ManageAccountView.as_view(), name="manage_account"),
+    path("edit-account/", views.EditAccountView.as_view(), name="edit_account"),
+]
+
+change_password_urls = [
     path(
-        "manage/linked-services/",
-        views.OIDCLinkedServicesView.as_view(),
-        name="oidc_linked_services",
-    ),
-    path(
-        "manage/change-password/",
+        "change-password/",
         views.PasswordChangeView.as_view(),
         name="change_password",
     ),
     path(
-        "manage/change-password/done/",
+        "change-password/done/",
         views.PasswordChangeDoneView.as_view(),
         name="change_password_done",
+    ),
+]
+
+linked_services_urls = [
+    path(
+        "linked-services/",
+        views.OIDCLinkedServicesView.as_view(),
+        name="oidc_linked_services",
+    ),
+]
+
+management_urls = [
+    path(
+        "manage/",
+        include(account_urls + change_password_urls + linked_services_urls),
     ),
 ]
 
