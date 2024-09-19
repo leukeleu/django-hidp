@@ -516,9 +516,9 @@ def parse_id_token(raw_id_token, *, client):
                 f" {expected_issuer!r}, got {claims['iss']!r}."
             )
 
-        # Check for the absence of the nonce claim. It is not sent in the
+        # Make sure the nonce claim is absent or empty. It is not sent in the
         # authentication request, so it should not be present in the ID Token.
-        if "nonce" in claims:
+        if claims.get("nonce"):
             raise OIDCError(
                 f"ID Token from {client.provider_key!r} contains an unexpected"
                 f" 'nonce' claim."
