@@ -163,7 +163,7 @@ class TestPasswordChangeView(TestCase):
         self.user.save()
         self.client.force_login(self.user)
         response = self.client.get(self.change_password_url, follow=True)
-        self.assertRedirects(response, reverse("hidp_accounts:manage_account"))
+        self.assertRedirects(response, reverse("hidp_accounts:set_password"))
 
     def test_get(self):
         """The password change page should be displayed for authenticated users."""
@@ -213,6 +213,14 @@ class TestSetPasswordView(TestCase):
             response,
             f"{reverse('hidp_accounts:login')}?next={self.set_password_url}",
         )
+
+    def test_redirect_user_with_usable_password(self):
+        """Users without a usable password should be redirected to the manage page."""
+        self.user.set_password("P@ssw0rd!")
+        self.user.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.set_password_url, follow=True)
+        self.assertRedirects(response, reverse("hidp_accounts:change_password"))
 
     def test_get(self):
         """The set password page should be displayed for authenticated users."""

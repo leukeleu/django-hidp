@@ -504,9 +504,8 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     success_url = reverse_lazy("hidp_accounts:change_password_done")
 
     def dispatch(self, request, *args, **kwargs):
-        # TODO: Let users set a password if they don't have one (HIdP-158)
         if request.user.is_authenticated and not request.user.has_usable_password():
-            return HttpResponseRedirect(reverse("hidp_accounts:manage_account"))
+            return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
         return super().dispatch(request, *args, **kwargs)
 
 
