@@ -397,6 +397,41 @@ class TestObtainTokens(SimpleTestCase):
             tokens,
         )
 
+    def test_obtain_tokens_no_pkce_or_basic_auth(self, mock_requests_post):
+        """Passes the client_id and client_secret as form data."""
+        request = RequestFactory().get("/callback/")
+        client = NoPKCEOIDCClient(client_id="client_id", client_secret="client_secret")
+        client.has_basic_auth_support = False
+        mock_requests_post.return_value.json.return_value = self.mock_response
+
+        tokens = authorization_code_flow.obtain_tokens(
+            request=request,
+            state={},
+            client=client,
+            code="code",
+            callback_url="/redirect/",
+        )
+
+        mock_requests_post.assert_called_once_with(
+            client.token_endpoint,
+            data={
+                "grant_type": "authorization_code",
+                "code": "code",
+                "redirect_uri": "http://testserver/redirect/",
+                "client_id": client.client_id,
+                "client_secret": client.client_secret,
+            },
+            headers={
+                "Accept": "application/json",
+                "Origin": "http://testserver",
+            },
+            timeout=(5, 30),
+        )
+        self.assertEqual(
+            self.mock_response,
+            tokens,
+        )
+
     def test_no_code_verifier_in_state(self, mock_requests_post):
         """Raises an OIDCError when the code_verifier is missing from the state."""
         request = RequestFactory().get("/callback/")

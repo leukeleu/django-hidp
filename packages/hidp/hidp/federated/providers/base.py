@@ -93,6 +93,9 @@ class OIDCClient:
 
     # Note: Only set to True if the provider supports S256 as the code challenge method.
     has_pkce_support = True
+    # Note: If set to False the client secret will be sent in the request body.
+    #       This is not spec compliant but required for some providers (e.g. LinkedIn).
+    has_basic_auth_support = True
 
     client_id = None
     client_secret = None
