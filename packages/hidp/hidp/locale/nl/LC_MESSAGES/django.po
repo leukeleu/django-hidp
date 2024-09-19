@@ -450,3 +450,7 @@ msgstr "Dit wachtwoord bevat geen speciale tekens (%s)."
 #, python-format
 msgid "Your password must contain at least 1 special character (%s)."
 msgstr "Uw wachtwoord moet minstens 1 speciaal teken bevatten (%s)."
+
+#: hidp/templates/hidp/accounts/verification/verify_email.html
+msgid "Please fill in your first and last name."
+msgstr "Voer je voor- en achternaam in."
