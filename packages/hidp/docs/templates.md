@@ -138,8 +138,16 @@ Shows a simple message letting the user know that their password has been change
 
 Rendered by the `SetPasswordView`.
 
+If the user doesn't have a password set they are required to have logged in recently
+in order to set a password. If the user hasn't logged in recently they need to
+re-authenticate using one of the OIDC providers linked to their account.
+
 This template gets passed the following context variables:
 - `form` - A form that allows users to change their password.
+- `must_reauthenticate` - Boolean that indicates if the user needs to re-authenticate
+- `oidc_linked_providers` - List of OIDC Clients the user can use to re-authenticate 
+  (only if `must_reauthenticate` is `True`).
+- `auth_next_url` - URL to redirect to after re-authentication (the set password view).
 
 Redirects to `SetPasswordDoneView` after successfully setting the password.
 

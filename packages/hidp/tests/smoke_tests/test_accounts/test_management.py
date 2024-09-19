@@ -1,7 +1,9 @@
+from datetime import timedelta
 from http import HTTPStatus
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from hidp.accounts.forms import EditUserForm
 from hidp.config.oidc_clients import configure_oidc_clients
@@ -221,6 +223,43 @@ class TestSetPasswordView(TestCase):
         self.client.force_login(self.user)
         response = self.client.get(self.set_password_url, follow=True)
         self.assertRedirects(response, reverse("hidp_accounts:change_password"))
+
+    def test_get_not_recently_authenticated(self):
+        """The must reauthenticate flag should be set to True."""
+        self.client.force_login(self.user)
+        self.user.last_login = timezone.now() - timedelta(days=1)
+        self.user.save()
+        response = self.client.get(self.set_password_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, "hidp/accounts/management/set_password.html")
+        self.assertTrue(
+            response.context["must_reauthenticate"],
+            msg="Expected must_reauthenticate to be True.",
+        )
+
+    def test_post_not_recently_authenticated(self):
+        """User is redirected to the same page to reauthenticate."""
+        self.client.force_login(self.user)
+        self.user.last_login = timezone.now() - timedelta(days=1)
+        self.user.save()
+        response = self.client.post(
+            self.set_password_url,
+            {
+                "new_password1": "new_password",
+                "new_password2": "new_password",
+            },
+            follow=True,
+        )
+
+        # User's password should not be updated
+        self.user.refresh_from_db()
+        self.assertFalse(
+            self.user.check_password("new_password"),
+            msg="Expected password to not be set.",
+        )
+
+        # Redirect to the same page
+        self.assertRedirects(response, self.set_password_url)
 
     def test_get(self):
         """The set password page should be displayed for authenticated users."""
