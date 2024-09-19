@@ -270,6 +270,10 @@ class PasswordChangeForm(auth_forms.PasswordChangeForm):
         return super().save(commit=commit)
 
 
+class SetPasswordForm(auth_forms.SetPasswordForm):
+    """Form for setting a new password without requiring the old password."""
+
+
 class RateLimitedAuthenticationForm(AuthenticationForm):
     """
     Authentication form that is used when a user is rate limited.

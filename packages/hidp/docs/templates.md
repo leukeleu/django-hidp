@@ -134,6 +134,21 @@ Rendered by the `PasswordChangeDoneView`.
 
 Shows a simple message letting the user know that their password has been changed.
 
+#### set_password.html
+
+Rendered by the `SetPasswordView`.
+
+This template gets passed the following context variables:
+- `form` - A form that allows users to change their password.
+
+Redirects to `SetPasswordDoneView` after successfully setting the password.
+
+#### set_password_done.html
+
+Rendered by the `SetPasswordDoneView`.
+
+Shows a simple message letting the user know that their password has been set.
+
 ### **recovery**
 
 All templates related to password recovery can be found

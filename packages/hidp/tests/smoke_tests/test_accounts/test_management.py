@@ -196,3 +196,50 @@ class TestPasswordChangeView(TestCase):
         # Redirect to the success page
         self.assertRedirects(response, reverse("hidp_accounts:change_password_done"))
         self.assertTemplateUsed("hidp/accounts/management/password_change_done.html")
+
+
+class TestSetPasswordView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory()
+        cls.user.set_unusable_password()
+        cls.user.save()
+        cls.set_password_url = reverse("hidp_accounts:set_password")
+
+    def test_login_required(self):
+        """Anonymous users should be redirected to the login page."""
+        response = self.client.get(self.set_password_url)
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_accounts:login')}?next={self.set_password_url}",
+        )
+
+    def test_get(self):
+        """The set password page should be displayed for authenticated users."""
+        self.client.force_login(self.user)
+        response = self.client.get(self.set_password_url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, "hidp/accounts/management/set_password.html")
+        self.assertIn("form", response.context)
+
+    def test_change_password(self):
+        """The user's password should be set."""
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.set_password_url,
+            {
+                "new_password1": "new_password",
+                "new_password2": "new_password",
+            },
+            follow=True,
+        )
+
+        # User's password should be updated
+        self.user.refresh_from_db()
+        self.assertTrue(
+            self.user.check_password("new_password"), msg="Expected password to be set."
+        )
+
+        # Redirect to the success page
+        self.assertRedirects(response, reverse("hidp_accounts:set_password_done"))
+        self.assertTemplateUsed("hidp/accounts/management/set_change_done.html")

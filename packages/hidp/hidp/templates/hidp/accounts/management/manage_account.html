@@ -26,6 +26,8 @@
   {% endif %}
   {% if request.user.has_usable_password %}
   <a href="{% url 'hidp_accounts:change_password' %}">{% translate 'Change password' %}</a>
+  {% else %}
+  <a href="{% url 'hidp_accounts:set_password' %}">{% translate 'Set password' %}</a>
   {% endif %}
 
 {% endblock %}

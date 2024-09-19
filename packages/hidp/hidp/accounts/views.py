@@ -516,6 +516,29 @@ class PasswordChangeDoneView(auth_views.TemplateView):
     template_name = "hidp/accounts/management/password_change_done.html"
 
 
+class SetPasswordView(LoginRequiredMixin, auth_views.PasswordChangeView):
+    """Allow users without a password to set one."""
+
+    form_class = forms.SetPasswordForm
+    template_name = "hidp/accounts/management/set_password.html"
+    success_url = reverse_lazy("hidp_accounts:set_password_done")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and request.user.has_usable_password():
+            return HttpResponseRedirect(reverse_lazy("hidp_accounts:change_password"))
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+
+class SetPasswordDoneView(auth_views.TemplateView):
+    """Display a message that the password has been set."""
+
+    template_name = "hidp/accounts/management/set_password_done.html"
+
+
 class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateView):
     """Display the manage account page."""
 
