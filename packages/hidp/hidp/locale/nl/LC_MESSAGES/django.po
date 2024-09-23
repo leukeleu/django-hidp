@@ -143,6 +143,7 @@ msgstr "Uitloggen aangevraagd door %(application)s"
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/management/edit_account.html
 #: hidp/templates/hidp/accounts/management/password_change.html
+#: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -151,10 +152,13 @@ msgid "Error"
 msgstr "Error"
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
+#: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
+#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
 msgid "You're receiving this email because you requested a password reset."
 msgstr "Je ontvangt deze e-mail omdat je wachtwoord reset hebt aangevraagd."
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
+#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
 msgid "Please go to the following page and choose a new password:"
 msgstr "Ga naar de volgende pagina en kies een nieuw wachtwoord:"
 
@@ -332,6 +336,7 @@ msgstr "Bewerk je accountinformatie"
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
 #: hidp/templates/hidp/accounts/management/password_change.html
+#: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Save"
 msgstr "Opslaan"
 
@@ -354,6 +359,7 @@ msgstr "Beheer jouw gekoppelde vertrouwde diensten"
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Linked services"
 msgstr "Gekoppelde diensten"
 
@@ -373,6 +379,7 @@ msgstr "Koppel met %(provider)s"
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
+#: hidp/templates/hidp/accounts/management/set_password_done.html
 msgid "Back"
 msgstr "Terug"
 
@@ -454,3 +461,38 @@ msgstr "Uw wachtwoord moet minstens 1 speciaal teken bevatten (%s)."
 #: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "Please fill in your first and last name."
 msgstr "Voer je voor- en achternaam in."
+
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/accounts/management/set_password_done.html
+msgid "Set password"
+msgstr "Wachtwoord instellen"
+
+#: hidp/templates/hidp/accounts/management/set_password_done.html
+msgid "Your password has been set."
+msgstr "Je wachtwoord is ingesteld."
+
+#: hidp/templates/hidp/accounts/management/set_password.html
+msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
+msgstr "Voor je veiligheid moet je opnieuw inloggen via een gekoppelde dienst voordat je een wachtwoord kunt instellen."
+
+#: hidp/templates/hidp/accounts/management/set_password.html
+#, python-format
+msgid "Authenticate with %(provider)s"
+msgstr "Opnieuw inloggen met %(provider)s"
+
+#: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
+msgid "However, you haven't set a password yet."
+msgstr "Je hebt alleen nog geen wachtwoord ingesteld."
+
+#: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
+msgid "Go to the following page to set a password:"
+msgstr "Ga naar de volgende pagina om een wachtwoord in te stellen:"
+
+#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
+msgid "Set password request"
+msgstr "Verzoek om een wachtwoord in te stellen"
+
+#: hidp/templates/hidp/accounts/management/set_password.html
+msgid "However, your account is not currently linked to any service, so you cannot set a password at this time."
+msgstr "Er is echter geen enkele dienst aan je account gekoppeld, waardoor je op dit moment geen wachtwoord kunt instellen."
