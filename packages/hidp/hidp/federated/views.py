@@ -101,6 +101,10 @@ class OIDCContextMixin:
 class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View):
     """Initiates an OpenID Connect Authorization Code Flow authentication request."""
 
+    # Optionally set extra parameters to include in the authentication request.
+    # I.e. to modify the prompt parameter.
+    extra_authentication_request_params = None
+
     http_method_names = [
         "post",
         "options",
@@ -120,6 +124,7 @@ class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View
                 client=self.get_oidc_client_or_404(provider_key),
                 callback_url=self.get_callback_url(provider_key),
                 next_url=self.get_redirect_url(),
+                **(self.extra_authentication_request_params or {}),
             )
         )
 
