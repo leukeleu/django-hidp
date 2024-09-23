@@ -19,7 +19,6 @@ from django.views import generic
 from django.views.decorators.cache import never_cache
 
 from ..config import oidc_clients
-from ..federated.models import OpenIdConnection
 from ..federated.views import OIDCContextMixin
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
@@ -560,9 +559,9 @@ class OIDCLinkedServicesView(
     template_name = "hidp/accounts/management/oidc_linked_services.html"
 
     def get_context_data(self, **kwargs):
-        oidc_linked_provider_keys = OpenIdConnection.objects.filter(
-            user=self.request.user,
-        ).values_list("provider_key", flat=True)
+        oidc_linked_provider_keys = self.request.user.openid_connections.values_list(
+            "provider_key", flat=True
+        )
 
         return super().get_context_data(
             successfully_linked_provider=oidc_clients.get_oidc_client_or_none(
