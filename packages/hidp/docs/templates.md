@@ -171,14 +171,14 @@ This template gets passed the following context variables:
 Templates for to password recovery emails can be found
 in `templates/hidp/accounts/recovery/email`.
 
-##### password_reset_email_body.txt
+##### password_reset_body.txt
 
 Sent by the `PasswordResetRequestView`.
 
 This template gets passed the following context variable:
 - `password_reset_url` - URL to `PasswordResetView`.
 
-##### password_reset_email_subject.txt
+##### password_reset_subject.txt
 
 The subject of the email is set with this template: `password_reset_subject.txt`.
 
@@ -214,25 +214,25 @@ This template gets passed the following context variables:
 Templates for to verification emails can be found email
 in `templates/hidp/accounts/verification/email`.
 
-##### verification_email_body.txt
+##### verification_body.txt
 
 Sent by the `RegistrationView`.
 
 This template gets passed the following context variable:
 - `verification_url` - URL to `EmailVerificationView`.
 
-##### verification_email_subject.txt
+##### verification_subject.txt
 
 The subject of the email is set with this template: `verification_subject.txt`.
 
-##### account_exists_email_body.txt
+##### account_exists_body.txt
 
 Sent by the `RegistrationView` if an account already exists with that email address.
 
 This template gets passed the following context variable:
 - `password_reset_url` - URL to `PasswordResetRequestView`.
 
-##### account_exists_email_subject.txt
+##### account_exists_subject.txt
 
 The subject of the email is set with this template: `account_exists_subject.txt`.
 
