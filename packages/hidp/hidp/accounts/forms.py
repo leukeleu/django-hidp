@@ -66,18 +66,31 @@ class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
         return user
 
 
-class EmailVerificationForm(forms.Form):
+class EmailVerificationForm(forms.ModelForm):
     """Store the date and time when the user verified their email address."""
 
-    def __init__(self, user, *args, **kwargs):
-        """
-        Initialize the form with the given `user`.
+    class Meta:
+        model = UserModel
+        fields = ["first_name", "last_name"]
 
-        The `user` is stored in an instance variable, to allow all
-        form methods to access the user.
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the form for the given user.
+
+        Remove the first and last name fields if they are both already filled in. This
+        is possible when the user is created using an OIDC connection, and the given
+        name and family name are provided by the OIDC provider.
+
+        If they are not filled in, they are required.
         """
         super().__init__(*args, **kwargs)
-        self.user = user
+
+        if self.instance.first_name and self.instance.last_name:
+            self.fields.pop("first_name")
+            self.fields.pop("last_name")
+        else:
+            self.fields["first_name"].required = True
+            self.fields["last_name"].required = True
 
     def save(self, *, commit=True):
         """
@@ -91,10 +104,8 @@ class EmailVerificationForm(forms.Form):
         Returns:
             The user with the email address verified.
         """
-        if commit:
-            self.user.email_verified = timezone.now()
-            self.user.save(update_fields=["email_verified"])
-        return self.user
+        self.instance.email_verified = timezone.now()
+        return super().save(commit=commit)
 
 
 class AuthenticationForm(auth_forms.AuthenticationForm):

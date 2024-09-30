@@ -220,7 +220,7 @@ class EmailVerificationRequiredView(
 class EmailVerificationView(
     auth_views.RedirectURLMixin,
     EmailTokenMixin,
-    generic.FormView,
+    generic.UpdateView,
 ):
     """
     Landing page for email verification links.
@@ -241,17 +241,14 @@ class EmailVerificationView(
             .filter(is_active=True, email_verified__isnull=True)
         )
 
-    def get_form_kwargs(self):
-        return {
-            **super().get_form_kwargs(),
-            "user": self.user,
-        }
-
     def get_context_data(self, **kwargs):
         return super().get_context_data(
             validlink=self.validlink,
             **kwargs,
         )
+
+    def get_object(self):
+        return self.user  # The user from the token
 
     def form_valid(self, form):
         form.save()

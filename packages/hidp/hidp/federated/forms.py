@@ -18,6 +18,7 @@ class OIDCRegistrationForm(TermsOfServiceMixin, forms.ModelForm):
         self.provider_key = provider_key
         self.claims = claims
         self.user_info = user_info
+
         # Populate the form using the OIDC claims and user info.
         oidc_data = claims | user_info
         initial_data = {
@@ -25,9 +26,20 @@ class OIDCRegistrationForm(TermsOfServiceMixin, forms.ModelForm):
             "first_name": oidc_data.get("given_name"),
             "last_name": oidc_data.get("family_name"),
         } | kwargs.pop("initial", {})
+
         super().__init__(initial=initial_data, **kwargs)
+
         # Disable the email field to prevent the user from changing it.
         self.fields["email"].disabled = True
+
+        # If the given name and family name are not provided, remove the fields.
+        # They will be asked for during email verification.
+        if not initial_data["first_name"] and not initial_data["last_name"]:
+            self.fields.pop("first_name")
+            self.fields.pop("last_name")
+        else:
+            self.fields["first_name"].required = True
+            self.fields["last_name"].required = True
 
     class Meta:
         model = UserModel

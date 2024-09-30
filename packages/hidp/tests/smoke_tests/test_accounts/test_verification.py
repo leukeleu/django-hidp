@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from hidp.accounts import tokens
+from hidp.accounts.forms import EmailVerificationForm
 from hidp.test.factories import user_factories
 
 
@@ -180,3 +181,48 @@ class TestEmailVerificationView(TestCase):
             response.redirect_chain[-1][0],
             reverse("hidp_accounts:email_verification_complete"),
         )
+
+
+class TestEmailVerificationForm(TestCase):
+    def test_form_for_user_no_name(self):
+        user = user_factories.UserFactory(first_name="", last_name="")
+        form = EmailVerificationForm(instance=user)
+        self.assertEqual(form.initial["first_name"], "")
+        self.assertEqual(form.initial["last_name"], "")
+        self.assertTrue(form.fields["first_name"].required)
+        self.assertTrue(form.fields["last_name"].required)
+
+    def test_form_for_user_with_partial_name(self):
+        user = user_factories.UserFactory(first_name="", last_name="White")
+        form = EmailVerificationForm(instance=user)
+        self.assertEqual(form.initial["first_name"], "")
+        self.assertEqual(form.initial["last_name"], "White")
+        self.assertTrue(form.fields["first_name"].required)
+        self.assertTrue(form.fields["last_name"].required)
+
+    def test_form_for_user_with_name(self):
+        """
+        Form should not have first and last name fields.
+
+        The user has probably been created using an OIDC connection, and the given name
+        and family name were provided by the OIDC provider.
+        """
+        user = user_factories.UserFactory(first_name="Walter", last_name="White")
+        form = EmailVerificationForm(instance=user)
+        self.assertNotIn("first_name", form.fields)
+        self.assertNotIn("last_name", form.fields)
+
+    def test_updates_name_fields(self):
+        user = user_factories.UserFactory(first_name="", last_name="")
+        form = EmailVerificationForm(
+            instance=user,
+            data={
+                "first_name": "Walter",
+                "last_name": "White",
+            },
+        )
+        self.assertTrue(form.is_valid())
+        form.save()
+        user.refresh_from_db()
+        self.assertEqual(user.first_name, "Walter")
+        self.assertEqual(user.last_name, "White")

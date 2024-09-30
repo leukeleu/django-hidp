@@ -8,7 +8,7 @@ from hidp.test.factories import user_factories
 
 
 class TestOIDCRegistrationForm(TestCase):
-    def _create_form(self, data=None):
+    def _create_form(self, data=None, first_name="Firstname", last_name="Lastname"):
         return forms.OIDCRegistrationForm(
             data=data,
             provider_key="test_provider",
@@ -18,8 +18,8 @@ class TestOIDCRegistrationForm(TestCase):
                 "email": "user@example.com",
             },
             user_info={
-                "given_name": "Firstname",
-                "family_name": "Lastname",
+                "given_name": first_name,
+                "family_name": last_name,
             },
         )
 
@@ -29,6 +29,18 @@ class TestOIDCRegistrationForm(TestCase):
         self.assertEqual(form.initial["email"], "user@example.com")
         self.assertEqual(form.initial["first_name"], "Firstname")
         self.assertEqual(form.initial["last_name"], "Lastname")
+
+    def test_partial_data_from_claims_and_user_info(self):
+        """The form is populated from the OIDC claims and partial user info."""
+        form = self._create_form(first_name="")
+        self.assertEqual(form.initial["first_name"], "")
+        self.assertEqual(form.initial["last_name"], "Lastname")
+
+    def test_name_fields_hidden_when_data_missing(self):
+        """First and last name fields are hidden when data is missing."""
+        form = self._create_form(first_name="", last_name="")
+        self.assertNotIn("first_name", form.fields)
+        self.assertNotIn("last_name", form.fields)
 
     def test_tos_required(self):
         """Terms of service must be agreed to."""
@@ -42,6 +54,8 @@ class TestOIDCRegistrationForm(TestCase):
             data={
                 "email": "fake@example.com",
                 "agreed_to_tos": "on",
+                "first_name": "Firstname",
+                "last_name": "Lastname",
             }
         )
         self.assertTrue(form.is_valid(), msg="Expected form to be valid.")
@@ -49,7 +63,13 @@ class TestOIDCRegistrationForm(TestCase):
 
     def test_creates_user_and_connection(self):
         """The form creates a user and OpenIdConnection from claims and user info."""
-        form = self._create_form(data={"agreed_to_tos": "on"})
+        form = self._create_form(
+            data={
+                "agreed_to_tos": "on",
+                "first_name": "Firstname",
+                "last_name": "Lastname",
+            }
+        )
         self.assertTrue(form.is_valid(), msg="Expected form to be valid.")
         user = form.save()
         self.assertAlmostEqual(
