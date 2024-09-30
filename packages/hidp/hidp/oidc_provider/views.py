@@ -1,6 +1,9 @@
 from oauth2_provider import views as oauth2_views
 
 from django.contrib.auth.models import AnonymousUser
+from django.utils.decorators import method_decorator
+
+from ..csp.decorators import hidp_csp_protection
 
 
 def _has_prompt_create(request):
@@ -11,6 +14,7 @@ def _has_prompt_create(request):
     return request.GET.get("prompt") == "create"
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class AuthorizationView(oauth2_views.AuthorizationView):
     registration_url = "hidp_accounts:register"
 
@@ -35,5 +39,6 @@ class AuthorizationView(oauth2_views.AuthorizationView):
         return super().get_login_url()
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class RPInitiatedLogoutView(oauth2_views.RPInitiatedLogoutView):
     template_name = "hidp/accounts/logout_confirm.html"

@@ -17,6 +17,7 @@ from django.views.generic import DeleteView, FormView, View
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailer
 from ..config import oidc_clients
+from ..csp.decorators import hidp_csp_protection
 from ..federated.constants import OIDCError
 from ..rate_limit.decorators import rate_limit_strict
 from . import forms, tokens
@@ -97,6 +98,7 @@ class OIDCContextMixin:
         )
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View):
     """Initiates an OpenID Connect Authorization Code Flow authentication request."""
@@ -280,6 +282,7 @@ class TokenDataMixin:
         return super().dispatch(request, *args, **kwargs)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
     """Register a new user using the OIDC provider's claims and user info."""
@@ -320,6 +323,7 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
         )
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
     """Log in a user using the OIDC provider's claims."""
@@ -373,6 +377,7 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
         )
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 class OIDCAccountLinkView(TokenDataMixin, FormView):
@@ -407,6 +412,7 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
         return super().form_valid(form)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
     """Unlink an OIDC client from an existing user account."""
 

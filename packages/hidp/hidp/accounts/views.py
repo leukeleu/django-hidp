@@ -21,6 +21,7 @@ from django.views import generic
 from django.views.decorators.cache import never_cache
 
 from ..config import oidc_clients
+from ..csp.decorators import hidp_csp_protection
 from ..federated.views import OIDCContextMixin
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
@@ -30,6 +31,7 @@ logger = logging.getLogger(__name__)
 UserModel = get_user_model()
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
 @method_decorator(ratelimit(key="ip", rate="5/m", method="POST"), name="post")
 @method_decorator(ratelimit(key="ip", rate="30/15m", method="POST"), name="post")
@@ -102,6 +104,7 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
         )
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class TermsOfServiceView(generic.TemplateView):
     """Display the terms of service."""
 
@@ -175,6 +178,7 @@ class EmailTokenMixin:
         return super().dispatch(request, token=token)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(never_cache, name="dispatch")
 class EmailVerificationRequiredView(
@@ -217,6 +221,7 @@ class EmailVerificationRequiredView(
         return HttpResponseRedirect(self.request.get_full_path())
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(never_cache, name="dispatch")
 class EmailVerificationView(
@@ -264,6 +269,7 @@ class EmailVerificationView(
         )
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.TemplateView):
     """Display a message that the email address has been verified."""
 
@@ -281,6 +287,7 @@ class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.Templat
         )
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(
     ratelimit(key="post:username", rate="10/m", method="POST", block=False), name="post"
 )
@@ -443,6 +450,7 @@ class LogoutView(auth_views.LogoutView):
         return super().get(request, *args, **kwargs)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 class PasswordResetRequestView(generic.FormView):
     """
@@ -476,12 +484,14 @@ class PasswordResetRequestView(generic.FormView):
         return super().form_valid(form)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class PasswordResetEmailSentView(generic.TemplateView):
     """Display a message that the password reset email has been sent."""
 
     template_name = "hidp/accounts/recovery/password_reset_email_sent.html"
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
 class PasswordResetView(auth_views.PasswordResetConfirmView):
     """Display the password reset form and handle the password reset action."""
@@ -491,6 +501,7 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
     success_url = reverse_lazy("hidp_accounts:password_reset_complete")
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class PasswordResetCompleteView(auth_views.TemplateView):
     """Display a message that the password reset has been completed."""
 
@@ -503,6 +514,7 @@ class PasswordResetCompleteView(auth_views.TemplateView):
         )
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     """Display the password change form and handle the password change action."""
 
@@ -516,12 +528,14 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
         return super().dispatch(request, *args, **kwargs)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class PasswordChangeDoneView(auth_views.TemplateView):
     """Display a message that the password change has been completed."""
 
     template_name = "hidp/accounts/management/password_change_done.html"
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class SetPasswordView(
     LoginRequiredMixin, OIDCContextMixin, auth_views.PasswordChangeView
 ):
@@ -582,18 +596,21 @@ class SetPasswordView(
         return super().form_valid(form)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class SetPasswordDoneView(auth_views.TemplateView):
     """Display a message that the password has been set."""
 
     template_name = "hidp/accounts/management/set_password_done.html"
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateView):
     """Display the manage account page."""
 
     template_name = "hidp/accounts/management/manage_account.html"
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class EditAccountView(LoginRequiredMixin, generic.FormView):
     """Display the edit user form and handle the edit user action."""
 
@@ -620,6 +637,7 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
         return super().form_valid(form)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class OIDCLinkedServicesView(
     LoginRequiredMixin, OIDCContextMixin, generic.TemplateView
 ):
