@@ -92,6 +92,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
+    "hidp.csp.middleware.CSPMiddleware",
 ]
 
 ROOT_URLCONF = "hidp_sandbox.urls"
@@ -108,6 +109,7 @@ TEMPLATES = [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
+                "hidp.csp.context_processors.hidp_csp_nonce",
             ],
         },
     },
