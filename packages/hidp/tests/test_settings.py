@@ -61,6 +61,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
     "hidp.oidc_provider.middleware.UiLocalesMiddleware",
+    "hidp.csp.middleware.CSPMiddleware",
 ]
 
 USE_TZ = True
@@ -85,6 +86,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "hidp.csp.context_processors.hidp_csp_nonce",
             ],
         },
     }

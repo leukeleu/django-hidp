@@ -74,6 +74,14 @@ class TestConfigChecks(TestCase):
         self.assertEqual(
             checks.check_oidc_provider_installed_apps(),
             [
+                checks.E007,
+            ],
+        )
+
+    def test_check_csp_configuration(self):
+        self.assertEqual(
+            checks.check_csp_configuration(),
+            [
                 checks.E008,
             ],
         )

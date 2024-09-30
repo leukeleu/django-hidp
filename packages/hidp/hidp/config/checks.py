@@ -3,6 +3,8 @@ import importlib
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import checks
+from django.template import engines
+from django.template.backends.django import DjangoTemplates
 from django.urls import NoReverseMatch, reverse
 
 from ..accounts.models import BaseUser
@@ -144,19 +146,19 @@ def check_login_url(**kwargs):
     return []
 
 
-E008 = checks.Error(
+E007 = checks.Error(
     "INSTALLED_APPS does not include the required OIDC provider apps.",
     hint="INSTALLED_APPS should include the following apps: {}.".format(
         ", ".join(f"{app_name!r}" for app_name in OIDC_PROVIDER_REQUIRED_APPS)
     ),
-    id="hidp.E008",
+    id="hidp.E007",
 )
 
 
 def check_oidc_provider_installed_apps(**kwargs):
     for app_name in OIDC_PROVIDER_REQUIRED_APPS:
         if app_name not in settings.INSTALLED_APPS:
-            return [E008]
+            return [E007]
     return []
 
 
@@ -164,3 +166,33 @@ if importlib.util.find_spec("oauth2_provider") is not None:
     # Only enable the OIDC provider checks if OAuth2 Provider is installed
     checks.register(Tags.settings)(check_oauth2_provider)
     checks.register(Tags.dependencies)(check_oidc_provider_installed_apps)
+
+
+# Make sure the required middleware and context processor is included for the CSP
+E008 = checks.Error(
+    "Content Security Policy is not configured correctly.",
+    hint=(
+        "MIDDLEWARE should include hidp.csp.middleware.CSPMiddleware and"
+        " 'hidp.csp.context_processors.hidp_csp_nonce' must be enabled in"
+        " DjangoTemplates (TEMPLATES)"
+    ),
+    id="hidp.E008",
+)
+
+
+@checks.register(Tags.middleware, Tags.settings)
+def check_csp_configuration(**kwargs):
+    for engine in engines.all():
+        if isinstance(engine, DjangoTemplates):
+            django_templates_instance = engine.engine
+            break
+    else:
+        django_templates_instance = None
+
+    if "hidp.csp.middleware.CSPMiddleware" not in settings.MIDDLEWARE or (
+        django_templates_instance
+        and "hidp.csp.context_processors.hidp_csp_nonce"
+        not in django_templates_instance.context_processors
+    ):
+        return [E008]
+    return []
