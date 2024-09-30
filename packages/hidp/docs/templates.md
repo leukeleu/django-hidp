@@ -134,6 +134,29 @@ Rendered by the `PasswordChangeDoneView`.
 
 Shows a simple message letting the user know that their password has been changed.
 
+#### set_password.html
+
+Rendered by the `SetPasswordView`.
+
+If the user doesn't have a password set they are required to have logged in recently
+in order to set a password. If the user hasn't logged in recently they need to
+re-authenticate using one of the OIDC providers linked to their account.
+
+This template gets passed the following context variables:
+- `form` - A form that allows users to change their password.
+- `must_reauthenticate` - Boolean that indicates if the user needs to re-authenticate
+- `oidc_linked_providers` - List of OIDC Clients the user can use to re-authenticate 
+  (only if `must_reauthenticate` is `True`).
+- `auth_next_url` - URL to redirect to after re-authentication (the set password view).
+
+Redirects to `SetPasswordDoneView` after successfully setting the password.
+
+#### set_password_done.html
+
+Rendered by the `SetPasswordDoneView`.
+
+Shows a simple message letting the user know that their password has been set.
+
 ### **recovery**
 
 All templates related to password recovery can be found
@@ -173,7 +196,7 @@ in `templates/hidp/accounts/recovery/email`.
 
 ##### password_reset_body.txt
 
-Sent by the `PasswordResetRequestView`.
+Sent by the `PasswordResetRequestView` for users that have a password set.
 
 This template gets passed the following context variable:
 - `password_reset_url` - URL to `PasswordResetView`.
@@ -181,6 +204,17 @@ This template gets passed the following context variable:
 ##### password_reset_subject.txt
 
 The subject of the email is set with this template: `password_reset_subject.txt`.
+
+##### set_password_body.txt
+
+Sent by the `SetPasswordView` for users that don't have a password set.
+
+This template gets passed the following context variable:
+- `password_reset_url` - URL to `SetPasswordView`.
+
+##### set_password_subject.txt
+
+The subject of the email is set with this template: `set_password_subject.txt`.
 
 ### **verification**
 

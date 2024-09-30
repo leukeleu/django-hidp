@@ -11,6 +11,16 @@ urlpatterns = [
         name="authenticate",
     ),
     path(
+        "reauthenticate/<slug:provider_key>/",
+        views.OIDCAuthenticationRequestView.as_view(
+            extra_authentication_request_params={
+                "prompt": "login",
+                "max_age": 0,
+            }
+        ),
+        name="reauthenticate",
+    ),
+    path(
         "callback/<slug:provider_key>/",
         views.OIDCAuthenticationCallbackView.as_view(),
         name="callback",

@@ -1,5 +1,6 @@
 import logging
 
+from datetime import timedelta
 from urllib.parse import urlencode
 
 from django_ratelimit.decorators import ratelimit
@@ -14,6 +15,7 @@ from django.db.models.functions import MD5
 from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.cache import never_cache
@@ -454,18 +456,23 @@ class PasswordResetRequestView(generic.FormView):
     template_name = "hidp/accounts/recovery/password_reset_request.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_email_sent")
     password_reset_request_mailer = mailer.PasswordResetRequestMailer
+    set_password_mailer = mailer.SetPasswordMailer
 
     def form_valid(self, form):
         if user := form.get_user():
+            if user.has_usable_password():
+                mailer_class = self.password_reset_request_mailer
+            else:
+                mailer_class = self.set_password_mailer
             try:
-                self.password_reset_request_mailer(
+                mailer_class(
                     user=user,
                     base_url=self.request.build_absolute_uri("/"),
                 ).send()
             except Exception:
                 # Do not leak the existence of the user. Log the error and
                 # continue as if the email was sent successfully.
-                logger.exception("Failed to send password reset email.")
+                logger.exception("Failed to send password (re)set email.")
         return super().form_valid(form)
 
 
@@ -504,9 +511,8 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     success_url = reverse_lazy("hidp_accounts:change_password_done")
 
     def dispatch(self, request, *args, **kwargs):
-        # TODO: Let users set a password if they don't have one (HIdP-158)
         if request.user.is_authenticated and not request.user.has_usable_password():
-            return HttpResponseRedirect(reverse("hidp_accounts:manage_account"))
+            return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -514,6 +520,72 @@ class PasswordChangeDoneView(auth_views.TemplateView):
     """Display a message that the password change has been completed."""
 
     template_name = "hidp/accounts/management/password_change_done.html"
+
+
+class SetPasswordView(
+    LoginRequiredMixin, OIDCContextMixin, auth_views.PasswordChangeView
+):
+    """Allow users without a password to set one."""
+
+    form_class = forms.SetPasswordForm
+    template_name = "hidp/accounts/management/set_password.html"
+    success_url = reverse_lazy("hidp_accounts:set_password_done")
+    login_delta = timedelta(minutes=5)
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+
+        if request.user.has_usable_password():
+            return HttpResponseRedirect(reverse_lazy("hidp_accounts:change_password"))
+
+        last_login = request.user.last_login
+        # If the user has not logged in recently, they must re-authenticate
+        # to prove their identity before setting a password.
+        self.must_reauthenticate = last_login is None or last_login < (
+            timezone.now() - self.login_delta
+        )
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            must_reauthenticate=self.must_reauthenticate,
+            oidc_linked_providers=self._build_provider_url_list(
+                [
+                    provider
+                    for provider in oidc_clients.get_registered_oidc_clients()
+                    if provider.provider_key
+                    in self.request.user.openid_connections.values_list(
+                        "provider_key", flat=True
+                    )
+                ]
+                if self.must_reauthenticate
+                else [],
+                url_name="hidp_oidc_client:reauthenticate",
+            ),
+            # Return to the current page after re-authenticating.
+            auth_next_url=self.request.get_full_path(),
+            **kwargs,
+        )
+
+    def post(self, request, *args, **kwargs):
+        if self.must_reauthenticate:
+            # The user was able to POST the form, but has not logged in recently.
+            # Redirect to this view using a GET so they are shown the message
+            # that they must re-authenticate.
+            return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
+        return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+
+class SetPasswordDoneView(auth_views.TemplateView):
+    """Display a message that the password has been set."""
+
+    template_name = "hidp/accounts/management/set_password_done.html"
 
 
 class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateView):

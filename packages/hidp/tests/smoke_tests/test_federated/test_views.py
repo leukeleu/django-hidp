@@ -98,6 +98,40 @@ class TestOIDCAuthenticationRequestView(TestCase):
             self.client.session[OIDC_STATES_SESSION_KEY][state_key]["next_url"], "/next"
         )
 
+    def test_reauthenticate_params(self):
+        response = self.client.post(
+            reverse(
+                "hidp_oidc_client:reauthenticate", kwargs={"provider_key": "example"}
+            ),
+            secure=True,
+        )
+        state_key = next(iter(self.client.session[OIDC_STATES_SESSION_KEY]))
+        code_verifier = self.client.session[OIDC_STATES_SESSION_KEY][state_key][
+            "code_verifier"
+        ]
+        code_challenge = code_challenge_from_code_verifier(code_verifier)
+        callback_url = urllib.parse.quote(
+            "https://testserver"
+            + reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"})
+        )
+        self.assertRedirects(
+            response,
+            (
+                f"https://example.com/auth"
+                f"?client_id=test"
+                f"&response_type=code"
+                f"&scope=openid+email+profile"
+                f"&redirect_uri={callback_url}"
+                f"&state={state_key}"
+                f"&code_challenge={code_challenge}"
+                f"&code_challenge_method=S256"
+                # Adds prompt=login and max_age=0 to force reauthentication
+                f"&prompt=login"
+                f"&max_age=0"
+            ),
+            fetch_redirect_response=False,
+        )
+
 
 _VALID_AUTH_CALLBACK = (
     {

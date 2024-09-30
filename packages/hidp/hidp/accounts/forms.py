@@ -193,14 +193,11 @@ class PasswordResetRequestForm(forms.Form):
         Given an email, return the user who should receive a reset.
 
         Returns None if no user is found, or the user is not allowed
-        to reset their password (e.g. inactive, no password).
+        to reset their password (e.g. inactive).
         """
-        user = UserModel.objects.filter(
+        return UserModel.objects.filter(
             email__iexact=self.cleaned_data["email"], is_active=True
         ).first()
-        if user and user.has_usable_password():
-            return user
-        return None
 
 
 class PasswordResetForm(auth_forms.SetPasswordForm):
@@ -268,6 +265,10 @@ class PasswordChangeForm(auth_forms.PasswordChangeForm):
             The user with the new password set.
         """
         return super().save(commit=commit)
+
+
+class SetPasswordForm(auth_forms.SetPasswordForm):
+    """Form for setting a new password without requiring the old password."""
 
 
 class RateLimitedAuthenticationForm(AuthenticationForm):
