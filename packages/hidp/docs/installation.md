@@ -56,7 +56,27 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
+    "hidp.csp.middleware.CSPMiddleware",
     ...,
+]
+```
+
+### `TEMPLATES`
+
+Add the following context processor in your Django settings:
+
+```python
+TEMPLATES = [
+    {
+        ...,
+        "OPTIONS": {
+            "context_processors": [
+                ...,
+                "hidp.csp.context_processors.hidp_csp_nonce",
+                ...,
+            ],
+        },
+    },
 ]
 ```
 
