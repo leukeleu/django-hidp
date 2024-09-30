@@ -1,4 +1,5 @@
 # Note: Use a global .gitignore file to ignore common files and directories
+*.mo
 *.pem
 local.ini
 /var/*
