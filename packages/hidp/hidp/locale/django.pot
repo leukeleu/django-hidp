@@ -495,3 +495,15 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "However, your account is not currently linked to any service, so you cannot set a password at this time."
 msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/password_changed_body.txt
+msgid "You're receiving this email because your password has been changed."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/password_changed_body.txt
+msgid "If you did not change your password, please reset your password immediately using this link:"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/password_changed_subject.txt
+msgid "Password changed"
+msgstr ""
