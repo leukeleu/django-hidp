@@ -9,7 +9,6 @@ FROM python:$PYTHON_VERSION
 RUN apt-get update && apt-get install -y \
     gettext \
     sudo \
-    watchman \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
@@ -32,9 +31,6 @@ ENV PIP_REQUIRE_VIRTUALENV true
 # "activate" the virtualenv created by entrypoint.sh
 ENV VIRTUAL_ENV /code/var/venv
 ENV PATH $VIRTUAL_ENV/bin:$PATH
-
-# Configure watchman
-ENV DJANGO_WATCHMAN_TIMEOUT 60
 
 # Create .pgpass
 RUN echo "*:*:*:postgres:postgres" > ~/.pgpass
