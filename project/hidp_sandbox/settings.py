@@ -161,16 +161,16 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
     {
-        "NAME": "hidp.accounts.password_validators.DigitValidator",
+        "NAME": "hidp.accounts.password_validation.DigitValidator",
     },
     {
-        "NAME": "hidp.accounts.password_validators.UppercaseValidator",
+        "NAME": "hidp.accounts.password_validation.UppercaseValidator",
     },
     {
-        "NAME": "hidp.accounts.password_validators.LowercaseValidator",
+        "NAME": "hidp.accounts.password_validation.LowercaseValidator",
     },
     {
-        "NAME": "hidp.accounts.password_validators.SymbolValidator",
+        "NAME": "hidp.accounts.password_validation.SymbolValidator",
     },
 ]
 
