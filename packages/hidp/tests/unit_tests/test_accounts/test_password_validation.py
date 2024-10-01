@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 
-from hidp.accounts.password_validators import (
+from hidp.accounts.password_validation import (
     DigitValidator,
     LowercaseValidator,
     SymbolValidator,
