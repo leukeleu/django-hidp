@@ -207,3 +207,31 @@ class SetPasswordMailer(BaseMailer):
 
     def get_recipients(self):
         return [self.user.email]
+
+
+class PasswordChangedMailer(BaseMailer):
+    subject_template_name = (
+        "hidp/accounts/management/email/password_changed_subject.txt"
+    )
+    email_template_name = "hidp/accounts/management/email/password_changed_body.txt"
+
+    def __init__(self, user, *, base_url):
+        super().__init__(base_url=base_url)
+        self.user = user
+
+    def get_password_reset_url(self):
+        return (
+            urljoin(self.base_url, reverse("hidp_accounts:password_reset_request")),
+        )
+
+    def get_context(self, extra_context=None):
+        return super().get_context(
+            {
+                "user": self.user,
+                "password_reset_url": self.get_password_reset_url(),
+            }
+            | (extra_context or {})
+        )
+
+    def get_recipients(self):
+        return [self.user.email]
