@@ -177,6 +177,25 @@ class TestPasswordResetFlow(TestCase):
             "hidp/accounts/recovery/password_reset_complete.html",
         )
 
+        # Changed password mail should be sent
+        self.assertEqual(1, len(mail.outbox))
+        message = mail.outbox[0]
+        self.assertEqual(message.to, [self.user.email])
+        self.assertEqual(message.subject, "Password changed")
+        self.assertIn(
+            "You're receiving this email because your password has been changed.",
+            message.body,
+        )
+        self.assertIn(
+            "If you did not change your password, please reset your password"
+            " immediately using this link:",
+            message.body,
+        )
+        self.assertIn(
+            reverse("hidp_accounts:password_reset_request"),
+            message.body,
+        )
+
         with self.subTest("The password reset URL is invalid after use."):
             response = self.client.get(password_reset_url, follow=True)
             self.assertIn("validlink", response.context)

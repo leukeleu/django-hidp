@@ -1,6 +1,7 @@
 from datetime import timedelta
 from http import HTTPStatus
 
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -199,6 +200,25 @@ class TestPasswordChangeView(TestCase):
         self.assertRedirects(response, reverse("hidp_accounts:change_password_done"))
         self.assertTemplateUsed("hidp/accounts/management/password_change_done.html")
 
+        # Changed password mail should be sent
+        self.assertEqual(1, len(mail.outbox))
+        message = mail.outbox[0]
+        self.assertEqual(message.to, [self.user.email])
+        self.assertEqual(message.subject, "Password changed")
+        self.assertIn(
+            "You're receiving this email because your password has been changed.",
+            message.body,
+        )
+        self.assertIn(
+            "If you did not change your password, please reset your password"
+            " immediately using this link:",
+            message.body,
+        )
+        self.assertIn(
+            reverse("hidp_accounts:password_reset_request"),
+            message.body,
+        )
+
 
 class TestSetPasswordView(TestCase):
     @classmethod
@@ -290,3 +310,22 @@ class TestSetPasswordView(TestCase):
         # Redirect to the success page
         self.assertRedirects(response, reverse("hidp_accounts:set_password_done"))
         self.assertTemplateUsed("hidp/accounts/management/set_change_done.html")
+
+        # Changed password mail should be sent
+        self.assertEqual(1, len(mail.outbox))
+        message = mail.outbox[0]
+        self.assertEqual(message.to, [self.user.email])
+        self.assertEqual(message.subject, "Password changed")
+        self.assertIn(
+            "You're receiving this email because your password has been changed.",
+            message.body,
+        )
+        self.assertIn(
+            "If you did not change your password, please reset your password"
+            " immediately using this link:",
+            message.body,
+        )
+        self.assertIn(
+            reverse("hidp_accounts:password_reset_request"),
+            message.body,
+        )
