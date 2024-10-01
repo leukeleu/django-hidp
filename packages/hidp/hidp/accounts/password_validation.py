@@ -23,21 +23,21 @@ class DigitValidator(RegexValidator):
     regex = r"[0-9]"
     message = _("This password does not contain any digits (0-9).")
     code = "password_no_digit"
-    help_text = _("Your password must contain at least 1 digit (0-9).")
+    help_text = _("Your password must contain at least one digit (0-9).")
 
 
 class UppercaseValidator(RegexValidator):
     regex = r"[A-Z]"
     message = _("This password does not contain any uppercase characters (A-Z).")
     code = "password_no_upper"
-    help_text = _("Your password must contain at least 1 uppercase character (A-Z).")
+    help_text = _("Your password must contain at least one uppercase character (A-Z).")
 
 
 class LowercaseValidator(RegexValidator):
     regex = r"[a-z]"
     message = _("This password does not contain any lowercase characters (a-z).")
     code = "password_no_lower"
-    help_text = _("Your password must contain at least 1 lowercase character (a-z).")
+    help_text = _("Your password must contain at least one lowercase character (a-z).")
 
 
 class SymbolValidator(RegexValidator):
@@ -48,6 +48,6 @@ class SymbolValidator(RegexValidator):
     )
     code = "password_no_symbol"
     help_text = _(
-        _("Your password must contain at least 1 special character (%s).")
+        _("Your password must contain at least one special character (%s).")
         % string.punctuation
     )
