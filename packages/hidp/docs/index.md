@@ -13,6 +13,7 @@ installation
 configure-oidc-clients
 configure-as-oidc-provider
 user-model
+password-validation
 templates
 management-commands
 rate-limiting
