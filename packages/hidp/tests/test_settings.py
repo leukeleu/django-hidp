@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "hidp",
     "hidp.accounts",
     "hidp.api",
+    "hidp.csp",
     "hidp.federated",
     "hidp.oidc_provider",
     # Custom user model

@@ -13,6 +13,7 @@ REQUIRED_APPS = [
     "django.contrib.sessions",
     "hidp",
     "hidp.accounts",
+    "hidp.csp",
     "hidp.federated",
 ]
 

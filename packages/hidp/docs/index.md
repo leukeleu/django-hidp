@@ -12,6 +12,7 @@ This is Leukeleu's Headless Identity Provider
 installation
 configure-oidc-clients
 configure-as-oidc-provider
+content-security-policy
 user-model
 password-validation
 templates
