@@ -145,7 +145,7 @@ re-authenticate using one of the OIDC providers linked to their account.
 This template gets passed the following context variables:
 - `form` - A form that allows users to change their password.
 - `must_reauthenticate` - Boolean that indicates if the user needs to re-authenticate
-- `oidc_linked_providers` - List of OIDC Clients the user can use to re-authenticate 
+- `oidc_linked_providers` - List of OIDC Clients the user can use to re-authenticate
   (only if `must_reauthenticate` is `True`).
 - `auth_next_url` - URL to redirect to after re-authentication (the set password view).
 
@@ -156,6 +156,23 @@ Redirects to `SetPasswordDoneView` after successfully setting the password.
 Rendered by the `SetPasswordDoneView`.
 
 Shows a simple message letting the user know that their password has been set.
+
+#### **email**
+
+Templates for the password change notification email can be found
+in `templates/hidp/accounts/management/email`.
+
+##### password_changed_body.txt
+
+Sent by the `PasswordResetView`, `SetPasswordView` and `PasswordChangeView` when a user
+successfully changes their password.
+
+This template gets passed the following context variable:
+- `password_reset_url` - URL to `PasswordResetView`.
+
+##### password_changed_subject.txt
+
+The subject of the email is set with this template: `password_changed_subject.txt`.
 
 ### **recovery**
 
@@ -200,6 +217,7 @@ Sent by the `PasswordResetRequestView` for users that have a password set.
 
 This template gets passed the following context variable:
 - `password_reset_url` - URL to `PasswordResetView`.
+- `user` - The user the password was changed for
 
 ##### password_reset_subject.txt
 
