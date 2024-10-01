@@ -6,6 +6,7 @@ HIdP provides all the default Django authentication functionalities and more:
 - Registration (including email verification)
 - OpenID Connect (OIDC) Clients (Google and Microsoft included)
 - Rate limiting
+- Content Security Policy (see [Content Security Policy](project:content-security-policy.md))
 - Can be used as a standalone OpenID Connect (OIDC) provider (see [Configure as Identity Provider](project:configure-as-oidc-provider.md))
 
 
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     # Headless Identity Provider
     "hidp",
     "hidp.accounts",
+    "hidp.csp",
     "hidp.federated",
     # Project
     "accounts",
