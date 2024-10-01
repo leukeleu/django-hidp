@@ -2,6 +2,7 @@
 *.mo
 *.pem
 local.ini
+/**/docs/_build
 /var/*
 # Keep /var/README.md
 !/var/README.md
