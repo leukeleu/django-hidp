@@ -15,7 +15,7 @@ class TestPasswordValidation(SimpleTestCase):
 
         self.assertEqual(
             validator.get_help_text(),
-            "Your password must contain at least 1 digit (0-9).",
+            "Your password must contain at least one digit (0-9).",
         )
 
         with self.subTest("Valid password"):
@@ -36,7 +36,7 @@ class TestPasswordValidation(SimpleTestCase):
 
         self.assertEqual(
             validator.get_help_text(),
-            "Your password must contain at least 1 uppercase character (A-Z).",
+            "Your password must contain at least one uppercase character (A-Z).",
         )
 
         with self.subTest("Valid password"):
@@ -58,7 +58,7 @@ class TestPasswordValidation(SimpleTestCase):
 
         self.assertEqual(
             validator.get_help_text(),
-            "Your password must contain at least 1 lowercase character (a-z).",
+            "Your password must contain at least one lowercase character (a-z).",
         )
 
         with self.subTest("Valid password"):
@@ -81,7 +81,10 @@ class TestPasswordValidation(SimpleTestCase):
 
         self.assertEqual(
             validator.get_help_text(),
-            f"Your password must contain at least 1 special character ({punctuation}).",
+            (
+                f"Your password must contain at least one"
+                f" special character ({punctuation})."
+            ),
         )
 
         with self.subTest("Valid password"):
