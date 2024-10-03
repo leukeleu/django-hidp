@@ -122,7 +122,7 @@ This view provides extra user details for the authenticated user, based on the r
 This view provides details of the keys used to sign the JWTs generated for ID tokens,
 so that clients are able to verify them.
 
-### `/api/user/me/`
+### `/api/users/me/`
 
 API endpoint to retrieve and update the user's basic information (first and last name).
 
