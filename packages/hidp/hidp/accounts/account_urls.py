@@ -102,12 +102,12 @@ change_password_urls = [
 
 set_password_urls = [
     path(
-        "manage/set-password/",
+        "set-password/",
         views.SetPasswordView.as_view(),
         name="set_password",
     ),
     path(
-        "manage/set-password/done/",
+        "set-password/done/",
         views.SetPasswordDoneView.as_view(),
         name="set_password_done",
     ),
