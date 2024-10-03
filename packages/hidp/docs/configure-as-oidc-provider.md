@@ -8,6 +8,7 @@ The OIDC Provider part of HIdP is based on [Django OAuth Toolkit](https://django
 :::
 
 ## Installation
+
 Install with pip
 
 ```
@@ -22,6 +23,8 @@ INSTALLED_APPS = [
     # Headless Identity Provider
     "oauth2_provider",
     "hidp.oidc_provider",
+    "rest_framework",
+    "hidp.api",
     ...
 ]
 ```
@@ -111,8 +114,50 @@ PKCE is required by default.
 [TokenView](https://django-oauth-toolkit.readthedocs.io/en/latest/views/details.html#oauth2_provider.views.base.TokenView)
 
 ### `/o/userinfo/`
-This view provides extra user details
+
+This view provides extra user details for the authenticated user, based on the requested scopes.
 
 ### `/o/.well-known/jwks.json`
+
 This view provides details of the keys used to sign the JWTs generated for ID tokens,
 so that clients are able to verify them.
+
+### `/api/user/me/`
+
+API endpoint to retrieve and update the user's basic information (first and last name).
+
+## Django REST Framework recommendations
+
+If you are using HIdP as a standalone service, or integrating it in a Django project that doesn't use
+Django REST Framework yet, we recommend [DRF Standardized Errors](https://pypi.org/project/drf-standardized-errors/)
+to provide standardized error responses. In addition, we recommend disabling the browsable API unless you have a
+specific need for it.
+
+### Install DRF Standardized Errors
+
+```shell
+pip install drf-standardized-errors
+```
+
+### Update Django settings
+
+```python
+INSTALLED_APPS = [
+    ...,
+    "drf_standardized_errors",
+    ...,
+]
+
+REST_FRAMEWORK = {
+    ...,
+    # Disable the browsable API
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+    # Set DRF Standardized Errors as the default exception handler
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
+    ...,
+}
+```
+
+For more information on the functionality and options of DRF Standardized Errors, refer to the [documentation](https://drf-standardized-errors.readthedocs.io/en/latest/).
