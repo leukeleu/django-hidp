@@ -2,16 +2,10 @@ import uuid
 
 from datetime import timedelta
 
-from django.core import signing
+from ..accounts.tokens import BaseTokenGenerator
 
 
-class BaseTokenGenerator:
-    key_salt = NotImplemented
-    token_timeout = NotImplemented
-
-    def _get_signer(self):
-        return signing.TimestampSigner(algorithm="sha256", salt=self.key_salt)
-
+class BaseOIDCTokenGenerator(BaseTokenGenerator):
     def make_token(self):
         """
         Generate an expiring token based on a random value.
@@ -19,38 +13,36 @@ class BaseTokenGenerator:
         Returns:
             str: The generated token.
         """
-        value = str(uuid.uuid4())
-        return self._get_signer().sign(value)
+        return super().make_token(str(uuid.uuid4()))
 
     def check_token(self, token):
         """
-        Verify the token.
+        Verify a token.
+
+        Args:
+            token (str): The token to verify.
 
         Returns:
             bool: True if the token is valid, False otherwise.
         """
-        try:
-            self._get_signer().unsign(token, max_age=self.token_timeout)
-        except signing.BadSignature:
-            return False
-        return True
+        return super().check_token(token) is not None
 
 
-class OIDCRegistrationTokenGenerator(BaseTokenGenerator):
+class OIDCRegistrationTokenGenerator(BaseOIDCTokenGenerator):
     """Token for the OIDC registration process."""
 
     key_salt = "oidc-registration"
     token_timeout = timedelta(minutes=15).total_seconds()
 
 
-class OIDCLoginTokenGenerator(BaseTokenGenerator):
+class OIDCLoginTokenGenerator(BaseOIDCTokenGenerator):
     """Token for the OIDC login process."""
 
     key_salt = "oidc-login"
     token_timeout = timedelta(minutes=5).total_seconds()
 
 
-class OIDCAccountLinkTokenGenerator(BaseTokenGenerator):
+class OIDCAccountLinkTokenGenerator(BaseOIDCTokenGenerator):
     """Token for the OIDC account linking process."""
 
     key_salt = "oidc-account-link"
