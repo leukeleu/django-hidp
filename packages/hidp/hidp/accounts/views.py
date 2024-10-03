@@ -499,6 +499,16 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
     form_class = forms.PasswordResetForm
     template_name = "hidp/accounts/recovery/password_reset.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_complete")
+    password_changed_mailer = mailer.PasswordChangedMailer
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Send the password changed email.
+        self.password_changed_mailer(
+            self.user,
+            base_url=self.request.build_absolute_uri("/"),
+        ).send()
+        return response
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -521,11 +531,21 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     form_class = forms.PasswordChangeForm
     template_name = "hidp/accounts/management/password_change.html"
     success_url = reverse_lazy("hidp_accounts:change_password_done")
+    password_changed_mailer = mailer.PasswordChangedMailer
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and not request.user.has_usable_password():
             return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
         return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Send the password changed email.
+        self.password_changed_mailer(
+            self.request.user,
+            base_url=self.request.build_absolute_uri("/"),
+        ).send()
+        return response
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -545,6 +565,7 @@ class SetPasswordView(
     template_name = "hidp/accounts/management/set_password.html"
     success_url = reverse_lazy("hidp_accounts:set_password_done")
     login_delta = timedelta(minutes=5)
+    password_changed_mailer = mailer.PasswordChangedMailer
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -593,6 +614,11 @@ class SetPasswordView(
 
     def form_valid(self, form):
         form.save()
+        # Send the password changed email.
+        self.password_changed_mailer(
+            self.request.user,
+            base_url=self.request.build_absolute_uri("/"),
+        ).send()
         return super().form_valid(form)
 
 

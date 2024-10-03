@@ -496,3 +496,15 @@ msgstr "Verzoek om een wachtwoord in te stellen"
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "However, your account is not currently linked to any service, so you cannot set a password at this time."
 msgstr "Er is echter geen enkele dienst aan je account gekoppeld, waardoor je op dit moment geen wachtwoord kunt instellen."
+
+#: hidp/templates/hidp/accounts/management/email/password_changed_body.txt
+msgid "You're receiving this email because your password has been changed."
+msgstr "Je ontvangt deze e-mail omdat je wachtwoord is gewijzigd."
+
+#: hidp/templates/hidp/accounts/management/email/password_changed_body.txt
+msgid "If you did not change your password, please reset your password immediately using this link:"
+msgstr "Als je dit niet zelf hebt gedaan, wijzig dan meteen je wachtwoord met de volgende link:"
+
+#: hidp/templates/hidp/accounts/management/email/password_changed_subject.txt
+msgid "Password changed"
+msgstr "Je wachtwoord is gewijzigd."
