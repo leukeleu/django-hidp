@@ -6,7 +6,27 @@ from django.utils.translation import gettext_lazy as _
 from ..compat.uuid7 import uuid7
 
 
-class UserManager(auth_models.UserManager):
+class UserQuerySet(models.QuerySet):
+    def email_verified(self):
+        """
+        Only include users that have verified their email address.
+
+        Returns:
+            ``QuerySet``: Users that have verified their email address.
+        """
+        return self.exclude(email_verified__isnull=True)
+
+    def email_unverified(self):
+        """
+        Only include users that have not verified their email address.
+
+        Returns:
+            ``QuerySet``: Users that have not verified their email address.
+        """
+        return self.filter(email_verified__isnull=True)
+
+
+class UserManager(auth_models.UserManager.from_queryset(UserQuerySet)):
     """Custom user manager that uses email as the username field."""
 
     use_in_migrations = True

@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from hidp.test.factories import user_factories
 from tests.custom_user.models import CustomUser
 
 
@@ -43,3 +44,27 @@ class TestUserManager(TestCase):
         )
         self.assertTrue(superuser.is_staff, msg="Expected is_staff to be True")
         self.assertTrue(superuser.is_superuser, msg="Expected is_superuser to be True")
+
+    def test_email_unverified(self):
+        """Return a queryset of users that have not verified their email address."""
+        unverified_user = user_factories.UserFactory()
+        user_factories.VerifiedUserFactory()
+        user_factories.SuperUserFactory()
+        self.assertQuerySetEqual(
+            CustomUser.objects.email_unverified(),
+            [repr(unverified_user)],
+            transform=repr,
+            ordered=False,
+        )
+
+    def test_email_verified(self):
+        """Return a queryset of users that have verified their email address."""
+        user_factories.UserFactory()
+        verified_user = user_factories.VerifiedUserFactory()
+        superuser = user_factories.SuperUserFactory()
+        self.assertQuerySetEqual(
+            CustomUser.objects.email_verified(),
+            [repr(verified_user), repr(superuser)],
+            transform=repr,
+            ordered=False,
+        )
