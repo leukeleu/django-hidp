@@ -242,11 +242,7 @@ class EmailVerificationView(
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
 
     def _get_user_queryset(self):
-        return (
-            super()
-            ._get_user_queryset()
-            .filter(is_active=True, email_verified__isnull=True)
-        )
+        return super()._get_user_queryset().email_unverified().filter(is_active=True)
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
