@@ -14,7 +14,7 @@ author = "Jaap Roes, Dennis Bunskoek, Thomas Kalverda"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ["myst_parser", "sphinx.ext.napoleon", "sphinx.ext.autodoc"]
-myst_enable_extensions = ["colon_fence", "attrs_inline"]
+myst_enable_extensions = ["colon_fence", "attrs_inline", "deflist"]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
