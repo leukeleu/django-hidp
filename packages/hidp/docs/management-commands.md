@@ -30,9 +30,13 @@ For more information, please see [cleartokens](https://django-oauth-toolkit.read
 
 ## remove_stale_unverified_accounts
 The ``remove_stale_unverified_accounts`` management command removes accounts that have
-not been verified within a specific number of days after creation.
+not been verified within a specific number of days after creation (90 days by default).
 
 The following optional flags are available:
 - ``--days`` - Maximum number of days an account is allowed to be unverified: defaults to 90.
 - ``--dry-run`` - If `True`, returns the number of accounts that would be removed,
 without performing the removal. Defaults to `False`.
+
+To permanently change the default value of the `--days` flag, you can override the command
+in your project by subclassing `hidp.accounts.management.commands.remove_stale_unverified_accounts.Command`
+and setting the `DEFAULT_MAX_DAYS` class attribute to the desired value.
