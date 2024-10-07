@@ -4,19 +4,20 @@ from ...email_verification import remove_stale_unverified_accounts
 
 
 class Command(BaseCommand):
+    DEFAULT_MAX_DAYS = 90
     help = (
         "Remove accounts that have not been verified within"
         " a specific number of days after creation"
     )
 
-    def add_arguments(self, parser):  # noqa: PLR6301
+    def add_arguments(self, parser):
         parser.add_argument(
             "--days",
             type=int,
-            default=90,
+            default=self.DEFAULT_MAX_DAYS,
             help=(
-                "Maximum number of days an account is allowed to be unverified:"
-                " defaults to 90."
+                f"Maximum number of days an account is allowed to be unverified:"
+                f" defaults to {self.DEFAULT_MAX_DAYS}."
             ),
         )
 
