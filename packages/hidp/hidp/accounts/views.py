@@ -26,6 +26,7 @@ from ..federated.views import OIDCContextMixin
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
 from . import email_verification, forms, mailer, tokens
+from .email_change import Recipient
 
 logger = logging.getLogger(__name__)
 UserModel = get_user_model()
@@ -711,6 +712,7 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     form_class = forms.EmailChangeRequestForm
     template_name = "hidp/accounts/management/email_change_request.html"
     success_url = reverse_lazy("hidp_accounts:email_change_request_sent")
+    email_change_request_mailer = mailer.EmailChangeRequestMailer
 
     def get_form_kwargs(self):
         return {
@@ -720,6 +722,21 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         email_change_request = form.save()
+
+        mailer_kwargs = {
+            "user": self.request.user,
+            "email_change_request": email_change_request,
+            "base_url": self.request.build_absolute_uri("/"),
+        }
+        # Send the confirm email change emails.
+        self.email_change_request_mailer(
+            **mailer_kwargs,
+            recipient=Recipient.CURRENT_EMAIL,
+        ).send()
+        self.email_change_request_mailer(
+            **mailer_kwargs,
+            recipient=Recipient.PROPOSED_EMAIL,
+        ).send()
 
         return HttpResponseRedirect(self.success_url)
 

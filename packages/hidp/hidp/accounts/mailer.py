@@ -8,6 +8,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 from . import email_verification
+from .email_change import Recipient
 
 
 class BaseMailer:
@@ -235,3 +236,38 @@ class PasswordChangedMailer(BaseMailer):
 
     def get_recipients(self):
         return [self.user.email]
+
+
+class EmailChangeRequestMailer(BaseMailer):
+    subject_template_name = "hidp/accounts/management/email/email_change_subject.txt"
+    email_template_name = "hidp/accounts/management/email/email_change_body.txt"
+
+    def __init__(self, user, *, base_url, email_change_request, recipient):
+        super().__init__(base_url=base_url)
+        self.user = user
+        self.email_change_request = email_change_request
+        self.recipient = recipient
+
+    def get_confirmation_url(self):  # noqa: PLR6301
+        return "#"
+
+    def get_context(self, extra_context=None):
+        return super().get_context(
+            {
+                "user": self.user,
+                "recipient": self.recipient,
+                "current_email": self.email_change_request.current_email,
+                "proposed_email": self.email_change_request.proposed_email,
+                "confirmation_url": self.get_confirmation_url(),
+            }
+            | (extra_context or {})
+        )
+
+    def get_recipients(self):
+        match self.recipient:
+            case Recipient.CURRENT_EMAIL:
+                return [self.email_change_request.current_email]
+            case Recipient.PROPOSED_EMAIL:
+                return [self.email_change_request.proposed_email]
+            case _:
+                raise ValueError(f"Invalid recipient: {self.recipient!r}")

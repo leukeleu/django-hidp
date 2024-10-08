@@ -1,3 +1,4 @@
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
@@ -30,14 +31,18 @@ class TestEmailChangeRequest(TestCase):
         )
 
     def test_user_requests_email_change(self):
-        response = self.client.post(
-            self.url,
-            {
-                "password": "P@ssw0rd!",
-                "proposed_email": "newemail@example.com",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/management/email/email_change_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/email_change_body.txt"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.url,
+                {
+                    "password": "P@ssw0rd!",
+                    "proposed_email": "newemail@example.com",
+                },
+                follow=True,
+            )
 
         self.assertRedirects(
             response, reverse("hidp_accounts:email_change_request_sent")
@@ -53,6 +58,25 @@ class TestEmailChangeRequest(TestCase):
                 proposed_email="newemail@example.com",
             ).exists()
         )
+
+        # Email should be sent to current email
+        self.assertEqual(len(mail.outbox), 2)
+
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Confirm your email change request",
+        )
+        self.assertEqual(message.to, [self.user.email])
+
+        # Email should be sent to proposed email
+        message = mail.outbox[1]
+        self.assertEqual(
+            message.subject,
+            "Confirm your email change request",
+        )
+        self.assertEqual(message.to, ["newemail@example.com"])
+
 
 class TestEmailChangeRequestForm(TestCase):
     @classmethod
