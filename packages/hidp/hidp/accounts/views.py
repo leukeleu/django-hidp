@@ -851,3 +851,29 @@ class EmailChangeConfirmView(
     def form_valid(self, form):
         form.save()
         return HttpResponseRedirect(self.success_url)
+
+
+class EmailChangeCompleteView(auth_views.TemplateView):
+    """Display a message that the email change has been completed."""
+
+    template_name = "hidp/accounts/management/email_change_complete.html"
+
+    def get_context_data(self, **kwargs):
+        email_change_request = EmailChangeRequest.objects.filter(
+            user=self.request.user
+        ).first()
+        return super().get_context_data() | {
+            "proposed_email_confirmed_current_email_required": (
+                email_change_request.confirmed_by_proposed_email
+                and not email_change_request.confirmed_by_current_email
+            )
+            if email_change_request
+            else None,
+            "current_email_confirmed_proposed_email_required": (
+                email_change_request.confirmed_by_current_email
+                and not email_change_request.confirmed_by_proposed_email
+            )
+            if email_change_request
+            else None,
+            "email_change_request_completed": email_change_request.is_complete(),
+        }

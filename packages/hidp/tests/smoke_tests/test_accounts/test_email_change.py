@@ -225,3 +225,77 @@ class TestEmailChangeConfirm(TestCase):
             "Please go to your other inbox and look for the link there.",
             response.content.decode(),
         )
+
+    def test_post_current_email_valid_token(self):
+        response = self.client.post(
+            self.current_email_url, {"allow_change": "on"}, follow=True
+        )
+        self.assertRedirects(
+            response, reverse("hidp_accounts:email_change_complete"), status_code=308
+        )
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_complete.html"
+        )
+        self.assertInHTML(
+            "Successfully confirmed the change from your current email address.",
+            response.content.decode(),
+        )
+        self.assertInHTML(
+            "You also need to confirm the change from your new email.",
+            response.content.decode(),
+        )
+        self.email_change_request.refresh_from_db()
+        self.assertEqual(self.email_change_request.confirmed_by_current_email, True)
+
+    def test_post_proposed_email_valid_token(self):
+        response = self.client.post(
+            self.proposed_email_url, {"allow_change": "on"}, follow=True
+        )
+        self.assertRedirects(
+            response, reverse("hidp_accounts:email_change_complete"), status_code=308
+        )
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_complete.html"
+        )
+        self.assertInHTML(
+            "Successfully confirmed the change from your new email address.",
+            response.content.decode(),
+        )
+        self.assertInHTML(
+            "You also need to confirm the change from your current email.",
+            response.content.decode(),
+        )
+        self.email_change_request.refresh_from_db()
+        self.assertEqual(self.email_change_request.confirmed_by_proposed_email, True)
+
+    def test_post_second_valid_token(self):
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.save()
+
+        response = self.client.post(
+            self.proposed_email_url, {"allow_change": "on"}, follow=True
+        )
+        self.assertRedirects(
+            response, reverse("hidp_accounts:email_change_complete"), status_code=308
+        )
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_complete.html"
+        )
+        self.assertInHTML(
+            "Successfully confirmed the change from both your current and new "
+            " email address.",
+            response.content.decode(),
+        )
+        self.assertInHTML(
+            "Your email address has been changed.",
+            response.content.decode(),
+        )
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "newemail@example.com")
+
+        email_change_request = EmailChangeRequest.objects.filter(
+            user=self.user, proposed_email="newemail@example.com"
+        )
+        self.assertTrue(email_change_request.exists())
+        self.assertTrue(email_change_request.first().is_complete())
