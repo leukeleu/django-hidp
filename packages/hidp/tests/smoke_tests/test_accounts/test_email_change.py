@@ -1,7 +1,10 @@
+from http import HTTPStatus
+
 from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
+from hidp.accounts import tokens
 from hidp.accounts.forms import EmailChangeRequestForm
 from hidp.accounts.models import EmailChangeRequest
 from hidp.test.factories import user_factories
@@ -133,4 +136,92 @@ class TestEmailChangeRequestForm(TestCase):
                 user=self.user,
                 proposed_email="newemail@example.com",
             ).exists()
+        )
+
+
+class TestEmailChangeConfirm(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory()
+        cls.email_change_request = user_factories.EmailChangeRequestFactory(
+            user=cls.user, proposed_email="newemail@example.com"
+        )
+        cls.current_email_url = reverse(
+            "hidp_accounts:email_change_confirm",
+            kwargs={
+                "token": tokens.email_change_token_generator.make_token(
+                    str(cls.email_change_request.pk), "current_email"
+                )
+            },
+        )
+        cls.proposed_email_url = reverse(
+            "hidp_accounts:email_change_confirm",
+            kwargs={
+                "token": tokens.email_change_token_generator.make_token(
+                    str(cls.email_change_request.pk), "proposed_email"
+                )
+            },
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_get_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.current_email_url)
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+    def test_get_invalid_token(self):
+        response = self.client.get(
+            reverse(
+                "hidp_accounts:email_change_confirm",
+                kwargs={"token": "invalid"},
+            ),
+            follow=True,
+        )
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_confirm.html"
+        )
+        self.assertInHTML(
+            "The link you followed is invalid."
+            " It may have expired or been used already.",
+            response.content.decode(),
+        )
+
+    def test_valid_token_wrong_user(self):
+        self.client.force_login(user_factories.UserFactory())
+        response = self.client.get(self.current_email_url, follow=True)
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_confirm.html"
+        )
+        self.assertInHTML(
+            "The link you followed is invalid."
+            " It may have expired or been used already.",
+            response.content.decode(),
+        )
+
+    def test_get_valid_token(self):
+        response = self.client.get(self.current_email_url, follow=True)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_confirm.html"
+        )
+        self.assertIn("validlink", response.context)
+
+    def test_get_already_confirmed(self):
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.save()
+
+        response = self.client.get(self.current_email_url, follow=True)
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_confirm.html"
+        )
+        self.assertInHTML(
+            "You have already confirmed the change from this email address.",
+            response.content.decode(),
+        )
+        self.assertInHTML(
+            "Please go to your other inbox and look for the link there.",
+            response.content.decode(),
         )
