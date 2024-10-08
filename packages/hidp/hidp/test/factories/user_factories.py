@@ -24,3 +24,12 @@ class VerifiedUserFactory(UserFactory):
 class SuperUserFactory(VerifiedUserFactory):
     is_superuser = True
     is_staff = True
+
+
+class EmailChangeRequestFactory(DjangoModelFactory):
+    class Meta:
+        model = "hidp_accounts.EmailChangeRequest"
+
+    user = factory.SubFactory(VerifiedUserFactory)
+    proposed_email = factory.Faker("email")
+    current_email = factory.SelfAttribute("user.email")

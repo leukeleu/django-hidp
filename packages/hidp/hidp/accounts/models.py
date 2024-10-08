@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.db import models
 from django.db.models import functions
@@ -332,3 +333,71 @@ class BaseUser(auth_models.AbstractUser):
     def set_unusable_password(self):
         """Set the user's password field to a value that will never be a valid hash."""
         super().set_unusable_password()
+
+
+class EmailChangeRequest(models.Model):
+    """
+    A user's request to change their email and it's confirmation state.
+
+    Attributes:
+        uuid (``UUIDField``):
+            Primary key, a version 7 UUID.
+
+        user (``OneToOneField``):
+            The user that requested the email change.
+
+        proposed_email (``EmailField``):
+            The email address the user wants to change to.
+
+        confirmed_by_proposed_email (``BooleanField``):
+            Whether the email change has been confirmed by the proposed email address.
+
+            Defaults to ``False``.
+
+        confirmed_by_current_email (``BooleanField``):
+            Whether the email change has been confirmed by the current email address.
+
+            Defaults to ``False``.
+
+        created (``DateTimeField``):
+            Date and time when the email change request was created.
+
+        modified (``DateTimeField``):
+            Date and time when the email change request was last modified.
+    """
+
+    id = models.UUIDField(default=uuid7, editable=False, primary_key=True)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="email_change_request",
+        verbose_name=_("user"),
+    )
+    current_email = models.EmailField(_("current email address"))
+    proposed_email = models.EmailField(_("proposed email address"))
+    confirmed_by_proposed_email = models.BooleanField(
+        _("confirmed by proposed email"),
+        default=False,
+    )
+    confirmed_by_current_email = models.BooleanField(
+        _("confirmed by current email"),
+        default=False,
+    )
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    last_modified = models.DateTimeField(_("last modified"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("email change request")
+        verbose_name_plural = _("email change requests")
+
+    def __str__(self):
+        return f"Email change request for {self.current_email} to {self.proposed_email}"
+
+    def is_complete(self):
+        """
+        Check if the email change request is complete.
+
+        Returns:
+            ``bool``: ``True`` if the request is complete, ``False`` otherwise.
+        """
+        return self.confirmed_by_proposed_email and self.confirmed_by_current_email
