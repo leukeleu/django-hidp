@@ -121,6 +121,19 @@ linked_services_urls = [
     ),
 ]
 
+change_email_urls = [
+    path(
+        "change-email/",
+        views.EmailChangeRequestView.as_view(),
+        name="email_change_request",
+    ),
+    path(
+        "change-email/sent/",
+        views.EmailChangeRequestSentView.as_view(),
+        name="email_change_request_sent",
+    ),
+]
+
 management_urls = [
     path(
         "manage/",
@@ -129,6 +142,7 @@ management_urls = [
             + change_password_urls
             + set_password_urls
             + linked_services_urls
+            + change_email_urls
         ),
     ),
 ]

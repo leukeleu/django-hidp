@@ -695,3 +695,36 @@ class OIDCLinkedServicesView(
                 ]
             ),
         )
+
+
+@method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_strict, name="dispatch")
+class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
+    """
+    Display and handle the email change request form.
+
+    If the form is submitted with valid data, emails are sent to the user's
+    current and proposed email address to confirm the change request.
+    The user is then redirected to the success page.
+    """
+
+    form_class = forms.EmailChangeRequestForm
+    template_name = "hidp/accounts/management/email_change_request.html"
+    success_url = reverse_lazy("hidp_accounts:email_change_request_sent")
+
+    def get_form_kwargs(self):
+        return {
+            **super().get_form_kwargs(),
+            "user": self.request.user,
+        }
+
+    def form_valid(self, form):
+        email_change_request = form.save()
+
+        return HttpResponseRedirect(self.success_url)
+
+
+class EmailChangeRequestSentView(generic.TemplateView):
+    """Display a message that the email change request confirmation emails were sent."""
+
+    template_name = "hidp/accounts/management/email_change_request_sent.html"

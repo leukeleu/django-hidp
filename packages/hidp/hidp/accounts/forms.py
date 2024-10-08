@@ -1,11 +1,14 @@
 from django import forms
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
+
+from .models import EmailChangeRequest
 
 UserModel = get_user_model()
 
@@ -295,3 +298,73 @@ class EditUserForm(forms.ModelForm):
     class Meta:
         model = UserModel
         fields = ("first_name", "last_name")
+
+
+class EmailChangeRequestForm(forms.ModelForm):
+    """
+    Initiate the email address change flow for a user.
+
+    The user is asked to enter their password to confirm their identity.
+    """
+
+    proposed_email = forms.EmailField(
+        label=_("New email"),
+        max_length=254,
+        widget=forms.EmailInput(),
+    )
+    password = forms.CharField(
+        label=_("Password"),
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "password"}),
+    )
+
+    class Meta:
+        model = EmailChangeRequest
+        fields = ["proposed_email"]
+
+    def __init__(self, *args, user, **kwargs):
+        """
+        Initialize the form for the given user.
+
+        The `user` is stored in an instance variable, to allow all
+        form methods to access the user.
+        """
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean_password(self):
+        """
+        Validate the password.
+
+        Returns the password if it is correct, otherwise raises a `ValidationError`.
+        """
+        password = self.cleaned_data["password"]
+        if not self.user.check_password(password):
+            raise forms.ValidationError(_("The password is incorrect."))
+        return password
+
+    def save(self, *, commit=True):
+        """
+        Create an email change request.
+
+        Replaces any existing email change requests for the user.
+
+        Args:
+            commit:
+                Whether to save the email change request to the database
+                after creating it.
+
+        Returns:
+            The email change request.
+        """
+        # Set the user on the email change request.
+        instance = super().save(commit=False)
+        instance.user = self.user
+        instance.current_email = self.user.email
+
+        if commit:
+            with transaction.atomic():
+                # Remove existing email change requests for the user, if any.
+                EmailChangeRequest.objects.filter(user=self.user).delete()
+                instance.save()
+        return instance
