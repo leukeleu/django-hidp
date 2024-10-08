@@ -68,6 +68,12 @@ class TestEmailChangeRequest(TestCase):
             "Confirm your email change request",
         )
         self.assertEqual(message.to, [self.user.email])
+        self.assertRegex(
+            message.body,
+            # Matches the email change confirmation URL:
+            # http://testserver/manage/change-email-confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"http://testserver/manage/change-email-confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
 
         # Email should be sent to proposed email
         message = mail.outbox[1]
@@ -76,6 +82,12 @@ class TestEmailChangeRequest(TestCase):
             "Confirm your email change request",
         )
         self.assertEqual(message.to, ["newemail@example.com"])
+        self.assertRegex(
+            message.body,
+            # Matches the email change confirmation URL:
+            # http://testserver/manage/change-email-confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"http://testserver/manage/change-email-confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
 
 
 class TestEmailChangeRequestForm(TestCase):
