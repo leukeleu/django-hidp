@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.2
 
-ARG PYTHON_VERSION=3.11
+ARG PYTHON_VERSION=3.12
 
 # Create the project image
 FROM python:$PYTHON_VERSION
