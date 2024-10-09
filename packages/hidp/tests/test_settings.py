@@ -101,7 +101,7 @@ SECRET_KEY = "secret-key-only-for-testing"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "test_hidp",
+        "NAME": "postgres" if "CI" in os.environ else "test_hidp",
         "USER": "postgres",
         "PASSWORD": "postgres",
         "HOST": "localhost" if "CI" in os.environ else "postgres",
