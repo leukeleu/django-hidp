@@ -1,3 +1,5 @@
+import logging
+
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
@@ -24,6 +26,8 @@ from . import forms, tokens
 from .models import OpenIdConnection
 from .oidc import authorization_code_flow
 from .oidc.exceptions import InvalidOIDCStateError, OAuth2Error
+
+logger = logging.getLogger(__name__)
 
 UserModel = get_user_model()
 
@@ -225,6 +229,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
             # The user might have tampered with the state parameter, the session
             # might have expired or the authentication request might have expired.
             # Redirect the user to the login page to try again.
+            logger.exception("Invalid OIDC state parameter")
             return HttpResponseRedirect(
                 reverse("hidp_accounts:login")
                 + f"?oidc_error={OIDCError.REQUEST_EXPIRED}"
@@ -232,6 +237,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
         except OAuth2Error:
             # One of many things went wrong during the authentication process.
             # Redirect the user to the login page to try again.
+            logger.exception("Error during OIDC authentication")
             return HttpResponseRedirect(
                 reverse("hidp_accounts:login")
                 + f"?oidc_error={OIDCError.UNEXPECTED_ERROR}"
