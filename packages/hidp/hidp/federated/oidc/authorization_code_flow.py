@@ -563,30 +563,30 @@ def get_user_info(*, client, access_token, claims):
                 30,  # Read timeout
             ),
         )
-    except requests.RequestException:
+    except requests.RequestException as exc:
         raise OIDCError(
             f"Failed to fetch user information from {client.provider_key!r}"
             f" from {client.userinfo_endpoint!r}."
-        ) from None
+        ) from exc
 
     try:
         response.raise_for_status()
-    except requests.RequestException:
+    except requests.RequestException as exc:
         raise OIDCError(
             f"Error after fetching user information from {client.provider_key!r}"
             f" from {client.userinfo_endpoint!r}: {response.status_code}."
-        ) from None
+        ) from exc
 
     # 2.3.2. Successful UserInfo Response
     # https://openid.net/specs/openid-connect-basic-1_0.html#UserInfoResponse
     try:
         # The UserInfo Claims MUST be returned as the members of a JSON object.
         user_info = client.normalize_userinfo(userinfo=response.json())
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as exc:
         raise OIDCError(
             f"Failed to parse user information from {client.provider_key!r}"
             f" from {client.userinfo_endpoint!r}."
-        ) from None
+        ) from exc
 
     # The sub Claim in the UserInfo Response MUST be verified to exactly match
     # the sub Claim in the ID Token; if they do not match, the UserInfo Response
