@@ -34,14 +34,43 @@
 
   {% if oidc_linked_providers %}
   <h2>{% translate 'Linked services' %}</h2>
+  {% if oidc_linked_providers|length > 1 %}
+    {% translate 'Your account is currently linked with the following services:' %}
+  {% else %}
+    {% translate 'Your account is currently linked with the following service:' %}
+  {% endif %}
   {% for item in oidc_linked_providers %}
-  <p>
-    {% blocktranslate trimmed with provider=item.provider.name %}
-    Linked with {{ provider }}
-    {% endblocktranslate %}
-    <a href="{{ item.url }}" aria-label="{% translate 'Unlink' %}">{% translate 'Unlink' %}</a>
-  </p>
+  <ul>
+    <li>
+      {{ item.provider.name }}
+      {% if can_unlink %}
+        <a href="{{ item.url }}" aria-label="{% translate 'Unlink' %}">{% translate 'Unlink' %}</a>
+      {% endif %}
+    </li>
+  </ul>
   {% endfor %}
+  {% endif %}
+
+  {% if not can_unlink %}
+  <p>
+    {% blocktranslate trimmed %}
+      Unlinking is currently disabled to prevent you from being locked out.
+    {% endblocktranslate %}
+  <p>
+  {% if oidc_available_providers %}
+  <p>
+    {% blocktranslate trimmed %}
+      To unlink this service, you must either link another service or
+      <a href="{{ set_password_url }}">set a password</a> for your account.
+    {% endblocktranslate %}
+  </p>
+  {% else %}
+  <p>
+    {% blocktranslate trimmed %}
+      To unlink this service, you must <a href="{{ set_password_url }}">set a password</a> for your account.
+    {% endblocktranslate %}
+  </p>
+  {% endif %}
   {% endif %}
 
   {% if oidc_available_providers %}

@@ -113,6 +113,8 @@ This template gets passed the following context variables:
 user's account.
 - `oidc_available_providers` - List of OIDC Clients that can be linked to the
 user's account.
+- `can_unlink` - `False` if the user has not set a password and only has one linked provider.
+- `set_password_url` - URL to `SetPasswordView`.
 - `successfully_linked_provider` - Name of provider that was successfully linked.
 - `removed_provider` - Name of provider that was successfully removed.
 - `oidc_error_message` - Error message from the OIDC Authentication flow in case

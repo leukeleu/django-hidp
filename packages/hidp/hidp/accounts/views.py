@@ -732,7 +732,9 @@ class OIDCLinkedServicesView(
         oidc_linked_provider_keys = self.request.user.openid_connections.values_list(
             "provider_key", flat=True
         )
-
+        # Do not allow the user to unlink the only available login method.
+        user = self.request.user
+        can_unlink = user.has_usable_password() or user.openid_connections.count() > 1
         return super().get_context_data(
             successfully_linked_provider=oidc_clients.get_oidc_client_or_none(
                 self.request.GET.get("success")
@@ -755,6 +757,8 @@ class OIDCLinkedServicesView(
                     if provider.provider_key not in oidc_linked_provider_keys
                 ]
             ),
+            can_unlink=can_unlink,
+            set_password_url=reverse("hidp_accounts:set_password"),
         )
 
 
