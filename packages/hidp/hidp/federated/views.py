@@ -42,13 +42,6 @@ class OIDCMixin:
             return HttpResponseBadRequest("Insecure request")
         return super().dispatch(request, *args, **kwargs)
 
-    @staticmethod
-    def get_oidc_client_or_404(provider_key):
-        try:
-            return oidc_clients.get_oidc_client(provider_key)
-        except KeyError:
-            raise Http404(f"OIDC Client not found: {provider_key!r}") from None
-
     def get_callback_url(self, provider_key):
         return reverse(
             self.callback_pattern,
@@ -127,7 +120,7 @@ class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View
         return HttpResponseRedirect(
             authorization_code_flow.prepare_authentication_request(
                 request,
-                client=self.get_oidc_client_or_404(provider_key),
+                client=oidc_clients.get_oidc_client_or_404(provider_key),
                 callback_url=self.get_callback_url(provider_key),
                 next_url=self.get_redirect_url(),
                 **(self.extra_authentication_request_params or {}),
@@ -220,7 +213,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
             _tokens, claims, user_info, next_url = (
                 authorization_code_flow.handle_authentication_callback(
                     request,
-                    client=self.get_oidc_client_or_404(provider_key),
+                    client=oidc_clients.get_oidc_client_or_404(provider_key),
                     callback_url=self.get_callback_url(provider_key),
                 )
             )
@@ -431,7 +424,7 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
 
     def get_object(self, queryset=None):
         provider_key = self.kwargs["provider_key"]
-        self.provider = OIDCMixin.get_oidc_client_or_404(provider_key)
+        self.provider = oidc_clients.get_oidc_client_or_404(provider_key)
 
         connection = OpenIdConnection.objects.get_by_user_and_provider(
             user=self.request.user, provider_key=provider_key
