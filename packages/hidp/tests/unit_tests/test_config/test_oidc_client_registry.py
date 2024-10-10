@@ -1,5 +1,3 @@
-from unittest import mock
-
 from django.test import SimpleTestCase
 
 from hidp.config import configure_oidc_clients
@@ -27,16 +25,6 @@ class TestOIDCClientsRegistry(SimpleTestCase):
         configure_oidc_clients(ExampleOIDCClient(client_id="test"))
         client = get_oidc_client("example")
         self.assertIsInstance(client, ExampleOIDCClient)
-
-    @mock.patch("hidp.config.oidc_clients.jwks.get_oidc_client_jwks", autospec=True)
-    def test_register_client_with_eagerly_provisioning(self, mock_get_oidc_client_jwks):
-        """Registering a client with eager loading provisions the JWK store."""
-        client = ExampleOIDCClient(client_id="test")
-        configure_oidc_clients(
-            client,
-            eagerly_provision_jwk_store=True,
-        )
-        mock_get_oidc_client_jwks.assert_called_once_with(client, eager=True)
 
     def test_register_duplicate_client(self):
         """Registering a client with a duplicate provider key raises an error."""
