@@ -135,6 +135,15 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Cache settings
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": config.getliteral("app", "redis_cache_connection"),
+    }
+}
+
 # Custom user model
 AUTH_USER_MODEL = "accounts.User"
 
@@ -351,18 +360,3 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
 }
-
-# Cache settings
-
-_REDIS_SOCKET = config.getliteral("app", "redis_socket", fallback=None)
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": (
-            f"unix://{_REDIS_SOCKET}?db=0" if _REDIS_SOCKET else "redis://redis:6379/1",
-        ),
-    },
-}
-
-del _REDIS_SOCKET  # Remove the _REDIS_SOCKET from the global namespace
