@@ -426,5 +426,11 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
     def get_queryset(self):
         return self.request.user.openid_connections
 
+    def get_form_kwargs(self):
+        return super().get_form_kwargs() | {
+            "user": self.request.user,
+            "provider_key": self.provider.provider_key,
+        }
+
     def get_context_data(self, **kwargs):
         return super().get_context_data(provider=self.provider, **kwargs)
