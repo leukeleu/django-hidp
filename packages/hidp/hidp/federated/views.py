@@ -408,7 +408,7 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
-    """Unlink an OIDC client from an existing user account."""
+    """Unlink an OIDC account from an existing user account."""
 
     form_class = forms.OIDCAccountUnlinkForm
     template_name = "hidp/federated/account_unlink.html"
