@@ -649,8 +649,7 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
         return context
 
     def get_form_kwargs(self):
-        return {
-            **super().get_form_kwargs(),
+        return super().get_form_kwargs() | {
             "instance": self.request.user,
         }
 

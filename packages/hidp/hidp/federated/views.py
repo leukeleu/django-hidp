@@ -301,13 +301,11 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
     invalid_token_redirect_url = reverse_lazy("hidp_accounts:register")
 
     def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update(
-            provider_key=self.token_data["provider_key"],
-            claims=self.token_data["claims"],
-            user_info=self.token_data["user_info"],
-        )
-        return kwargs
+        return super().get_form_kwargs() | {
+            "provider_key": self.token_data["provider_key"],
+            "claims": self.token_data["claims"],
+            "user_info": self.token_data["user_info"],
+        }
 
     def form_valid(self, form):
         user = form.save()
@@ -399,13 +397,11 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
         return super().get_success_url() + f"?success={self.provider.provider_key}"
 
     def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs.update(
-            user=self.request.user,
-            provider_key=self.token_data["provider_key"],
-            claims=self.token_data["claims"],
-        )
-        return kwargs
+        return super().get_form_kwargs() | {
+            "user": self.request.user,
+            "provider_key": self.token_data["provider_key"],
+            "claims": self.token_data["claims"],
+        }
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(provider=self.provider, **kwargs)
