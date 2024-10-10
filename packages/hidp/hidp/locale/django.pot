@@ -287,6 +287,7 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
 #: hidp/templates/hidp/accounts/verification/verify_email.html
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "The link you followed is invalid. It may have expired or been used already."
 msgstr ""
 
@@ -381,6 +382,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
 msgid "Back"
 msgstr ""
 
@@ -566,6 +568,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 #: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
 msgid "Change email address"
 msgstr ""
 
@@ -584,6 +587,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Please note that changing your email address will also change the username you use to login."
 msgstr ""
 
@@ -597,4 +601,58 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "Only after you confirmed through both email addresses, your email address will be changed."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Successfully confirmed the change from your new email address."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "You also need to confirm the change from your current email."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Successfully confirmed the change from your current email address."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "You also need to confirm the change from your new email."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Successfully confirmed the change from both your current and new email address."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Your email address has been changed."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Something went wrong"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "Confirm email change"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "You have already confirmed the change from this email address."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "Please go to your other inbox and look for the link there."
+msgstr ""
+
+#: hidp/accounts/forms.py
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "Yes, I want to change my email address"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+#, python-format
+msgid "Are you sure you want to change your email address from %(current_email)s to %(proposed_email)s?"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "Confirm"
 msgstr ""

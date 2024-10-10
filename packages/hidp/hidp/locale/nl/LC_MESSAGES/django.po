@@ -288,6 +288,7 @@ msgstr "Verificatie-e-mail opnieuw verzenden"
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
 #: hidp/templates/hidp/accounts/verification/verify_email.html
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "The link you followed is invalid. It may have expired or been used already."
 msgstr "De link die je hebt gevolgd is ongeldig. Het kan zijn dat deze is verlopen of al is gebruikt."
 
@@ -382,6 +383,7 @@ msgstr "Koppel met %(provider)s"
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
 msgid "Back"
 msgstr "Terug"
 
@@ -567,6 +569,7 @@ msgstr "Bevestig je verzoek om je e-mailadres te wijzigen"
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 #: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
 msgid "Change email address"
 msgstr "Wijzig e-mailadres"
 
@@ -585,6 +588,7 @@ msgstr "Je ontvangt een e-mail op zowel je huidige als je nieuwe e-mailadres met
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Please note that changing your email address will also change the username you use to login."
 msgstr "Houd er rekening mee dat het wijzigen van je e-mailadres ook je inlognaam verandert."
 
@@ -599,3 +603,57 @@ msgstr "Als je geen e-mail ontvangt, controleer dan of je het nieuwe adres corre
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "Only after you confirmed through both email addresses, your email address will be changed."
 msgstr "Pas op het moment dat je via beide e-mailadressen hebt bevestigd, zal je e-mailadres worden gewijzigd."
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Successfully confirmed the change from your new email address."
+msgstr "De wijziging is succesvol bevestigd vanaf je nieuwe e-mailadres."
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "You also need to confirm the change from your current email."
+msgstr "Je moet de wijziging ook bevestigen vanaf je huidige e-mailadres."
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Successfully confirmed the change from your current email address."
+msgstr "De wijziging is succesvol bevestigd vanaf je huidige e-mailadres."
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "You also need to confirm the change from your new email."
+msgstr "Je moet de wijziging ook bevestigen vanaf je nieuwe e-mailadres."
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Successfully confirmed the change from both your current and new email address."
+msgstr "De wijziging is succesvol bevestigd vanaf zowel je huidige als je nieuwe e-mailadres."
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Your email address has been changed."
+msgstr "Je e-mailadres is gewijzigd."
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Something went wrong"
+msgstr "Er ging iets fout"
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "Confirm email change"
+msgstr "Bevestig e-mailadres wijziging"
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "You have already confirmed the change from this email address."
+msgstr "Je hebt de wijziging al bevestigd vanaf dit e-mailadres."
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "Please go to your other inbox and look for the link there."
+msgstr "Ga naar je andere inbox en bevestig de wijziging:"
+
+#: hidp/accounts/forms.py
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "Yes, I want to change my email address"
+msgstr "Ja, ik wil mijn e-mailadres wijzigen"
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+#, python-format
+msgid "Are you sure you want to change your email address from %(current_email)s to %(proposed_email)s?"
+msgstr "Weet je zeker dat je je e-mailadres wilt wijzigen van %(current_email)s naar %(proposed_email)s?"
+
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+msgid "Confirm"
+msgstr "Bevestig"
