@@ -344,13 +344,7 @@ if config.getboolean("app", "enable_oidc_certification_client", fallback=False):
         )
     )
 
-hidp_config.configure_oidc_clients(
-    *oidc_clients,
-    # Eagerly provision the JWK store to ensure that the keys are loaded
-    # at application startup. This increases the application startup time
-    # but avoids the first request to be slow.
-    eagerly_provision_jwk_store=True,
-)
+hidp_config.configure_oidc_clients(*oidc_clients)
 
 # Django REST Framework
 
