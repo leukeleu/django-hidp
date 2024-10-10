@@ -6,7 +6,36 @@ HIdP supports authentication using OpenID Connect (OIDC).
 HIdP has built-in support for both Google and Microsoft as OIDC providers,
 and can be extended to support others.
 
-## Using the provided OIDC Clients
+## Quick Start
+
+To enable OIDC authentication, you need to configure the OIDC clients in your Django settings.
+
+```python
+from hidp import config as hidp_config
+
+from hidp.federated.providers.google import GoogleOIDCClient
+from hidp.federated.providers.microsoft import MicrosoftOIDCClient
+
+hidp_config.configure_oidc_clients(
+    GoogleOIDCClient(client_id="your-client-id", client_secret="****"),
+    MicrosoftOIDCClient(client_id="your-client-id"),
+)
+```
+
+:::{important}
+Never expose a client secret in the source code or client-side code. Use environment
+variables or a secret management tool to store the client secret.
+:::
+
+:::{note}
+It is strongly recommended to run the `refresh_oidc_clients_jwks` management command
+after each deploy and at least once a day to ensure the JWKs are up to date.
+
+See the documentation on [refreshing OIDC clients JWKs](project:management-commands.md#refresh_oidc_clients_jwks)
+for more information.
+:::
+
+## Obtaining Client Credentials
 
 To use Google and/or Microsoft as an OIDC provider, you'll need to create a "project" in
 their respective online portals and configure the client with the correct credentials in HIdP.
@@ -53,11 +82,6 @@ Use `local.<production-domain>` to avoid squatting on a real domain.
   - Save the client ID and client secret, they will be required for the
     OpenID Connect client configuration.
 
-:::{important}
-Make sure to treat the client secret as a secret, do not expose it in the source code
-or client-side code.
-:::
-
 In your Django settings, add the following:
 
 ```python
@@ -68,6 +92,11 @@ hidp_config.configure_oidc_clients(
     GoogleOIDCClient(client_id="your-client-id", client_secret="****"),
 )
 ```
+
+:::{important}
+Never expose the client secret in the source code or client-side code. Use environment
+variables or a secret management tool to store the client secret.
+:::
 
 ### Microsoft
 
@@ -112,7 +141,12 @@ HIdP only supports the Authorization Code flow. Other flows, like the Implicit f
 are considered insecure and will not work.
 :::
 
-:::{note}
+```{eval-rst}
+.. autoclass:: hidp.federated.providers.base.OIDCClient
+   :members:
+```
+
+:::{tip}
 OpenID Connect configuration can usually be extracted from the provider's discovery
 document, commonly found at: *https://**\<provider\>**/.well-known/openid-configuration*
 :::
@@ -124,11 +158,5 @@ from hidp import config as hidp_config
 hidp_config.configure_oidc_clients(
     MyCustomOIDCClient(client_id="your-client-id"),
 )
-```
-
-```{eval-rst}
-.. autoclass:: hidp.federated.providers.base.OIDCClient
-   :members:
-   :special-members:
 ```
 
