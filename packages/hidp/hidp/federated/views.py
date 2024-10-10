@@ -7,7 +7,6 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import (
-    Http404,
     HttpResponseBadRequest,
     HttpResponseRedirect,
 )
@@ -418,21 +417,18 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
     form_class = forms.OIDCAccountUnlinkForm
     template_name = "hidp/federated/account_unlink.html"
     success_url = reverse_lazy("hidp_accounts:oidc_linked_services")
+    slug_field = "provider_key"
+    slug_url_kwarg = "provider_key"
+
+    def dispatch(self, request, *args, provider_key, **kwargs):
+        self.provider = oidc_clients.get_oidc_client_or_404(provider_key)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return super().get_success_url() + f"?removed={self.provider.provider_key}"
 
-    def get_object(self, queryset=None):
-        provider_key = self.kwargs["provider_key"]
-        self.provider = oidc_clients.get_oidc_client_or_404(provider_key)
-
-        connection = OpenIdConnection.objects.get_by_user_and_provider(
-            user=self.request.user, provider_key=provider_key
-        )
-        if connection is None:
-            raise Http404(f"No OpenID Connection found for {provider_key!r}")
-
-        return connection
+    def get_queryset(self):
+        return self.request.user.openid_connections
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(provider=self.provider, **kwargs)
