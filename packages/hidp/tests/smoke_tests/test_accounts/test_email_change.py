@@ -1,10 +1,16 @@
+import io
+
 from http import HTTPStatus
+from unittest import mock
 
 from django.core import mail
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from hidp.accounts import tokens
+from hidp.accounts.email_change import remove_complete_and_stale_email_change_requests
 from hidp.accounts.forms import EmailChangeRequestForm
 from hidp.accounts.models import EmailChangeRequest
 from hidp.test.factories import user_factories
@@ -299,3 +305,169 @@ class TestEmailChangeConfirm(TestCase):
         )
         self.assertTrue(email_change_request.exists())
         self.assertTrue(email_change_request.first().is_complete())
+
+
+class TestRemoveIncompleteEmailChangeRequests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.stale_request = user_factories.EmailChangeRequestFactory()
+        cls.stale_request.created_at = timezone.now() - timezone.timedelta(days=14)
+        cls.stale_request.save()
+
+        cls.incomplete_recent_request = user_factories.EmailChangeRequestFactory()
+        cls.incomplete_recent_request.created_at = timezone.now() - timezone.timedelta(
+            days=3
+        )
+        cls.incomplete_recent_request.save()
+
+        cls.completed_request = user_factories.EmailChangeRequestFactory(
+            confirmed_by_current_email=True,
+            confirmed_by_proposed_email=True,
+        )
+        cls.completed_request.created_at = timezone.now() - timezone.timedelta(days=1)
+        cls.completed_request.save()
+
+    def test_remove_complete_and_stale_email_change_requests_dry_run(self):
+        removed_requests = remove_complete_and_stale_email_change_requests(dry_run=True)
+        email_change_requests_exist = (
+            EmailChangeRequest.objects.filter(pk=email_change_request.pk).exists()
+            for email_change_request in (
+                self.stale_request,
+                self.incomplete_recent_request,
+                self.completed_request,
+            )
+        )
+        self.assertEqual(
+            removed_requests,
+            2,
+            msg="Expected 2 requests to be selected for removal.",
+        )
+        self.assertTrue(
+            all(email_change_requests_exist),
+            msg="Expected all requests to still exist after dry run.",
+        )
+
+    def test_remove_complete_and_stale_email_change_requests(self):
+        removed_requests = remove_complete_and_stale_email_change_requests()
+        self.assertEqual(
+            removed_requests,
+            2,
+            msg="Expected 2 requests to be selected for removal.",
+        )
+        self.assertFalse(
+            EmailChangeRequest.objects.filter(pk=self.stale_request.pk).exists(),
+            msg="Expected stale request to be removed, created more than 7 days ago.",
+        )
+        self.assertFalse(
+            EmailChangeRequest.objects.filter(pk=self.completed_request.pk).exists(),
+            msg="Expected complete request to be removed.",
+        )
+        self.assertTrue(
+            EmailChangeRequest.objects.filter(
+                pk=self.incomplete_recent_request.pk
+            ).exists(),
+            msg=(
+                "Expected incomplete recent request to still exist, created less"
+                " than 7 days ago.",
+            ),
+        )
+
+    def test_remove_complete_and_stale_email_change_requests_2_days(self):
+        removed_requests = remove_complete_and_stale_email_change_requests(days=2)
+        self.assertEqual(
+            removed_requests,
+            3,
+            msg="Expected 3 requests to be selected for removal.",
+        )
+        self.assertFalse(
+            EmailChangeRequest.objects.filter(pk=self.stale_request.pk).exists(),
+            msg="Expected stale request to be removed, created more than 2 days ago.",
+        )
+        self.assertFalse(
+            EmailChangeRequest.objects.filter(pk=self.completed_request.pk).exists(),
+            msg="Expected complete request to be removed.",
+        )
+        self.assertFalse(
+            EmailChangeRequest.objects.filter(
+                pk=self.incomplete_recent_request.pk
+            ).exists(),
+            msg=(
+                "Expected incomplete recent request to be removed, created more"
+                " than 2 days ago.",
+            ),
+        )
+
+    @mock.patch(
+        "hidp.accounts.management.commands.remove_complete_and_stale_email_change_requests.remove_complete_and_stale_email_change_requests",
+        return_value=1,
+    )
+    def test_remove_complete_and_stale_email_change_requests_management_command_dry_run(
+        self, mock_remove_complete_and_stale_email_change_requests
+    ):
+        stdout = io.StringIO()
+
+        call_command(
+            "remove_complete_and_stale_email_change_requests",
+            dry_run=True,
+            stdout=stdout,
+        )
+        self.assertIn(
+            "Removing completed email change requests and requests that have not been"
+            " completed within 7 days...",
+            stdout.getvalue(),
+        )
+        self.assertIn(
+            "1 completed and/or stale email change request(s) would be removed.",
+            stdout.getvalue(),
+        )
+        mock_remove_complete_and_stale_email_change_requests.assert_called_once_with(
+            days=7, dry_run=True
+        )
+
+    @mock.patch(
+        "hidp.accounts.management.commands.remove_complete_and_stale_email_change_requests.remove_complete_and_stale_email_change_requests",
+        return_value=1,
+    )
+    def test_remove_complete_and_stale_email_change_requests_management_command(
+        self, mock_remove_complete_and_stale_email_change_requests
+    ):
+        stdout = io.StringIO()
+
+        call_command("remove_complete_and_stale_email_change_requests", stdout=stdout)
+        self.assertIn(
+            "Removing completed email change requests and requests that have not been"
+            " completed within 7 days...",
+            stdout.getvalue(),
+        )
+        self.assertIn(
+            "Successfully removed 1 completed and/or stale email change request(s).",
+            stdout.getvalue(),
+        )
+        mock_remove_complete_and_stale_email_change_requests.assert_called_once_with(
+            days=7, dry_run=False
+        )
+
+    @mock.patch(
+        "hidp.accounts.management.commands.remove_complete_and_stale_email_change_requests.remove_complete_and_stale_email_change_requests",
+        return_value=2,
+    )
+    def test_remove_complete_and_stale_email_change_requests_management_command_2_days(
+        self, mock_remove_complete_and_stale_email_change_requests
+    ):
+        stdout = io.StringIO()
+
+        call_command(
+            "remove_complete_and_stale_email_change_requests", days=2, stdout=stdout
+        )
+        self.assertIn(
+            "Removing completed email change requests and requests that have not been"
+            " completed within 2 days...",
+            stdout.getvalue(),
+        )
+        self.assertIn(
+            "Successfully removed 2 completed and/or stale email change request(s).",
+            stdout.getvalue(),
+        )
+        mock_remove_complete_and_stale_email_change_requests.assert_called_once_with(
+            days=2, dry_run=False
+        )
