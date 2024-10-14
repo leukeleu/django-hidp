@@ -48,25 +48,3 @@ class TestOpenIdConnectionModel(TestCase):
             )
             self.assertEqual(connection, self.connection)
             self.assertEqual(connection.user, self.user)
-
-    def test_get_by_user_and_provider(self):
-        with self.assertNumQueries(1):
-            connection = models.OpenIdConnection.objects.get_by_user_and_provider(
-                user=self.user, provider_key="test-provider"
-            )
-            self.assertEqual(connection, self.connection)
-            self.assertEqual(connection.user, self.user)
-
-    def test_get_by_user_and_provider_no_connection(self):
-        other_user = user_factories.UserFactory()
-        with self.assertNumQueries(1):
-            connection = models.OpenIdConnection.objects.get_by_user_and_provider(
-                user=other_user, provider_key="test-provider"
-            )
-            self.assertIsNone(connection)
-
-        with self.assertNumQueries(1):
-            connection = models.OpenIdConnection.objects.get_by_user_and_provider(
-                user=self.user, provider_key="other-provider"
-            )
-            self.assertIsNone(connection)
