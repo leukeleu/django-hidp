@@ -1,5 +1,7 @@
 import contextlib
 
+from django.http import Http404
+
 from ..federated.providers.base import OIDCClient
 
 _registry = {}
@@ -67,6 +69,23 @@ def get_oidc_client_or_none(provider_key):
     with contextlib.suppress(KeyError):
         return get_oidc_client(provider_key) if provider_key else None
     return None
+
+
+def get_oidc_client_or_404(provider_key):
+    """
+    Retrieve an OIDC client by provider key or raise a 404 error if not found.
+
+    Arguments:
+        provider_key (str):
+            The provider key of the client to retrieve.
+
+    Returns:
+        OIDCClient:
+            The OIDC client instance.
+    """
+    with contextlib.suppress(KeyError):
+        return get_oidc_client(provider_key)
+    raise Http404(f"OIDC Client not found: {provider_key!r}") from None
 
 
 def get_registered_oidc_clients():
