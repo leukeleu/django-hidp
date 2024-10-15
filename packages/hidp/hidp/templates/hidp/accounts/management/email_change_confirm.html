@@ -1,0 +1,35 @@
+{% extends "hidp/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Confirm email change' %}{% endblock %}
+
+{% block body %}
+  {% if already_confirmed_for_this_email %}
+  <p>{% translate 'You have already confirmed the change from this email address.'%}</p>
+  <p>{% translate 'Please go to your other inbox and look for the link there.'%}</p>
+  {% else %}
+
+    {% if validlink %}
+    <h1>{% translate 'Confirm email change' %}</h1>
+
+    <p>
+      {% blocktranslate trimmed %}
+      Are you sure you want to change your email address from {{ current_email }} to {{ proposed_email }}?
+      {% endblocktranslate %}
+    </p>
+    <p>{% translate "Please note that changing your email address will also change the username you use to login." %}</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">{% translate 'Confirm' %}</button>
+    </form>
+
+    {% else %}
+    <p>
+      {% translate 'The link you followed is invalid. It may have expired or been used already.' %}
+    </p>
+
+    {% endif %}
+  {% endif %}
+{% endblock %}

@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
-from . import email_verification
+from . import email_verification, tokens
 from .email_change import Recipient
 
 
@@ -248,8 +248,20 @@ class EmailChangeRequestMailer(BaseMailer):
         self.email_change_request = email_change_request
         self.recipient = recipient
 
-    def get_confirmation_url(self):  # noqa: PLR6301
-        return "#"
+    def get_confirmation_url(self):
+        return urljoin(
+            self.base_url,
+            reverse(
+                "hidp_accounts:email_change_confirm",
+                kwargs={
+                    "token": (
+                        tokens.email_change_token_generator.make_token(
+                            str(self.email_change_request.pk), self.recipient
+                        )
+                    )
+                },
+            ),
+        )
 
     def get_context(self, extra_context=None):
         return super().get_context(

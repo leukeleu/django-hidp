@@ -27,6 +27,7 @@ from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
 from . import email_verification, forms, mailer, tokens
 from .email_change import Recipient
+from .models import EmailChangeRequest
 
 logger = logging.getLogger(__name__)
 UserModel = get_user_model()
@@ -112,12 +113,12 @@ class TermsOfServiceView(generic.TemplateView):
     template_name = "hidp/accounts/tos.html"
 
 
-class EmailTokenMixin:
-    """Mixin to handle email verification tokens in URLs."""
+class BaseTokenMixin:
+    """Mixin to handle tokens in URLs."""
 
     token_generator = NotImplemented
     token_session_key = NotImplemented
-    token_placeholder = "email"  # noqa: S105 (not a password)
+    token_placeholder = "token"  # noqa: S105 (not a password)
 
     def _remove_token_from_url(self, token):
         """
@@ -135,6 +136,12 @@ class EmailTokenMixin:
             token, self.token_placeholder
         )
         return HttpResponseRedirect(redirect_url, status=308)
+
+
+class EmailTokenMixin(BaseTokenMixin):
+    """Mixin to handle email verification tokens in URLs."""
+
+    token_placeholder = "email"  # noqa: S105 (not a password)
 
     def _get_user_queryset(self):  # noqa: PLR6301 (no-self-use)
         """
@@ -176,6 +183,60 @@ class EmailTokenMixin:
             return response
         self.user = self._get_user_from_token()
         self.validlink = self.user is not None
+        return super().dispatch(request, token=token)
+
+
+class EmailChangeTokenMixin(BaseTokenMixin):
+    """Mixin to handle email change tokens in URLs."""
+
+    token_placeholder = "email-change"  # noqa: S105 (not a password)
+
+    def _get_email_change_request_from_token_object(self, token_object):
+        """
+        Find the email change request associated with the token in the session.
+
+        Returns:
+            EmailChangeRequest | None:
+                The email change request if the token is valid, otherwise None.
+        """
+        email_change_request = EmailChangeRequest.objects.filter(
+            id=token_object["uuid"]
+        ).first()
+        if (
+            email_change_request is None
+            or email_change_request.user != self.request.user
+        ):
+            return None
+        return email_change_request
+
+    def _check_token(self, token):
+        token = self.request.session.get(self.token_session_key)
+        if token is None:
+            return None
+        return self.token_generator.check_token(token)
+
+    def dispatch(self, request, *, token):
+        """
+        Handle email change tokens in URLs.
+
+        Makes sure the token is removed from the URL and stored in
+        the session.
+
+        Sets the `email_change_request` attribute to the email change request
+        found by the token, and the `validlink` attribute to whether the token
+        is valid (i.e. it resolves to an email change request).
+        """
+        response = self._remove_token_from_url(token)
+        if response:
+            return response
+        token_object = self._check_token(token)
+        self.email_change_request = (
+            self._get_email_change_request_from_token_object(token_object)
+            if token_object
+            else None
+        )
+        self.recipient = token_object["recipient"] if token_object else None
+        self.validlink = self.email_change_request is not None
         return super().dispatch(request, token=token)
 
 
@@ -744,3 +805,74 @@ class EmailChangeRequestSentView(generic.TemplateView):
     """Display a message that the email change request confirmation emails were sent."""
 
     template_name = "hidp/accounts/management/email_change_request_sent.html"
+
+
+class EmailChangeConfirmView(
+    LoginRequiredMixin,
+    EmailChangeTokenMixin,
+    generic.UpdateView,
+):
+    """
+    Landing page for email change confirmation links.
+
+    Contains a form that must be submitted to complete the email change process.
+    """
+
+    form_class = forms.EmailChangeConfirmForm
+    template_name = "hidp/accounts/management/email_change_confirm.html"
+    success_url = reverse_lazy("hidp_accounts:email_change_complete")
+    token_generator = tokens.email_change_token_generator
+    token_session_key = "_email_change_request_token"  # noqa: S105 (not a password)
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "validlink": self.validlink,
+        }
+        if self.validlink:
+            context |= {
+                "recipient": self.recipient,
+                "already_confirmed_for_this_email": getattr(
+                    self.email_change_request, f"confirmed_by_{self.recipient}"
+                ),
+                "current_email": self.email_change_request.current_email,
+                "proposed_email": self.email_change_request.proposed_email,
+            }
+        return super().get_context_data(**(context | kwargs))
+
+    def get_form_kwargs(self):
+        return super().get_form_kwargs() | {
+            "recipient": self.recipient,
+        }
+
+    def get_object(self):
+        return self.email_change_request
+
+    def form_valid(self, form):
+        form.save()
+        return HttpResponseRedirect(self.success_url)
+
+
+class EmailChangeCompleteView(auth_views.TemplateView):
+    """Display a message that the email change has been completed."""
+
+    template_name = "hidp/accounts/management/email_change_complete.html"
+
+    def get_context_data(self, **kwargs):
+        email_change_request = EmailChangeRequest.objects.filter(
+            user=self.request.user
+        ).first()
+        return super().get_context_data() | {
+            "proposed_email_confirmed_current_email_required": (
+                email_change_request.confirmed_by_proposed_email
+                and not email_change_request.confirmed_by_current_email
+            )
+            if email_change_request
+            else None,
+            "current_email_confirmed_proposed_email_required": (
+                email_change_request.confirmed_by_current_email
+                and not email_change_request.confirmed_by_proposed_email
+            )
+            if email_change_request
+            else None,
+            "email_change_request_completed": email_change_request.is_complete(),
+        }

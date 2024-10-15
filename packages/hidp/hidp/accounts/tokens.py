@@ -4,6 +4,8 @@ from datetime import timedelta
 
 from django.core import signing
 
+from .email_change import Recipient
+
 
 class BaseTokenGenerator:
     key_salt = NotImplemented
@@ -91,3 +93,25 @@ class EmailVerificationTokenGenerator(BaseEmailVerificationTokenGenerator):
 
 
 email_verification_token_generator = EmailVerificationTokenGenerator()
+
+
+class EmailChangeTokenGenerator(BaseTokenGenerator):
+    """Token to confirm an email change request."""
+
+    key_salt = "email-change"
+    token_timeout = timedelta(days=1).total_seconds()
+
+    def make_token(self, email_change_request_uuid, recipient):
+        """Generate a token based on the email change request and recipient."""
+        if recipient not in Recipient.__members__.values():
+            raise ValueError(f"Invalid recipient: {recipient}")
+
+        return super().make_token(
+            {
+                "uuid": str(email_change_request_uuid),
+                "recipient": recipient,
+            }
+        )
+
+
+email_change_token_generator = EmailChangeTokenGenerator()

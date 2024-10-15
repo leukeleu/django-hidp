@@ -169,6 +169,34 @@ address and password.
 
 Rendered by the `EmailChangeRequestSentView`.
 
+#### email_change_confirm.html
+
+Rendered by the `EmailChangeConfirmView`.
+
+This template gets passed the following context variables:
+- `form` - The email change confirm form, where users need to confirm the change.
+- `validlink` - boolean that indicates the validity of the used token.
+
+If `validlink` is `True` the following context variables are also available:
+- `already_confirmed_for_this_email` - boolean that indicates if the user has already
+confirmed the change via the used token, either for the current or proposed email.
+- `recipient` - String that indicates the recipient of the email. The value is either
+`'current_email'` or `'proposed_email'`.
+- `current_email` - The current email address.
+- `proposed_email` - The proposed new email address.
+
+#### email_change_complete.html
+
+Rendered by the `EmailChangeCompleteView`.
+
+This template gets passed the following context variables:
+- `proposed_email_confirmed_current_email_required` - boolean that indicates that the
+change is confirmed through proposed email, but not yet through current email.
+- `current_email_confirmed_proposed_email_required` - boolean that indicates that the
+change is confirmed through current email, but not yet through proposed email.
+- `email_change_request_completed` - boolean that indicates whether the entire change
+request is completed.
+
 #### **email**
 
 Templates for the password change notification email can be found

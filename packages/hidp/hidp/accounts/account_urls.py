@@ -132,6 +132,16 @@ change_email_urls = [
         views.EmailChangeRequestSentView.as_view(),
         name="email_change_request_sent",
     ),
+    path(
+        "change-email-confirm/<token>/",
+        views.EmailChangeConfirmView.as_view(),
+        name="email_change_confirm",
+    ),
+    path(
+        "change-email-complete/",
+        views.EmailChangeCompleteView.as_view(),
+        name="email_change_complete",
+    ),
 ]
 
 management_urls = [

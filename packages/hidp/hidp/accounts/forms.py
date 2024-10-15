@@ -8,6 +8,7 @@ from django.utils.safestring import mark_safe
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
+from .email_change import Recipient
 from .models import EmailChangeRequest
 
 UserModel = get_user_model()
@@ -367,4 +368,43 @@ class EmailChangeRequestForm(forms.ModelForm):
                 # Remove existing email change requests for the user, if any.
                 EmailChangeRequest.objects.filter(user=self.user).delete()
                 instance.save()
+        return instance
+
+
+class EmailChangeConfirmForm(forms.ModelForm):
+    """Update the EmailChangeRequest with the correct confirmation."""
+
+    allow_change = forms.BooleanField(
+        label=_("Yes, I want to change my email address"),
+        required=True,
+    )
+
+    class Meta:
+        model = EmailChangeRequest
+        fields = []
+
+    def __init__(self, *args, recipient, **kwargs):
+        """Initialize the form for the given email change request."""
+        self.recipient = recipient
+        super().__init__(*args, **kwargs)
+
+    def save(self, *, commit=True, **kwargs):
+        instance = super().save(commit=False)
+
+        match self.recipient:
+            case Recipient.CURRENT_EMAIL:
+                instance.confirmed_by_current_email = True
+            case Recipient.PROPOSED_EMAIL:
+                instance.confirmed_by_proposed_email = True
+            case _:
+                raise ValueError("Invalid recipient")
+
+        # Change email address of user if complete.
+        if commit:
+            with transaction.atomic():
+                instance.save()
+                if instance.is_complete():
+                    instance.user.email = instance.proposed_email
+                    instance.user.save(update_fields=["email"])
+
         return instance
