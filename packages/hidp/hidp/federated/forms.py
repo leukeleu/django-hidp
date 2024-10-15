@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
@@ -104,3 +105,21 @@ class OIDCAccountUnlinkForm(forms.Form):
         label=_("Yes, I want to unlink this account."),
         required=True,
     )
+
+    def __init__(self, *, user, provider_key, **kwargs):
+        self.user = user
+        self.provider_key = provider_key
+        super().__init__(**kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Do not allow the user to unlink the only available login method.
+        can_unlink = (
+            self.user.has_usable_password()
+            or self.user.openid_connections.exclude(
+                provider_key=self.provider_key
+            ).exists()
+        )
+        if not can_unlink:
+            raise ValidationError(_("You cannot unlink your only way to login."))
+        return cleaned_data

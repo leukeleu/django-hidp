@@ -670,3 +670,29 @@ msgstr "Een wachtwoord is nodig om je identiteit te verfifiëren."
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Please set a password first."
 msgstr "Stel eerst een wachtwoord in."
+
+#: hidp/federated/forms.py
+msgid "You cannot unlink your only way to login."
+msgstr "Je kunt je enige manier om in te loggen niet ontkoppelen."
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+msgid "Your account is currently linked with the following services:"
+msgstr "Je account is momenteel aan de volgende diensten gekoppeld:"
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+msgid "Your account is currently linked with the following service:"
+msgstr "Je account is momenteel aan de volgende dienst gekoppeld:"
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#, python-format
+msgid "To unlink this service, you must either link another service or <a href=\"%(set_password_url)s\">set a password</a> for your account."
+msgstr "Om deze dienst te ontkoppelen, moet je een andere dienst koppelen of <a href=\"%(set_password_url)s\">een wachtwoord instellen</a> voor je account."
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#, python-format
+msgid "To unlink this service, you must <a href=\"%(set_password_url)s\">set a password</a> for your account."
+msgstr "Om deze dienst te ontkoppelen, moet je <a href=\"%(set_password_url)s\">een wachtwoord instellen</a> voor je account."
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+msgid "Unlinking is currently disabled to prevent you from being locked out."
+msgstr "Ontkoppelen is momenteel uitgeschakeld om te voorkomen dat je wordt buitengesloten."

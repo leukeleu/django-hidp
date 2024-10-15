@@ -408,7 +408,7 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
-    """Unlink an OIDC client from an existing user account."""
+    """Unlink an OIDC account from an existing user account."""
 
     form_class = forms.OIDCAccountUnlinkForm
     template_name = "hidp/federated/account_unlink.html"
@@ -425,6 +425,12 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return self.request.user.openid_connections
+
+    def get_form_kwargs(self):
+        return super().get_form_kwargs() | {
+            "user": self.request.user,
+            "provider_key": self.provider.provider_key,
+        }
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(provider=self.provider, **kwargs)

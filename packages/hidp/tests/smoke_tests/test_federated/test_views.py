@@ -590,6 +590,21 @@ class TestOIDCAccountUnlinkView(TestCase):
             response.content.decode("utf-8"),
         )
 
+    def test_delete_only_login_method(self):
+        # Remove the user's password so they can only log in via OIDC
+        self.user.set_unusable_password()
+        self.user.save()
+        self.client.force_login(self.user)
+        # Attempt to unlink the only login method
+        response = self.client.post(self.url, {"allow_unlink": "on"}, follow=True)
+        # Form error
+        self.assertTemplateUsed(response, "hidp/federated/account_unlink.html")
+        self.assertFormError(
+            response.context["form"],
+            None,
+            "You cannot unlink your only way to login.",
+        )
+
     def test_valid_provider_no_connection(self):
         other_user = user_factories.VerifiedUserFactory()
         self.client.force_login(other_user)
