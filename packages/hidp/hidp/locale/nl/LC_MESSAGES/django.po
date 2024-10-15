@@ -469,6 +469,7 @@ msgstr "Voer je voor- en achternaam in."
 #: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/management/set_password.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Set password"
 msgstr "Wachtwoord instellen"
 
@@ -657,3 +658,15 @@ msgstr "Weet je zeker dat je je e-mailadres wilt wijzigen van %(current_email)s 
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Confirm"
 msgstr "Bevestig"
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "You cannot change your email address because you do not have a password set."
+msgstr "Je kan je e-mailadres niet wijzigen, omdat je geen wachtwoord hebt ingesteld."
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "A password is required to confirm your identity."
+msgstr "Een wachtwoord is nodig om je identiteit te verfifiëren."
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Please set a password first."
+msgstr "Stel eerst een wachtwoord in."
