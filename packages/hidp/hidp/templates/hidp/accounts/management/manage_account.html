@@ -29,5 +29,6 @@
   {% else %}
   <a href="{% url 'hidp_accounts:set_password' %}">{% translate 'Set password' %}</a>
   {% endif %}
+  <a href="{% url 'hidp_accounts:email_change_request' %}">{% translate 'Change email address' %}</a>
 
 {% endblock %}

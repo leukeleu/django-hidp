@@ -157,6 +157,18 @@ Rendered by the `SetPasswordDoneView`.
 
 Shows a simple message letting the user know that their password has been set.
 
+#### email_change_request.html
+
+Rendered by the `EmailChangeRequestView`.
+
+This template gets passed the following context variables:
+- `form` - The email change request form, where users need to fill in a new email
+address and password.
+
+#### email_change_request_sent.html
+
+Rendered by the `EmailChangeRequestSentView`.
+
 #### **email**
 
 Templates for the password change notification email can be found
@@ -173,6 +185,23 @@ This template gets passed the following context variable:
 ##### password_changed_subject.txt
 
 The subject of the email is set with this template: `password_changed_subject.txt`.
+
+##### email_change_body.txt
+
+Sent by the `EmailChangeRequestView` to both old and new email address when a user
+requests to change their email address.
+
+This template gets passed the following context variables:
+- `confirmation_url` - URL to `EmailChangeConfirmView`.
+- `user` - The user that requested the email change
+- `recipient` - String that indicates the recipient of the email. The value is either
+`'current_email'` or `'proposed_email'`.
+- `current_email` - The current email address.
+- `proposed_email` - The proposed new email address.
+
+##### email_change_subject.txt
+
+The subject of the email is set with this template: `email_change_subject.txt`.
 
 ### **recovery**
 

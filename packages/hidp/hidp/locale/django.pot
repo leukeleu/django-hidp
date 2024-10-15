@@ -143,6 +143,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/edit_account.html
 #: hidp/templates/hidp/accounts/management/password_change.html
 #: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Cancel"
 msgstr ""
 
@@ -336,6 +337,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/edit_account.html
 #: hidp/templates/hidp/accounts/management/password_change.html
 #: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Save"
 msgstr ""
 
@@ -506,4 +508,93 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/password_changed_subject.txt
 msgid "Password changed"
+msgstr ""
+
+#: hidp/accounts/forms.py
+msgid "New email"
+msgstr ""
+
+#: hidp/accounts/forms.py
+msgid "Password"
+msgstr ""
+
+#: hidp/accounts/forms.py
+msgid "The password is incorrect."
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "current email address"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "proposed email address"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "confirmed by proposed email"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "confirmed by current email"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "created at"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "email change request"
+msgstr ""
+
+#: hidp/accounts/models.py
+msgid "email change requests"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+#, python-format
+msgid "You're receiving this email because you want to change your email address from %(current_email)s to %(proposed_email)s."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+msgid "Please go to the following page and confirm the change:"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/email_change_subject.txt
+msgid "Confirm your email change request"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Change email address"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Enter your new email address."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Your password is required to confirm your identity."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "You will receive an email on your current and new email address with a link to confirm the change."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+msgid "Please note that changing your email address will also change the username you use to login."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+msgid "We've emailed you on your current and new email address to confirm the change. You should receive both emails shortly."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+msgid "If you don't receive an email, please make sure you've entered the correct new address, and check your spam folder."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+msgid "Only after you confirmed through both email addresses, your email address will be changed."
 msgstr ""
