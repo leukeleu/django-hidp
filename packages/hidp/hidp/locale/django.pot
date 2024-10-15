@@ -468,6 +468,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/management/set_password.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Set password"
 msgstr ""
 
@@ -655,4 +656,16 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Confirm"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "You cannot change your email address because you do not have a password set."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "A password is required to confirm your identity."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Please set a password first."
 msgstr ""

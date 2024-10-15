@@ -780,6 +780,12 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
             "user": self.request.user,
         }
 
+    def get_context_data(self, **kwargs):
+        context = {
+            "can_change_email": self.request.user.has_usable_password(),
+        }
+        return super().get_context_data(**(context | kwargs))
+
     def form_valid(self, form):
         email_change_request = form.save()
 

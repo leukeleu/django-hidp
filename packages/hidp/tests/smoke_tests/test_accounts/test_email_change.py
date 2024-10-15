@@ -39,6 +39,42 @@ class TestEmailChangeRequest(TestCase):
             response, "hidp/accounts/management/email_change_request.html"
         )
 
+    def test_get_user_without_password_requests_email_change(self):
+        self.user.set_unusable_password()
+        self.user.save()
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.url)
+        self.assertInHTML(
+            "You cannot change your email address because you do not have a"
+            " password set.",
+            response.content.decode(),
+        )
+        self.assertInHTML(
+            "Please set a password first.",
+            response.content.decode(),
+        )
+        self.assertInHTML(
+            '<a href="/manage/set-password/">Set password</a>',
+            response.content.decode(),
+        )
+
+    def test_post_user_without_password_requests_email_change(self):
+        self.user.set_unusable_password()
+        self.user.save()
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.url,
+            {
+                "password": "P@ssw0rd!",
+                "proposed_email": "newemail@example.com",
+            },
+        )
+        self.assertFalse(response.context["form"].is_valid())
+        self.assertIn("password", response.context["form"].errors)
+
     def test_user_requests_email_change(self):
         with (
             self.assertTemplateUsed("hidp/accounts/management/email/email_change_subject.txt"),
