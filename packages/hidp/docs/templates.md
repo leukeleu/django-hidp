@@ -192,9 +192,9 @@ confirmed the change via the used token, either for the current or proposed emai
 Rendered by the `EmailChangeCompleteView`.
 
 This template gets passed the following context variables:
-- `proposed_email_confirmed_current_email_required` - boolean that indicates that the
+- `current_email_confirmation_required` - boolean that indicates that the
 change is confirmed through proposed email, but not yet through current email.
-- `current_email_confirmed_proposed_email_required` - boolean that indicates that the
+- `proposed_email_confirmation_required` - boolean that indicates that the
 change is confirmed through current email, but not yet through proposed email.
 - `email_change_request_completed` - boolean that indicates whether the entire change
 request is completed.
