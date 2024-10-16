@@ -199,6 +199,21 @@ change is confirmed through current email, but not yet through proposed email.
 - `email_change_request_completed` - boolean that indicates whether the entire change
 request is completed.
 
+#### email_change_cancel.html
+
+Rendered by the `EmailChangeCancelView`.
+
+This template gets passed the following context variables:
+- `validlink` - boolean that indicates whether the request can be cancelled.
+
+If `validlink` is `True` the following context variables are also available:
+- `current_email` - The current email address.
+- `proposed_email` - The proposed new email address.
+
+#### email_change_cancel_done.html
+
+Rendered by the `EmailChangeCancelDoneView`.
+
 #### **email**
 
 Templates for the password change notification email can be found
