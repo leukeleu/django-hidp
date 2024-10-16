@@ -58,6 +58,11 @@ OAUTH2_PROVIDER = {
     "OAUTH2_VALIDATOR_CLASS": "hidp.oidc_provider.oauth_validators.OAuth2Validator",
 }
 
+# XXX: Everything above this line is included verbatim in the documentation!
+#      If this line number changes, update `literalinclude` in the
+#      "Adding/overriding Django OAuth Toolkit settings" section of
+#      `docs/configure-as-oidc-provider.md` to end at the correct line number.
+
 
 def get_oauth2_provider_settings(
     *,
