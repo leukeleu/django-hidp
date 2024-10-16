@@ -29,7 +29,16 @@ INSTALLED_APPS = [
 ]
 ```
 
-## Generate private key
+## Configure Django OAuth Toolkit
+
+HIdP uses Django OAuth Toolkit (DOT) to provide OIDC functionality.
+
+For easy configuration, HIdP provides a helper function to generate the settings required by DOT.
+
+The only required setting is the `OIDC_RSA_PRIVATE_KEY`, which is used to sign the tokens.
+All other settings are set to the values preferred by HIdP.
+
+### Generate private key
 
 The OAuth2 / OIDC provider requires a private key to sign the tokens.
 
@@ -57,6 +66,9 @@ OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
 Other ways to provide the private key are possible, e.g. using environment variables.
 Use whatever method is most suitable for your deployment.
 :::
+
+For information on the settings provided by `get_oauth2_provider_settings` and instructions on how to add or override
+the settings, refer to the [](#addingoverriding-django-oauth-toolkit-settings) section.
 
 ## Database migrations
 
@@ -161,3 +173,26 @@ REST_FRAMEWORK = {
 ```
 
 For more information on the functionality and options of DRF Standardized Errors, refer to the [documentation](https://drf-standardized-errors.readthedocs.io/en/latest/).
+
+## Adding/overriding Django OAuth Toolkit settings
+
+To add to or override the settings provided by `get_oauth2_provider_settings` you can update the dictionary
+returned by the function, for example to disable the OIDC logout prompt use the following code:
+
+```python
+OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
+    OIDC_RSA_PRIVATE_KEY=OIDC_RSA_PRIVATE_KEY
+) | {
+    "OIDC_RP_INITIATED_LOGOUT_ALWAYS_PROMPT": False,
+}
+```
+
+The settings provided by `get_oauth2_provider_settings` are as follows:
+
+```{eval-rst}
+.. literalinclude:: ../hidp/config/oauth2_provider.py
+  :lines: 1-60
+```
+
+Refer to the [Django OAuth Toolkit documentation](https://django-oauth-toolkit.readthedocs.io/en/latest/settings.html)
+for more information on the settings provided by DOT and a list of all available settings.
