@@ -408,3 +408,12 @@ class EmailChangeConfirmForm(forms.ModelForm):
                     instance.user.save(update_fields=["email"])
 
         return instance
+
+
+class EmailChangeCancelForm(forms.Form):
+    """Delete the EmailChangeRequest."""
+
+    allow_cancel = forms.BooleanField(
+        label=_("Yes, I want to cancel changing my email address"),
+        required=True,
+    )

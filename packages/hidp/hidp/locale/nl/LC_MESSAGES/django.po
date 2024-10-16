@@ -384,6 +384,8 @@ msgstr "Koppel met %(provider)s"
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+#: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
 msgid "Back"
 msgstr "Terug"
 
@@ -696,3 +698,30 @@ msgstr "Om deze dienst te ontkoppelen, moet je <a href=\"%(set_password_url)s\">
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Unlinking is currently disabled to prevent you from being locked out."
 msgstr "Ontkoppelen is momenteel uitgeschakeld om te voorkomen dat je wordt buitengesloten."
+
+#: hidp/accounts/forms.py
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+msgid "Yes, I want to cancel changing my email address"
+msgstr "Ja, ik wil het wijzigen van mijn e-mailadres annuleren"
+
+#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+msgid "If you didn't request this change, you can cancel the request by visiting the following page:"
+msgstr "Als je deze wijziging niet hebt aangevraagd, kun je het verzoek annuleren op de volgende pagina:"
+
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+#: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
+msgid "Cancel email change"
+msgstr "Annuleer e-mailadres wijziging"
+
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+#, python-format
+msgid "Are you sure you want to cancel changing your email address from %(current_email)s to %(proposed_email)s?"
+msgstr "Weet je zeker dat je de wijziging van je e-mailadres van %(current_email)s naar %(proposed_email)s wilt annuleren?"
+
+#: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
+msgid "Successfully cancelled the email address change."
+msgstr "Het wijzigen van je e-mailadres is succesvol geannuleerd."
+
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+msgid "The link you followed is invalid or has expired."
+msgstr "De link die je hebt gevolgd is ongeldig of verlopen."

@@ -263,6 +263,12 @@ class EmailChangeRequestMailer(BaseMailer):
             ),
         )
 
+    def get_cancel_url(self):
+        return urljoin(
+            self.base_url,
+            reverse("hidp_accounts:email_change_cancel"),
+        )
+
     def get_context(self, extra_context=None):
         return super().get_context(
             {
@@ -271,6 +277,7 @@ class EmailChangeRequestMailer(BaseMailer):
                 "current_email": self.email_change_request.current_email,
                 "proposed_email": self.email_change_request.proposed_email,
                 "confirmation_url": self.get_confirmation_url(),
+                "cancel_url": self.get_cancel_url(),
             }
             | (extra_context or {})
         )

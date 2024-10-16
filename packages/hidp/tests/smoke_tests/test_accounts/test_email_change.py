@@ -119,6 +119,10 @@ class TestEmailChangeRequest(TestCase):
             # http://testserver/manage/change-email-confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
             r"http://testserver/manage/change-email-confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
         )
+        self.assertIn(
+            "http://testserver/manage/change-email-cancel/",
+            message.body,
+        )
 
         # Email should be sent to proposed email
         message = mail.outbox[1]
@@ -132,6 +136,10 @@ class TestEmailChangeRequest(TestCase):
             # Matches the email change confirmation URL:
             # http://testserver/manage/change-email-confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
             r"http://testserver/manage/change-email-confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
+        self.assertIn(
+            "http://testserver/manage/change-email-cancel/",
+            message.body,
         )
 
 
@@ -341,6 +349,111 @@ class TestEmailChangeConfirm(TestCase):
         )
         self.assertTrue(email_change_request.exists())
         self.assertTrue(email_change_request.first().is_complete())
+
+
+class TestEmailChangeCancel(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory()
+        cls.email_change_request = user_factories.EmailChangeRequestFactory(
+            user=cls.user
+        )
+        cls.url = reverse("hidp_accounts:email_change_cancel")
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_get_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+    def test_get_no_change_request(self):
+        self.email_change_request.delete()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        self.assertIn("validlink", response.context)
+        self.assertFalse(
+            response.context["validlink"], msg="Expected the link to be invalid."
+        )
+        self.assertInHTML(
+            "The link you followed is invalid or has expired.",
+            response.content.decode(),
+        )
+
+    def test_get_completed_change_request(self):
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.confirmed_by_proposed_email = True
+        self.email_change_request.save()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        self.assertIn("validlink", response.context)
+        self.assertFalse(
+            response.context["validlink"], msg="Expected the link to be invalid."
+        )
+        self.assertInHTML(
+            "The link you followed is invalid or has expired.",
+            response.content.decode(),
+        )
+
+    def test_get(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_cancel.html"
+        )
+
+        self.assertIn("validlink", response.context)
+        self.assertTrue(
+            response.context["validlink"], msg="Expected the link to be valid."
+        )
+
+    def test_post_expired_change_request(self):
+        self.email_change_request.created_at = timezone.now() - timezone.timedelta(
+            days=8
+        )
+        self.email_change_request.save()
+
+        response = self.client.post(self.url, {"allow_cancel": "on"})
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        self.assertInHTML(
+            "The link you followed is invalid or has expired.",
+            response.content.decode(),
+        )
+
+    def test_post_no_change_request(self):
+        self.email_change_request.delete()
+
+        response = self.client.post(self.url, {"allow_cancel": "on"})
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        self.assertInHTML(
+            "The link you followed is invalid or has expired.",
+            response.content.decode(),
+        )
+
+    def test_post(self):
+        response = self.client.post(self.url, {"allow_cancel": "on"}, follow=True)
+        self.assertRedirects(
+            response,
+            reverse("hidp_accounts:email_change_cancel_done"),
+        )
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_cancel_done.html"
+        )
+
+        self.assertFalse(
+            EmailChangeRequest.objects.filter(
+                user=self.user,
+            ).exists()
+        )
 
 
 class TestRemoveIncompleteEmailChangeRequests(TestCase):

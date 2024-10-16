@@ -1,0 +1,24 @@
+{% extends "hidp/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Cancel email change' %}{% endblock %}
+
+{% block body %}
+  <h1>{% translate 'Cancel email change' %}</h1>
+
+  {% if not validlink %}
+  <p>{% translate 'The link you followed is invalid or has expired.' %}</p>
+  {% else %}
+  <p>
+    {% blocktranslate trimmed %}
+    Are you sure you want to cancel changing your email address from {{ current_email }} to {{ proposed_email }}?
+    {% endblocktranslate %}
+  </p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" name="allow_cancel" value="true">{% translate 'Yes, I want to cancel changing my email address' %}</button>
+    <a href="{% url 'hidp_accounts:manage_account' %}">{% translate 'Back' %}</a>
+  </form>
+  {% endif %}
+{% endblock %}
