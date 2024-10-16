@@ -8,4 +8,9 @@ You're receiving this email because you want to change your email address from {
 {% translate "Please go to the following page and confirm the change:" %}
 
 {{ confirmation_url }}
+
+{% translate "If you didn't request this change, you can cancel the request by visiting the following page:" %}
+
+{{ cancel_url }}
+
 {% endautoescape %}

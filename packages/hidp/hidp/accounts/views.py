@@ -886,3 +886,61 @@ class EmailChangeCompleteView(auth_views.TemplateView):
             else None,
             "email_change_request_completed": email_change_request.is_complete(),
         }
+
+
+class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
+    """Cancel an email change request."""
+
+    form_class = forms.EmailChangeCancelForm
+    template_name = "hidp/accounts/management/email_change_cancel.html"
+    success_url = reverse_lazy("hidp_accounts:email_change_cancel_done")
+    token_generator = tokens.email_change_token_generator
+
+    def get_context_data(self, **kwargs):
+        validlink = self.object is not None
+        context = {
+            "validlink": validlink,
+        }
+
+        if validlink:
+            context |= {
+                "current_email": self.object.current_email,
+                "proposed_email": self.object.proposed_email,
+            }
+
+        return super().get_context_data(**(context | kwargs))
+
+    def get_object(self, queryset=None):
+        """
+        Get the email change request to cancel.
+
+        But only if there is a request for the current user that has not been confirmed
+        by both the current and proposed email addresses, and has not expired.
+        """
+        return (
+            EmailChangeRequest.objects.filter(
+                user=self.request.user,
+                created_at__gte=(
+                    timezone.now()
+                    - timedelta(seconds=self.token_generator.token_timeout)
+                ),
+            )
+            .exclude(
+                confirmed_by_current_email=True,
+                confirmed_by_proposed_email=True,
+            )
+            .first()
+        )
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if self.object is None:
+            # Show invalid or expired link message.
+            return self.get(request, *args, **kwargs)
+        return super().post(request, *args, **kwargs)
+
+
+class EmailChangeCancelDoneView(auth_views.TemplateView):
+    """Display a message that the email change request has been cancelled."""
+
+    template_name = "hidp/accounts/management/email_change_cancel_done.html"
