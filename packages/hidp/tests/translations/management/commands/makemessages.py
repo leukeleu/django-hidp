@@ -6,6 +6,23 @@ from django.core.management.commands import makemessages
 class Command(makemessages.Command):
     """Wraps Django's makemessages command to create translation files for HIdP."""
 
+    msgmerge_options = [
+        *makemessages.Command.msgmerge_options,
+        "--sort-by-file",
+    ]
+    msguniq_options = [
+        *makemessages.Command.msguniq_options,
+        "--sort-by-file",
+    ]
+    msgattrib_options = [
+        *makemessages.Command.msgattrib_options,
+        "--sort-by-file",
+    ]
+    xgettext_options = [
+        *makemessages.Command.xgettext_options,
+        "--sort-by-file",
+    ]
+
     def add_arguments(self, parser):
         super().add_arguments(parser)
         # Override default options to avoid having to specify them
