@@ -85,13 +85,14 @@ class OIDCContextMixin:
 
     def get_context_data(self, **kwargs):
         oidc_error = self.request.GET.get("oidc_error", None)
-        return super().get_context_data(
-            oidc_login_providers=self._build_provider_url_list(
+        context = {
+            "oidc_error": oidc_error,
+            "oidc_login_providers": self._build_provider_url_list(
                 oidc_clients.get_registered_oidc_clients()
             ),
-            oidc_error_message=self.oidc_error_messages.get(oidc_error, oidc_error),
-            **kwargs,
-        )
+            "oidc_error_message": self.oidc_error_messages.get(oidc_error, oidc_error),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -396,7 +397,10 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
         }
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(provider=self.provider, **kwargs)
+        context = {
+            "provider": self.provider,
+        }
+        return super().get_context_data() | context | kwargs
 
     def form_valid(self, form):
         form.save()
@@ -433,4 +437,7 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
         }
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(provider=self.provider, **kwargs)
+        context = {
+            "provider": self.provider,
+        }
+        return super().get_context_data() | context | kwargs

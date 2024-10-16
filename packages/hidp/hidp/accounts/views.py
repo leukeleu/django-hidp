@@ -61,14 +61,12 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
             if (redirect_url := self.get_redirect_url())
             else ""
         )
-        return super().get_context_data(
-            login_url=login_url,
-            next=self.get_success_url(),
-            # Make sure logging out will return to the current page,
-            # including the query string.
-            logout_next_url=self.request.get_full_path(),
-            **kwargs,
-        )
+        context = {
+            "login_url": login_url,
+            "next": self.get_success_url(),
+            "logout_next_url": self.request.get_full_path(),
+        }
+        return super().get_context_data() | context | kwargs
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -260,10 +258,10 @@ class EmailVerificationRequiredView(
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            validlink=self.validlink,
-            **kwargs,
-        )
+        context = {
+            "validlink": self.validlink,
+        }
+        return super().get_context_data() | context | kwargs
 
     def post(self, *args, **kwargs):
         if self.validlink:
@@ -307,10 +305,10 @@ class EmailVerificationView(
         return super()._get_user_queryset().email_unverified().filter(is_active=True)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            validlink=self.validlink,
-            **kwargs,
-        )
+        context = {
+            "validlink": self.validlink,
+        }
+        return super().get_context_data() | context | kwargs
 
     def get_object(self):
         return self.user  # The user from the token
@@ -339,10 +337,10 @@ class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.Templat
             if (redirect_url := self.get_redirect_url())
             else ""
         )
-        return super().get_context_data(
-            login_url=login_url,
-            **kwargs,
-        )
+        context = {
+            "login_url": login_url,
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -399,10 +397,10 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
             if (redirect_url := self.get_redirect_url())
             else ""
         )
-        return super().get_context_data(
-            register_url=register_url,
-            **kwargs,
-        )
+        context = {
+            "register_url": register_url,
+        }
+        return super().get_context_data() | context | kwargs
 
     def get_success_url(self):
         """
@@ -576,10 +574,10 @@ class PasswordResetCompleteView(auth_views.TemplateView):
     template_name = "hidp/accounts/recovery/password_reset_complete.html"
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            login_url=resolve_url(settings.LOGIN_URL),
-            **kwargs,
-        )
+        context = {
+            "login_url": resolve_url(settings.LOGIN_URL),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -642,9 +640,9 @@ class SetPasswordView(
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            must_reauthenticate=self.must_reauthenticate,
-            oidc_linked_providers=self._build_provider_url_list(
+        context = {
+            "must_reauthenticate": self.must_reauthenticate,
+            "oidc_linked_providers": self._build_provider_url_list(
                 [
                     provider
                     for provider in oidc_clients.get_registered_oidc_clients()
@@ -657,10 +655,9 @@ class SetPasswordView(
                 else [],
                 url_name="hidp_oidc_client:reauthenticate",
             ),
-            # Return to the current page after re-authenticating.
-            auth_next_url=self.request.get_full_path(),
-            **kwargs,
-        )
+            "auth_next_url": self.request.get_full_path(),
+        }
+        return super().get_context_data() | context | kwargs
 
     def post(self, request, *args, **kwargs):
         if self.must_reauthenticate:
@@ -706,9 +703,10 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
         return self.success_url + "?success"
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["show_success_message"] = "success" in self.request.GET
-        return context
+        context = {
+            "show_success_message": "success" in self.request.GET,
+        }
+        return super().get_context_data() | context | kwargs
 
     def get_form_kwargs(self):
         return super().get_form_kwargs() | {
@@ -735,14 +733,16 @@ class OIDCLinkedServicesView(
         # Do not allow the user to unlink the only available login method.
         user = self.request.user
         can_unlink = user.has_usable_password() or user.openid_connections.count() > 1
-        return super().get_context_data(
-            successfully_linked_provider=oidc_clients.get_oidc_client_or_none(
-                self.request.GET.get("success")
-            ),
-            removed_provider=oidc_clients.get_oidc_client_or_none(
-                self.request.GET.get("removed")
-            ),
-            oidc_linked_providers=self._build_provider_url_list(
+        linked_provider = oidc_clients.get_oidc_client_or_none(
+            self.request.GET.get("success")
+        )
+        removed_provider = oidc_clients.get_oidc_client_or_none(
+            self.request.GET.get("removed")
+        )
+        context = {
+            "successfully_linked_provider": linked_provider,
+            "removed_provider": removed_provider,
+            "oidc_linked_providers": self._build_provider_url_list(
                 [
                     provider
                     for provider in oidc_clients.get_registered_oidc_clients()
@@ -750,16 +750,17 @@ class OIDCLinkedServicesView(
                 ],
                 url_name="hidp_oidc_client:unlink_account",
             ),
-            oidc_available_providers=self._build_provider_url_list(
+            "oidc_available_providers": self._build_provider_url_list(
                 [
                     provider
                     for provider in oidc_clients.get_registered_oidc_clients()
                     if provider.provider_key not in oidc_linked_provider_keys
                 ]
             ),
-            can_unlink=can_unlink,
-            set_password_url=reverse("hidp_accounts:set_password"),
-        )
+            "can_unlink": can_unlink,
+            "set_password_url": reverse("hidp_accounts:set_password"),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -788,7 +789,7 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
         context = {
             "can_change_email": self.request.user.has_usable_password(),
         }
-        return super().get_context_data(**(context | kwargs))
+        return super().get_context_data() | context | kwargs
 
     def form_valid(self, form):
         email_change_request = form.save()
@@ -847,7 +848,7 @@ class EmailChangeConfirmView(
                 "current_email": self.email_change_request.current_email,
                 "proposed_email": self.email_change_request.proposed_email,
             }
-        return super().get_context_data(**(context | kwargs))
+        return super().get_context_data() | context | kwargs
 
     def get_form_kwargs(self):
         return super().get_form_kwargs() | {
@@ -871,7 +872,7 @@ class EmailChangeCompleteView(auth_views.TemplateView):
         email_change_request = EmailChangeRequest.objects.filter(
             user=self.request.user
         ).first()
-        return super().get_context_data() | {
+        context = {
             "proposed_email_confirmed_current_email_required": (
                 email_change_request.confirmed_by_proposed_email
                 and not email_change_request.confirmed_by_current_email
@@ -886,6 +887,7 @@ class EmailChangeCompleteView(auth_views.TemplateView):
             else None,
             "email_change_request_completed": email_change_request.is_complete(),
         }
+        return super().get_context_data() | context | kwargs
 
 
 class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
@@ -908,7 +910,7 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
                 "proposed_email": self.object.proposed_email,
             }
 
-        return super().get_context_data(**(context | kwargs))
+        return super().get_context_data() | context | kwargs
 
     def get_object(self, queryset=None):
         """
