@@ -383,6 +383,8 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+#: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
 msgid "Back"
 msgstr ""
 
@@ -694,4 +696,31 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Unlinking is currently disabled to prevent you from being locked out."
+msgstr ""
+
+#: hidp/accounts/forms.py
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+msgid "Yes, I want to cancel changing my email address"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+msgid "If you didn't request this change, you can cancel the request by visiting the following page:"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+#: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
+msgid "Cancel email change"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+#, python-format
+msgid "Are you sure you want to cancel changing your email address from %(current_email)s to %(proposed_email)s?"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
+msgid "Successfully cancelled the email address change."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+msgid "The link you followed is invalid or has expired."
 msgstr ""
