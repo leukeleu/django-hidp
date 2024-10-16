@@ -41,8 +41,8 @@ class OpenIdConnection(models.Model):
         related_name="openid_connections",
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_modified = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    last_modified = models.DateTimeField(_("last modified"), auto_now=True)
 
     # Short identifier for the identity provider (e.g. google, microsoft, etc.).
     provider_key = models.CharField(max_length=100)

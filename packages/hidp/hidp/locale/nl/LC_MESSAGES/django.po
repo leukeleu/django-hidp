@@ -32,7 +32,7 @@ msgstr "e-mailadres"
 msgid "email verified"
 msgstr "e-mailadres geverifieerd"
 
-#: hidp/accounts/models.py
+#: hidp/accounts/models.py hidp/federated/models.py
 msgid "last modified"
 msgstr "laatst gewijzigd"
 
@@ -542,7 +542,7 @@ msgstr "bevestigd door voorgesteld e-mailadres"
 msgid "confirmed by current email"
 msgstr "bevestigd door huidig e-mailadres"
 
-#: hidp/accounts/models.py
+#: hidp/accounts/models.py hidp/federated/models.py
 msgid "created at"
 msgstr "aangemaakt op"
 
