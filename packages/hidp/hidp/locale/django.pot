@@ -31,7 +31,7 @@ msgstr ""
 msgid "email verified"
 msgstr ""
 
-#: hidp/accounts/models.py
+#: hidp/accounts/models.py hidp/federated/models.py
 msgid "last modified"
 msgstr ""
 
@@ -541,7 +541,7 @@ msgstr ""
 msgid "confirmed by current email"
 msgstr ""
 
-#: hidp/accounts/models.py
+#: hidp/accounts/models.py hidp/federated/models.py
 msgid "created at"
 msgstr ""
 
