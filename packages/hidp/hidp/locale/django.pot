@@ -301,6 +301,7 @@ msgid "Save"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+#: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
 msgid "If you didn't request this change, you can cancel the request by visiting the following page:"
 msgstr ""
 
@@ -316,6 +317,7 @@ msgid "Please note that changing your email address will also change the usernam
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+#: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
 #, python-format
 msgid "You're receiving this email because you want to change your email address from %(current_email)s to %(proposed_email)s."
 msgstr ""
@@ -334,6 +336,19 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/password_changed_subject.txt
 msgid "Password changed"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
+#, python-format
+msgid "However, %(proposed_email)s is already in use by another account."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
+msgid "If you want to use this email address, you'll need to change the email address of the other account first."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/proposed_email_exists_subject.txt
+msgid "Email change request"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_cancel.html
