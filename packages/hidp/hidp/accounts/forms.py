@@ -344,6 +344,20 @@ class EmailChangeRequestForm(forms.ModelForm):
             raise forms.ValidationError(_("The password is incorrect."))
         return password
 
+    def clean_proposed_email(self):
+        """
+        Validate the proposed email address.
+
+        Returns the proposed email address if it is different from the current email
+        address of the user, otherwise raises a `ValidationError`.
+        """
+        proposed_email = self.cleaned_data["proposed_email"]
+        if proposed_email == self.user.email:
+            raise forms.ValidationError(
+                _("The new email address is the same as the current email address.")
+            )
+        return proposed_email
+
     def save(self, *, commit=True):
         """
         Create an email change request.
