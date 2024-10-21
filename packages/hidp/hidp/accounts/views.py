@@ -77,6 +77,23 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
             raise PermissionDenied("Logged-in users cannot register a new account.")
         return super().post(request, *args, **kwargs)
 
+    def send_email(self, user):
+        """Send the appropriate email to the user."""
+        base_url = self.request.build_absolute_uri("/")
+        if not user.email_verified:
+            # Send the email verification email.
+            self.verification_mailer(
+                user,
+                base_url=base_url,
+                post_verification_redirect=self.get_redirect_url(),
+            ).send()
+        else:
+            # Email the user to inform them that they have an account.
+            self.account_exists_mailer(
+                user,
+                base_url=base_url,
+            ).send()
+
     def form_valid(self, form):
         """Save the new user and redirect to the email verification required page."""
         try:
@@ -85,19 +102,7 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
             # The user exists! Find the user by the email address (case-insensitive).
             user = UserModel.objects.get(email__iexact=form.cleaned_data["email"])
 
-        if not user.email_verified:
-            # Send the email verification email.
-            self.verification_mailer(
-                user,
-                base_url=self.request.build_absolute_uri("/"),
-                post_verification_redirect=self.get_redirect_url(),
-            ).send()
-        else:
-            # Email the user to inform them that they have an account.
-            self.account_exists_mailer(
-                user,
-                base_url=self.request.build_absolute_uri("/"),
-            ).send()
+        self.send_email(user)
 
         # Always redirect to the email verification required page.
         # This is a security measure to prevent user enumeration.
@@ -267,14 +272,18 @@ class EmailVerificationRequiredView(
         }
         return super().get_context_data() | context | kwargs
 
+    def send_email(self):
+        """Send the email verification email."""
+        self.verification_mailer(
+            self.user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
+
     def post(self, *args, **kwargs):
         if self.validlink:
             # Send the email verification email.
-            self.verification_mailer(
-                self.user,
-                base_url=self.request.build_absolute_uri("/"),
-                post_verification_redirect=self.get_redirect_url(),
-            ).send()
+            self.send_email()
             # Redirect to the email verification required page, with a new token.
             return HttpResponseRedirect(
                 email_verification.get_email_verification_required_url(
@@ -433,6 +442,14 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
             return self.rate_limited_form_class
         return super().get_form_class()
 
+    def send_email(self, user):
+        """Send the email verification email."""
+        self.verification_mailer(
+            user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
+
     def form_valid(self, form):
         """
         User has provided valid credentials and is allowed to log in.
@@ -451,11 +468,7 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
 
         # If the user's email address is not yet verified:
         # Send the email verification email.
-        self.verification_mailer(
-            user,
-            base_url=self.request.build_absolute_uri("/"),
-            post_verification_redirect=self.get_redirect_url(),
-        ).send()
+        self.send_email(user)
 
         # Then redirect them to the email verification required page.
         return HttpResponseRedirect(
@@ -527,21 +540,25 @@ class PasswordResetRequestView(generic.FormView):
     password_reset_request_mailer = mailers.PasswordResetRequestMailer
     set_password_mailer = mailers.SetPasswordMailer
 
+    def send_email(self, user):
+        """Send the appropriate email to the user."""
+        if user.has_usable_password():
+            mailer_class = self.password_reset_request_mailer
+        else:
+            mailer_class = self.set_password_mailer
+        try:
+            mailer_class(
+                user=user,
+                base_url=self.request.build_absolute_uri("/"),
+            ).send()
+        except Exception:
+            # Do not leak the existence of the user. Log the error and
+            # continue as if the email was sent successfully.
+            logger.exception("Failed to send password (re)set email.")
+
     def form_valid(self, form):
         if user := form.get_user():
-            if user.has_usable_password():
-                mailer_class = self.password_reset_request_mailer
-            else:
-                mailer_class = self.set_password_mailer
-            try:
-                mailer_class(
-                    user=user,
-                    base_url=self.request.build_absolute_uri("/"),
-                ).send()
-            except Exception:
-                # Do not leak the existence of the user. Log the error and
-                # continue as if the email was sent successfully.
-                logger.exception("Failed to send password (re)set email.")
+            self.send_email(user)
         return super().form_valid(form)
 
 
@@ -562,13 +579,16 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
     success_url = reverse_lazy("hidp_accounts:password_reset_complete")
     password_changed_mailer = mailers.PasswordChangedMailer
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        # Send the password changed email.
+    def send_email(self):
+        """Send the password changed email."""
         self.password_changed_mailer(
             self.user,
             base_url=self.request.build_absolute_uri("/"),
         ).send()
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.send_email()
         return response
 
 
@@ -599,13 +619,16 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
             return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
         return super().dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        # Send the password changed email.
+    def send_email(self):
+        """Send the password changed email."""
         self.password_changed_mailer(
             self.request.user,
             base_url=self.request.build_absolute_uri("/"),
         ).send()
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        self.send_email()
         return response
 
 
@@ -672,13 +695,16 @@ class SetPasswordView(
             return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
         return super().post(request, *args, **kwargs)
 
-    def form_valid(self, form):
-        form.save()
-        # Send the password changed email.
+    def send_email(self):
+        """Send the password changed email."""
         self.password_changed_mailer(
             self.request.user,
             base_url=self.request.build_absolute_uri("/"),
         ).send()
+
+    def form_valid(self, form):
+        form.save()
+        self.send_email()
         return super().form_valid(form)
 
 
@@ -841,15 +867,13 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
         }
         return super().get_context_data() | context | kwargs
 
-    def form_valid(self, form):
-        email_change_request = form.save()
-
+    def send_email(self, email_change_request):
+        """Send the email change confirmation emails."""
         mailer_kwargs = {
             "user": self.request.user,
             "email_change_request": email_change_request,
             "base_url": self.request.build_absolute_uri("/"),
         }
-        # Send the confirm email change emails.
         self.email_change_request_mailer(
             **mailer_kwargs,
             recipient=Recipient.CURRENT_EMAIL,
@@ -859,6 +883,9 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
             recipient=Recipient.PROPOSED_EMAIL,
         ).send()
 
+    def form_valid(self, form):
+        email_change_request = form.save()
+        self.send_email(email_change_request)
         return HttpResponseRedirect(self.success_url)
 
 
