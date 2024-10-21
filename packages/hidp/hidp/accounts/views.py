@@ -872,21 +872,22 @@ class EmailChangeCompleteView(auth_views.TemplateView):
         email_change_request = EmailChangeRequest.objects.filter(
             user=self.request.user
         ).first()
-        context = {
-            "proposed_email_confirmed_current_email_required": (
-                email_change_request.confirmed_by_proposed_email
-                and not email_change_request.confirmed_by_current_email
-            )
-            if email_change_request
-            else None,
-            "current_email_confirmed_proposed_email_required": (
-                email_change_request.confirmed_by_current_email
-                and not email_change_request.confirmed_by_proposed_email
-            )
-            if email_change_request
-            else None,
-            "email_change_request_completed": email_change_request.is_complete(),
-        }
+        if email_change_request is None or email_change_request.is_complete():
+            context = {
+                "current_email_confirmation_required": False,
+                "proposed_email_confirmation_required": False,
+                "email_change_request_completed": True,
+            }
+        else:
+            context = {
+                "current_email_confirmation_required": (
+                    not email_change_request.confirmed_by_current_email
+                ),
+                "proposed_email_confirmation_required": (
+                    not email_change_request.confirmed_by_proposed_email
+                ),
+                "email_change_request_completed": False,
+            }
         return super().get_context_data() | context | kwargs
 
 

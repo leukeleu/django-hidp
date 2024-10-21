@@ -6,11 +6,11 @@
 {% block body %}
   <h1>{% translate 'Change email address' %}</h1>
 
-  {% if proposed_email_confirmed_current_email_required %}
+  {% if current_email_confirmation_required %}
   <p>{% translate 'Successfully confirmed the change from your new email address.' %}</p>
   <p>{% translate 'You also need to confirm the change from your current email.' %}</p>
 
-  {% elif current_email_confirmed_proposed_email_required %}
+  {% elif proposed_email_confirmation_required %}
   <p>{% translate 'Successfully confirmed the change from your current email address.' %}</p>
   <p>{% translate 'You also need to confirm the change from your new email.' %}</p>
 
