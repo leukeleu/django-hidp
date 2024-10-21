@@ -942,7 +942,17 @@ class EmailChangeConfirmView(
         return self.email_change_request
 
     def form_valid(self, form):
-        form.save()
+        try:
+            form.save()
+        except IntegrityError:
+            form.add_error(
+                None,
+                _(
+                    "Sorry, changing your email address is not possible because an"
+                    " account with this email address already exists."
+                ),
+            )
+            return self.form_invalid(form)
         return HttpResponseRedirect(self.success_url)
 
 
