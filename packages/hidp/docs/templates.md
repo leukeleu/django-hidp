@@ -208,13 +208,13 @@ Rendered by the `OIDCLinkedServicesView`.
 
 Rendered by the `PasswordChangeView`.
 
+Redirects to `PasswordChangeDoneView` after successfully changing the password.
+
 **Context variables**
 
 `form`
 : A form that allows users to change their password. 
   The user also needs to enter their old password to verify the user's identity.
-
-Redirects to `PasswordChangeDoneView` after successfully changing the password.
 
 ### password_change_done.html
 
@@ -230,6 +230,8 @@ If the user doesn't have a password set they are required to have logged in rece
 in order to set a password. If the user hasn't logged in recently they need to
 re-authenticate using one of the OIDC providers linked to their account.
 
+Redirects to `SetPasswordDoneView` after successfully setting the password.
+
 **Context variables**
 
 `form`
@@ -244,8 +246,6 @@ re-authenticate using one of the OIDC providers linked to their account.
 
 `auth_next_url`
 : URL to redirect to after re-authentication (the set password view).
-
-Redirects to `SetPasswordDoneView` after successfully setting the password.
 
 ### set_password_done.html
 
@@ -534,6 +534,9 @@ in: `templates/hidp/federated`.
 
 Rendered by the `OIDCAccountLinkView`.
 
+Redirects to `OIDCLinkedServicesView` after successfully linking the account to the
+OIDC provider.
+
 **Context variables**
 
 `form`
@@ -548,12 +551,12 @@ Rendered by the `OIDCAccountLinkView`.
 `provider_email`
 : The email address retrieved from the OIDC provider.
 
-Redirects to `OIDCLinkedServicesView` after successfully linking the account to the
-OIDC provider.
-
 ### account_unlink.html
 
 Rendered by the `OIDCAccountUnlinkView`.
+
+Redirects to `OIDCLinkedServicesView` after successfully unlinking the account from the
+OIDC provider.
 
 **Context variables**
 
@@ -562,9 +565,6 @@ Rendered by the `OIDCAccountUnlinkView`.
 
 `provider`
 : The OIDC provider that the user is unlinking.
-
-Redirects to `OIDCLinkedServicesView` after successfully unlinking the account from the
-OIDC provider.
 
 ### registration.html
 
