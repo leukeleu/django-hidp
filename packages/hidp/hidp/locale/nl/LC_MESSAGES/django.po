@@ -699,6 +699,11 @@ msgstr "Account koppelen"
 
 #: hidp/templates/hidp/federated/account_link.html
 #, python-format
+msgid "This will allow you to use your %(provider)s account (%(provider_email)s) to log in to your existing account (%(user_email)s)."
+msgstr "Dit stelt je in staat om je %(provider)s-account (%(provider_email)s) te gebruiken om in te loggen op je bestaande account (%(user_email)s)."
+
+#: hidp/templates/hidp/federated/account_link.html
+#, python-format
 msgid "This will allow you to use your %(provider)s account to log in to your existing account."
 msgstr "Dit stelt je in staat om je %(provider)s-account te gebruiken om in te loggen op je bestaande account."
 

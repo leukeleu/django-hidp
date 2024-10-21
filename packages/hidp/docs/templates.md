@@ -374,6 +374,8 @@ Rendered by the `OIDCAccountLinkView`.
 This template gets passed the following context variables:
 - `form` - The account link form.
 - `provider` - The OIDC provider that the user is linking their account to.
+- `user_email` - The email address of the user that is linking their account.
+- `provider_email` - The email address retrieved from the OIDC provider.
 
 Redirects to `OIDCLinkedServicesView` after successfully linking the account to the
 OIDC provider.

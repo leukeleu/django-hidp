@@ -399,6 +399,8 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
     def get_context_data(self, **kwargs):
         context = {
             "provider": self.provider,
+            "user_email": self.request.user.email,
+            "provider_email": self.token_data["claims"]["email"],
         }
         return super().get_context_data() | context | kwargs
 

@@ -698,6 +698,11 @@ msgstr ""
 
 #: hidp/templates/hidp/federated/account_link.html
 #, python-format
+msgid "This will allow you to use your %(provider)s account (%(provider_email)s) to log in to your existing account (%(user_email)s)."
+msgstr ""
+
+#: hidp/templates/hidp/federated/account_link.html
+#, python-format
 msgid "This will allow you to use your %(provider)s account to log in to your existing account."
 msgstr ""
 
