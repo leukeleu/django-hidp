@@ -892,12 +892,14 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
         return HttpResponseRedirect(self.success_url)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class EmailChangeRequestSentView(generic.TemplateView):
     """Display a message that the email change request confirmation emails were sent."""
 
     template_name = "hidp/accounts/management/email_change_request_sent.html"
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
 class EmailChangeConfirmView(
     LoginRequiredMixin,
@@ -944,6 +946,7 @@ class EmailChangeConfirmView(
         return HttpResponseRedirect(self.success_url)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class EmailChangeCompleteView(auth_views.TemplateView):
     """Display a message that the email change has been completed."""
 
@@ -972,6 +975,7 @@ class EmailChangeCompleteView(auth_views.TemplateView):
         return super().get_context_data() | context | kwargs
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
 class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
     """Cancel an email change request."""
@@ -1025,6 +1029,7 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
         return super().post(request, *args, **kwargs)
 
 
+@method_decorator(hidp_csp_protection, name="dispatch")
 class EmailChangeCancelDoneView(auth_views.TemplateView):
     """Display a message that the email change request has been cancelled."""
 
