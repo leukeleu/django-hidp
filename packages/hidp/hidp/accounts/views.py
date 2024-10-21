@@ -857,6 +857,7 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     template_name = "hidp/accounts/management/email_change_request.html"
     success_url = reverse_lazy("hidp_accounts:email_change_request_sent")
     email_change_request_mailer = mailers.EmailChangeRequestMailer
+    proposed_email_exists_mailer = mailers.ProposedEmailExistsMailer
 
     def get_form_kwargs(self):
         return {
@@ -881,7 +882,16 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
             **mailer_kwargs,
             recipient=Recipient.CURRENT_EMAIL,
         ).send()
-        self.email_change_request_mailer(
+
+        proposed_email_mailer_class = self.email_change_request_mailer
+        if UserModel.objects.filter(
+            email__iexact=email_change_request.proposed_email
+        ).exists():
+            # Send an email to the proposed email address to inform them that
+            # an account with this email address already exists.
+            proposed_email_mailer_class = self.proposed_email_exists_mailer
+
+        proposed_email_mailer_class(
             **mailer_kwargs,
             recipient=Recipient.PROPOSED_EMAIL,
         ).send()

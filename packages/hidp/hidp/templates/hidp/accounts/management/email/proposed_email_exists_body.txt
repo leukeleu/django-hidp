@@ -1,0 +1,16 @@
+{% load i18n %}{% autoescape off %}
+{% blocktranslate trimmed %}
+You're receiving this email because you want to change your email address from {{ current_email }} to {{ proposed_email }}.
+{% endblocktranslate %}
+
+{% blocktranslate trimmed %}
+ However, {{ proposed_email }} is already in use by another account.
+ {% endblocktranslate %}
+
+{% translate "If you want to use this email address, you'll need to change the email address of the other account first." %}
+
+{% translate "If you didn't request this change, you can cancel the request by visiting the following page:" %}
+
+{{ cancel_url }}
+
+{% endautoescape %}
