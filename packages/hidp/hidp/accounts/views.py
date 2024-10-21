@@ -25,7 +25,7 @@ from ..csp.decorators import hidp_csp_protection
 from ..federated.views import OIDCContextMixin
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
-from . import email_verification, forms, mailer, tokens
+from . import email_verification, forms, mailers, tokens
 from .email_change import Recipient
 from .models import EmailChangeRequest
 
@@ -52,8 +52,8 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
     form_class = forms.UserCreationForm
     template_name = "hidp/accounts/register.html"
     next_page = "/"
-    verification_mailer = mailer.EmailVerificationMailer
-    account_exists_mailer = mailer.AccountExistsMailer
+    verification_mailer = mailers.EmailVerificationMailer
+    account_exists_mailer = mailers.AccountExistsMailer
 
     def get_context_data(self, **kwargs):
         login_url = resolve_url(settings.LOGIN_URL) + (
@@ -254,7 +254,7 @@ class EmailVerificationRequiredView(
 
     template_name = "hidp/accounts/verification/email_verification_required.html"
     token_generator = tokens.email_verification_request_token_generator
-    verification_mailer = mailer.EmailVerificationMailer
+    verification_mailer = mailers.EmailVerificationMailer
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
 
     def get_context_data(self, **kwargs):
@@ -373,7 +373,7 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
     redirect_authenticated_user = False
 
     # Mailer class to use when a user's email address is not verified
-    verification_mailer = mailer.EmailVerificationMailer
+    verification_mailer = mailers.EmailVerificationMailer
 
     def get_context_data(self, **kwargs):
         """
@@ -519,8 +519,8 @@ class PasswordResetRequestView(generic.FormView):
     form_class = forms.PasswordResetRequestForm
     template_name = "hidp/accounts/recovery/password_reset_request.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_email_sent")
-    password_reset_request_mailer = mailer.PasswordResetRequestMailer
-    set_password_mailer = mailer.SetPasswordMailer
+    password_reset_request_mailer = mailers.PasswordResetRequestMailer
+    set_password_mailer = mailers.SetPasswordMailer
 
     def form_valid(self, form):
         if user := form.get_user():
@@ -555,7 +555,7 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
     form_class = forms.PasswordResetForm
     template_name = "hidp/accounts/recovery/password_reset.html"
     success_url = reverse_lazy("hidp_accounts:password_reset_complete")
-    password_changed_mailer = mailer.PasswordChangedMailer
+    password_changed_mailer = mailers.PasswordChangedMailer
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -587,7 +587,7 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     form_class = forms.PasswordChangeForm
     template_name = "hidp/accounts/management/password_change.html"
     success_url = reverse_lazy("hidp_accounts:change_password_done")
-    password_changed_mailer = mailer.PasswordChangedMailer
+    password_changed_mailer = mailers.PasswordChangedMailer
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and not request.user.has_usable_password():
@@ -621,7 +621,7 @@ class SetPasswordView(
     template_name = "hidp/accounts/management/set_password.html"
     success_url = reverse_lazy("hidp_accounts:set_password_done")
     login_delta = timedelta(minutes=5)
-    password_changed_mailer = mailer.PasswordChangedMailer
+    password_changed_mailer = mailers.PasswordChangedMailer
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -777,7 +777,7 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     form_class = forms.EmailChangeRequestForm
     template_name = "hidp/accounts/management/email_change_request.html"
     success_url = reverse_lazy("hidp_accounts:email_change_request_sent")
-    email_change_request_mailer = mailer.EmailChangeRequestMailer
+    email_change_request_mailer = mailers.EmailChangeRequestMailer
 
     def get_form_kwargs(self):
         return {
