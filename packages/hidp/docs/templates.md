@@ -39,7 +39,7 @@ scripts:
 `extra_body`
 : inside the HTML body tag, below the `body` block.
 
-## **accounts**
+## accounts
 
 All templates related to the authentication, registration, recovery and verification
 can be found in this directory and subdirectories: `templates/hidp/accounts`.
@@ -132,7 +132,7 @@ override this template to provide your own Terms of Service or disable the
 `agreed_to_tos` field by overriding the `UserCreationForm`.
 :::
 
-### **management**
+### management
 
 All templates related to account management can be found
 in `templates/hidp/accounts/management`.
@@ -327,7 +327,7 @@ If `validlink` is `True` the following context variables are also available:
 
 Rendered by the `EmailChangeCancelDoneView`.
 
-#### **email**
+#### email
 
 Templates for the password change notification email can be found
 in `templates/hidp/accounts/management/email`.
@@ -374,7 +374,7 @@ This template gets passed the following context variables:
 
 The subject of the email is set with this template: `email_change_subject.txt`.
 
-### **recovery**
+### recovery
 
 All templates related to password recovery can be found
 in `templates/hidp/accounts/recovery`.
@@ -413,7 +413,7 @@ This template gets passed the following context variables:
 `login_url`
 : URL to the login page, with a next param if `redirect_url` is available.
 
-#### **email**
+#### email
 
 Templates for to password recovery emails can be found
 in `templates/hidp/accounts/recovery/email`.
@@ -447,7 +447,7 @@ This template gets passed the following context variable:
 
 The subject of the email is set with this template: `set_password_subject.txt`.
 
-### **verification**
+### verification
 
 Templates for the verification emails can be found
 in `templates/hidp/accounts/verification`.
@@ -482,7 +482,7 @@ This template gets passed the following context variables:
 `login_url`
 : URL to the login page, with a next param if `redirect_url` is available.
 
-#### **email**
+#### email
 
 Templates for to verification emails can be found email
 in `templates/hidp/accounts/verification/email`.
@@ -513,7 +513,7 @@ This template gets passed the following context variable:
 
 The subject of the email is set with this template: `account_exists_subject.txt`.
 
-## **federated**
+## federated
 
 All templates related to the OIDC authentication and registration can be found
 in: `templates/hidp/federated`.
