@@ -161,6 +161,20 @@ class TestEmailChangeRequestForm(TestCase):
         )
         self.assertFalse(form.is_valid())
 
+    def test_form_current_email(self):
+        form = EmailChangeRequestForm(
+            user=self.user,
+            data={
+                "password": "P@ssw0rd!",
+                "proposed_email": self.user.email,
+            },
+        )
+        self.assertFalse(form.is_valid(), msg="Expected form to be invalid")
+        self.assertIn(
+            "The new email address is the same as the current email address.",
+            form.errors["proposed_email"],
+        )
+
     def test_form_valid(self):
         form = EmailChangeRequestForm(
             user=self.user,
