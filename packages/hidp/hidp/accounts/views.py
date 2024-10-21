@@ -993,6 +993,8 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
     form_class = forms.EmailChangeCancelForm
     template_name = "hidp/accounts/management/email_change_cancel.html"
     success_url = reverse_lazy("hidp_accounts:email_change_cancel_done")
+    # This view does not use a token. The token generator is only used
+    # to limit the change request lookup to those that have not expired.
     token_generator = tokens.email_change_token_generator
 
     def get_context_data(self, **kwargs):
