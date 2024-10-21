@@ -606,6 +606,7 @@ class PasswordResetCompleteView(auth_views.TemplateView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     """Display the password change form and handle the password change action."""
 
@@ -640,6 +641,7 @@ class PasswordChangeDoneView(auth_views.TemplateView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 class SetPasswordView(
     LoginRequiredMixin, OIDCContextMixin, auth_views.PasswordChangeView
 ):
