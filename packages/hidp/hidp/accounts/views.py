@@ -606,6 +606,7 @@ class PasswordResetCompleteView(auth_views.TemplateView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
     """Display the password change form and handle the password change action."""
 
@@ -640,6 +641,7 @@ class PasswordChangeDoneView(auth_views.TemplateView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 class SetPasswordView(
     LoginRequiredMixin, OIDCContextMixin, auth_views.PasswordChangeView
 ):
@@ -768,6 +770,7 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 class EditAccountView(LoginRequiredMixin, generic.FormView):
     """Display the edit user form and handle the edit user action."""
 
@@ -840,7 +843,7 @@ class OIDCLinkedServicesView(
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
-@method_decorator(rate_limit_strict, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     """
     Display and handle the email change request form.
@@ -895,6 +898,7 @@ class EmailChangeRequestSentView(generic.TemplateView):
     template_name = "hidp/accounts/management/email_change_request_sent.html"
 
 
+@method_decorator(rate_limit_default, name="dispatch")
 class EmailChangeConfirmView(
     LoginRequiredMixin,
     EmailChangeTokenMixin,
@@ -968,6 +972,7 @@ class EmailChangeCompleteView(auth_views.TemplateView):
         return super().get_context_data() | context | kwargs
 
 
+@method_decorator(rate_limit_default, name="dispatch")
 class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
     """Cancel an email change request."""
 
