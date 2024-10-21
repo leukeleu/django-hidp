@@ -300,17 +300,21 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
             "user_info": self.token_data["user_info"],
         }
 
+    def send_email(self, user):
+        """Send the email verification email to the user."""
+        self.verification_mailer(
+            user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
+
     def form_valid(self, form):
         user = form.save()
         # Remove the token from the session after the form has been saved.
         del self.request.session[self.token]
 
         # Send the email verification email.
-        self.verification_mailer(
-            user,
-            base_url=self.request.build_absolute_uri("/"),
-            post_verification_redirect=self.get_redirect_url(),
-        ).send()
+        self.send_email(user)
 
         # Redirect to the email verification required page.
         return HttpResponseRedirect(
@@ -328,6 +332,14 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
     token_generator = tokens.OIDCLoginTokenGenerator()
     next_page = "/"
     verification_mailer = mailers.EmailVerificationMailer
+
+    def send_email(self, user):
+        """Send the email verification email to the user."""
+        self.verification_mailer(
+            user,
+            base_url=self.request.build_absolute_uri("/"),
+            post_verification_redirect=self.get_redirect_url(),
+        ).send()
 
     def get(self, request):
         """
@@ -360,11 +372,7 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
 
         # If the user's email address is not yet verified:
         # Send the email verification email.
-        self.verification_mailer(
-            user,
-            base_url=self.request.build_absolute_uri("/"),
-            post_verification_redirect=self.get_redirect_url(),
-        ).send()
+        self.send_email(user)
 
         # Then redirect them to the email verification required page.
         return HttpResponseRedirect(
