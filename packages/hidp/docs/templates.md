@@ -376,9 +376,32 @@ requests to change their email address.
 `proposed_email`
 : The proposed new email address.
 
+`cancel_url`
+: URL to `EmailChangeCancelView`.
+
 ### email_change_subject.txt
 
 The subject of the email is set with this template: `email_change_subject.txt`.
+
+### proposed_email_exists_body.txt
+
+Sent by the `EmailChangeRequestView` to the new email address when a user
+requests to change their email address to an email address of an existing account.
+
+**Context variables**
+
+`current_email`
+: The current email address.
+
+`proposed_email`
+: The proposed new email address.
+
+`cancel_url`
+: URL to `EmailChangeCancelView`.
+
+### proposed_email_change_subject.txt
+
+The subject of the email is set with this template: `proposed_email_change_subject.txt`.
 
 ---
 
