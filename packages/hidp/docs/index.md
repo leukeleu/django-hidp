@@ -1,6 +1,9 @@
-# Welcome to Headless Identity Provider's documentation!
+# Welcome to the Django Human Identity Platform documentation!
 
-This is Leukeleu's Headless Identity Provider
+The Django Human Identity Platform (HIdP) is a Django application that offers a
+full-featured authentication system for Django projects. It is designed with
+the OWASP best practices in mind and offers a secure and flexible solution for
+registering and authenticating users in Django projects.
 
 ## Requirements
 * Python >=3.11
