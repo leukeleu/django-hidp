@@ -253,6 +253,24 @@ class TestEmailChangeConfirm(TestCase):
             response.content.decode(),
         )
 
+    def test_no_token_in_session(self):
+        """Placeholder token, no token in session."""
+        response = self.client.get(
+            reverse(
+                "hidp_accounts:email_change_confirm",
+                kwargs={"token": "email-change"},
+            ),
+            follow=True,
+        )
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_confirm.html"
+        )
+        self.assertInHTML(
+            "The link you followed is invalid."
+            " It may have expired or been used already.",
+            response.content.decode(),
+        )
+
     def test_valid_token_wrong_user(self):
         self.client.force_login(user_factories.UserFactory())
         response = self.client.get(self.current_email_url, follow=True)
@@ -363,6 +381,24 @@ class TestEmailChangeConfirm(TestCase):
         )
         self.assertTrue(email_change_request.exists())
         self.assertTrue(email_change_request.first().is_complete())
+
+    def test_post_invalid_token(self):
+        response = self.client.post(
+            reverse(
+                "hidp_accounts:email_change_confirm",
+                kwargs={"token": "invalid"},
+            ),
+            {"allow_change": "on"},
+            follow=True,
+        )
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_confirm.html"
+        )
+        self.assertInHTML(
+            "The link you followed is invalid."
+            " It may have expired or been used already.",
+            response.content.decode(),
+        )
 
     def test_post_proposed_email_already_exists(self):
         # Should only happen if an account was created with the proposed email

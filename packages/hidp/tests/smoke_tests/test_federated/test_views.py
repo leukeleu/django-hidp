@@ -338,11 +338,12 @@ class OIDCTokenDataTestMixin:
     def setUp(self):
         configure_oidc_clients(ExampleOIDCClient(client_id="test"))
 
-    def _assert_invalid_token(self, *, token=None):
+    def _assert_invalid_token(self, *, token=None, method="get"):
+        request_method = getattr(self.client, method)
         response = (
-            self.client.get(self.url, follow=True)
+            request_method(self.url, follow=True)
             if token is None
-            else self.client.get(self.url, {"token": token}, follow=True)
+            else request_method(self.url, {"token": token}, follow=True)
         )
         self.assertInHTML(
             "Expired or invalid token. Please try again.",
@@ -375,6 +376,9 @@ class OIDCTokenDataTestMixin:
 
     def test_invalid_token(self):
         self._assert_invalid_token(token="invalid")
+
+    def test_post_invalid_token(self):
+        self._assert_invalid_token(token="invalid", method="post")
 
     def test_valid_token_missing_session_data(self):
         # Do not save the session to mimic an expired session or hijacked token
