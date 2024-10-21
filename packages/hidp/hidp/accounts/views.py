@@ -898,6 +898,7 @@ class EmailChangeRequestSentView(generic.TemplateView):
     template_name = "hidp/accounts/management/email_change_request_sent.html"
 
 
+@method_decorator(rate_limit_default, name="dispatch")
 class EmailChangeConfirmView(
     LoginRequiredMixin,
     EmailChangeTokenMixin,
@@ -971,6 +972,7 @@ class EmailChangeCompleteView(auth_views.TemplateView):
         return super().get_context_data() | context | kwargs
 
 
+@method_decorator(rate_limit_default, name="dispatch")
 class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
     """Cancel an email change request."""
 
