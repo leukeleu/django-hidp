@@ -12,7 +12,7 @@ For more information on overriding templates, visit
 
 The templates available are:
 :::{contents}
-:depth: 5
+:depth: 3
 :local:
 :::
 
@@ -39,7 +39,7 @@ scripts:
 `extra_body`
 : inside the HTML body tag, below the `body` block.
 
-## accounts
+## accounts/
 
 All templates related to the authentication, registration, recovery and verification
 can be found in this directory and subdirectories: `templates/hidp/accounts`.
@@ -132,12 +132,12 @@ override this template to provide your own Terms of Service or disable the
 `agreed_to_tos` field by overriding the `UserCreationForm`.
 :::
 
-### management
+## accounts/management/
 
 All templates related to account management can be found
 in `templates/hidp/accounts/management`.
 
-#### manage_account.html
+### manage_account.html
 
 Rendered by the `ManageAccountView`.
 
@@ -159,7 +159,7 @@ This template gets passed the following context variables:
   `url`
   : Reversed URL for the link.
 
-#### edit_account.html
+### edit_account.html
 
 Rendered by the `EditAccountView`.
 
@@ -171,7 +171,7 @@ This template gets passed the following context variables:
 `show_success_message`
 : `True` if the account was updated successfully.
 
-#### oidc_linked_services.html
+### oidc_linked_services.html
 
 Rendered by the `OIDCLinkedServicesView`.
 
@@ -198,7 +198,7 @@ This template gets passed the following context variables:
 `oidc_error_message`
 : Error message from the OIDC Authentication flow in case something went wrong.
 
-#### password_change.html
+### password_change.html
 
 Rendered by the `PasswordChangeView`.
 
@@ -210,13 +210,13 @@ This template gets passed the following context variables:
 
 Redirects to `PasswordChangeDoneView` after successfully changing the password.
 
-#### password_change_done.html
+### password_change_done.html
 
 Rendered by the `PasswordChangeDoneView`.
 
 Shows a message letting the user know that their password has been changed.
 
-#### set_password.html
+### set_password.html
 
 Rendered by the `SetPasswordView`.
 
@@ -241,13 +241,13 @@ This template gets passed the following context variables:
 
 Redirects to `SetPasswordDoneView` after successfully setting the password.
 
-#### set_password_done.html
+### set_password_done.html
 
 Rendered by the `SetPasswordDoneView`.
 
 Shows a message letting the user know that their password has been set.
 
-#### email_change_request.html
+### email_change_request.html
 
 Rendered by the `EmailChangeRequestView`.
 
@@ -257,11 +257,11 @@ This template gets passed the following context variables:
 : The email change request form, where users need to fill in a new email 
   address and password.
 
-#### email_change_request_sent.html
+### email_change_request_sent.html
 
 Rendered by the `EmailChangeRequestSentView`.
 
-#### email_change_confirm.html
+### email_change_confirm.html
 
 Rendered by the `EmailChangeConfirmView`.
 
@@ -289,7 +289,7 @@ If `validlink` is `True` the following context variables are also available:
 `proposed_email`
 : The proposed new email address.
 
-#### email_change_complete.html
+### email_change_complete.html
 
 Rendered by the `EmailChangeCompleteView`.
 
@@ -306,7 +306,7 @@ This template gets passed the following context variables:
 `email_change_request_completed`
 : boolean that indicates whether the entire change request is completed.
 
-#### email_change_cancel.html
+### email_change_cancel.html
 
 Rendered by the `EmailChangeCancelView`.
 
@@ -323,16 +323,16 @@ If `validlink` is `True` the following context variables are also available:
 `proposed_email`
 : The proposed new email address.
 
-#### email_change_cancel_done.html
+### email_change_cancel_done.html
 
 Rendered by the `EmailChangeCancelDoneView`.
 
-#### email
+## accounts/management/email/
 
 Templates for the password change notification email can be found
 in `templates/hidp/accounts/management/email`.
 
-##### password_changed_body.txt
+### password_changed_body.txt
 
 Sent by the `PasswordResetView`, `SetPasswordView` and `PasswordChangeView` when a user
 successfully changes their password.
@@ -343,11 +343,11 @@ This template gets passed the following context variable:
 : URL to `PasswordResetView`.
 
 
-##### password_changed_subject.txt
+### password_changed_subject.txt
 
 The subject of the email is set with this template: `password_changed_subject.txt`.
 
-##### email_change_body.txt
+### email_change_body.txt
 
 Sent by the `EmailChangeRequestView` to both old and new email address when a user
 requests to change their email address.
@@ -370,16 +370,16 @@ This template gets passed the following context variables:
 `proposed_email`
 : The proposed new email address.
 
-##### email_change_subject.txt
+### email_change_subject.txt
 
 The subject of the email is set with this template: `email_change_subject.txt`.
 
-### recovery
+## accounts/recovery
 
 All templates related to password recovery can be found
 in `templates/hidp/accounts/recovery`.
 
-#### password_reset_request.html
+### password_reset_request.html
 
 Rendered by the `PasswordResetRequestView`.
 
@@ -388,11 +388,11 @@ This template gets passed the following context variables:
 `form`
 : The password reset request form, where users need to fill in their email address.
 
-#### password_reset_email_sent.html
+### password_reset_email_sent.html
 
 Rendered by the `PasswordResetEmailSentView`.
 
-#### password_reset.html
+### password_reset.html
 
 Rendered by the `PasswordResetView`, which is a subclass of Django's `PasswordResetConfirmView`.
 
@@ -404,7 +404,7 @@ This template gets passed the following context variables:
 `validlink`
 : boolean that indicates the validity of the used token.
 
-#### password_reset_complete.html
+### password_reset_complete.html
 
 Rendered by the `PasswordResetCompleteView`.
 
@@ -413,12 +413,12 @@ This template gets passed the following context variables:
 `login_url`
 : URL to the login page, with a next param if `redirect_url` is available.
 
-#### email
+## accounts/recovery/email/
 
 Templates for to password recovery emails can be found
 in `templates/hidp/accounts/recovery/email`.
 
-##### password_reset_body.txt
+### password_reset_body.txt
 
 Sent by the `PasswordResetRequestView` for users that have a password set.
 
@@ -430,11 +430,11 @@ This template gets passed the following context variable:
 `user`
 : The user the password was changed for
 
-##### password_reset_subject.txt
+### password_reset_subject.txt
 
 The subject of the email is set with this template: `password_reset_subject.txt`.
 
-##### set_password_body.txt
+### set_password_body.txt
 
 Sent by the `SetPasswordView` for users that don't have a password set.
 
@@ -443,16 +443,16 @@ This template gets passed the following context variable:
 `password_reset_url`
 : URL to `SetPasswordView`.
 
-##### set_password_subject.txt
+### set_password_subject.txt
 
 The subject of the email is set with this template: `set_password_subject.txt`.
 
-### verification
+## accounts/verification
 
 Templates for the verification emails can be found
 in `templates/hidp/accounts/verification`.
 
-#### email_verification_required.html
+### email_verification_required.html
 
 Rendered by the `EmailVerificationRequiredView`.
 
@@ -461,7 +461,7 @@ This template gets passed the following context variables:
 `validlink`
 : boolean that indicates the validity of the used token.
 
-#### verify_email.html
+### verify_email.html
 
 Rendered by the `EmailVerificationView`.
 
@@ -473,7 +473,7 @@ This template gets passed the following context variables:
 `validlink`
 : boolean that indicates the validity of the used token.
 
-#### email_verification_complete.html
+### email_verification_complete.html
 
 Rendered by the `EmailVerificationCompleteView`.
 
@@ -482,12 +482,12 @@ This template gets passed the following context variables:
 `login_url`
 : URL to the login page, with a next param if `redirect_url` is available.
 
-#### email
+## accounts/verification/email/
 
 Templates for to verification emails can be found email
 in `templates/hidp/accounts/verification/email`.
 
-##### verification_body.txt
+### verification_body.txt
 
 Sent by the `RegistrationView`.
 
@@ -496,11 +496,11 @@ This template gets passed the following context variable:
 `verification_url`
 : URL to `EmailVerificationView`.
 
-##### verification_subject.txt
+### verification_subject.txt
 
 The subject of the email is set with this template: `verification_subject.txt`.
 
-##### account_exists_body.txt
+### account_exists_body.txt
 
 Sent by the `RegistrationView` if an account already exists with that email address.
 
@@ -509,11 +509,11 @@ This template gets passed the following context variable:
 `password_reset_url`
 : URL to `PasswordResetRequestView`.
 
-##### account_exists_subject.txt
+### account_exists_subject.txt
 
 The subject of the email is set with this template: `account_exists_subject.txt`.
 
-## federated
+## federated/
 
 All templates related to the OIDC authentication and registration can be found
 in: `templates/hidp/federated`.
