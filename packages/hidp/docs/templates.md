@@ -16,6 +16,8 @@ The templates available are:
 :local:
 :::
 
+---
+
 ## base.html
 
 This is the base template that every template in HIdP extends. It includes the basic
@@ -38,6 +40,8 @@ scripts:
 
 `extra_body`
 : inside the HTML body tag, below the `body` block.
+
+---
 
 ## accounts/
 
@@ -131,6 +135,8 @@ This template serves as an example and is not suited for use in production. Plea
 override this template to provide your own Terms of Service or disable the
 `agreed_to_tos` field by overriding the `UserCreationForm`.
 :::
+
+---
 
 ## accounts/management/
 
@@ -374,6 +380,8 @@ This template gets passed the following context variables:
 
 The subject of the email is set with this template: `email_change_subject.txt`.
 
+---
+
 ## accounts/recovery
 
 All templates related to password recovery can be found
@@ -447,6 +455,8 @@ This template gets passed the following context variable:
 
 The subject of the email is set with this template: `set_password_subject.txt`.
 
+---
+
 ## accounts/verification
 
 Templates for the verification emails can be found
@@ -512,6 +522,8 @@ This template gets passed the following context variable:
 ### account_exists_subject.txt
 
 The subject of the email is set with this template: `account_exists_subject.txt`.
+
+---
 
 ## federated/
 
