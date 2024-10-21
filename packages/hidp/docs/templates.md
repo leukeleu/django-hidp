@@ -52,7 +52,7 @@ can be found in this directory and subdirectories: `templates/hidp/accounts`.
 
 Rendered by the `LoginView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The login form.
@@ -90,7 +90,7 @@ This template gets passed the following context variables:
 
 Rendered by the `RPInitiatedLogoutView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `application`
 : An [`Application`](https://django-oauth-toolkit.readthedocs.io/en/latest/models.html#oauth2_provider.models.Application) object.
@@ -103,7 +103,7 @@ This template gets passed the following context variables:
 
 Rendered by the `RegistrationView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The registration form.
@@ -147,7 +147,7 @@ in `templates/hidp/accounts/management`.
 
 Rendered by the `ManageAccountView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `user`
 : The current user instance.
@@ -169,7 +169,7 @@ This template gets passed the following context variables:
 
 Rendered by the `EditAccountView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : A form that allows users to update their first and last name.
@@ -181,7 +181,7 @@ This template gets passed the following context variables:
 
 Rendered by the `OIDCLinkedServicesView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `oidc_linked_providers`
 : List of OIDC Clients that are already linked to the user's account.
@@ -208,7 +208,7 @@ This template gets passed the following context variables:
 
 Rendered by the `PasswordChangeView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : A form that allows users to change their password. 
@@ -230,7 +230,7 @@ If the user doesn't have a password set they are required to have logged in rece
 in order to set a password. If the user hasn't logged in recently they need to
 re-authenticate using one of the OIDC providers linked to their account.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : A form that allows users to change their password.
@@ -257,7 +257,7 @@ Shows a message letting the user know that their password has been set.
 
 Rendered by the `EmailChangeRequestView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The email change request form, where users need to fill in a new email 
@@ -271,7 +271,7 @@ Rendered by the `EmailChangeRequestSentView`.
 
 Rendered by the `EmailChangeConfirmView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The email change confirm form, where users need to confirm the change.
@@ -299,7 +299,7 @@ If `validlink` is `True` the following context variables are also available:
 
 Rendered by the `EmailChangeCompleteView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `current_email_confirmation_required`
 : boolean that indicates that the change is confirmed through proposed email,
@@ -316,7 +316,7 @@ This template gets passed the following context variables:
 
 Rendered by the `EmailChangeCancelView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `validlink`
 : boolean that indicates whether the request can be cancelled.
@@ -343,7 +343,7 @@ in `templates/hidp/accounts/management/email`.
 Sent by the `PasswordResetView`, `SetPasswordView` and `PasswordChangeView` when a user
 successfully changes their password.
 
-This template gets passed the following context variable:
+**Context variables**
 
 `password_reset_url`
 : URL to `PasswordResetView`.
@@ -358,7 +358,7 @@ The subject of the email is set with this template: `password_changed_subject.tx
 Sent by the `EmailChangeRequestView` to both old and new email address when a user
 requests to change their email address.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `confirmation_url`
 : URL to `EmailChangeConfirmView`.
@@ -391,7 +391,7 @@ in `templates/hidp/accounts/recovery`.
 
 Rendered by the `PasswordResetRequestView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The password reset request form, where users need to fill in their email address.
@@ -404,7 +404,7 @@ Rendered by the `PasswordResetEmailSentView`.
 
 Rendered by the `PasswordResetView`, which is a subclass of Django's `PasswordResetConfirmView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The password reset form.
@@ -416,7 +416,7 @@ This template gets passed the following context variables:
 
 Rendered by the `PasswordResetCompleteView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `login_url`
 : URL to the login page, with a next param if `redirect_url` is available.
@@ -430,7 +430,7 @@ in `templates/hidp/accounts/recovery/email`.
 
 Sent by the `PasswordResetRequestView` for users that have a password set.
 
-This template gets passed the following context variable:
+**Context variables**
 
 `password_reset_url`
 : URL to `PasswordResetView`.
@@ -446,7 +446,7 @@ The subject of the email is set with this template: `password_reset_subject.txt`
 
 Sent by the `SetPasswordView` for users that don't have a password set.
 
-This template gets passed the following context variable:
+**Context variables**
 
 `password_reset_url`
 : URL to `SetPasswordView`.
@@ -466,7 +466,7 @@ in `templates/hidp/accounts/verification`.
 
 Rendered by the `EmailVerificationRequiredView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `validlink`
 : boolean that indicates the validity of the used token.
@@ -475,7 +475,7 @@ This template gets passed the following context variables:
 
 Rendered by the `EmailVerificationView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The email verification form.
@@ -487,7 +487,7 @@ This template gets passed the following context variables:
 
 Rendered by the `EmailVerificationCompleteView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `login_url`
 : URL to the login page, with a next param if `redirect_url` is available.
@@ -501,7 +501,7 @@ in `templates/hidp/accounts/verification/email`.
 
 Sent by the `RegistrationView`.
 
-This template gets passed the following context variable:
+**Context variables**
 
 `verification_url`
 : URL to `EmailVerificationView`.
@@ -514,7 +514,7 @@ The subject of the email is set with this template: `verification_subject.txt`.
 
 Sent by the `RegistrationView` if an account already exists with that email address.
 
-This template gets passed the following context variable:
+**Context variables**
 
 `password_reset_url`
 : URL to `PasswordResetRequestView`.
@@ -534,7 +534,8 @@ in: `templates/hidp/federated`.
 
 Rendered by the `OIDCAccountLinkView`.
 
-This template gets passed the following context variables:
+**Context variables**
+
 `form`
 : The account link form.
 
@@ -554,7 +555,7 @@ OIDC provider.
 
 Rendered by the `OIDCAccountUnlinkView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The account unlink form.
@@ -569,7 +570,7 @@ OIDC provider.
 
 Rendered by the `OIDCRegistrationView`.
 
-This template gets passed the following context variables:
+**Context variables**
 
 `form`
 : The OIDC registration form.
