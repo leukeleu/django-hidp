@@ -132,6 +132,43 @@ msgstr "Uw wachtwoord moet minstens één speciaal teken bevatten (%s)."
 msgid "Your password must contain at least one uppercase character (A-Z)."
 msgstr "Uw wachtwoord moet minstens één hoofdletter bevatten (A-Z)."
 
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Change email address"
+msgstr "Wijzig e-mailadres"
+
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/password_change.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
+#: hidp/templates/hidp/accounts/recovery/password_reset.html
+msgid "Change password"
+msgstr "Wachtwoord wijzigen"
+
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Edit account"
+msgstr "Account bewerken"
+
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#: hidp/templates/hidp/accounts/management/set_password.html
+msgid "Linked services"
+msgstr "Gekoppelde diensten"
+
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/accounts/management/set_password_done.html
+msgid "Set password"
+msgstr "Wachtwoord instellen"
+
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account."
 msgstr "Ja, ik wil dit account koppelen."
@@ -254,11 +291,6 @@ msgid "Dismiss"
 msgstr "Sluiten"
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-msgid "Edit account"
-msgstr "Account bewerken"
-
-#: hidp/templates/hidp/accounts/management/edit_account.html
 msgid "Edit your account information"
 msgstr "Bewerk je accountinformatie"
 
@@ -333,13 +365,6 @@ msgid "Successfully cancelled the email address change."
 msgstr "Het wijzigen van je e-mailadres is succesvol geannuleerd."
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-msgid "Change email address"
-msgstr "Wijzig e-mailadres"
-
-#: hidp/templates/hidp/accounts/management/email_change_complete.html
 msgid "Something went wrong"
 msgstr "Er ging iets fout"
 
@@ -407,13 +432,6 @@ msgid "Please set a password first."
 msgstr "Stel eerst een wachtwoord in."
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/management/set_password.html
-#: hidp/templates/hidp/accounts/management/set_password_done.html
-msgid "Set password"
-msgstr "Wachtwoord instellen"
-
-#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "You cannot change your email address because you do not have a password set."
 msgstr "Je kan je e-mailadres niet wijzigen, omdat je geen wachtwoord hebt ingesteld."
 
@@ -436,19 +454,6 @@ msgstr "Pas op het moment dat je via beide e-mailadressen hebt bevestigd, zal je
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "We've emailed you on your current and new email address to confirm the change. You should receive both emails shortly."
 msgstr "We hebben je een e-mail gestuurd naar zowel je huidige als je nieuwe e-mailadres om de wijziging te bevestigen. Deze zul je deze snel ontvangen."
-
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/management/password_change.html
-#: hidp/templates/hidp/accounts/management/password_change_done.html
-#: hidp/templates/hidp/accounts/recovery/password_reset.html
-msgid "Change password"
-msgstr "Wachtwoord wijzigen"
-
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#: hidp/templates/hidp/accounts/management/set_password.html
-msgid "Linked services"
-msgstr "Gekoppelde diensten"
 
 #: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Manage account"
