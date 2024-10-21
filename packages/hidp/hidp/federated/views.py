@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, FormView, View
 
 from ..accounts import auth as hidp_auth
-from ..accounts import email_verification, mailer
+from ..accounts import email_verification, mailers
 from ..config import oidc_clients
 from ..csp.decorators import hidp_csp_protection
 from ..federated.constants import OIDCError
@@ -290,7 +290,7 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
     form_class = forms.OIDCRegistrationForm
     template_name = "hidp/federated/registration.html"
     next_page = "/"
-    verification_mailer = mailer.EmailVerificationMailer
+    verification_mailer = mailers.EmailVerificationMailer
     invalid_token_redirect_url = reverse_lazy("hidp_accounts:register")
 
     def get_form_kwargs(self):
@@ -327,7 +327,7 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
 
     token_generator = tokens.OIDCLoginTokenGenerator()
     next_page = "/"
-    verification_mailer = mailer.EmailVerificationMailer
+    verification_mailer = mailers.EmailVerificationMailer
 
     def get(self, request):
         """

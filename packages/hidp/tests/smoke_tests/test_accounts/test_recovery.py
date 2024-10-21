@@ -5,7 +5,7 @@ from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
-from hidp.accounts import forms, mailer
+from hidp.accounts import forms, mailers
 from hidp.test.factories import user_factories
 
 
@@ -113,7 +113,7 @@ class TestPasswordResetFlow(TestCase):
         )
 
     @mock.patch(
-        "hidp.accounts.views.mailer.PasswordResetRequestMailer.send",
+        "hidp.accounts.views.mailers.PasswordResetRequestMailer.send",
         side_effect=Exception,
     )
     def test_password_reset_email_error(self, mock_send):
@@ -131,7 +131,7 @@ class TestPasswordResetFlow(TestCase):
 
     def test_get_password_reset_url(self):
         """Render the password reset form."""
-        password_reset_url = mailer.PasswordResetRequestMailer(
+        password_reset_url = mailers.PasswordResetRequestMailer(
             user=self.user,
             base_url="https://testserver",
         ).get_password_reset_url()
@@ -146,7 +146,7 @@ class TestPasswordResetFlow(TestCase):
 
     def test_post_password_reset_url(self):
         """Reset the user's password."""
-        password_reset_url = mailer.PasswordResetRequestMailer(
+        password_reset_url = mailers.PasswordResetRequestMailer(
             user=self.user,
             base_url="https://testserver",
         ).get_password_reset_url()
