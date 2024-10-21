@@ -842,7 +842,7 @@ class OIDCLinkedServicesView(
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
-@method_decorator(rate_limit_strict, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     """
     Display and handle the email change request form.
