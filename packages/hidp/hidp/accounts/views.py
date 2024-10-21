@@ -770,6 +770,7 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 class EditAccountView(LoginRequiredMixin, generic.FormView):
     """Display the edit user form and handle the edit user action."""
 
