@@ -6,8 +6,7 @@
 {% block body %}
   <h1>{% translate 'Manage your account information' %}</h1>
 
-  {% if request.user.is_authenticated %}
-  <form action="{%  url 'hidp_accounts:logout' %}" method="post">
+  <form action="{{ logout_url }}" method="post">
     {% csrf_token %}
     <p>
       {% blocktranslate trimmed %}
@@ -16,19 +15,12 @@
       <button type="submit">{% translate 'Log out' %}</button>
     </p>
   </form>
-  {% endif %}
 
   <hr>
 
-  <a href="{% url 'hidp_accounts:edit_account' %}">{% translate 'Edit account' %}</a>
-  {% if oidc_login_providers %}
-  <a href="{% url 'hidp_accounts:oidc_linked_services' %}">{% translate 'Linked services' %}</a>
-  {% endif %}
-  {% if request.user.has_usable_password %}
-  <a href="{% url 'hidp_accounts:change_password' %}">{% translate 'Change password' %}</a>
-  {% else %}
-  <a href="{% url 'hidp_accounts:set_password' %}">{% translate 'Set password' %}</a>
-  {% endif %}
-  <a href="{% url 'hidp_accounts:email_change_request' %}">{% translate 'Change email address' %}</a>
-
+  <ul>
+  {% for item in account_management_links %}
+    <li><a href="{{ item.url }}">{{ item.text }}</a></li>
+  {% endfor %}
+  </ul>
 {% endblock %}

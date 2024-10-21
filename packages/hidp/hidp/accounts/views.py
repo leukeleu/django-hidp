@@ -17,6 +17,7 @@ from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
 
@@ -62,9 +63,12 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
             else ""
         )
         context = {
+            "user": self.request.user,
             "login_url": login_url,
             "next": self.get_success_url(),
+            "logout_url": reverse("hidp_accounts:logout"),
             "logout_next_url": self.request.get_full_path(),
+            "can_register": not self.request.user.is_authenticated,
         }
         return super().get_context_data() | context | kwargs
 
@@ -399,6 +403,7 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
         )
         context = {
             "register_url": register_url,
+            "is_rate_limited": self.request.limited,
         }
         return super().get_context_data() | context | kwargs
 
@@ -689,6 +694,51 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
     """Display the manage account page."""
 
     template_name = "hidp/accounts/management/manage_account.html"
+
+    def get_account_management_links(self):
+        links = [
+            {
+                "url": reverse("hidp_accounts:edit_account"),
+                "text": _("Edit account"),
+            },
+            {
+                "url": reverse("hidp_accounts:email_change_request"),
+                "text": _("Change email address"),
+            },
+        ]
+
+        if self.request.user.has_usable_password():
+            links.append(
+                {
+                    "url": reverse("hidp_accounts:change_password"),
+                    "text": _("Change password"),
+                },
+            )
+        else:
+            links.append(
+                {
+                    "url": reverse("hidp_accounts:set_password"),
+                    "text": _("Set password"),
+                },
+            )
+
+        if oidc_clients.get_registered_oidc_clients():
+            links.append(
+                {
+                    "url": reverse("hidp_accounts:oidc_linked_services"),
+                    "text": _("Linked services"),
+                },
+            )
+
+        return links
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "user": self.request.user,
+            "logout_url": reverse("hidp_accounts:logout"),
+            "account_management_links": self.get_account_management_links(),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")

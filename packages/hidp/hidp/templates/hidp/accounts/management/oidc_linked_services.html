@@ -19,7 +19,7 @@
     <li>{% blocktranslate trimmed with provider=successfully_linked_provider.name%}
       Successfully linked your {{ provider }} account.
       {% endblocktranslate %}
-      <a href="{{ request.path }}" aria-label="{% translate 'Dismiss' %}">✕</a>
+      <a href="." aria-label="{% translate 'Dismiss' %}">✕</a>
     </li>
   </ul>
   {% elif removed_provider %}
@@ -27,7 +27,7 @@
     <li>{% blocktranslate trimmed with provider=removed_provider.name %}
       Successfully unlinked your {{ provider }} account.
       {% endblocktranslate %}
-      <a href="{{ request.path }}" aria-label="{% translate 'Dismiss' %}">✕</a>
+      <a href="." aria-label="{% translate 'Dismiss' %}">✕</a>
     </li>
   </ul>
   {% endif %}

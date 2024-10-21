@@ -83,8 +83,7 @@ class TestEditAccountView(TestCase):
 
         # Success message should be displayed
         self.assertInHTML(
-            "Account updated successfully."
-            '<a href="/manage/edit-account/" aria-label="Dismiss">✕</a>',
+            'Account updated successfully. <a href="." aria-label="Dismiss">✕</a>',
             response.content.decode("utf-8"),
         )
 
