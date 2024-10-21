@@ -23,7 +23,7 @@ Add the following to `INSTALLED_APPS` in your Django settings:
 ```python
 INSTALLED_APPS = [
     ...
-    # Headless Identity Provider
+    # Hello, ID Please
     "oauth2_provider",
     "hidp.oidc_provider",
     "rest_framework",

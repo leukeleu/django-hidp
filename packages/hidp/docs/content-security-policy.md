@@ -9,7 +9,7 @@ In order for the CSP to properly work, make sure  `hidp.csp` is in your INSTALLE
 ```python
 INSTALLED_APPS = [
     ...
-    # Headless Identity Provider
+    # Hello, ID Please
     "hidp.csp",
 ]
 ```

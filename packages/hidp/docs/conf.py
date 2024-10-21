@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Headless Identity Provider"
+project = "Hello, ID Please"
 project_copyright = "2024, Jaap Roes, Dennis Bunskoek, Thomas Kalverda"
 author = "Jaap Roes, Dennis Bunskoek, Thomas Kalverda"
 

@@ -1,6 +1,7 @@
 # Installation
 
-Headless Identity Provider is an all-in-one solution for your user management needs.
+"Hello, ID Please" (HIdP) is a Django application that offers a
+full-featured authentication system for Django projects.
 
 HIdP provides all the default Django authentication functionalities and more:
 - Registration (including email verification)
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
-    # Headless Identity Provider
+    # Hello, ID Please
     "hidp",
     "hidp.accounts",
     "hidp.csp",
