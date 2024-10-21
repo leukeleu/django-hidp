@@ -532,7 +532,7 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
         # Linked services page
         self.assertInHTML(
             "Successfully linked your Example account."
-            '<a href="/manage/linked-services/" aria-label="Dismiss">✕</a>',
+            '<a href="." aria-label="Dismiss">✕</a>',
             response.content.decode("utf-8"),
         )
 
@@ -586,7 +586,7 @@ class TestOIDCAccountUnlinkView(TestCase):
         # Linked services page
         self.assertInHTML(
             "Successfully unlinked your Example account."
-            '<a href="/manage/linked-services/" aria-label="Dismiss">✕</a>',
+            '<a href="." aria-label="Dismiss">✕</a>',
             response.content.decode("utf-8"),
         )
 

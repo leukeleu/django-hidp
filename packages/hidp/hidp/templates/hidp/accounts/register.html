@@ -14,13 +14,13 @@
   </ul>
   {% endif %}
 
-  {% if request.user.is_authenticated %}
+  {% if not can_register %}
   <p>
     {% blocktranslate %}You are currently logged in as {{ user }}.{% endblocktranslate %}
     {% translate 'To create a new account, please log out first.' %}
   </p>
 
-  <form action="{%  url 'hidp_accounts:logout' %}" method="post">
+  <form action="{{ logout_url }}" method="post">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ logout_next_url }}">
     <p><button type="submit">{% translate 'Log out' %}</button></p>

@@ -131,6 +131,43 @@ msgstr ""
 msgid "Your password must contain at least one uppercase character (A-Z)."
 msgstr ""
 
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Change email address"
+msgstr ""
+
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/password_change.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
+#: hidp/templates/hidp/accounts/recovery/password_reset.html
+msgid "Change password"
+msgstr ""
+
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+msgid "Edit account"
+msgstr ""
+
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#: hidp/templates/hidp/accounts/management/set_password.html
+msgid "Linked services"
+msgstr ""
+
+#: hidp/accounts/views.py
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/accounts/management/set_password_done.html
+msgid "Set password"
+msgstr ""
+
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account."
 msgstr ""
@@ -253,11 +290,6 @@ msgid "Dismiss"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-msgid "Edit account"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/edit_account.html
 msgid "Edit your account information"
 msgstr ""
 
@@ -332,13 +364,6 @@ msgid "Successfully cancelled the email address change."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-msgid "Change email address"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_complete.html
 msgid "Something went wrong"
 msgstr ""
 
@@ -406,13 +431,6 @@ msgid "Please set a password first."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/management/set_password.html
-#: hidp/templates/hidp/accounts/management/set_password_done.html
-msgid "Set password"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "You cannot change your email address because you do not have a password set."
 msgstr ""
 
@@ -434,19 +452,6 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "We've emailed you on your current and new email address to confirm the change. You should receive both emails shortly."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/management/password_change.html
-#: hidp/templates/hidp/accounts/management/password_change_done.html
-#: hidp/templates/hidp/accounts/recovery/password_reset.html
-msgid "Change password"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#: hidp/templates/hidp/accounts/management/set_password.html
-msgid "Linked services"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/manage_account.html

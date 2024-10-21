@@ -14,7 +14,7 @@
 
   <h1>{% translate 'Log in with username and password' %}</h1>
 
-  {% if request.limited %}
+  {% if is_rate_limited %}
   <p>
     {% blocktranslate trimmed %}
     Excessive login attempts have been detected for this account.

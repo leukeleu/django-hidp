@@ -55,6 +55,7 @@ not installed).
 - `site_name` - The name of the current site (host name if `RequestSite` is used)
 - `register_url` - URL to the sign up page, with a next param if `redirect_url` is
 available.
+- `is_rate_limited` - Whether the view is rate limited or not; result of `request.limited`.
 - Any additional data present is `self.extra_context`.
 
 ### logout_confirm.html
@@ -75,7 +76,12 @@ Rendered by the `RegistrationView`.
 
 This template gets passed the following context variables:
 - `form` - The registration form.
+- `user` - The current user instance.
 - `login_url` - URL to the login page, with a next param if `redirect_url` is available.
+- `next` - URL to redirect to after successful registration.
+- `logout_url` - URL to the logout page.
+- `logout_next_url` - URL to same page, redirecting to login page if necessary.
+- `can_register` - `False` if the user is authenticated.
 
 ### tos.html
 
@@ -95,6 +101,14 @@ in `templates/hidp/accounts/management`.
 #### manage_account.html
 
 Rendered by the `ManageAccountView`.
+
+This template gets passed the following context variables:
+- `user` - The current user instance.
+- `logout_url` - URL to the logout page.
+- `account_management_links` - List of dicts of available account management urls with
+the following information per link:
+  - `text` - The text to show for the link.
+  - `url` - Reversed URL for the link.
 
 #### edit_account.html
 
