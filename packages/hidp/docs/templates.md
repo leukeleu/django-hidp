@@ -329,7 +329,7 @@ Rendered by the `EmailChangeCancelDoneView`.
 
 ## accounts/management/email/
 
-Templates for the password change notification email can be found
+Templates for the password and email change emails can be found
 in `templates/hidp/accounts/management/email`.
 
 ### password_changed_body.txt
