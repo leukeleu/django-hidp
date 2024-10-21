@@ -214,7 +214,7 @@ Redirects to `PasswordChangeDoneView` after successfully changing the password.
 
 Rendered by the `PasswordChangeDoneView`.
 
-Shows a simple message letting the user know that their password has been changed.
+Shows a message letting the user know that their password has been changed.
 
 #### set_password.html
 
@@ -245,7 +245,7 @@ Redirects to `SetPasswordDoneView` after successfully setting the password.
 
 Rendered by the `SetPasswordDoneView`.
 
-Shows a simple message letting the user know that their password has been set.
+Shows a message letting the user know that their password has been set.
 
 #### email_change_request.html
 
