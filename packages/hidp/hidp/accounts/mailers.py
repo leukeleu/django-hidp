@@ -126,9 +126,7 @@ class AccountExistsMailer(BaseMailer):
         self.user = user
 
     def get_password_reset_url(self):
-        return (
-            urljoin(self.base_url, reverse("hidp_accounts:password_reset_request")),
-        )
+        return urljoin(self.base_url, reverse("hidp_accounts:password_reset_request"))
 
     def get_context(self, extra_context=None):
         return super().get_context(
@@ -221,9 +219,7 @@ class PasswordChangedMailer(BaseMailer):
         self.user = user
 
     def get_password_reset_url(self):
-        return (
-            urljoin(self.base_url, reverse("hidp_accounts:password_reset_request")),
-        )
+        return urljoin(self.base_url, reverse("hidp_accounts:password_reset_request"))
 
     def get_context(self, extra_context=None):
         return super().get_context(
