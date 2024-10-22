@@ -364,6 +364,26 @@ class TestEmailChangeConfirm(TestCase):
         self.assertTrue(email_change_request.exists())
         self.assertTrue(email_change_request.first().is_complete())
 
+    def test_post_proposed_email_already_exists(self):
+        # Should only happen if an account was created with the proposed email
+        # address after email change request was made.
+        user_factories.UserFactory(email="newemail@example.com")
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.save()
+
+        response = self.client.post(
+            self.proposed_email_url, {"allow_change": "on"}, follow=True
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertFalse(
+            response.context["form"].is_valid(), msg="Expected form to be invalid"
+        )
+        self.assertIn(
+            "Sorry, changing your email address is not possible because an"
+            " account with this email address already exists.",
+            response.context["form"].errors["__all__"],
+        )
+
 
 class TestEmailChangeCancel(TestCase):
     @classmethod
