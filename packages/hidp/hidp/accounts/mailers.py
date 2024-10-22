@@ -286,3 +286,19 @@ class EmailChangeRequestMailer(BaseMailer):
                 return [self.email_change_request.proposed_email]
             case _:
                 raise ValueError(f"Invalid recipient: {self.recipient!r}")
+
+
+class ProposedEmailExistsMailer(EmailChangeRequestMailer):
+    subject_template_name = (
+        "hidp/accounts/management/email/proposed_email_exists_subject.txt"
+    )
+    email_template_name = (
+        "hidp/accounts/management/email/proposed_email_exists_body.txt"
+    )
+
+    def get_context(self, extra_context=None):
+        return {
+            "current_email": self.email_change_request.current_email,
+            "proposed_email": self.email_change_request.proposed_email,
+            "cancel_url": self.get_cancel_url(),
+        }

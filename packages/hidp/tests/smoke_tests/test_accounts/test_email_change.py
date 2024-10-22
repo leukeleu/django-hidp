@@ -142,6 +142,86 @@ class TestEmailChangeRequest(TestCase):
             message.body,
         )
 
+    def test_email_change_proposed_email_exists(self):
+        """
+        Pretend that the email change request was successful.
+
+        When the user requests an email change to an email address that already exists,
+        we pretend that the email change request was successful and send an email to the
+        current email address, but a different one to the proposed one.
+        """
+        user_factories.UserFactory(email="existing@example.com")
+        with (
+            self.assertTemplateUsed("hidp/accounts/management/email/email_change_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/email_change_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/proposed_email_exists_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/proposed_email_exists_body.txt"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.url,
+                {
+                    "password": "P@ssw0rd!",
+                    "proposed_email": "existing@example.com",
+                },
+                follow=True,
+            )
+
+        self.assertRedirects(
+            response, reverse("hidp_accounts:email_change_request_sent")
+        )
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/email_change_request_sent.html"
+        )
+
+        # EmailChangeRequest should be created
+        self.assertTrue(
+            EmailChangeRequest.objects.filter(
+                user=self.user,
+                proposed_email="existing@example.com",
+            ).exists()
+        )
+
+        # Email should be sent to current email
+        self.assertEqual(len(mail.outbox), 2)
+
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Confirm your email change request",
+        )
+        self.assertEqual(message.to, [self.user.email])
+        self.assertRegex(
+            message.body,
+            # Matches the email change confirmation URL:
+            # http://testserver/manage/change-email-confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"http://testserver/manage/change-email-confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
+        self.assertIn(
+            "http://testserver/manage/change-email-cancel/",
+            message.body,
+        )
+
+        # A different email should be sent to proposed email
+        message = mail.outbox[1]
+        self.assertEqual(
+            message.subject,
+            "Email change request",
+        )
+        self.assertEqual(message.to, ["existing@example.com"])
+        self.assertIn(
+            "However, existing@example.com is already in use by another account.",
+            message.body,
+        )
+        self.assertIn(
+            "If you want to use this email address, you'll need to change the "
+            "email address of the other account first.",
+            message.body,
+        )
+        self.assertIn(
+            "http://testserver/manage/change-email-cancel/",
+            message.body,
+        )
+
 
 class TestEmailChangeRequestForm(TestCase):
     @classmethod
