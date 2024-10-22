@@ -101,6 +101,7 @@ class TestEmailVerificationRequiredView(TestCase):
         self.client.post(response.redirect_chain[-1][0], follow=True)
         # Verification email not sent
         self.assertEqual(len(mail.outbox), 0)
+        self._assert_response(response, validlink=False)
 
 
 class TestEmailVerificationView(TestCase):
@@ -189,6 +190,24 @@ class TestEmailVerificationView(TestCase):
             response.redirect_chain[-1][0],
             reverse("hidp_accounts:email_verification_complete"),
         )
+
+    def test_post_invalid_token(self):
+        # Get the page first, to populate the session
+        response = self.client.get(
+            reverse(
+                "hidp_accounts:verify_email",
+                kwargs={"token": "invalid-value:invalid-signature"},
+            ),
+            follow=True,
+        )
+        # Post to the redirected URL
+        self.client.post(response.redirect_chain[-1][0], follow=True)
+        # User's email_verified field not updated
+        self.user.refresh_from_db()
+        self.assertIsNone(
+            self.user.email_verified, msg="Expected email to not be verified."
+        )
+        self._assert_response(response, validlink=False)
 
 
 class TestEmailVerificationForm(TestCase):

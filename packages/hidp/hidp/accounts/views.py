@@ -144,6 +144,50 @@ class BaseTokenMixin:
         )
         return HttpResponseRedirect(redirect_url, status=308)
 
+    def get_context_data(self, **kwargs):
+        context = {
+            "validlink": self.validlink,
+        }
+        return super().get_context_data() | context | kwargs
+
+    def validate_token_data(self, token_data):  # noqa: PLR6301 (no-self-use)
+        """
+        Validate the token data.
+
+        Override this method to add additional validation checks.
+
+        Returns:
+            bool:
+                True if the token data is valid, otherwise False.
+        """
+        return token_data is not None
+
+    def dispatch(self, request, *, token):
+        """
+        Handle tokens in URLs.
+
+        Makes sure the token is removed from the URL and stored in
+        the session.
+
+        Sets the `validlink` attribute to whether the token is valid.
+
+        If `validlink` is False, the `get` method will be called
+        irrespective of the HTTP method used.
+        """
+        response = self._remove_token_from_url(token)
+        if response:
+            return response
+
+        token = self.request.session.get(self.token_session_key)
+        token_data = self.token_generator.check_token(token) if token else None
+        self.validlink = self.validate_token_data(token_data)
+
+        if not self.validlink:
+            # Invalid token, handle it in the `get` method.
+            return self.get(request, token=token)
+
+        return super().dispatch(request, token=token)
+
 
 class EmailTokenMixin(BaseTokenMixin):
     """Mixin to handle email verification tokens in URLs."""
@@ -159,7 +203,7 @@ class EmailTokenMixin(BaseTokenMixin):
         """
         return UserModel.objects.annotate(email_hash=MD5("email"))
 
-    def _get_user_from_token(self):
+    def _get_user_from_token(self, email_hash):
         """
         Find the user associated with the token in the session.
 
@@ -167,30 +211,26 @@ class EmailTokenMixin(BaseTokenMixin):
             UserModel | None:
                 The user if the token is valid, otherwise None.
         """
-        token = self.request.session.get(self.token_session_key)
-        if token is None:
-            return None
-        email_hash = self.token_generator.check_token(token)
         # Find the user by the hash of their email address
         return self._get_user_queryset().filter(email_hash=email_hash).first()
 
-    def dispatch(self, request, *, token):
+    def validate_token_data(self, token_data):
         """
-        Handle email verification tokens in URLs.
-
-        Makes sure the token is removed from the URL and stored in
-        the session.
+        Validate the token data.
 
         Sets the `user` attribute to the user found by the token,
-        and the `validlink` attribute to whether the token is valid
-        (i.e. it resolves to a user).
+        or `None` if the token is invalid.
+
+        Returns:
+            bool:
+                True if the token data is valid, otherwise False.
         """
-        response = self._remove_token_from_url(token)
-        if response:
-            return response
-        self.user = self._get_user_from_token()
-        self.validlink = self.user is not None
-        return super().dispatch(request, token=token)
+        if super().validate_token_data(token_data):
+            self.user = self._get_user_from_token(token_data)
+            return self.user is not None
+        else:
+            self.user = None
+            return False
 
 
 class EmailChangeTokenMixin(BaseTokenMixin):
@@ -216,35 +256,30 @@ class EmailChangeTokenMixin(BaseTokenMixin):
             return None
         return email_change_request
 
-    def _check_token(self, token):
-        token = self.request.session.get(self.token_session_key)
-        if token is None:
-            return None
-        return self.token_generator.check_token(token)
-
-    def dispatch(self, request, *, token):
+    def validate_token_data(self, token_data):
         """
-        Handle email change tokens in URLs.
-
-        Makes sure the token is removed from the URL and stored in
-        the session.
+        Validate the token data.
 
         Sets the `email_change_request` attribute to the email change request
-        found by the token, and the `validlink` attribute to whether the token
-        is valid (i.e. it resolves to an email change request).
+        found by the token, or `None` if the token is invalid.
+
+        Sets the `recipient` attribute to the recipient of the token,
+        or `None` if the token is invalid.
+
+        Returns:
+            bool:
+                True if the token data is valid, otherwise False.
         """
-        response = self._remove_token_from_url(token)
-        if response:
-            return response
-        token_object = self._check_token(token)
-        self.email_change_request = (
-            self._get_email_change_request_from_token_object(token_object)
-            if token_object
-            else None
-        )
-        self.recipient = token_object["recipient"] if token_object else None
-        self.validlink = self.email_change_request is not None
-        return super().dispatch(request, token=token)
+        if super().validate_token_data(token_data):
+            self.email_change_request = (
+                self._get_email_change_request_from_token_object(token_data)
+            )
+            self.recipient = token_data["recipient"]
+            return self.email_change_request is not None
+        else:
+            self.email_change_request = None
+            self.recipient = None
+            return False
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -265,12 +300,6 @@ class EmailVerificationRequiredView(
     token_generator = tokens.email_verification_request_token_generator
     verification_mailer = mailers.EmailVerificationMailer
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
-
-    def get_context_data(self, **kwargs):
-        context = {
-            "validlink": self.validlink,
-        }
-        return super().get_context_data() | context | kwargs
 
     def send_email(self):
         """Send the email verification email."""
@@ -316,12 +345,6 @@ class EmailVerificationView(
 
     def _get_user_queryset(self):
         return super()._get_user_queryset().email_unverified().filter(is_active=True)
-
-    def get_context_data(self, **kwargs):
-        context = {
-            "validlink": self.validlink,
-        }
-        return super().get_context_data() | context | kwargs
 
     def get_object(self):
         return self.user  # The user from the token
@@ -929,11 +952,8 @@ class EmailChangeConfirmView(
     token_session_key = "_email_change_request_token"  # noqa: S105 (not a password)
 
     def get_context_data(self, **kwargs):
-        context = {
-            "validlink": self.validlink,
-        }
         if self.validlink:
-            context |= {
+            context = {
                 "recipient": self.recipient,
                 "already_confirmed_for_this_email": getattr(
                     self.email_change_request, f"confirmed_by_{self.recipient}"
@@ -941,6 +961,8 @@ class EmailChangeConfirmView(
                 "current_email": self.email_change_request.current_email,
                 "proposed_email": self.email_change_request.proposed_email,
             }
+        else:
+            context = {}
         return super().get_context_data() | context | kwargs
 
     def get_form_kwargs(self):
@@ -1003,6 +1025,8 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
     form_class = forms.EmailChangeCancelForm
     template_name = "hidp/accounts/management/email_change_cancel.html"
     success_url = reverse_lazy("hidp_accounts:email_change_cancel_done")
+    # This view does not use a token. The token generator is only used
+    # to limit the change request lookup to those that have not expired.
     token_generator = tokens.email_change_token_generator
 
     def get_context_data(self, **kwargs):
