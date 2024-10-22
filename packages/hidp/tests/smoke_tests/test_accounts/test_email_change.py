@@ -380,11 +380,8 @@ class TestEmailChangeConfirm(TestCase):
             response, "hidp/accounts/management/email_change_confirm.html"
         )
         self.assertInHTML(
-            "You have already confirmed the change from this email address.",
-            response.content.decode(),
-        )
-        self.assertInHTML(
-            "Please go to your other inbox and look for the link there.",
+            "The link you followed is invalid."
+            " It may have expired or been used already.",
             response.content.decode(),
         )
 
@@ -498,6 +495,21 @@ class TestEmailChangeConfirm(TestCase):
             "Sorry, changing your email address is not possible because an"
             " account with this email address already exists.",
             response.context["form"].errors["__all__"],
+        )
+
+    def test_post_already_completed_request(self):
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.confirmed_by_proposed_email = True
+        self.email_change_request.save()
+
+        response = self.client.post(
+            self.current_email_url, {"allow_change": "on"}, follow=True
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertInHTML(
+            "The link you followed is invalid."
+            " It may have expired or been used already.",
+            response.content.decode(),
         )
 
 

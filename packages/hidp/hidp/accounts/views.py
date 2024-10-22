@@ -242,13 +242,18 @@ class EmailChangeTokenMixin(BaseTokenMixin):
         """
         Find the email change request associated with the token in the session.
 
+        Exclude the request if it has already been confirmed for this email address.
+
         Returns:
             EmailChangeRequest | None:
                 The email change request if the token is valid, otherwise None.
         """
-        email_change_request = EmailChangeRequest.objects.filter(
-            id=token_object["uuid"]
-        ).first()
+        email_change_request = (
+            EmailChangeRequest.objects.filter(id=token_object["uuid"])
+            .exclude(**{f"confirmed_by_{token_object['recipient']}": True})
+            .first()
+        )
+
         if (
             email_change_request is None
             or email_change_request.user != self.request.user
@@ -955,9 +960,6 @@ class EmailChangeConfirmView(
         if self.validlink:
             context = {
                 "recipient": self.recipient,
-                "already_confirmed_for_this_email": getattr(
-                    self.email_change_request, f"confirmed_by_{self.recipient}"
-                ),
                 "current_email": self.email_change_request.current_email,
                 "proposed_email": self.email_change_request.proposed_email,
             }
