@@ -428,17 +428,9 @@ msgid "Confirm email change"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
-msgid "Please go to your other inbox and look for the link there."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_confirm.html
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
 #: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "The link you followed is invalid. It may have expired or been used already."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_confirm.html
-msgid "You have already confirmed the change from this email address."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
