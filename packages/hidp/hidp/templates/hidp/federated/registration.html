@@ -8,7 +8,7 @@
 
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form }}
     <button type="submit">{% translate 'Sign up' %}</button>
   </form>
 {% endblock %}
