@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.core import mail
@@ -275,3 +276,48 @@ class TestRegistrationView(TransactionTestCase):
 
         # Account exists email not sent
         self.assertEqual(len(mail.outbox), 0)
+
+    @mock.patch(
+        "hidp.accounts.views.mailers.EmailVerificationMailer.send",
+        side_effect=Exception,
+    )
+    def test_verification_email_error(self, mock_send):
+        """Errors are logged when sending the verification email."""
+        # This is a fix for Django's CVE-2024-45231. The email backend
+        # might raise an exception when sending an email, which could
+        # be used to enumerate valid email addresses.
+        with self.assertLogs("hidp.accounts.views", level="ERROR") as cm:
+            self.client.post(
+                self.signup_url,
+                {
+                    "email": "test@example.com",
+                    "password1": "P@ssw0rd!",
+                    "password2": "P@ssw0rd!",
+                    "agreed_to_tos": "on",
+                },
+            )
+        self.assertIn("Failed to send verification email.", cm.records[0].msg)
+        self.assertEqual(0, len(mail.outbox))
+
+    @mock.patch(
+        "hidp.accounts.views.mailers.AccountExistsMailer.send",
+        side_effect=Exception,
+    )
+    def test_account_exists_email_error(self, mock_send):
+        """Errors are logged when sending the account exists email."""
+        # This is a fix for Django's CVE-2024-45231. The email backend
+        # might raise an exception when sending an email, which could
+        # be used to enumerate valid email addresses.
+        user_factories.VerifiedUserFactory(email="test@example.com")
+        with self.assertLogs("hidp.accounts.views", level="ERROR") as cm:
+            self.client.post(
+                self.signup_url,
+                {
+                    "email": "test@example.com",
+                    "password1": "P@ssw0rd!",
+                    "password2": "P@ssw0rd!",
+                    "agreed_to_tos": "on",
+                },
+            )
+        self.assertIn("Failed to send verification email.", cm.records[0].msg)
+        self.assertEqual(0, len(mail.outbox))
