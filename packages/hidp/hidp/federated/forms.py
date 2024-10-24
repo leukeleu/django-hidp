@@ -13,6 +13,9 @@ UserModel = get_user_model()
 class OIDCRegistrationForm(TermsOfServiceMixin, forms.ModelForm):
     """Create a user and OpenIDConnection from OIDC claims and user info."""
 
+    template_name = "hidp/federated/forms/registration_form.html"
+
+    # Fields
     agreed_to_tos = TermsOfServiceMixin.create_agreed_to_tos_field()
 
     def __init__(self, *, provider_key, claims, user_info, **kwargs):
@@ -70,6 +73,9 @@ class OIDCRegistrationForm(TermsOfServiceMixin, forms.ModelForm):
 class OIDCAccountLinkForm(forms.ModelForm):
     """Link an existing user to an OpenIDConnection."""
 
+    template_name = "hidp/federated/forms/account_link_form.html"
+
+    # Fields
     allow_link = forms.BooleanField(
         label=_("Yes, I want to link this account."),
         required=True,
@@ -101,6 +107,9 @@ class OIDCAccountLinkForm(forms.ModelForm):
 class OIDCAccountUnlinkForm(forms.Form):
     """Unlink an OpenIDConnection from a user."""
 
+    template_name = "hidp/federated/forms/account_unlink_form.html"
+
+    # Fields
     allow_unlink = forms.BooleanField(
         label=_("Yes, I want to unlink this account."),
         required=True,
