@@ -966,6 +966,7 @@ class EmailChangeConfirmView(
     success_url = reverse_lazy("hidp_accounts:email_change_complete")
     token_generator = tokens.email_change_token_generator
     token_session_key = "_email_change_request_token"  # noqa: S105 (not a password)
+    email_changed_mailer = mailers.EmailChangedMailer
 
     def get_context_data(self, **kwargs):
         if self.validlink:
@@ -998,7 +999,17 @@ class EmailChangeConfirmView(
                 ),
             )
             return self.form_invalid(form)
+        if self.email_change_request.is_complete():
+            self.send_email()
         return HttpResponseRedirect(self.success_url)
+
+    def send_email(self):
+        """Send the email changed email."""
+        self.email_changed_mailer(
+            self.request.user,
+            email_change_request=self.email_change_request,
+            base_url=self.request.build_absolute_uri("/"),
+        ).send()
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")

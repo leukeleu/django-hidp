@@ -334,6 +334,20 @@ msgstr ""
 msgid "Confirm your email change request"
 msgstr ""
 
+#: hidp/templates/hidp/accounts/management/email/email_changed_body.txt
+#, python-format
+msgid "Please note that this means you'll need to use %(proposed_email)s to log in from now on."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/email_changed_body.txt
+#, python-format
+msgid "You're receiving this email because the email address of your account has been changed from %(current_email)s to %(proposed_email)s."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/email_changed_subject.txt
+msgid "Email address changed"
+msgstr ""
+
 #: hidp/templates/hidp/accounts/management/email/password_changed_body.txt
 msgid "If you did not change your password, please reset your password immediately using this link:"
 msgstr ""
