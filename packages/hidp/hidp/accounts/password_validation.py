@@ -2,6 +2,7 @@ import re
 import string
 
 from django.core.exceptions import ValidationError
+from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
 
@@ -42,12 +43,12 @@ class LowercaseValidator(RegexValidator):
 
 class SymbolValidator(RegexValidator):
     regex = "|".join(re.escape(c) for c in string.punctuation)
-    message = _(
-        _("This password does not contain any special characters (%s).")
-        % string.punctuation
+    message = format_lazy(
+        _("This password does not contain any special characters ({})."),
+        string.punctuation,
     )
     code = "password_no_symbol"
-    help_text = _(
-        _("Your password must contain at least one special character (%s).")
-        % string.punctuation
+    help_text = format_lazy(
+        _("Your password must contain at least one special character ({})."),
+        string.punctuation,
     )
