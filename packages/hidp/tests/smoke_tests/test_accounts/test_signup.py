@@ -212,3 +212,66 @@ class TestRegistrationView(TransactionTestCase):
             },
         )
         self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+
+    def test_account_exists(self):
+        """Existing users should be notified if someone tries to use their email."""
+        existing_user = user_factories.VerifiedUserFactory()
+        response = self.client.post(
+            self.signup_url,
+            {
+                "email": existing_user.email,
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
+            },
+            follow=True,
+        )
+
+        # Pretend the registration was successful
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required",
+                kwargs={"token": "email"},
+            ),
+        )
+
+        # Account exists email sent
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Sign up request",
+        )
+        self.assertIn(
+            "You're receiving this email because you attempted to create an"
+            " account using this email address."
+            " However, an account already exists with this email address.",
+            message.body,
+        )
+
+    def test_inactive_account_exists(self):
+        """Inactive users should not be notified if someone tries to use their email."""
+        inactive_user = user_factories.VerifiedUserFactory(is_active=False)
+        response = self.client.post(
+            self.signup_url,
+            {
+                "email": inactive_user.email,
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
+            },
+            follow=True,
+        )
+
+        # Pretend the registration was successful
+        self.assertRedirects(
+            response,
+            reverse(
+                "hidp_accounts:email_verification_required",
+                kwargs={"token": "email"},
+            ),
+        )
+
+        # Account exists email not sent
+        self.assertEqual(len(mail.outbox), 0)

@@ -87,7 +87,7 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
                 base_url=base_url,
                 post_verification_redirect=self.get_redirect_url(),
             ).send()
-        else:
+        elif user.is_active:
             # Email the user to inform them that they have an account.
             self.account_exists_mailer(
                 user,
