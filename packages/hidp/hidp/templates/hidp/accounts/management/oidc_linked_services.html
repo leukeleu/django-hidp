@@ -1,9 +1,9 @@
-{% extends "hidp/base.html" %}
+{% extends "hidp/base_post_login.html" %}
 {% load i18n %}
 
 {% block title %}{% translate 'Manage linked trusted services' %}{% endblock %}
 
-{% block body %}
+{% block main %}
   <h1>{% translate 'Manage your linked trusted services' %}</h1>
 
   {% if oidc_error_message %}

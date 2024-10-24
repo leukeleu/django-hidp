@@ -1,9 +1,9 @@
-{% extends "hidp/base.html" %}
+{% extends "hidp/base_post_login.html" %}
 {% load i18n %}
 
 {% block title %}{% translate 'Unlink account' %}{% endblock %}
 
-{% block body %}
+{% block main %}
   <h1>{% translate 'Unlink account' %}</h1>
 
   <p>
@@ -27,7 +27,7 @@
       {% endfor %}
     </ul>
   {% endif %}
-  
+
   <form method="post">
     {% csrf_token %}
     <button type="submit" name="allow_unlink" value="true">

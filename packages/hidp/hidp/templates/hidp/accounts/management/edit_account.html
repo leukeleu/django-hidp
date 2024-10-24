@@ -1,9 +1,9 @@
-{% extends "hidp/base.html" %}
+{% extends "hidp/base_post_login.html" %}
 {% load i18n %}
 
 {% block title %}{% translate 'Edit account' %}{% endblock %}
 
-{% block body %}
+{% block main %}
   <h1>{% translate 'Edit your account information' %}</h1>
 
   {% if show_success_message %}

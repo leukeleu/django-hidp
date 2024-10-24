@@ -18,11 +18,17 @@ The templates available are:
 
 ---
 
-## base.html
+## Base templates
 
-This is the base template that every template in HIdP extends. It includes the basic
-HTML boilerplate for each page. Override this template to load custom CSS, scripts,
-and set up a base layout.
+To facilitate the common use case of having a distinct layout for the pre-login and
+post-login pages, HIdP provides a base template hierarchy that you can extend to
+customize the layout of your application.
+
+### base.html
+
+This is the root base template that every template in HIdP extends. It includes the
+basic HTML boilerplate for each page. Override this template to load custom CSS,
+scripts, and set up a base layout.
 
 This template defines two blocks that all other templates depend on:
 
@@ -32,6 +38,9 @@ This template defines two blocks that all other templates depend on:
 `body`
 : inside the HTML `body` tag.
 
+`main`
+: inside the `body` block, where the main application content is rendered.
+
 This template also defines two blocks that you can extend to inject extra styles and/or
 scripts:
 
@@ -40,6 +49,16 @@ scripts:
 
 `extra_body`
 : inside the HTML body tag, below the `body` block.
+
+### base_pre_login.html
+
+This template extends `base.html` and is used for all pre-login pages. It does not
+add anything over the base template and is only provided as an extension point.
+
+### base_post_login.html
+
+This template extends `base.html` and is used for all post-login pages. It does not
+add anything over the base template and is only provided as an extension point.
 
 ---
 
@@ -51,6 +70,8 @@ can be found in this directory and subdirectories: `templates/hidp/accounts`.
 ### login.html
 
 Rendered by the `LoginView`.
+
+**Base template**: `base_pre_login.html`
 
 **Context variables**
 
@@ -88,7 +109,12 @@ Rendered by the `LoginView`.
 
 ### logout_confirm.html
 
-Rendered by the `RPInitiatedLogoutView`.
+Rendered by the `RPInitiatedLogoutView` and is used to confirm the logout.
+
+**Base template**: `base_pre_login.html`
+
+Using the pre-login base template might sound counterintuitive, but the logout
+confirmation page is shown regardless of the user's authentication status.
 
 **Context variables**
 
@@ -102,6 +128,8 @@ Rendered by the `RPInitiatedLogoutView`.
 ### register.html
 
 Rendered by the `RegistrationView`.
+
+**Base template**: `base_pre_login.html`
 
 **Context variables**
 
@@ -130,6 +158,8 @@ Rendered by the `RegistrationView`.
 
 Rendered by the `TermsOfServiceView`.
 
+**Base template**: `base_pre_login.html`
+
 :::{important}
 This template serves as an example and is not suited for use in production. Please
 override this template to provide your own Terms of Service or disable the
@@ -146,6 +176,8 @@ in `templates/hidp/accounts/management`.
 ### manage_account.html
 
 Rendered by the `ManageAccountView`.
+
+**Base template**: `base_post_login.html`
 
 **Context variables**
 
@@ -169,6 +201,8 @@ Rendered by the `ManageAccountView`.
 
 Rendered by the `EditAccountView`.
 
+**Base template**: `base_post_login.html`
+
 **Context variables**
 
 `form`
@@ -180,6 +214,8 @@ Rendered by the `EditAccountView`.
 ### oidc_linked_services.html
 
 Rendered by the `OIDCLinkedServicesView`.
+
+**Base template**: `base_post_login.html`
 
 **Context variables**
 
@@ -210,6 +246,8 @@ Rendered by the `PasswordChangeView`.
 
 Redirects to `PasswordChangeDoneView` after successfully changing the password.
 
+**Base template**: `base_post_login.html`
+
 **Context variables**
 
 `form`
@@ -222,6 +260,8 @@ Rendered by the `PasswordChangeDoneView`.
 
 Shows a message letting the user know that their password has been changed.
 
+**Base template**: `base_post_login.html`
+
 ### set_password.html
 
 Rendered by the `SetPasswordView`.
@@ -231,6 +271,8 @@ in order to set a password. If the user hasn't logged in recently they need to
 re-authenticate using one of the OIDC providers linked to their account.
 
 Redirects to `SetPasswordDoneView` after successfully setting the password.
+
+**Base template**: `base_post_login.html`
 
 **Context variables**
 
@@ -253,9 +295,13 @@ Rendered by the `SetPasswordDoneView`.
 
 Shows a message letting the user know that their password has been set.
 
+**Base template**: `base_post_login.html`
+
 ### email_change_request.html
 
 Rendered by the `EmailChangeRequestView`.
+
+**Base template**: `base_post_login.html`
 
 **Context variables**
 
@@ -267,9 +313,13 @@ Rendered by the `EmailChangeRequestView`.
 
 Rendered by the `EmailChangeRequestSentView`.
 
+**Base template**: `base_post_login.html`
+
 ### email_change_confirm.html
 
 Rendered by the `EmailChangeConfirmView`.
+
+**Base template**: `base_post_login.html`
 
 **Context variables**
 
@@ -299,6 +349,8 @@ If `validlink` is `True` the following context variables are also available:
 
 Rendered by the `EmailChangeCompleteView`.
 
+**Base template**: `base_post_login.html`
+
 **Context variables**
 
 `current_email_confirmation_required`
@@ -316,6 +368,8 @@ Rendered by the `EmailChangeCompleteView`.
 
 Rendered by the `EmailChangeCancelView`.
 
+**Base template**: `base_post_login.html`
+
 **Context variables**
 
 `validlink`
@@ -332,6 +386,8 @@ If `validlink` is `True` the following context variables are also available:
 ### email_change_cancel_done.html
 
 Rendered by the `EmailChangeCancelDoneView`.
+
+**Base template**: `base_post_login.html`
 
 ## accounts/management/email/
 
@@ -414,6 +470,8 @@ in `templates/hidp/accounts/recovery`.
 
 Rendered by the `PasswordResetRequestView`.
 
+**Base template**: `base_pre_login.html`
+
 **Context variables**
 
 `form`
@@ -423,9 +481,13 @@ Rendered by the `PasswordResetRequestView`.
 
 Rendered by the `PasswordResetEmailSentView`.
 
+**Base template**: `base_pre_login.html`
+
 ### password_reset.html
 
 Rendered by the `PasswordResetView`, which is a subclass of Django's `PasswordResetConfirmView`.
+
+**Base template**: `base_pre_login.html`
 
 **Context variables**
 
@@ -438,6 +500,8 @@ Rendered by the `PasswordResetView`, which is a subclass of Django's `PasswordRe
 ### password_reset_complete.html
 
 Rendered by the `PasswordResetCompleteView`.
+
+**Base template**: `base_pre_login.html`
 
 **Context variables**
 
@@ -489,6 +553,8 @@ in `templates/hidp/accounts/verification`.
 
 Rendered by the `EmailVerificationRequiredView`.
 
+**Base template**: `base_pre_login.html`
+
 **Context variables**
 
 `validlink`
@@ -497,6 +563,8 @@ Rendered by the `EmailVerificationRequiredView`.
 ### verify_email.html
 
 Rendered by the `EmailVerificationView`.
+
+**Base template**: `base_pre_login.html`
 
 **Context variables**
 
@@ -509,6 +577,8 @@ Rendered by the `EmailVerificationView`.
 ### email_verification_complete.html
 
 Rendered by the `EmailVerificationCompleteView`.
+
+**Base template**: `base_pre_login.html`
 
 **Context variables**
 
@@ -560,6 +630,8 @@ Rendered by the `OIDCAccountLinkView`.
 Redirects to `OIDCLinkedServicesView` after successfully linking the account to the
 OIDC provider.
 
+**Base template**: `base_post_login.html`
+
 **Context variables**
 
 `form`
@@ -581,6 +653,8 @@ Rendered by the `OIDCAccountUnlinkView`.
 Redirects to `OIDCLinkedServicesView` after successfully unlinking the account from the
 OIDC provider.
 
+**Base template**: `base_post_login.html`
+
 **Context variables**
 
 `form`
@@ -592,6 +666,8 @@ OIDC provider.
 ### registration.html
 
 Rendered by the `OIDCRegistrationView`.
+
+**Base template**: `base_pre_login.html`
 
 **Context variables**
 
