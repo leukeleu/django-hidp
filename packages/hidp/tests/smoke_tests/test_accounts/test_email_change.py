@@ -222,6 +222,32 @@ class TestEmailChangeRequest(TestCase):
             message.body,
         )
 
+    def test_proposed_email_user_inactive(self):
+        inactive_user = user_factories.UserFactory(is_active=False)
+
+        response = self.client.post(
+            self.url,
+            {
+                "password": "P@ssw0rd!",
+                "proposed_email": inactive_user.email,
+            },
+            follow=True,
+        )
+
+        self.assertRedirects(
+            response, reverse("hidp_accounts:email_change_request_sent")
+        )
+
+        # Email should be sent to current email, but not to proposed email (inactive)
+        self.assertEqual(len(mail.outbox), 1)
+
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Confirm your email change request",
+        )
+        self.assertEqual(message.to, [self.user.email])
+
 
 class TestEmailChangeRequestForm(TestCase):
     @classmethod

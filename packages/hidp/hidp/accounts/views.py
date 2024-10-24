@@ -912,9 +912,15 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
         ).send()
 
         proposed_email_mailer_class = self.email_change_request_mailer
-        if UserModel.objects.filter(
+        existing_user = UserModel.objects.filter(
             email__iexact=email_change_request.proposed_email
-        ).exists():
+        ).first()
+
+        if existing_user and not existing_user.is_active:
+            # Do nothing if the user exists but is not active.
+            return
+
+        if existing_user:
             # Send an email to the proposed email address to inform them that
             # an account with this email address already exists.
             proposed_email_mailer_class = self.proposed_email_exists_mailer
