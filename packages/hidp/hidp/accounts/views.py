@@ -80,19 +80,24 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
     def send_email(self, user):
         """Send the appropriate email to the user."""
         base_url = self.request.build_absolute_uri("/")
-        if not user.email_verified:
-            # Send the email verification email.
-            self.verification_mailer(
-                user,
-                base_url=base_url,
-                post_verification_redirect=self.get_redirect_url(),
-            ).send()
-        else:
-            # Email the user to inform them that they have an account.
-            self.account_exists_mailer(
-                user,
-                base_url=base_url,
-            ).send()
+
+        try:
+            if not user.email_verified:
+                self.verification_mailer(
+                    user,
+                    base_url=base_url,
+                    post_verification_redirect=self.get_redirect_url(),
+                ).send()
+            elif user.is_active:
+                # Email the user to inform them that they have an account.
+                self.account_exists_mailer(
+                    user,
+                    base_url=base_url,
+                ).send()
+        except Exception:
+            # Do not leak the existence of the user. Log the error and
+            # continue as if the email was sent successfully.
+            logger.exception("Failed to send verification email.")
 
     def form_valid(self, form):
         """Save the new user and redirect to the email verification required page."""
@@ -912,9 +917,15 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
         ).send()
 
         proposed_email_mailer_class = self.email_change_request_mailer
-        if UserModel.objects.filter(
+        existing_user = UserModel.objects.filter(
             email__iexact=email_change_request.proposed_email
-        ).exists():
+        ).first()
+
+        if existing_user and not existing_user.is_active:
+            # Do nothing if the user exists but is not active.
+            return
+
+        if existing_user:
             # Send an email to the proposed email address to inform them that
             # an account with this email address already exists.
             proposed_email_mailer_class = self.proposed_email_exists_mailer
