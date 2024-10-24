@@ -1,9 +1,9 @@
-{% extends "hidp/base.html" %}
+{% extends "hidp/base_pre_login.html" %}
 {% load i18n %}
 
 {% block title %}{% translate 'Log in' %}{% endblock %}
 
-{% block body %}
+{% block main %}
 {% if oidc_error_message %}
 <ul>
   <li>

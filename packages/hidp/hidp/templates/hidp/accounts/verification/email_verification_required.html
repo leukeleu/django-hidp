@@ -1,9 +1,9 @@
-{% extends "hidp/base.html" %}
+{% extends "hidp/base_pre_login.html" %}
 {% load i18n %}
 
 {% block title %}{% translate 'Verification required' %}{% endblock %}
 
-{% block body %}
+{% block main %}
   {% if validlink %}
   <h1>{% translate 'Verification required' %}</h1>
 
