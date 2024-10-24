@@ -335,6 +335,20 @@ msgstr "Je ontvangt deze e-mail omdat je je e-mailadres wilt wijzigen van %(curr
 msgid "Confirm your email change request"
 msgstr "Bevestig je verzoek om je e-mailadres te wijzigen"
 
+#: hidp/templates/hidp/accounts/management/email/email_changed_body.txt
+#, python-format
+msgid "Please note that this means you'll need to use %(proposed_email)s to log in from now on."
+msgstr "Houd er rekening mee dat je vanaf nu met %(proposed_email)s moet inloggen."
+
+#: hidp/templates/hidp/accounts/management/email/email_changed_body.txt
+#, python-format
+msgid "You're receiving this email because the email address of your account has been changed from %(current_email)s to %(proposed_email)s."
+msgstr "Je ontvangt deze e-mail omdat het e-mailadres van je account is gewijzigd van %(current_email)s naar %(proposed_email)s."
+
+#: hidp/templates/hidp/accounts/management/email/email_changed_subject.txt
+msgid "Email address changed"
+msgstr "E-mailadres is gewijzigd"
+
 #: hidp/templates/hidp/accounts/management/email/password_changed_body.txt
 msgid "If you did not change your password, please reset your password immediately using this link:"
 msgstr "Als je dit niet zelf hebt gedaan, wijzig dan meteen je wachtwoord met de volgende link:"

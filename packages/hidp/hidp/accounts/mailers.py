@@ -302,3 +302,28 @@ class ProposedEmailExistsMailer(EmailChangeRequestMailer):
             "proposed_email": self.email_change_request.proposed_email,
             "cancel_url": self.get_cancel_url(),
         }
+
+
+class EmailChangedMailer(BaseMailer):
+    subject_template_name = "hidp/accounts/management/email/email_changed_subject.txt"
+    email_template_name = "hidp/accounts/management/email/email_changed_body.txt"
+
+    def __init__(self, user, *, email_change_request, base_url):
+        super().__init__(base_url=base_url)
+        self.user = user
+        self.email_change_request = email_change_request
+
+    def get_context(self, extra_context=None):
+        return super().get_context(
+            {
+                "current_email": self.email_change_request.current_email,
+                "proposed_email": self.email_change_request.proposed_email,
+            }
+            | (extra_context or {})
+        )
+
+    def get_recipients(self):
+        return [
+            self.email_change_request.current_email,
+            self.email_change_request.proposed_email,
+        ]

@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}
+{% blocktranslate trimmed %}
+You're receiving this email because the email address of your account has been changed from {{ current_email }} to {{ proposed_email }}.
+{% endblocktranslate %}
+
+{% blocktranslate trimmed %}
+Please note that this means you'll need to use {{ proposed_email }} to log in from now on.
+{% endblocktranslate %}
+
+{% endautoescape %}

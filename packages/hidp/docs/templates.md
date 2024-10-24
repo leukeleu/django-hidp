@@ -439,6 +439,23 @@ requests to change their email address.
 
 The subject of the email is set with this template: `email_change_subject.txt`.
 
+### email_changed_body.txt
+
+Sent by the `EmailChangeConfirmView` to both old and new email address when a user
+changed their email address.
+
+**Context variables**
+
+`current_email`
+: The current email address.
+
+`proposed_email`
+: The proposed new email address.
+
+### email_changed_subject.txt
+
+The subject of the email is set with this template: `email_changed_subject.txt`.
+
 ### proposed_email_exists_body.txt
 
 Sent by the `EmailChangeRequestView` to the new email address when a user

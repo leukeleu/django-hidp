@@ -312,7 +312,7 @@ class TestEmailChangeRequestForm(TestCase):
 class TestEmailChangeConfirm(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = user_factories.UserFactory()
+        cls.user = user_factories.UserFactory(email="current@example.com")
         cls.email_change_request = user_factories.EmailChangeRequestFactory(
             user=cls.user, proposed_email="newemail@example.com"
         )
@@ -432,6 +432,13 @@ class TestEmailChangeConfirm(TestCase):
         self.email_change_request.refresh_from_db()
         self.assertEqual(self.email_change_request.confirmed_by_current_email, True)
 
+        # Email address should not be changed yet
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "current@example.com")
+
+        # Email changed mail should not be sent yet
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_post_proposed_email_valid_token(self):
         response = self.client.post(
             self.proposed_email_url, {"allow_change": "on"}, follow=True
@@ -452,6 +459,13 @@ class TestEmailChangeConfirm(TestCase):
         )
         self.email_change_request.refresh_from_db()
         self.assertEqual(self.email_change_request.confirmed_by_proposed_email, True)
+
+        # Email address should not be changed yet
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "current@example.com")
+
+        # Email changed mail should not be sent yet
+        self.assertEqual(len(mail.outbox), 0)
 
     def test_post_second_valid_token(self):
         self.email_change_request.confirmed_by_current_email = True
@@ -484,6 +498,27 @@ class TestEmailChangeConfirm(TestCase):
         )
         self.assertTrue(email_change_request.exists())
         self.assertTrue(email_change_request.first().is_complete())
+
+        # Email changed mail should be sent
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(
+            mail.outbox[0].subject,
+            "Email address changed",
+        )
+        self.assertEqual(
+            mail.outbox[0].to,
+            ["current@example.com", "newemail@example.com"],
+        )
+        self.assertIn(
+            "You're receiving this email because the email address of your account"
+            " has been changed from current@example.com to newemail@example.com.",
+            mail.outbox[0].body,
+        )
+        self.assertIn(
+            "Please note that this means you'll need to use"
+            " newemail@example.com to log in from now on.",
+            mail.outbox[0].body,
+        )
 
     def test_post_invalid_token(self):
         response = self.client.post(
