@@ -115,6 +115,10 @@ msgid "This password does not contain any special characters (%s)."
 msgstr ""
 
 #: hidp/accounts/password_validation.py
+msgid "This password does not contain any special characters ({})."
+msgstr ""
+
+#: hidp/accounts/password_validation.py
 msgid "This password does not contain any uppercase characters (A-Z)."
 msgstr ""
 
@@ -129,6 +133,10 @@ msgstr ""
 #: hidp/accounts/password_validation.py
 #, python-format
 msgid "Your password must contain at least one special character (%s)."
+msgstr ""
+
+#: hidp/accounts/password_validation.py
+msgid "Your password must contain at least one special character ({})."
 msgstr ""
 
 #: hidp/accounts/password_validation.py

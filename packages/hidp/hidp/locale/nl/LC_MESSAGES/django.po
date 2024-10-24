@@ -116,6 +116,10 @@ msgid "This password does not contain any special characters (%s)."
 msgstr "Dit wachtwoord bevat geen speciale tekens (%s)."
 
 #: hidp/accounts/password_validation.py
+msgid "This password does not contain any special characters ({})."
+msgstr "Dit wachtwoord bevat geen speciale tekens ({})."
+
+#: hidp/accounts/password_validation.py
 msgid "This password does not contain any uppercase characters (A-Z)."
 msgstr "Dit wachtwoord bevat geen hoofdletters (A-Z)."
 
@@ -131,6 +135,10 @@ msgstr "Uw wachtwoord moet minstens één kleine letter bevatten (a-z)."
 #, python-format
 msgid "Your password must contain at least one special character (%s)."
 msgstr "Uw wachtwoord moet minstens één speciaal teken bevatten (%s)."
+
+#: hidp/accounts/password_validation.py
+msgid "Your password must contain at least one special character ({})."
+msgstr "Uw wachtwoord moet minstens één speciaal teken bevatten ({})."
 
 #: hidp/accounts/password_validation.py
 msgid "Your password must contain at least one uppercase character (A-Z)."
