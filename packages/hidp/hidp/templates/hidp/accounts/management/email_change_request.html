@@ -15,7 +15,7 @@
     <p>{% translate 'Enter your new email address.' %}</p>
     <p>{% translate 'You will receive an email on your current and new email address with a link to confirm the change.' %}</p>
 
-    <form action="{% url 'hidp_accounts:email_change_request' %}" method="post">
+    <form method="post">
       {% csrf_token %}
       {{ form }}
       <button type="submit">{% translate 'Save' %}</button>

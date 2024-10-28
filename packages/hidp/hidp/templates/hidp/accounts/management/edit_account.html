@@ -12,7 +12,7 @@
   </ul>
   {% endif %}
 
-  <form action="{% url 'hidp_accounts:edit_account' %}" method="post">
+  <form method="post">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
     {{ form }}
