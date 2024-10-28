@@ -26,7 +26,7 @@
   <form method="post">
     {% csrf_token %}
     {{ form }}
-    <button type="submit">{% translate 'Log in' %}</button>
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Log in') %}
   </form>
 
   <p>

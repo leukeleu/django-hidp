@@ -36,7 +36,7 @@
   <form method="post">
     {% csrf_token %}
     {{ form }}
-    <button type="submit">{% translate 'Sign up' %}</button>
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Sign up') %}
   </form>
 
   {% if oidc_login_providers %}

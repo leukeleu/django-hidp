@@ -258,10 +258,7 @@ msgid "Sign up"
 msgstr "Registreer"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
-#: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/password_change.html
-#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/includes/forms/submit_row.html
 msgid "Cancel"
 msgstr "Annuleren"
 

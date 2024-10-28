@@ -14,7 +14,7 @@
   <form method="post">
     {% csrf_token %}
     {{ form }}
-    <button>{% translate 'Verify email' %}</button>
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Verify email') %}
   </form>
 
   {% else %}
