@@ -17,7 +17,8 @@
 
   <form method="post">
     {% csrf_token %}
-    <button type="submit" name="allow_cancel" value="true">{% translate 'Yes, I want to cancel changing my email address' %}</button>
+    {{ form }}
+    <button type="submit">{{ form.fields.allow_cancel.label }}</button>
     <a href="{% url 'hidp_accounts:manage_account' %}">{% translate 'Back' %}</a>
   </form>
   {% endif %}

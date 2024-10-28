@@ -202,3 +202,9 @@ Open the browser and navigate to the login page, e.g. `http://localhost:8000/log
 
 If everything is set up correctly, you should see the login page and be able to log in with the superuser credentials
 created earlier.
+
+## Templates
+
+HIdP comes with a set of templates that can be overridden in your project.
+
+See [Customizing Templates](project:customizing-templates.md) for more information.

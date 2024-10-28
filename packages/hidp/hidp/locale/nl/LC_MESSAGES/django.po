@@ -48,7 +48,6 @@ msgid "The password is incorrect."
 msgstr "Het wachtwoord is incorrect."
 
 #: hidp/accounts/forms.py
-#: hidp/templates/hidp/accounts/management/email_change_cancel.html
 msgid "Yes, I want to cancel changing my email address"
 msgstr "Ja, ik wil het wijzigen van mijn e-mailadres annuleren"
 

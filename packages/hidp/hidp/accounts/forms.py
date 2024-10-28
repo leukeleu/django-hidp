@@ -47,6 +47,9 @@ class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
     `settings.AUTH_PASSWORD_VALIDATORS`.
     """
 
+    template_name = "hidp/accounts/forms/user_creation_form.html"
+
+    # Fields
     agreed_to_tos = TermsOfServiceMixin.create_agreed_to_tos_field()
     # Remove the option to create an account with an unusable password.
     usable_password = None
@@ -72,6 +75,8 @@ class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
 
 class EmailVerificationForm(forms.ModelForm):
     """Store the date and time when the user verified their email address."""
+
+    template_name = "hidp/accounts/verification/forms/email_verification_form.html"
 
     class Meta:
         model = UserModel
@@ -119,6 +124,8 @@ class AuthenticationForm(auth_forms.AuthenticationForm):
     The username field is mapped to `User.USERNAME_FIELD`. This makes it possible
     to change the username field to a different one, such as an email address.
     """
+
+    template_name = "hidp/accounts/forms/authentication_form.html"
 
     def __init__(self, request=None, *args, **kwargs):
         """
@@ -186,6 +193,9 @@ class AuthenticationForm(auth_forms.AuthenticationForm):
 class PasswordResetRequestForm(forms.Form):
     """Start the password reset process by requesting a password reset email."""
 
+    template_name = "hidp/accounts/recovery/forms/password_reset_request_form.html"
+
+    # Fields
     email = forms.EmailField(
         label=_("Email"),
         max_length=254,
@@ -212,6 +222,8 @@ class PasswordResetForm(auth_forms.SetPasswordForm):
     The password is validated using the validators configured in
     `settings.AUTH_PASSWORD_VALIDATORS`.
     """
+
+    template_name = "hidp/accounts/recovery/forms/password_reset_form.html"
 
     def __init__(self, user, *args, **kwargs):
         """
@@ -247,6 +259,8 @@ class PasswordChangeForm(auth_forms.PasswordChangeForm):
     `settings.AUTH_PASSWORD_VALIDATORS`.
     """
 
+    template_name = "hidp/accounts/management/forms/password_change_form.html"
+
     def __init__(self, user, *args, **kwargs):
         """
         Initialize the form with the given `user`.
@@ -274,6 +288,8 @@ class PasswordChangeForm(auth_forms.PasswordChangeForm):
 class SetPasswordForm(auth_forms.SetPasswordForm):
     """Form for setting a new password without requiring the old password."""
 
+    template_name = "hidp/accounts/management/forms/set_password_form.html"
+
 
 class RateLimitedAuthenticationForm(AuthenticationForm):
     """
@@ -286,6 +302,9 @@ class RateLimitedAuthenticationForm(AuthenticationForm):
     that provides stronger protection against automated attacks.
     """
 
+    template_name = "hidp/accounts/forms/rate_limited_authentication_form.html"
+
+    # Fields
     i_am_not_a_robot = forms.BooleanField(
         label=_("I am not a robot"),
         required=True,
@@ -296,6 +315,8 @@ class RateLimitedAuthenticationForm(AuthenticationForm):
 
 
 class EditUserForm(forms.ModelForm):
+    template_name = "hidp/accounts/management/forms/edit_user_form.html"
+
     class Meta:
         model = UserModel
         fields = ("first_name", "last_name")
@@ -308,6 +329,9 @@ class EmailChangeRequestForm(forms.ModelForm):
     The user is asked to enter their password to confirm their identity.
     """
 
+    template_name = "hidp/accounts/management/forms/email_change_request_form.html"
+
+    # Fields
     proposed_email = forms.EmailField(
         label=_("New email"),
         max_length=254,
@@ -393,6 +417,9 @@ class EmailChangeRequestForm(forms.ModelForm):
 class EmailChangeConfirmForm(forms.ModelForm):
     """Update the EmailChangeRequest with the correct confirmation."""
 
+    template_name = "hidp/accounts/management/forms/email_change_confirm_form.html"
+
+    # Fields
     allow_change = forms.BooleanField(
         label=_("Yes, I want to change my email address"),
         required=True,
@@ -432,7 +459,12 @@ class EmailChangeConfirmForm(forms.ModelForm):
 class EmailChangeCancelForm(forms.Form):
     """Delete the EmailChangeRequest."""
 
+    template_name = "hidp/accounts/management/forms/email_change_cancel_form.html"
+
+    # Fields
     allow_cancel = forms.BooleanField(
         label=_("Yes, I want to cancel changing my email address"),
         required=True,
+        initial=True,
+        widget=forms.HiddenInput(),
     )

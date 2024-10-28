@@ -29,6 +29,7 @@
 
   <form method="post">
     {% csrf_token %}
-    <button type="submit" name="allow_link" value="true">{% translate 'Link account' %}</button>
+    {{ form }}
+    <button type="submit">{{ form.fields.allow_link.label }}</button>
   </form>
 {% endblock %}
