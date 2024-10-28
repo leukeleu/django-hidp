@@ -271,6 +271,9 @@ Rendered by the `OIDCLinkedServicesView`.
 `set_password_url`
 : URL to `SetPasswordView`.
 
+`back_url`
+: Link for the cancel button.
+
 `successfully_linked_provider`
 : Name of provider that was successfully linked.
 
@@ -306,6 +309,11 @@ Rendered by the `PasswordChangeDoneView`.
 Shows a message letting the user know that their password has been changed.
 
 **Base template**: `base_post_login.html`
+
+**Context variables**
+
+`back_url`
+: Link back to the account management page.
 
 ### set_password.html
 
@@ -346,6 +354,11 @@ Rendered by the `SetPasswordDoneView`.
 Shows a message letting the user know that their password has been set.
 
 **Base template**: `base_post_login.html`
+
+**Context variables**
+
+`back_url`
+: Link back to the account management page.
 
 ### email_change_request.html
 
@@ -421,6 +434,9 @@ Rendered by the `EmailChangeCompleteView`.
 `email_change_request_completed`
 : boolean that indicates whether the entire change request is completed.
 
+`back_url`
+: Link back to the account management page.
+
 ### email_change_cancel.html
 
 Rendered by the `EmailChangeCancelView`.
@@ -450,6 +466,11 @@ If `validlink` is `True` the following context variables are also available:
 Rendered by the `EmailChangeCancelDoneView`.
 
 **Base template**: `base_post_login.html`
+
+**Context variables**
+
+`back_url`
+: Link back to the account management page.
 
 ## accounts/management/email/
 

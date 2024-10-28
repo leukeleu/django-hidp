@@ -8,6 +8,6 @@
   <p>{% translate 'Successfully cancelled the email address change.' %}</p>
 
   <hr>
-  <a href="{% url 'hidp_accounts:manage_account' %}">{% translate 'Back' %}</a>
 
+  <a href="{{ back_url }}">{% translate 'Back' %}</a>
 {% endblock %}
