@@ -754,6 +754,9 @@ OIDC provider.
 `form`
 : The account link form.
 
+`cancel_url`
+: Link for the cancel button.
+
 `provider`
 : The OIDC provider that the user is linking their account to.
 
@@ -781,6 +784,9 @@ OIDC provider.
 
 `provider`
 : The OIDC provider that the user is unlinking.
+
+`cancel_url`
+: URL for the cancel button.
 
 ### registration.html
 

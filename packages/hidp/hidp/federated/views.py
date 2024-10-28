@@ -409,6 +409,7 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
             "provider": self.provider,
             "user_email": self.request.user.email,
             "provider_email": self.token_data["claims"]["email"],
+            "cancel_url": self.success_url,
         }
         return super().get_context_data() | context | kwargs
 
@@ -449,5 +450,6 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
     def get_context_data(self, **kwargs):
         context = {
             "provider": self.provider,
+            "cancel_url": self.success_url,
         }
         return super().get_context_data() | context | kwargs
