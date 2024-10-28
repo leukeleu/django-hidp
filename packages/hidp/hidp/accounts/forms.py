@@ -312,11 +312,16 @@ class EmailChangeRequestForm(forms.ModelForm):
         label=_("New email"),
         max_length=254,
         widget=forms.EmailInput(),
+        help_text=_(
+            "Please note that changing your email address will also"
+            " change the username you use to login."
+        ),
     )
     password = forms.CharField(
         label=_("Password"),
         strip=False,
-        widget=forms.PasswordInput(attrs={"autocomplete": "password"}),
+        widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
+        help_text=_("Your password is required to verify your identity."),
     )
 
     class Meta:
