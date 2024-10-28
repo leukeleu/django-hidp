@@ -653,6 +653,12 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
             return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = {
+            "cancel_url": reverse("hidp_accounts:manage_account"),
+        }
+        return super().get_context_data() | context | kwargs
+
     def send_email(self):
         """Send the password changed email."""
         self.password_changed_mailer(
@@ -704,6 +710,7 @@ class SetPasswordView(
 
     def get_context_data(self, **kwargs):
         context = {
+            "cancel_url": reverse("hidp_accounts:manage_account"),
             "must_reauthenticate": self.must_reauthenticate,
             "oidc_linked_providers": self._build_provider_url_list(
                 [
@@ -816,6 +823,7 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
 
     def get_context_data(self, **kwargs):
         context = {
+            "cancel_url": reverse("hidp_accounts:manage_account"),
             "show_success_message": "success" in self.request.GET,
         }
         return super().get_context_data() | context | kwargs
@@ -901,6 +909,7 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         context = {
             "can_change_email": self.request.user.has_usable_password(),
+            "cancel_url": reverse("hidp_accounts:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -1063,6 +1072,7 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
             context |= {
                 "current_email": self.object.current_email,
                 "proposed_email": self.object.proposed_email,
+                "cancel_url": reverse("hidp_accounts:manage_account"),
             }
 
         return super().get_context_data() | context | kwargs

@@ -245,6 +245,9 @@ Rendered by the `EditAccountView`.
 `form`
 : A form that allows users to update their first and last name.
 
+`cancel_url`
+: Link for the cancel button.
+
 `show_success_message`
 : `True` if the account was updated successfully.
 
@@ -293,6 +296,9 @@ Redirects to `PasswordChangeDoneView` after successfully changing the password.
 : A form that allows users to change their password. 
   The user also needs to enter their old password to verify the user's identity.
 
+`cancel_url`
+: Link for the cancel button.
+
 ### password_change_done.html
 
 Rendered by the `PasswordChangeDoneView`.
@@ -319,6 +325,9 @@ Redirects to `SetPasswordDoneView` after successfully setting the password.
 
 `form`
 : A form that allows users to change their password.
+
+`cancel_url`
+: Link for the cancel button.
 
 `must_reauthenticate`
 : Boolean that indicates if the user needs to re-authenticate
@@ -351,6 +360,9 @@ Rendered by the `EmailChangeRequestView`.
 `form`
 : The email change request form, where users need to fill in a new email 
   address and password.
+
+`cancel_url`
+: Link for the cancel button.
 
 ### email_change_request_sent.html
 
@@ -429,6 +441,9 @@ If `validlink` is `True` the following context variables are also available:
 
 `proposed_email`
 : The proposed new email address.
+
+`cancel_url`
+: Link for the back button.
 
 ### email_change_cancel_done.html
 
