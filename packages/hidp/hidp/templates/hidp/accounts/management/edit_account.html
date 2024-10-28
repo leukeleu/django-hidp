@@ -14,7 +14,6 @@
 
   <form method="post">
     {% csrf_token %}
-    <input type="hidden" name="next" value="{{ next }}">
     {{ form }}
     <button type="submit">{% translate 'Save' %}</button>
     <a href="{% url 'hidp_accounts:manage_account' %}">{% translate 'Cancel' %}</a>
