@@ -719,11 +719,6 @@ msgid "This will remove the possibility to use your %(provider)s account to log 
 msgstr ""
 
 #: hidp/templates/hidp/federated/account_unlink.html
-#, python-format
-msgid "Unlink %(provider)s"
-msgstr ""
-
-#: hidp/templates/hidp/federated/account_unlink.html
 msgid "Unlink account"
 msgstr ""
 
