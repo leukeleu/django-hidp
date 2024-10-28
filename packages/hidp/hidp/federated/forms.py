@@ -77,7 +77,7 @@ class OIDCAccountLinkForm(forms.ModelForm):
 
     # Fields
     allow_link = forms.BooleanField(
-        label=_("Yes, I want to link this account."),
+        label=_("Yes, I want to link this account"),
         required=True,
         initial=True,
         widget=forms.HiddenInput(),
@@ -113,7 +113,7 @@ class OIDCAccountUnlinkForm(forms.Form):
 
     # Fields
     allow_unlink = forms.BooleanField(
-        label=_("Yes, I want to unlink this account."),
+        label=_("Yes, I want to unlink this account"),
         required=True,
         initial=True,
         widget=forms.HiddenInput(),

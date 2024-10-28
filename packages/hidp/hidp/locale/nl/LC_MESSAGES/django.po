@@ -181,12 +181,12 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
 #: hidp/federated/forms.py
-msgid "Yes, I want to link this account."
-msgstr "Ja, ik wil dit account koppelen."
+msgid "Yes, I want to link this account"
+msgstr "Ja, ik wil dit account koppelen"
 
 #: hidp/federated/forms.py
-msgid "Yes, I want to unlink this account."
-msgstr "Ja, ik wil dit account ontkoppelen."
+msgid "Yes, I want to unlink this account"
+msgstr "Ja, ik wil dit account ontkoppelen"
 
 #: hidp/federated/forms.py
 msgid "You cannot unlink your only way to login."
