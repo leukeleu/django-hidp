@@ -444,6 +444,7 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
             else ""
         )
         context = {
+            "password_reset_url": reverse("hidp_accounts:password_reset_request"),
             "register_url": register_url,
             "is_rate_limited": self.request.limited,
         }
@@ -653,6 +654,12 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
             return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = {
+            "cancel_url": reverse("hidp_accounts:manage_account"),
+        }
+        return super().get_context_data() | context | kwargs
+
     def send_email(self):
         """Send the password changed email."""
         self.password_changed_mailer(
@@ -671,6 +678,12 @@ class PasswordChangeDoneView(auth_views.TemplateView):
     """Display a message that the password change has been completed."""
 
     template_name = "hidp/accounts/management/password_change_done.html"
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "back_url": reverse("hidp_accounts:manage_account"),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -704,6 +717,7 @@ class SetPasswordView(
 
     def get_context_data(self, **kwargs):
         context = {
+            "cancel_url": reverse("hidp_accounts:manage_account"),
             "must_reauthenticate": self.must_reauthenticate,
             "oidc_linked_providers": self._build_provider_url_list(
                 [
@@ -748,6 +762,12 @@ class SetPasswordDoneView(auth_views.TemplateView):
     """Display a message that the password has been set."""
 
     template_name = "hidp/accounts/management/set_password_done.html"
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "back_url": reverse("hidp_accounts:manage_account"),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -816,6 +836,7 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
 
     def get_context_data(self, **kwargs):
         context = {
+            "cancel_url": reverse("hidp_accounts:manage_account"),
             "show_success_message": "success" in self.request.GET,
         }
         return super().get_context_data() | context | kwargs
@@ -871,6 +892,7 @@ class OIDCLinkedServicesView(
             ),
             "can_unlink": can_unlink,
             "set_password_url": reverse("hidp_accounts:set_password"),
+            "back_url": reverse("hidp_accounts:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -901,6 +923,8 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         context = {
             "can_change_email": self.request.user.has_usable_password(),
+            "set_password_url": reverse("hidp_accounts:set_password"),
+            "cancel_url": reverse("hidp_accounts:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -1022,14 +1046,17 @@ class EmailChangeCompleteView(auth_views.TemplateView):
         email_change_request = EmailChangeRequest.objects.filter(
             user=self.request.user
         ).first()
+        context = {
+            "back_url": reverse("hidp_accounts:manage_account"),
+        }
         if email_change_request is None or email_change_request.is_complete():
-            context = {
+            context |= {
                 "current_email_confirmation_required": False,
                 "proposed_email_confirmation_required": False,
                 "email_change_request_completed": True,
             }
         else:
-            context = {
+            context |= {
                 "current_email_confirmation_required": (
                     not email_change_request.confirmed_by_current_email
                 ),
@@ -1063,6 +1090,7 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
             context |= {
                 "current_email": self.object.current_email,
                 "proposed_email": self.object.proposed_email,
+                "cancel_url": reverse("hidp_accounts:manage_account"),
             }
 
         return super().get_context_data() | context | kwargs
@@ -1102,3 +1130,9 @@ class EmailChangeCancelDoneView(auth_views.TemplateView):
     """Display a message that the email change request has been cancelled."""
 
     template_name = "hidp/accounts/management/email_change_cancel_done.html"
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "back_url": reverse("hidp_accounts:manage_account"),
+        }
+        return super().get_context_data() | context | kwargs

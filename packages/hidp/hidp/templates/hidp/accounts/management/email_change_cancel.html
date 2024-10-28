@@ -19,7 +19,7 @@
     {% csrf_token %}
     {{ form }}
     <button type="submit">{{ form.fields.allow_cancel.label }}</button>
-    <a href="{% url 'hidp_accounts:manage_account' %}">{% translate 'Back' %}</a>
+    <a href="{{ cancel_url }}">{% translate 'Back' %}</a>
   </form>
   {% endif %}
 {% endblock %}
