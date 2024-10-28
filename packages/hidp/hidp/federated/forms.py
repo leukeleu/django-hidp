@@ -79,6 +79,8 @@ class OIDCAccountLinkForm(forms.ModelForm):
     allow_link = forms.BooleanField(
         label=_("Yes, I want to link this account."),
         required=True,
+        initial=True,
+        widget=forms.HiddenInput(),
     )
 
     def __init__(self, *, user, provider_key, claims, **kwargs):

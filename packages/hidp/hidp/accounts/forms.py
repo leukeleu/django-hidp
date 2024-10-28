@@ -465,4 +465,6 @@ class EmailChangeCancelForm(forms.Form):
     allow_cancel = forms.BooleanField(
         label=_("Yes, I want to cancel changing my email address"),
         required=True,
+        initial=True,
+        widget=forms.HiddenInput(),
     )
