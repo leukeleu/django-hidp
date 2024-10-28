@@ -373,6 +373,10 @@ Rendered by the `EmailChangeRequestView`.
 
 **Context variables**
 
+`can_change_email`
+: Boolean that indicates if the user can change their email address.
+  A user must have a password set in order to change their email address.
+
 `set_password_url`
 : URL to the set password page.
 
