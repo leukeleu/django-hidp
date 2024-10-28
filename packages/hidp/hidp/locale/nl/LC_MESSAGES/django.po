@@ -266,10 +266,6 @@ msgid "Cancel"
 msgstr "Annuleren"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
-msgid "Error"
-msgstr "Error"
-
-#: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/register.html
 msgid "Log out"
