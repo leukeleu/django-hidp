@@ -146,7 +146,7 @@ urlpatterns = [
 ### Cache
 
 HIdP requires a caching implementation, in order for the rate limits to properly work
-and to store OIDC Provider signing keys. See [Django's cache framework](https://docs.djangoproject.com/en/5.0/topics/cache/#django-s-cache-framework).
+and to store OIDC Provider signing keys. See [Django's cache framework](https://docs.djangoproject.com/en/stable/topics/cache/#django-s-cache-framework).
 
 For example a Redis cache:
 
@@ -166,7 +166,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 ```
 
 :::{note}
-This requires Redis to be running locally or on a remote machine. See [Redis](https://docs.djangoproject.com/en/5.0/topics/cache/#redis)
+This requires Redis to be running locally or on a remote machine. See [Redis](https://docs.djangoproject.com/en/stable/topics/cache/#redis)
 for more information how to set it up.
 :::
 
