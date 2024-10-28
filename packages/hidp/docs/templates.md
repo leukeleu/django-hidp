@@ -134,6 +134,9 @@ Rendered by the `LoginView`.
 `site_name`
 : The name of the current site (host name if `RequestSite` is used)
 
+`password_reset_url`
+: URL to the password reset page.
+
 `register_url`
 : URL to the sign-up page, with a next param if `redirect_url` is available.
 
@@ -369,6 +372,9 @@ Rendered by the `EmailChangeRequestView`.
 **Form template**: `accounts/forms/email_change_request_form.html`
 
 **Context variables**
+
+`set_password_url`
+: URL to the set password page.
 
 `form`
 : The email change request form, where users need to fill in a new email 

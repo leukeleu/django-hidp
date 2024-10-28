@@ -30,7 +30,7 @@
   </form>
 
   <p>
-    <a href="{% url 'hidp_accounts:password_reset_request' %}">
+    <a href="{{ password_reset_url }}">
       {% translate 'Forgot your password?' %}
     </a>
   </p>

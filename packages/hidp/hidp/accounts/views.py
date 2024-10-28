@@ -444,6 +444,7 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
             else ""
         )
         context = {
+            "password_reset_url": reverse("hidp_accounts:password_reset_request"),
             "register_url": register_url,
             "is_rate_limited": self.request.limited,
         }
@@ -922,6 +923,7 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         context = {
             "can_change_email": self.request.user.has_usable_password(),
+            "set_password_url": reverse("hidp_accounts:set_password"),
             "cancel_url": reverse("hidp_accounts:manage_account"),
         }
         return super().get_context_data() | context | kwargs
