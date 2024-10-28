@@ -189,7 +189,7 @@ msgid "Yes, I want to unlink this account"
 msgstr "Ja, ik wil dit account ontkoppelen"
 
 #: hidp/federated/forms.py
-msgid "You cannot unlink your only way to login."
+msgid "You cannot unlink your only way to log in."
 msgstr "Je kunt je enige manier om in te loggen niet ontkoppelen."
 
 #: hidp/federated/models.py

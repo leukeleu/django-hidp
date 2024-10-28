@@ -606,7 +606,7 @@ class TestOIDCAccountUnlinkView(TestCase):
         self.assertFormError(
             response.context["form"],
             None,
-            "You cannot unlink your only way to login.",
+            "You cannot unlink your only way to log in.",
         )
 
     def test_valid_provider_no_connection(self):

@@ -188,7 +188,7 @@ msgid "Yes, I want to unlink this account"
 msgstr ""
 
 #: hidp/federated/forms.py
-msgid "You cannot unlink your only way to login."
+msgid "You cannot unlink your only way to log in."
 msgstr ""
 
 #: hidp/federated/models.py
