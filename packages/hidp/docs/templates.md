@@ -272,7 +272,7 @@ Rendered by the `OIDCLinkedServicesView`.
 : `False` if the user has not set a password and only has one linked provider.
 
 `set_password_url`
-: URL to `SetPasswordView`.
+: URL to the set password page.
 
 `back_url`
 : Link for the cancel button.
@@ -491,8 +491,7 @@ successfully changes their password.
 **Context variables**
 
 `password_reset_url`
-: URL to `PasswordResetView`.
-
+: URL to the password reset page.
 
 ### password_changed_subject.txt
 
@@ -630,7 +629,7 @@ Sent by the `PasswordResetRequestView` for users that have a password set.
 **Context variables**
 
 `password_reset_url`
-: URL to `PasswordResetView`.
+: URL to the password reset page.
 
 `user`
 : The user the password was changed for
@@ -646,7 +645,7 @@ Sent by the `SetPasswordView` for users that don't have a password set.
 **Context variables**
 
 `password_reset_url`
-: URL to `SetPasswordView`.
+: URL to the password reset page.
 
 ### set_password_subject.txt
 
@@ -722,7 +721,7 @@ Sent by the `RegistrationView` if an account already exists with that email addr
 **Context variables**
 
 `password_reset_url`
-: URL to `PasswordResetRequestView`.
+: URL to the password reset page.
 
 ### account_exists_subject.txt
 
