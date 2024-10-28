@@ -33,6 +33,14 @@ msgid "Please confirm that you are not a robot."
 msgstr "Bevestig dat je geen robot bent."
 
 #: hidp/accounts/forms.py
+#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+msgid "Please note that changing your email address will also change the username you use to login."
+msgstr "Houd er rekening mee dat het wijzigen van je e-mailadres ook je inlognaam verandert."
+
+#: hidp/accounts/forms.py
 msgid "The new email address is the same as the current email address."
 msgstr "Het nieuwe e-mailadres is hetzelfde als het huidige e-mailadres."
 
@@ -49,6 +57,11 @@ msgstr "Ja, ik wil het wijzigen van mijn e-mailadres annuleren"
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Yes, I want to change my email address"
 msgstr "Ja, ik wil mijn e-mailadres wijzigen"
+
+#: hidp/accounts/forms.py
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Your password is required to verify your identity."
+msgstr "Je wachtwoord is nodig om je identiteit te verfifiëren."
 
 #: hidp/accounts/models.py
 msgid "agreed to terms of service"
@@ -325,13 +338,6 @@ msgstr "Als je deze wijziging niet hebt aangevraagd, kun je het verzoek annulere
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 msgid "Please go to the following page and confirm the change:"
 msgstr "Ga naar de volgende pagina en bevestig de wijziging:"
-
-#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
-#: hidp/templates/hidp/accounts/management/email_change_confirm.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-msgid "Please note that changing your email address will also change the username you use to login."
-msgstr "Houd er rekening mee dat het wijzigen van je e-mailadres ook je inlognaam verandert."
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 #: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt

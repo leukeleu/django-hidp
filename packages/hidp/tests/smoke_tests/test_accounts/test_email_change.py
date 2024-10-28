@@ -52,10 +52,6 @@ class TestEmailChangeRequest(TestCase):
             response.content.decode(),
         )
         self.assertInHTML(
-            "Please set a password first.",
-            response.content.decode(),
-        )
-        self.assertInHTML(
             '<a href="/manage/set-password/">Set password</a>',
             response.content.decode(),
         )

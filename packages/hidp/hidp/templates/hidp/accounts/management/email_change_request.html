@@ -8,15 +8,12 @@
 
   {% if not can_change_email %}
     <p>{% translate 'You cannot change your email address because you do not have a password set.' %}</p>
-    <p>{% translate 'A password is required to confirm your identity.' %}</p>
-    <p>{% translate 'Please set a password first.' %}</p>
+    <p>{% translate 'Your password is required to verify your identity.' %}</p>
     <a href="{% url 'hidp_accounts:set_password' %}">{% translate 'Set password' %}</a>
 
   {% else %}
     <p>{% translate 'Enter your new email address.' %}</p>
-    <p>{% translate 'Your password is required to confirm your identity.' %}
     <p>{% translate 'You will receive an email on your current and new email address with a link to confirm the change.' %}</p>
-    <p>{% translate 'Please note that changing your email address will also change the username you use to login.' %}</p>
 
     <form action="{% url 'hidp_accounts:email_change_request' %}" method="post">
       {% csrf_token %}

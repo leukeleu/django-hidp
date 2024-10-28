@@ -32,6 +32,14 @@ msgid "Please confirm that you are not a robot."
 msgstr ""
 
 #: hidp/accounts/forms.py
+#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
+#: hidp/templates/hidp/accounts/management/email_change_confirm.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+msgid "Please note that changing your email address will also change the username you use to login."
+msgstr ""
+
+#: hidp/accounts/forms.py
 msgid "The new email address is the same as the current email address."
 msgstr ""
 
@@ -47,6 +55,11 @@ msgstr ""
 #: hidp/accounts/forms.py
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Yes, I want to change my email address"
+msgstr ""
+
+#: hidp/accounts/forms.py
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Your password is required to verify your identity."
 msgstr ""
 
 #: hidp/accounts/models.py
@@ -323,13 +336,6 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 msgid "Please go to the following page and confirm the change:"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email/email_change_body.txt
-#: hidp/templates/hidp/accounts/management/email_change_confirm.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-msgid "Please note that changing your email address will also change the username you use to login."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
