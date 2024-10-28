@@ -1,6 +1,17 @@
 import fnmatch
+import os
 
 from django.core.management.commands import makemessages
+
+POT_TEMPLATE = r"""
+#, fuzzy
+msgid ""
+msgstr ""
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+""".strip()
 
 
 class Command(makemessages.Command):
@@ -62,6 +73,12 @@ class Command(makemessages.Command):
     def remove_potfiles(self):
         # Even though keep_pot is set to True, the default implementation
         # still removes the .pot file at the start of the process.
-        # We do not want this, as it is customized to remove some of
+        # We do not want this, and instead use this to recreate the .pot
+        # file using our own customized template to remove some of
         # the default (and in our opinion, pointless) comments and headers.
-        pass
+        for path in self.locale_paths:
+            pot_path = os.path.join(path, f"{self.domain}.pot")
+            if not os.path.exists(pot_path):
+                continue
+            with open(pot_path, "w", encoding="utf-8") as f:
+                f.write(POT_TEMPLATE)
