@@ -7,8 +7,27 @@ These templates are located in the `templates/hidp` directory.
 To override them, create a file in your application's template directory
 with the same path as the templates you are trying to override.
 
-For more information on overriding templates, visit
+Forms are rendered using Django's built-in form rendering system, and each
+form is assigned their own template. In order to override the form templates,
+using a template from your project's template directory some additional
+configuration is required.
+
+```python
+# settings.py
+INSTALLED_APPS = [
+  ...,
+  "django.forms",
+  ...,
+]
+
+FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
+```
+
+For more information on overriding templates in general, visit
 [Django's documentation](https://docs.djangoproject.com/en/stable/howto/overriding-templates/).
+
+For more information on overriding form templates, read this section in
+[Django's documentation](https://docs.djangoproject.com/en/5.0/topics/forms/#reusable-form-templates).
 
 The templates available are:
 :::{contents}
@@ -60,6 +79,15 @@ add anything over the base template and is only provided as an extension point.
 This template extends `base.html` and is used for all post-login pages. It does not
 add anything over the base template and is only provided as an extension point.
 
+### base_form.html
+
+This is the base template for all forms in HIdP. It extends the default Django form
+template (`django/forms/div.html`) (without any modifications). Override this template
+to customize the layout of HIdP forms on a global basis.
+
+Each form is assigned a template that extends this base template (again, without any
+modifications). These templates are noted in the per-page documentation below.
+
 ---
 
 ## accounts/
@@ -72,6 +100,11 @@ can be found in this directory and subdirectories: `templates/hidp/accounts`.
 Rendered by the `LoginView`.
 
 **Base template**: `base_pre_login.html`
+
+**Form template**: 
+
+* `accounts/forms/authentication_form.html`
+* `accounts/forms/rate_limited_authentication_form.html` (if rate limited)
 
 **Context variables**
 
@@ -130,6 +163,8 @@ confirmation page is shown regardless of the user's authentication status.
 Rendered by the `RegistrationView`.
 
 **Base template**: `base_pre_login.html`
+
+**Form template**: `accounts/forms/user_creation_form.html`
 
 **Context variables**
 
@@ -203,6 +238,8 @@ Rendered by the `EditAccountView`.
 
 **Base template**: `base_post_login.html`
 
+**Form template**: `accounts/forms/edit_user_form.html`
+
 **Context variables**
 
 `form`
@@ -248,6 +285,8 @@ Redirects to `PasswordChangeDoneView` after successfully changing the password.
 
 **Base template**: `base_post_login.html`
 
+**Form template**: `accounts/forms/password_change_form.html`
+
 **Context variables**
 
 `form`
@@ -273,6 +312,8 @@ re-authenticate using one of the OIDC providers linked to their account.
 Redirects to `SetPasswordDoneView` after successfully setting the password.
 
 **Base template**: `base_post_login.html`
+
+**Form template**: `accounts/forms/set_password_form.html`
 
 **Context variables**
 
@@ -303,6 +344,8 @@ Rendered by the `EmailChangeRequestView`.
 
 **Base template**: `base_post_login.html`
 
+**Form template**: `accounts/forms/email_change_request_form.html`
+
 **Context variables**
 
 `form`
@@ -320,6 +363,8 @@ Rendered by the `EmailChangeRequestSentView`.
 Rendered by the `EmailChangeConfirmView`.
 
 **Base template**: `base_post_login.html`
+
+**Form template**: `accounts/forms/email_change_confirm_form.html`
 
 **Context variables**
 
@@ -369,6 +414,8 @@ Rendered by the `EmailChangeCompleteView`.
 Rendered by the `EmailChangeCancelView`.
 
 **Base template**: `base_post_login.html`
+
+**Form template**: `accounts/forms/email_change_cancel_form.html`
 
 **Context variables**
 
@@ -489,6 +536,8 @@ Rendered by the `PasswordResetRequestView`.
 
 **Base template**: `base_pre_login.html`
 
+**Form template**: `accounts/forms/password_reset_request_form.html`
+
 **Context variables**
 
 `form`
@@ -505,6 +554,8 @@ Rendered by the `PasswordResetEmailSentView`.
 Rendered by the `PasswordResetView`, which is a subclass of Django's `PasswordResetConfirmView`.
 
 **Base template**: `base_pre_login.html`
+
+**Form template**: `accounts/forms/password_reset_form.html`
 
 **Context variables**
 
@@ -583,6 +634,8 @@ Rendered by the `EmailVerificationView`.
 
 **Base template**: `base_pre_login.html`
 
+**Form template**: `accounts/forms/email_verification_form.html`
+
 **Context variables**
 
 `form`
@@ -649,6 +702,8 @@ OIDC provider.
 
 **Base template**: `base_post_login.html`
 
+**Form template**: `federated/forms/account_link_form.html`
+
 **Context variables**
 
 `form`
@@ -672,6 +727,8 @@ OIDC provider.
 
 **Base template**: `base_post_login.html`
 
+**Form template**: `federated/forms/account_unlink_form.html`
+
 **Context variables**
 
 `form`
@@ -685,6 +742,8 @@ OIDC provider.
 Rendered by the `OIDCRegistrationView`.
 
 **Base template**: `base_pre_login.html`
+
+**Form template**: `federated/forms/registration_form.html`
 
 **Context variables**
 
