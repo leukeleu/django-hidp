@@ -27,7 +27,7 @@ For more information on overriding templates in general, visit
 [Django's documentation](https://docs.djangoproject.com/en/stable/howto/overriding-templates/).
 
 For more information on overriding form templates, read this section in
-[Django's documentation](https://docs.djangoproject.com/en/5.0/topics/forms/#reusable-form-templates).
+[Django's documentation](https://docs.djangoproject.com/en/stable/topics/forms/#reusable-form-templates).
 
 The templates available are:
 :::{contents}
