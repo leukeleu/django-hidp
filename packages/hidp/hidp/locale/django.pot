@@ -16,7 +16,7 @@ msgstr ""
 
 #: hidp/accounts/forms.py
 #, python-brace-format
-msgid "I have read and accept the <a href=\"{url}\">Terms of Service</a>."
+msgid "I have read and accept the <a href=\"{url}\">Terms of Service</a>"
 msgstr ""
 
 #: hidp/accounts/forms.py

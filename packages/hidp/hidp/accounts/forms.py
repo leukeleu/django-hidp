@@ -19,7 +19,7 @@ class TermsOfServiceMixin:
     def create_agreed_to_tos_field():
         label = mark_safe(  # noqa: S308 (safe string, no user input)
             format_lazy(
-                _('I have read and accept the <a href="{url}">Terms of Service</a>.'),
+                _('I have read and accept the <a href="{url}">Terms of Service</a>'),
                 url=reverse_lazy("hidp_accounts:tos"),
             )
         )

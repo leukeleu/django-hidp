@@ -17,8 +17,8 @@ msgstr "Ik ben geen robot"
 
 #: hidp/accounts/forms.py
 #, python-brace-format
-msgid "I have read and accept the <a href=\"{url}\">Terms of Service</a>."
-msgstr "Ik heb de <a href=\"{url}\">Servicevoorwaarden</a> gelezen en accepteer ze."
+msgid "I have read and accept the <a href=\"{url}\">Terms of Service</a>"
+msgstr "Ik heb de <a href=\"{url}\">Servicevoorwaarden</a> gelezen en accepteer ze"
 
 #: hidp/accounts/forms.py
 msgid "New email"
