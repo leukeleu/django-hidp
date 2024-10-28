@@ -34,7 +34,6 @@ msgstr ""
 #: hidp/accounts/forms.py
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "Please note that changing your email address will also change the username you use to login."
 msgstr ""
@@ -53,7 +52,6 @@ msgid "Yes, I want to cancel changing my email address"
 msgstr ""
 
 #: hidp/accounts/forms.py
-#: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Yes, I want to change my email address"
 msgstr ""
 
@@ -123,11 +121,6 @@ msgid "This password does not contain any lowercase characters (a-z)."
 msgstr ""
 
 #: hidp/accounts/password_validation.py
-#, python-format
-msgid "This password does not contain any special characters (%s)."
-msgstr ""
-
-#: hidp/accounts/password_validation.py
 msgid "This password does not contain any special characters ({})."
 msgstr ""
 
@@ -144,11 +137,6 @@ msgid "Your password must contain at least one lowercase character (a-z)."
 msgstr ""
 
 #: hidp/accounts/password_validation.py
-#, python-format
-msgid "Your password must contain at least one special character (%s)."
-msgstr ""
-
-#: hidp/accounts/password_validation.py
 msgid "Your password must contain at least one special character ({})."
 msgstr ""
 
@@ -160,12 +148,10 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Change email address"
 msgstr ""
 
 #: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/management/password_change.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
@@ -174,12 +160,10 @@ msgstr ""
 
 #: hidp/accounts/views.py
 #: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Edit account"
 msgstr ""
 
 #: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Linked services"
@@ -187,7 +171,6 @@ msgstr ""
 
 #: hidp/accounts/views.py
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/management/set_password.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
 msgid "Set password"
@@ -269,23 +252,9 @@ msgid "Log in with username and password"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html
-#: hidp/templates/hidp/accounts/logout_confirm.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/register.html
-msgid "Log out"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/register.html
 #: hidp/templates/hidp/federated/registration.html
 msgid "Sign up"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/login.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/register.html
-#, python-format
-msgid "You are currently logged in as %(user)s."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
@@ -298,6 +267,12 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 msgid "Error"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/logout_confirm.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/register.html
+msgid "Log out"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
@@ -462,15 +437,7 @@ msgid "The link you followed is invalid. It may have expired or been used alread
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "A password is required to confirm your identity."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Enter your new email address."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "Please set a password first."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
@@ -479,10 +446,6 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "You will receive an email on your current and new email address with a link to confirm the change."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "Your password is required to confirm your identity."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
@@ -505,6 +468,12 @@ msgstr ""
 msgid "Manage your account information"
 msgstr ""
 
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/register.html
+#, python-format
+msgid "You are currently logged in as %(user)s."
+msgstr ""
+
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Available services"
 msgstr ""
@@ -512,11 +481,6 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #, python-format
 msgid "Link with %(provider)s"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#, python-format
-msgid "Linked with %(provider)s"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
@@ -585,13 +549,11 @@ msgid "Your password has been set."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
-#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
 msgid "Please go to the following page and choose a new password:"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
 #: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
-#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
 msgid "You're receiving this email because you requested a password reset."
 msgstr ""
 

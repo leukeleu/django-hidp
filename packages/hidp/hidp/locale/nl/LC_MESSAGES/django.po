@@ -35,7 +35,6 @@ msgstr "Bevestig dat je geen robot bent."
 #: hidp/accounts/forms.py
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "Please note that changing your email address will also change the username you use to login."
 msgstr "Houd er rekening mee dat het wijzigen van je e-mailadres ook je inlognaam verandert."
@@ -54,7 +53,6 @@ msgid "Yes, I want to cancel changing my email address"
 msgstr "Ja, ik wil het wijzigen van mijn e-mailadres annuleren"
 
 #: hidp/accounts/forms.py
-#: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Yes, I want to change my email address"
 msgstr "Ja, ik wil mijn e-mailadres wijzigen"
 
@@ -124,11 +122,6 @@ msgid "This password does not contain any lowercase characters (a-z)."
 msgstr "Dit wachtwoord bevat geen kleine letters (a-z)."
 
 #: hidp/accounts/password_validation.py
-#, python-format
-msgid "This password does not contain any special characters (%s)."
-msgstr "Dit wachtwoord bevat geen speciale tekens (%s)."
-
-#: hidp/accounts/password_validation.py
 msgid "This password does not contain any special characters ({})."
 msgstr "Dit wachtwoord bevat geen speciale tekens ({})."
 
@@ -145,11 +138,6 @@ msgid "Your password must contain at least one lowercase character (a-z)."
 msgstr "Uw wachtwoord moet minstens één kleine letter bevatten (a-z)."
 
 #: hidp/accounts/password_validation.py
-#, python-format
-msgid "Your password must contain at least one special character (%s)."
-msgstr "Uw wachtwoord moet minstens één speciaal teken bevatten (%s)."
-
-#: hidp/accounts/password_validation.py
 msgid "Your password must contain at least one special character ({})."
 msgstr "Uw wachtwoord moet minstens één speciaal teken bevatten ({})."
 
@@ -161,12 +149,10 @@ msgstr "Uw wachtwoord moet minstens één hoofdletter bevatten (A-Z)."
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Change email address"
 msgstr "Wijzig e-mailadres"
 
 #: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/management/password_change.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
@@ -175,12 +161,10 @@ msgstr "Wachtwoord wijzigen"
 
 #: hidp/accounts/views.py
 #: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
 msgid "Edit account"
 msgstr "Account bewerken"
 
 #: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Linked services"
@@ -188,7 +172,6 @@ msgstr "Gekoppelde diensten"
 
 #: hidp/accounts/views.py
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/management/set_password.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
 msgid "Set password"
@@ -270,24 +253,10 @@ msgid "Log in with username and password"
 msgstr "Inloggen met gebruikersnaam en wachtwoord"
 
 #: hidp/templates/hidp/accounts/login.html
-#: hidp/templates/hidp/accounts/logout_confirm.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/register.html
-msgid "Log out"
-msgstr "Uitloggen"
-
-#: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/register.html
 #: hidp/templates/hidp/federated/registration.html
 msgid "Sign up"
 msgstr "Registreer"
-
-#: hidp/templates/hidp/accounts/login.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/register.html
-#, python-format
-msgid "You are currently logged in as %(user)s."
-msgstr "Je bent momenteel ingelogd als %(user)s."
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/management/edit_account.html
@@ -300,6 +269,12 @@ msgstr "Annuleren"
 #: hidp/templates/hidp/accounts/logout_confirm.html
 msgid "Error"
 msgstr "Error"
+
+#: hidp/templates/hidp/accounts/logout_confirm.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/register.html
+msgid "Log out"
+msgstr "Uitloggen"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
 msgid "Logout"
@@ -463,16 +438,8 @@ msgid "The link you followed is invalid. It may have expired or been used alread
 msgstr "De link die je hebt gevolgd is ongeldig. Het kan zijn dat deze is verlopen of al is gebruikt."
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "A password is required to confirm your identity."
-msgstr "Een wachtwoord is nodig om je identiteit te verfifiëren."
-
-#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Enter your new email address."
 msgstr "Voer je nieuwe e-mailadres in."
-
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "Please set a password first."
-msgstr "Stel eerst een wachtwoord in."
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "You cannot change your email address because you do not have a password set."
@@ -481,10 +448,6 @@ msgstr "Je kan je e-mailadres niet wijzigen, omdat je geen wachtwoord hebt inges
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "You will receive an email on your current and new email address with a link to confirm the change."
 msgstr "Je ontvangt een e-mail op zowel je huidige als je nieuwe e-mailadres met een link om de wijziging te bevestigen."
-
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "Your password is required to confirm your identity."
-msgstr "Je wachtwoord is nodig om je identiteit te verfifiëren."
 
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "If you don't receive an email, please make sure you've entered the correct new address, and check your spam folder."
@@ -506,6 +469,12 @@ msgstr "Account beheren"
 msgid "Manage your account information"
 msgstr "Beheer je accountinformatie"
 
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/register.html
+#, python-format
+msgid "You are currently logged in as %(user)s."
+msgstr "Je bent momenteel ingelogd als %(user)s."
+
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Available services"
 msgstr "Beschikbare diensten"
@@ -514,11 +483,6 @@ msgstr "Beschikbare diensten"
 #, python-format
 msgid "Link with %(provider)s"
 msgstr "Koppel met %(provider)s"
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#, python-format
-msgid "Linked with %(provider)s"
-msgstr "Gekoppeld met %(provider)s"
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Manage linked trusted services"
@@ -586,13 +550,11 @@ msgid "Your password has been set."
 msgstr "Je wachtwoord is ingesteld."
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
-#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
 msgid "Please go to the following page and choose a new password:"
 msgstr "Ga naar de volgende pagina en kies een nieuw wachtwoord:"
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
 #: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
-#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
 msgid "You're receiving this email because you requested a password reset."
 msgstr "Je ontvangt deze e-mail omdat je wachtwoord reset hebt aangevraagd."
 
