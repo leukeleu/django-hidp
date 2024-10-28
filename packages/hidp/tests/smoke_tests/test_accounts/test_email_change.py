@@ -51,10 +51,6 @@ class TestEmailChangeRequest(TestCase):
             " password set.",
             response.content.decode(),
         )
-        self.assertInHTML(
-            '<a href="/manage/set-password/">Set password</a>',
-            response.content.decode(),
-        )
 
     def test_post_user_without_password_requests_email_change(self):
         self.user.set_unusable_password()

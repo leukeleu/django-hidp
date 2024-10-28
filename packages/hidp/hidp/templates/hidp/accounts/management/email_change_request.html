@@ -9,7 +9,9 @@
   {% if not can_change_email %}
     <p>{% translate 'You cannot change your email address because you do not have a password set.' %}</p>
     <p>{% translate 'Your password is required to verify your identity.' %}</p>
-    <a href="{{ set_password_url }}">{% translate 'Set password' %}</a>
+    <form action="{{ set_password_url }}" method="get">
+      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Set password') cancel_url=cancel_url %}
+    </form>
 
   {% else %}
     <p>{% translate 'Enter your new email address.' %}</p>
