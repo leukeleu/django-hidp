@@ -145,6 +145,11 @@ msgid "Your password must contain at least one uppercase character (A-Z)."
 msgstr "Uw wachtwoord moet minstens één hoofdletter bevatten (A-Z)."
 
 #: hidp/accounts/views.py
+#, python-brace-format
+msgid "Authenticate with {provider}"
+msgstr "Opnieuw inloggen met {provider}"
+
+#: hidp/accounts/views.py
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
@@ -164,6 +169,11 @@ msgid "Edit account"
 msgstr "Account bewerken"
 
 #: hidp/accounts/views.py
+#, python-brace-format
+msgid "Link with {provider}"
+msgstr "Koppel met {provider}"
+
+#: hidp/accounts/views.py
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Linked services"
@@ -177,8 +187,18 @@ msgid "Set password"
 msgstr "Wachtwoord instellen"
 
 #: hidp/accounts/views.py
+#, python-brace-format
+msgid "Sign up using {provider}"
+msgstr "Registreer met {provider}"
+
+#: hidp/accounts/views.py
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
+
+#: hidp/accounts/views.py
+#, python-brace-format
+msgid "Unlink from {provider}"
+msgstr "Ontkoppelen van {provider}"
 
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
@@ -207,6 +227,11 @@ msgstr "Onverwachte fout tijdens authenticatie. Probeer het opnieuw."
 #: hidp/federated/views.py
 msgid "Expired or invalid token. Please try again."
 msgstr "Verlopen of ongeldig token. Probeer het opnieuw."
+
+#: hidp/federated/views.py
+#, python-brace-format
+msgid "Log in with {provider}"
+msgstr "Log in met {provider}"
 
 #: hidp/federated/views.py
 msgid "Login failed. Invalid credentials."
@@ -241,11 +266,6 @@ msgstr "Inloggen"
 #: hidp/templates/hidp/accounts/login.html
 msgid "Log in using a trusted service"
 msgstr "Log in met een vertrouwde dienst"
-
-#: hidp/templates/hidp/accounts/login.html
-#, python-format
-msgid "Log in with %(provider)s"
-msgstr "Log in met %(provider)s"
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Log in with username and password"
@@ -472,11 +492,6 @@ msgid "Available services"
 msgstr "Beschikbare diensten"
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#, python-format
-msgid "Link with %(provider)s"
-msgstr "Koppel met %(provider)s"
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Manage linked trusted services"
 msgstr "Beheer gekoppelde vertrouwde diensten"
 
@@ -505,10 +520,6 @@ msgid "To unlink this service, you must either link another service or <a href=\
 msgstr "Om deze dienst te ontkoppelen, moet je een andere dienst koppelen of <a href=\"%(set_password_url)s\">een wachtwoord instellen</a> voor je account."
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Unlink"
-msgstr "Ontkoppel"
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Unlinking is currently disabled to prevent you from being locked out."
 msgstr "Ontkoppelen is momenteel uitgeschakeld om te voorkomen dat je wordt buitengesloten."
 
@@ -521,11 +532,6 @@ msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 msgid "Your password has been changed."
 msgstr "Je wachtwoord is gewijzigd."
-
-#: hidp/templates/hidp/accounts/management/set_password.html
-#, python-format
-msgid "Authenticate with %(provider)s"
-msgstr "Opnieuw inloggen met %(provider)s"
 
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
@@ -608,11 +614,6 @@ msgstr "Je kunt ook <a href=\"%(next)s\">doorgaan met je huidige account</a>."
 #: hidp/templates/hidp/federated/registration.html
 msgid "Create a new account"
 msgstr "Maak een nieuw account"
-
-#: hidp/templates/hidp/accounts/register.html
-#, python-format
-msgid "Sign up using %(provider)s"
-msgstr "Registreer met %(provider)s"
 
 #: hidp/templates/hidp/accounts/register.html
 msgid "Sign up using a trusted service"
