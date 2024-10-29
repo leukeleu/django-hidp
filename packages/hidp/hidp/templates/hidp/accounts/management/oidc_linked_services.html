@@ -39,16 +39,11 @@
   {% plural %}
     Your account is currently linked with the following services:
   {% endblocktrans %}
-  {% for item in oidc_linked_providers %}
-  <ul>
-    <li>
-      {{ item.provider.name }}
-      {% if can_unlink %}
-        <a href="{{ item.url }}" aria-label="{% translate 'Unlink' %}">{% translate 'Unlink' %}</a>
-      {% endif %}
-    </li>
-  </ul>
-  {% endfor %}
+  {% if can_unlink %}
+    {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_linked_providers form_method='get' %}
+  {% else %}
+    {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_linked_providers form_method='get' disabled=True %}
+  {% endif %}
   {% endif %}
 
   {% if not can_unlink %}
@@ -75,16 +70,7 @@
 
   {% if oidc_available_providers %}
   <h2>{% translate 'Available services' %}</h2>
-  {% for item in oidc_available_providers %}
-  <form action="{{ item.url }}" method="POST">
-    {% csrf_token %}
-    <button type="submit">
-      {% blocktranslate trimmed with provider=item.provider.name %}
-      Link with {{ provider }}
-      {% endblocktranslate %}
-    </button>
-  </form>
-  {% endfor %}
+  {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_available_providers %}
   {% endif %}
 
   {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}

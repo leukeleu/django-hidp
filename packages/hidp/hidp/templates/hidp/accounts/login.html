@@ -40,18 +40,8 @@
 
   <h1>{% translate 'Log in using a trusted service' %}</h1>
 
-  {% for item in oidc_login_providers %}
-  <form action="{{ item.url }}" method="POST">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ next }}">
-    <button type="submit">
-      {% blocktranslate trimmed with provider=item.provider.name %}
-      Log in with {{ provider }}
-      {% endblocktranslate %}
-    </button>
-  </form>
+  {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_login_providers next_url=next %}
 
-  {% endfor %}
   {% endif %}
 
   <hr>

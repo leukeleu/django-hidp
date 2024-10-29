@@ -1,0 +1,12 @@
+<form
+  action="{{ item.url }}"
+  method="{{ form_method|default:'post' }}"
+  {% if disabled %}inert{% endif %}
+>
+  {% csrf_token %}
+  {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+  <button
+    type="submit"
+    {% if disabled %}disabled{% endif %}
+  >{{ item.label }}</button>
+</form>

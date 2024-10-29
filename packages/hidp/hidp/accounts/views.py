@@ -56,6 +56,18 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
     verification_mailer = mailers.EmailVerificationMailer
     account_exists_mailer = mailers.AccountExistsMailer
 
+    def _build_provider_url_list(
+        self,
+        providers,
+        url_name="hidp_oidc_client:authenticate",
+        label=None,
+    ):
+        return super()._build_provider_url_list(
+            providers,
+            url_name,
+            label=label or _("Sign up using {provider}"),
+        )
+
     def get_context_data(self, **kwargs):
         login_url = resolve_url(settings.LOGIN_URL) + (
             f"?{urlencode({'next': redirect_url})}"
@@ -715,22 +727,23 @@ class SetPasswordView(
 
         return super().dispatch(request, *args, **kwargs)
 
+    def _get_linked_oidc_providers(self):
+        """User's linked OIDC providers in client registration order."""
+        linked_provider_keys = self.request.user.openid_connections.values_list(
+            "provider_key", flat=True
+        )
+        for provider in oidc_clients.get_registered_oidc_clients():
+            if provider.provider_key in linked_provider_keys:
+                yield provider
+
     def get_context_data(self, **kwargs):
         context = {
             "cancel_url": reverse("hidp_accounts:manage_account"),
             "must_reauthenticate": self.must_reauthenticate,
             "oidc_linked_providers": self._build_provider_url_list(
-                [
-                    provider
-                    for provider in oidc_clients.get_registered_oidc_clients()
-                    if provider.provider_key
-                    in self.request.user.openid_connections.values_list(
-                        "provider_key", flat=True
-                    )
-                ]
-                if self.must_reauthenticate
-                else [],
+                self._get_linked_oidc_providers() if self.must_reauthenticate else (),
                 url_name="hidp_oidc_client:reauthenticate",
+                label=_("Authenticate with {provider}"),
             ),
             "auth_next_url": self.request.get_full_path(),
         }
@@ -876,19 +889,21 @@ class OIDCLinkedServicesView(
             "successfully_linked_provider": linked_provider,
             "removed_provider": removed_provider,
             "oidc_linked_providers": self._build_provider_url_list(
-                [
+                (
                     provider
                     for provider in oidc_clients.get_registered_oidc_clients()
                     if provider.provider_key in oidc_linked_provider_keys
-                ],
+                ),
                 url_name="hidp_oidc_client:unlink_account",
+                label=_("Unlink from {provider}"),
             ),
             "oidc_available_providers": self._build_provider_url_list(
-                [
+                (
                     provider
                     for provider in oidc_clients.get_registered_oidc_clients()
                     if provider.provider_key not in oidc_linked_provider_keys
-                ]
+                ),
+                label=_("Link with {provider}"),
             ),
             "can_unlink": can_unlink,
             "set_password_url": reverse("hidp_accounts:set_password"),

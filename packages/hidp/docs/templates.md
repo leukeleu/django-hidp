@@ -81,7 +81,7 @@ add anything over the base template and is only provided as an extension point.
 
 ---
 
-### Inclusion templates
+## Inclusion templates
 
 To make it easier to customize the look and feel of common elements across the
 application, HIdP provides a select number of inclusion templates that can be
@@ -103,6 +103,18 @@ modifications). These templates are noted in the per-page documentation below.
 This template is used to render the submit button, and cancel button if available,
 for forms in HIdP. Override this template to customize the layout of the submit and
 cancel buttons on a global basis.
+
+### federated/oidc_provider_list.html
+
+Used to render a list of buttons any time a user is offered the option to perform
+an action with an OIDC provider (e.g. login, registration, linking, unlinking).
+
+Uses of this template are noted in the per-page documentation below.
+
+### federated/oidc_provider_list_item.html
+
+Used by the `oidc_provider_list.html` template to render the item for a single
+OIDC provider.
 
 ---
 
@@ -128,14 +140,7 @@ Rendered by the `LoginView`.
 : The login form.
 
 `oidc_login_providers`
-: List of dicts of configured OIDC providers with the following
-  information per provider:
-
-  `provider`
-  : Registered OIDC provider.
-
-  `url`
-  : Authentication URL for the OIDC provider.
+: List of configured OIDC providers.
 
 `oidc_error_message`
 : Error message from the OIDC Authentication flow in case
@@ -158,6 +163,11 @@ Rendered by the `LoginView`.
 
 `is_rate_limited`
 : Whether the view is rate limited or not; result of `request.limited`.
+
+**Inclusion templates**
+
+`federated/oidc_provider_list.html`
+: Displays `oidc_login_providers` (if available) to allow users to login with OIDC.
 
 ### logout_confirm.html
 
@@ -190,6 +200,9 @@ Rendered by the `RegistrationView`.
 `form`
 : The registration form.
 
+`oidc_login_providers`
+: List of configured OIDC providers.
+
 `user`
 : The current user instance.
 
@@ -207,6 +220,11 @@ Rendered by the `RegistrationView`.
 
 `can_register`
 : `False` if the user is authenticated.
+
+**Inclusion templates**
+
+`federated/oidc_provider_list.html`
+: Displays `oidc_login_providers` (if available) to allow users to register with OIDC.
 
 ### tos.html
 
@@ -302,6 +320,12 @@ Rendered by the `OIDCLinkedServicesView`.
 `oidc_error_message`
 : Error message from the OIDC Authentication flow in case something went wrong.
 
+**Inclusion templates**
+
+`federated/oidc_provider_list.html`
+: Displays `oidc_linked_providers` (if available) to allow users to unlink OIDC providers.
+: Displays `oidc_available_providers` (if available) to allow users to link OIDC providers.
+
 ### password_change.html
 
 Rendered by the `PasswordChangeView`.
@@ -365,6 +389,11 @@ Redirects to `SetPasswordDoneView` after successfully setting the password.
 
 `auth_next_url`
 : URL to redirect to after re-authentication (the set password view).
+
+**Inclusion templates**
+
+`federated/oidc_provider_list.html`
+: Displays `oidc_linked_providers` (if available) to allow users to re-authenticate.
 
 ### set_password_done.html
 
