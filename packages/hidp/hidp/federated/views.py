@@ -12,6 +12,7 @@ from django.http import (
 )
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DeleteView, FormView, View
 
@@ -69,7 +70,11 @@ class OIDCContextMixin:
     }
 
     @staticmethod
-    def _build_provider_url_list(providers, url_name="hidp_oidc_client:authenticate"):
+    def _build_provider_url_list(
+        providers,
+        url_name="hidp_oidc_client:authenticate",
+        label=None,
+    ):
         return [
             {
                 "provider": provider,
@@ -78,6 +83,10 @@ class OIDCContextMixin:
                     kwargs={
                         "provider_key": provider.provider_key,
                     },
+                ),
+                "label": format_lazy(
+                    label or _("Log in with {provider}"),
+                    provider=provider.name,
                 ),
             }
             for provider in providers

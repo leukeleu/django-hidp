@@ -128,10 +128,6 @@ class TestOIDCLinkedServicesView(TestCase):
             "Available services",
             response.content.decode("utf-8"),
         )
-        self.assertContains(
-            response,
-            '<form action="/login/oidc/authenticate/example/" method="POST">',
-        )
         for name in ("Example", "Test"):
             self.assertInHTML(
                 f"<button type='submit'>Link with {name}</button>",
@@ -159,12 +155,10 @@ class TestOIDCLinkedServicesView(TestCase):
             "Linked services",
             response.content.decode("utf-8"),
         )
-        self.assertInHTML("<li>Example</li>", response.content.decode("utf-8"))
 
-        # Unlink button should not be available
-        self.assertNotInHTML(
-            '<a href="/login/oidc/unlink-account/example/"'
-            ' aria-label="Unlink">Unlink</a>',
+        # Unlink option should be disabled
+        self.assertInHTML(
+            "<button type='submit' disabled>Unlink from Example</button>",
             response.content.decode("utf-8"),
         )
 
@@ -206,9 +200,7 @@ class TestOIDCLinkedServicesView(TestCase):
         )
         for key in ("example", "test"):
             self.assertInHTML(
-                f"<li>{key.capitalize()}"
-                f' <a href="/login/oidc/unlink-account/{key}/"'
-                f' aria-label="Unlink">Unlink</a></li>',
+                f"<button type='submit'>Unlink from {key.capitalize()}</button>",
                 response.content.decode("utf-8"),
             )
 
@@ -240,9 +232,7 @@ class TestOIDCLinkedServicesView(TestCase):
             response.content.decode("utf-8"),
         )
         self.assertInHTML(
-            "<li>Example"
-            ' <a href="/login/oidc/unlink-account/example/"'
-            ' aria-label="Unlink">Unlink</a></li>',
+            "<button type='submit'>Unlink from Example</button>",
             response.content.decode("utf-8"),
         )
 
