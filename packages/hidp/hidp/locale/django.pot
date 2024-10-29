@@ -513,11 +513,9 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Your account is currently linked with the following service:"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Your account is currently linked with the following services:"
-msgstr ""
+msgid_plural "Your account is currently linked with the following services:"
+msgstr[0] ""
+msgstr[1] ""
 
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 msgid "Your password has been changed."
