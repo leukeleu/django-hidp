@@ -13,26 +13,7 @@
       </li>
     </ul>
   {% endif %}
-
-  {% if successfully_linked_provider %}
-    <ul>
-      <li>{% blocktranslate trimmed with provider=successfully_linked_provider.name %}
-        Successfully linked your {{ provider }} account.
-      {% endblocktranslate %}
-        <a href="." aria-label="{% translate 'Dismiss' %}">✕</a>
-      </li>
-    </ul>
-
-  {% elif removed_provider %}
-    <ul>
-      <li>{% blocktranslate trimmed with provider=removed_provider.name %}
-        Successfully unlinked your {{ provider }} account.
-      {% endblocktranslate %}
-        <a href="." aria-label="{% translate 'Dismiss' %}">✕</a>
-      </li>
-    </ul>
-  {% endif %}
-
+  
   {% if oidc_linked_providers %}
     <h2>{% translate 'Linked services' %}</h2>
 

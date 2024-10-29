@@ -1,0 +1,14 @@
+{% extends "hidp/base_post_login.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Manage linked trusted services' %}{% endblock %}
+
+{% block main %}
+  <h1>{% translate 'Manage your linked trusted services' %}</h1>
+
+  {% blocktranslate trimmed with provider=provider.name %}
+    Successfully linked your {{ provider }} account.
+  {% endblocktranslate %}
+
+  {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
+{% endblock %}

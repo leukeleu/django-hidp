@@ -677,17 +677,15 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
         connection = models.OpenIdConnection.objects.filter(user=self.user).first()
         self.assertIsNotNone(connection, msg="Expected connection to be created.")
 
-        # Redirected to linked services page
+        # Redirected to the done page
         self.assertRedirects(
             response,
-            reverse("hidp_oidc_management:linked_services") + "?success=example",
+            reverse(
+                "hidp_oidc_management:link_account_done",
+                kwargs={"provider_key": "example"},
+            ),
         )
-        # Linked services page
-        self.assertInHTML(
-            "Successfully linked your Example account."
-            '<a href="." aria-label="Dismiss">✕</a>',
-            response.content.decode("utf-8"),
-        )
+        self.assertTemplateUsed(response, "hidp/federated/account_link_done.html")
 
 
 class TestOIDCAccountUnlinkView(TestCase):
@@ -731,17 +729,15 @@ class TestOIDCAccountUnlinkView(TestCase):
     def test_post_with_valid_provider(self):
         response = self.client.post(self.url, {"allow_unlink": "on"}, follow=True)
 
-        # Redirected to linked services page
+        # Redirected to the done page
         self.assertRedirects(
             response,
-            reverse("hidp_oidc_management:linked_services") + "?removed=example",
+            reverse(
+                "hidp_oidc_management:unlink_account_done",
+                kwargs={"provider_key": "example"},
+            ),
         )
-        # Linked services page
-        self.assertInHTML(
-            "Successfully unlinked your Example account."
-            '<a href="." aria-label="Dismiss">✕</a>',
-            response.content.decode("utf-8"),
-        )
+        self.assertTemplateUsed(response, "hidp/federated/account_unlink_done.html")
 
     def test_delete_only_login_method(self):
         # Remove the user's password so they can only log in via OIDC

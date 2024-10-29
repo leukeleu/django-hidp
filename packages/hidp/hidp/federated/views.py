@@ -15,7 +15,6 @@ from django.utils.decorators import method_decorator
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
-from django.views.generic import DeleteView, FormView, View
 
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailers
@@ -107,7 +106,9 @@ class OIDCContextMixin:
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
-class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View):
+class OIDCAuthenticationRequestView(
+    auth_views.RedirectURLMixin, OIDCMixin, generic.View
+):
     """Initiates an OpenID Connect Authorization Code Flow authentication request."""
 
     # Optionally set extra parameters to include in the authentication request.
@@ -139,7 +140,7 @@ class OIDCAuthenticationRequestView(auth_views.RedirectURLMixin, OIDCMixin, View
 
 
 @method_decorator(rate_limit_strict, name="dispatch")
-class OIDCAuthenticationCallbackView(OIDCMixin, View):
+class OIDCAuthenticationCallbackView(OIDCMixin, generic.View):
     """
     Handle the callback from an OIDC authentication request.
 
@@ -293,7 +294,9 @@ class TokenDataMixin:
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
-class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
+class OIDCRegistrationView(
+    auth_views.RedirectURLMixin, TokenDataMixin, generic.FormView
+):
     """Register a new user using the OIDC provider's claims and user info."""
 
     token_generator = tokens.OIDCRegistrationTokenGenerator()
@@ -336,7 +339,7 @@ class OIDCRegistrationView(auth_views.RedirectURLMixin, TokenDataMixin, FormView
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
-class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
+class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, generic.FormView):
     """Log in a user using the OIDC provider's claims."""
 
     token_generator = tokens.OIDCLoginTokenGenerator()
@@ -395,17 +398,19 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, FormView):
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 @method_decorator(login_required, name="dispatch")
-class OIDCAccountLinkView(TokenDataMixin, FormView):
+class OIDCAccountLinkView(TokenDataMixin, generic.FormView):
     """Link an existing user account to an OIDC account."""
 
     form_class = forms.OIDCAccountLinkForm
     template_name = "hidp/federated/account_link.html"
-    success_url = reverse_lazy("hidp_oidc_management:linked_services")
     token_generator = tokens.OIDCAccountLinkTokenGenerator()
     invalid_token_redirect_url = reverse_lazy("hidp_oidc_management:linked_services")
 
     def get_success_url(self):
-        return super().get_success_url() + f"?success={self.provider.provider_key}"
+        return reverse(
+            "hidp_oidc_management:link_account_done",
+            kwargs={"provider_key": self.provider.provider_key},
+        )
 
     def get_form_kwargs(self):
         return super().get_form_kwargs() | {
@@ -432,12 +437,27 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
-class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
+class OIDCAccountLinkDoneView(LoginRequiredMixin, generic.TemplateView):
+    """Show a success message after linking an OIDC account."""
+
+    template_name = "hidp/federated/account_link_done.html"
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "provider": oidc_clients.get_oidc_client_or_404(
+                self.kwargs["provider_key"]
+            ),
+            "back_url": reverse("hidp_oidc_management:linked_services"),
+        }
+        return super().get_context_data() | context | kwargs
+
+
+@method_decorator(hidp_csp_protection, name="dispatch")
+class OIDCAccountUnlinkView(LoginRequiredMixin, generic.DeleteView):
     """Unlink an OIDC account from an existing user account."""
 
     form_class = forms.OIDCAccountUnlinkForm
     template_name = "hidp/federated/account_unlink.html"
-    success_url = reverse_lazy("hidp_oidc_management:linked_services")
     slug_field = "provider_key"
     slug_url_kwarg = "provider_key"
 
@@ -446,7 +466,10 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
-        return super().get_success_url() + f"?removed={self.provider.provider_key}"
+        return reverse(
+            "hidp_oidc_management:unlink_account_done",
+            kwargs={"provider_key": self.provider.provider_key},
+        )
 
     def get_queryset(self):
         return self.request.user.openid_connections
@@ -461,6 +484,22 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
         context = {
             "provider": self.provider,
             "cancel_url": self.success_url,
+        }
+        return super().get_context_data() | context | kwargs
+
+
+@method_decorator(hidp_csp_protection, name="dispatch")
+class OIDCAccountUnlinkDoneView(LoginRequiredMixin, generic.TemplateView):
+    """Show a success message after unlinking an OIDC account."""
+
+    template_name = "hidp/federated/account_unlink_done.html"
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "provider": oidc_clients.get_oidc_client_or_404(
+                self.kwargs["provider_key"]
+            ),
+            "back_url": reverse("hidp_oidc_management:linked_services"),
         }
         return super().get_context_data() | context | kwargs
 

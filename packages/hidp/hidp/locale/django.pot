@@ -315,6 +315,8 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/federated/account_link_done.html
+#: hidp/templates/hidp/federated/account_unlink_done.html
 #: hidp/templates/hidp/federated/linked_services.html
 msgid "Back"
 msgstr ""
@@ -668,6 +670,23 @@ msgstr ""
 msgid "You are about to link your %(provider)s account to your existing account."
 msgstr ""
 
+#: hidp/templates/hidp/federated/account_link_done.html
+#: hidp/templates/hidp/federated/account_unlink_done.html
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Manage linked trusted services"
+msgstr ""
+
+#: hidp/templates/hidp/federated/account_link_done.html
+#: hidp/templates/hidp/federated/account_unlink_done.html
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Manage your linked trusted services"
+msgstr ""
+
+#: hidp/templates/hidp/federated/account_link_done.html
+#, python-format
+msgid "Successfully linked your %(provider)s account."
+msgstr ""
+
 #: hidp/templates/hidp/federated/account_unlink.html
 #, python-format
 msgid "This will remove the possibility to use your %(provider)s account to log in."
@@ -682,30 +701,13 @@ msgstr ""
 msgid "You are about to unlink your %(provider)s account from your account."
 msgstr ""
 
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Available services"
-msgstr ""
-
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Dismiss"
-msgstr ""
-
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Manage linked trusted services"
-msgstr ""
-
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Manage your linked trusted services"
-msgstr ""
-
-#: hidp/templates/hidp/federated/linked_services.html
-#, python-format
-msgid "Successfully linked your %(provider)s account."
-msgstr ""
-
-#: hidp/templates/hidp/federated/linked_services.html
+#: hidp/templates/hidp/federated/account_unlink_done.html
 #, python-format
 msgid "Successfully unlinked your %(provider)s account."
+msgstr ""
+
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Available services"
 msgstr ""
 
 #: hidp/templates/hidp/federated/linked_services.html

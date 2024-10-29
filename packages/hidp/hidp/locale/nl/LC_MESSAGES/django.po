@@ -316,6 +316,8 @@ msgstr "Opslaan"
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/federated/account_link_done.html
+#: hidp/templates/hidp/federated/account_unlink_done.html
 #: hidp/templates/hidp/federated/linked_services.html
 msgid "Back"
 msgstr "Terug"
@@ -669,6 +671,23 @@ msgstr "Dit stelt je in staat om je %(provider)s-account te gebruiken om in te l
 msgid "You are about to link your %(provider)s account to your existing account."
 msgstr "Je staat op het punt je %(provider)s-account te koppelen aan je bestaande account."
 
+#: hidp/templates/hidp/federated/account_link_done.html
+#: hidp/templates/hidp/federated/account_unlink_done.html
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Manage linked trusted services"
+msgstr "Beheer gekoppelde vertrouwde diensten"
+
+#: hidp/templates/hidp/federated/account_link_done.html
+#: hidp/templates/hidp/federated/account_unlink_done.html
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Manage your linked trusted services"
+msgstr "Beheer jouw gekoppelde vertrouwde diensten"
+
+#: hidp/templates/hidp/federated/account_link_done.html
+#, python-format
+msgid "Successfully linked your %(provider)s account."
+msgstr "Je %(provider)s-account is nu gekoppeld."
+
 #: hidp/templates/hidp/federated/account_unlink.html
 #, python-format
 msgid "This will remove the possibility to use your %(provider)s account to log in."
@@ -683,31 +702,14 @@ msgstr "Account ontkoppelen"
 msgid "You are about to unlink your %(provider)s account from your account."
 msgstr "Je staat op het punt je %(provider)s-account te ontkoppelen."
 
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Available services"
-msgstr "Beschikbare diensten"
-
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Dismiss"
-msgstr "Sluiten"
-
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Manage linked trusted services"
-msgstr "Beheer gekoppelde vertrouwde diensten"
-
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Manage your linked trusted services"
-msgstr "Beheer jouw gekoppelde vertrouwde diensten"
-
-#: hidp/templates/hidp/federated/linked_services.html
-#, python-format
-msgid "Successfully linked your %(provider)s account."
-msgstr "Je %(provider)s-account is nu gekoppeld."
-
-#: hidp/templates/hidp/federated/linked_services.html
+#: hidp/templates/hidp/federated/account_unlink_done.html
 #, python-format
 msgid "Successfully unlinked your %(provider)s account."
 msgstr "Je %(provider)s-account is nu ontkoppeld."
+
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Available services"
+msgstr "Beschikbare diensten"
 
 #: hidp/templates/hidp/federated/linked_services.html
 #, python-format
