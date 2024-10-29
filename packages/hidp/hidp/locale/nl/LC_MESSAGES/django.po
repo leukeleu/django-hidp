@@ -514,11 +514,9 @@ msgstr "Ontkoppelen is momenteel uitgeschakeld om te voorkomen dat je wordt buit
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Your account is currently linked with the following service:"
-msgstr "Je account is momenteel aan de volgende dienst gekoppeld:"
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Your account is currently linked with the following services:"
-msgstr "Je account is momenteel aan de volgende diensten gekoppeld:"
+msgid_plural "Your account is currently linked with the following services:"
+msgstr[0] "Je account is momenteel aan de volgende dienst gekoppeld:"
+msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"
 
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 msgid "Your password has been changed."
