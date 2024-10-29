@@ -5,30 +5,30 @@
 
 {% block main %}
   {% if not error %}
+    <h1>
+      {% if application %}
+        {% blocktranslate trimmed %}
+          Logout requested by {{ application }}
+        {% endblocktranslate %}
+      {% else %}
+        {% translate 'Logout' %}
+      {% endif %}
+    </h1>
 
-  {% if application %}
-  <h1>
-    {% blocktranslate trimmed %}
-    Logout requested by {{ application }}
-    {% endblocktranslate %}
-  </h1>
+    <form method="post">
+      {% csrf_token %}
+
+      {% for field in form %}
+        {% if field.is_hidden %}
+          {{ field }}
+        {% endif %}
+      {% endfor %}
+
+      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Log out') submit_name='allow' submit_value='true' cancel_label=_('Cancel') %}
+    </form>
+
   {% else %}
-  <h1>{% translate 'Logout' %}</h1>
-  {% endif %}
+    <p>{{ error.description }}</p>
 
-  <form method="post">
-    {% csrf_token %}
-
-    {% for field in form %}
-    {% if field.is_hidden %}
-      {{ field }}
-    {% endif %}
-    {% endfor %}
-
-    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Log out') submit_name='allow' submit_value='true' cancel_label=_('Cancel') %}
-  </form>
-
-  {% else %}
-  <p>{{ error.description }}</p>
   {% endif %}
 {% endblock %}

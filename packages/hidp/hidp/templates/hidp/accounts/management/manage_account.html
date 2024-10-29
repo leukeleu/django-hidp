@@ -10,7 +10,7 @@
     {% csrf_token %}
     <p>
       {% blocktranslate trimmed %}
-      You are currently logged in as {{ user }}.
+        You are currently logged in as {{ user }}.
       {% endblocktranslate %}
       <button type="submit">{% translate 'Log out' %}</button>
     </p>
@@ -19,8 +19,8 @@
   <hr>
 
   <ul>
-  {% for item in account_management_links %}
-    <li><a href="{{ item.url }}">{{ item.text }}</a></li>
-  {% endfor %}
+    {% for item in account_management_links %}
+      <li><a href="{{ item.url }}">{{ item.text }}</a></li>
+    {% endfor %}
   </ul>
 {% endblock %}
