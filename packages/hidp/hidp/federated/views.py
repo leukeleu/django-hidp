@@ -507,7 +507,7 @@ class OIDCLinkedServicesView(
                 label=_("Link with {provider}"),
             ),
             "can_unlink": can_unlink,
-            "set_password_url": reverse("hidp_accounts:set_password"),
-            "back_url": reverse("hidp_accounts:manage_account"),
+            "set_password_url": reverse("hidp_account_management:set_password"),
+            "back_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs

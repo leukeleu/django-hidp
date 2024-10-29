@@ -7,7 +7,7 @@ urlpatterns = [
     # Project
     path(
         "",
-        RedirectView.as_view(pattern_name="hidp_accounts:manage_account"),
+        RedirectView.as_view(pattern_name="hidp_account_management:manage_account"),
         name="root",
     ),
     path("", include(hidp_urls)),

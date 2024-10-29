@@ -20,7 +20,7 @@ class TestEmailChangeRequest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory()
-        cls.url = reverse("hidp_accounts:email_change_request")
+        cls.url = reverse("hidp_account_management:email_change_request")
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -82,7 +82,7 @@ class TestEmailChangeRequest(TestCase):
             )
 
         self.assertRedirects(
-            response, reverse("hidp_accounts:email_change_request_sent")
+            response, reverse("hidp_account_management:email_change_request_sent")
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_request_sent.html"
@@ -159,7 +159,7 @@ class TestEmailChangeRequest(TestCase):
             )
 
         self.assertRedirects(
-            response, reverse("hidp_accounts:email_change_request_sent")
+            response, reverse("hidp_account_management:email_change_request_sent")
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_request_sent.html"
@@ -227,7 +227,7 @@ class TestEmailChangeRequest(TestCase):
         )
 
         self.assertRedirects(
-            response, reverse("hidp_accounts:email_change_request_sent")
+            response, reverse("hidp_account_management:email_change_request_sent")
         )
 
         # Email should be sent to current email, but not to proposed email (inactive)
@@ -309,7 +309,7 @@ class TestEmailChangeConfirm(TestCase):
             user=cls.user, proposed_email="newemail@example.com"
         )
         cls.current_email_url = reverse(
-            "hidp_accounts:email_change_confirm",
+            "hidp_account_management:email_change_confirm",
             kwargs={
                 "token": tokens.email_change_token_generator.make_token(
                     str(cls.email_change_request.pk), "current_email"
@@ -317,7 +317,7 @@ class TestEmailChangeConfirm(TestCase):
             },
         )
         cls.proposed_email_url = reverse(
-            "hidp_accounts:email_change_confirm",
+            "hidp_account_management:email_change_confirm",
             kwargs={
                 "token": tokens.email_change_token_generator.make_token(
                     str(cls.email_change_request.pk), "proposed_email"
@@ -337,7 +337,7 @@ class TestEmailChangeConfirm(TestCase):
     def test_get_invalid_token(self):
         response = self.client.get(
             reverse(
-                "hidp_accounts:email_change_confirm",
+                "hidp_account_management:email_change_confirm",
                 kwargs={"token": "invalid"},
             ),
             follow=True,
@@ -355,7 +355,7 @@ class TestEmailChangeConfirm(TestCase):
         """Placeholder token, no token in session."""
         response = self.client.get(
             reverse(
-                "hidp_accounts:email_change_confirm",
+                "hidp_account_management:email_change_confirm",
                 kwargs={"token": "email-change"},
             ),
             follow=True,
@@ -408,7 +408,9 @@ class TestEmailChangeConfirm(TestCase):
             self.current_email_url, {"allow_change": "on"}, follow=True
         )
         self.assertRedirects(
-            response, reverse("hidp_accounts:email_change_complete"), status_code=308
+            response,
+            reverse("hidp_account_management:email_change_complete"),
+            status_code=308,
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_complete.html"
@@ -436,7 +438,9 @@ class TestEmailChangeConfirm(TestCase):
             self.proposed_email_url, {"allow_change": "on"}, follow=True
         )
         self.assertRedirects(
-            response, reverse("hidp_accounts:email_change_complete"), status_code=308
+            response,
+            reverse("hidp_account_management:email_change_complete"),
+            status_code=308,
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_complete.html"
@@ -467,7 +471,9 @@ class TestEmailChangeConfirm(TestCase):
             self.proposed_email_url, {"allow_change": "on"}, follow=True
         )
         self.assertRedirects(
-            response, reverse("hidp_accounts:email_change_complete"), status_code=308
+            response,
+            reverse("hidp_account_management:email_change_complete"),
+            status_code=308,
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_complete.html"
@@ -515,7 +521,7 @@ class TestEmailChangeConfirm(TestCase):
     def test_post_invalid_token(self):
         response = self.client.post(
             reverse(
-                "hidp_accounts:email_change_confirm",
+                "hidp_account_management:email_change_confirm",
                 kwargs={"token": "invalid"},
             ),
             {"allow_change": "on"},
@@ -573,7 +579,7 @@ class TestEmailChangeCancel(TestCase):
         cls.email_change_request = user_factories.EmailChangeRequestFactory(
             user=cls.user
         )
-        cls.url = reverse("hidp_accounts:email_change_cancel")
+        cls.url = reverse("hidp_account_management:email_change_cancel")
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -658,7 +664,7 @@ class TestEmailChangeCancel(TestCase):
         response = self.client.post(self.url, {"allow_cancel": "on"}, follow=True)
         self.assertRedirects(
             response,
-            reverse("hidp_accounts:email_change_cancel_done"),
+            reverse("hidp_account_management:email_change_cancel_done"),
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_cancel_done.html"

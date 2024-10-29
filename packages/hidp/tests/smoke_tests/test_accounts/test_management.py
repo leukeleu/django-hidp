@@ -14,7 +14,7 @@ class TestManageAccountView(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory()
-        cls.manage_account_url = reverse("hidp_accounts:manage_account")
+        cls.manage_account_url = reverse("hidp_account_management:manage_account")
 
     def test_login_required(self):
         """Anonymous users should be redirected to the login page."""
@@ -38,7 +38,7 @@ class TestEditAccountView(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory()
-        cls.edit_account_url = reverse("hidp_accounts:edit_account")
+        cls.edit_account_url = reverse("hidp_account_management:edit_account")
 
     def test_login_required(self):
         """Anonymous users should be redirected to the login page."""
@@ -79,7 +79,9 @@ class TestEditAccountView(TestCase):
         self.assertEqual(self.user.last_name, "Name")
 
         # Success message should be displayed
-        self.assertRedirects(response, reverse("hidp_accounts:edit_account_done"))
+        self.assertRedirects(
+            response, reverse("hidp_account_management:edit_account_done")
+        )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/edit_account_done.html"
         )
@@ -89,7 +91,7 @@ class TestPasswordChangeView(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory()
-        cls.change_password_url = reverse("hidp_accounts:change_password")
+        cls.change_password_url = reverse("hidp_account_management:change_password")
 
     def test_login_required(self):
         """Anonymous users should be redirected to the login page."""
@@ -106,7 +108,7 @@ class TestPasswordChangeView(TestCase):
         self.user.save()
         self.client.force_login(self.user)
         response = self.client.get(self.change_password_url, follow=True)
-        self.assertRedirects(response, reverse("hidp_accounts:set_password"))
+        self.assertRedirects(response, reverse("hidp_account_management:set_password"))
 
     def test_get(self):
         """The password change page should be displayed for authenticated users."""
@@ -137,7 +139,9 @@ class TestPasswordChangeView(TestCase):
         self.assertTrue(self.user.check_password("new_password"))
 
         # Redirect to the success page
-        self.assertRedirects(response, reverse("hidp_accounts:change_password_done"))
+        self.assertRedirects(
+            response, reverse("hidp_account_management:change_password_done")
+        )
         self.assertTemplateUsed("hidp/accounts/management/password_change_done.html")
 
         # Changed password mail should be sent
@@ -166,7 +170,7 @@ class TestSetPasswordView(TestCase):
         cls.user = user_factories.UserFactory()
         cls.user.set_unusable_password()
         cls.user.save()
-        cls.set_password_url = reverse("hidp_accounts:set_password")
+        cls.set_password_url = reverse("hidp_account_management:set_password")
 
     def test_login_required(self):
         """Anonymous users should be redirected to the login page."""
@@ -182,7 +186,9 @@ class TestSetPasswordView(TestCase):
         self.user.save()
         self.client.force_login(self.user)
         response = self.client.get(self.set_password_url, follow=True)
-        self.assertRedirects(response, reverse("hidp_accounts:change_password"))
+        self.assertRedirects(
+            response, reverse("hidp_account_management:change_password")
+        )
 
     def test_get_not_recently_authenticated(self):
         """The must reauthenticate flag should be set to True."""
@@ -229,7 +235,7 @@ class TestSetPasswordView(TestCase):
         self.assertTemplateUsed(response, "hidp/accounts/management/set_password.html")
         self.assertIn("form", response.context)
 
-    def test_change_password(self):
+    def test_set_password(self):
         """The user's password should be set."""
         self.client.force_login(self.user)
         response = self.client.post(
@@ -248,7 +254,9 @@ class TestSetPasswordView(TestCase):
         )
 
         # Redirect to the success page
-        self.assertRedirects(response, reverse("hidp_accounts:set_password_done"))
+        self.assertRedirects(
+            response, reverse("hidp_account_management:set_password_done")
+        )
         self.assertTemplateUsed("hidp/accounts/management/set_change_done.html")
 
         # Changed password mail should be sent

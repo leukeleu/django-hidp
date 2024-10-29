@@ -7,6 +7,6 @@ class TestRoot(TestCase):
         response = self.client.get("/")
         self.assertRedirects(
             response,
-            reverse("hidp_accounts:manage_account"),
+            reverse("hidp_account_management:manage_account"),
             fetch_redirect_response=False,
         )

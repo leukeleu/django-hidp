@@ -70,7 +70,7 @@ class TestPasswordResetFlow(TestCase):
         self.assertEqual(message.to, [self.user.email])
         self.assertEqual(message.subject, "Set password request")
         self.assertIn(
-            reverse("hidp_accounts:set_password"),
+            reverse("hidp_account_management:set_password"),
             message.body,
         )
         self.assertRedirects(
