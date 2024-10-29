@@ -22,7 +22,5 @@
   <p>{% translate 'Something went wrong'%}</p>
   {% endif %}
 
-  <hr>
-
-  <a href="{{ back_url }}">{% translate 'Back' %}</a>
+  {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
 {% endblock %}
