@@ -1,3 +1,23 @@
+"""
+OIDC Management URLs.
+
+Provides the URL patterns for managing OIDC linked services.
+
+Include this module in the root URL configuration:
+
+    from hidp.federated import oidc_management_urls
+
+    urlpatterns = [
+        path("manage/oidc/", include(oidc_management_urls)),
+    ]
+
+This module also defines the namespace `hidp_oidc_management` for these URLs.
+
+Include this namespace when reversing URLs, for example:
+
+    reverse("hidp_oidc_management:linked_services")
+"""
+
 from django.urls import path
 
 from . import views
