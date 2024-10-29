@@ -85,6 +85,11 @@ recover_urls = [
 account_urls = [
     path("", views.ManageAccountView.as_view(), name="manage_account"),
     path("edit-account/", views.EditAccountView.as_view(), name="edit_account"),
+    path(
+        "edit-account/done/",
+        views.EditAccountDoneView.as_view(),
+        name="edit_account_done",
+    ),
 ]
 
 change_password_urls = [

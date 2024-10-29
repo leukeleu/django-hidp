@@ -842,15 +842,11 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
 
     template_name = "hidp/accounts/management/edit_account.html"
     form_class = forms.EditUserForm
-    success_url = reverse_lazy("hidp_accounts:edit_account")
-
-    def get_success_url(self):
-        return self.success_url + "?success"
+    success_url = reverse_lazy("hidp_accounts:edit_account_done")
 
     def get_context_data(self, **kwargs):
         context = {
             "cancel_url": reverse("hidp_accounts:manage_account"),
-            "show_success_message": "success" in self.request.GET,
         }
         return super().get_context_data() | context | kwargs
 
@@ -862,6 +858,19 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
     def form_valid(self, form):
         form.save()
         return super().form_valid(form)
+
+
+@method_decorator(hidp_csp_protection, name="dispatch")
+class EditAccountDoneView(generic.TemplateView):
+    """Display a message that the account has been updated."""
+
+    template_name = "hidp/accounts/management/edit_account_done.html"
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "back_url": reverse("hidp_accounts:manage_account"),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")

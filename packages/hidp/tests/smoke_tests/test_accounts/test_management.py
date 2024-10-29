@@ -82,9 +82,9 @@ class TestEditAccountView(TestCase):
         self.assertEqual(self.user.last_name, "Name")
 
         # Success message should be displayed
-        self.assertInHTML(
-            'Account updated successfully. <a href="." aria-label="Dismiss">✕</a>',
-            response.content.decode("utf-8"),
+        self.assertRedirects(response, reverse("hidp_accounts:edit_account_done"))
+        self.assertTemplateUsed(
+            response, "hidp/accounts/management/edit_account_done.html"
         )
 
 

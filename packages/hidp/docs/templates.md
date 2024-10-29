@@ -285,8 +285,18 @@ Rendered by the `EditAccountView`.
 `cancel_url`
 : Link for the cancel button.
 
-`show_success_message`
-: `True` if the account was updated successfully.
+### edit_account_done.html
+
+Rendered by the `EditAccountDoneView`.
+
+Shows a message letting the user know that their account has been updated.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`back_url`
+: Link back to the account management page.
 
 ### oidc_linked_services.html
 
