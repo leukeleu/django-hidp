@@ -180,15 +180,15 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr ""
 
 #: hidp/federated/forms.py
-msgid "Yes, I want to link this account."
+msgid "Yes, I want to link this account"
 msgstr ""
 
 #: hidp/federated/forms.py
-msgid "Yes, I want to unlink this account."
+msgid "Yes, I want to unlink this account"
 msgstr ""
 
 #: hidp/federated/forms.py
-msgid "You cannot unlink your only way to login."
+msgid "You cannot unlink your only way to log in."
 msgstr ""
 
 #: hidp/federated/models.py
