@@ -7,72 +7,81 @@
   <h1>{% translate 'Manage your linked trusted services' %}</h1>
 
   {% if oidc_error_message %}
-  <ul>
-    <li>
-      {{ oidc_error_message }}
-    </li>
-  </ul>
+    <ul>
+      <li>
+        {{ oidc_error_message }}
+      </li>
+    </ul>
   {% endif %}
 
   {% if successfully_linked_provider %}
-  <ul>
-    <li>{% blocktranslate trimmed with provider=successfully_linked_provider.name%}
-      Successfully linked your {{ provider }} account.
+    <ul>
+      <li>{% blocktranslate trimmed with provider=successfully_linked_provider.name %}
+        Successfully linked your {{ provider }} account.
       {% endblocktranslate %}
-      <a href="." aria-label="{% translate 'Dismiss' %}">✕</a>
-    </li>
-  </ul>
+        <a href="." aria-label="{% translate 'Dismiss' %}">✕</a>
+      </li>
+    </ul>
+
   {% elif removed_provider %}
-  <ul>
-    <li>{% blocktranslate trimmed with provider=removed_provider.name %}
-      Successfully unlinked your {{ provider }} account.
+    <ul>
+      <li>{% blocktranslate trimmed with provider=removed_provider.name %}
+        Successfully unlinked your {{ provider }} account.
       {% endblocktranslate %}
-      <a href="." aria-label="{% translate 'Dismiss' %}">✕</a>
-    </li>
-  </ul>
+        <a href="." aria-label="{% translate 'Dismiss' %}">✕</a>
+      </li>
+    </ul>
   {% endif %}
 
   {% if oidc_linked_providers %}
-  <h2>{% translate 'Linked services' %}</h2>
-  <p>
-  {% blocktrans count linked=oidc_linked_providers|length trimmed %}
-    Your account is currently linked with the following service:
-  {% plural %}
-    Your account is currently linked with the following services:
-  {% endblocktrans %}
-  </p>
-  {% if can_unlink %}
-    {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_linked_providers form_method='get' %}
-  {% else %}
-    {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_linked_providers form_method='get' disabled=True %}
-  {% endif %}
+    <h2>{% translate 'Linked services' %}</h2>
+
+    <p>
+      {% blocktrans count linked=oidc_linked_providers|length trimmed %}
+        Your account is currently linked with the following service:
+        {% plural %}
+        Your account is currently linked with the following services:
+      {% endblocktrans %}
+    </p>
+
+    {% if can_unlink %}
+      {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_linked_providers form_method='get' %}
+    {% else %}
+      {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_linked_providers form_method='get' disabled=True %}
+    {% endif %}
+
   {% endif %}
 
   {% if not can_unlink %}
-  <p>
-    {% blocktranslate trimmed %}
-      Unlinking is currently disabled to prevent you from being locked out.
-    {% endblocktranslate %}
-  <p>
-  {% if oidc_available_providers %}
-  <p>
-    {% blocktranslate trimmed %}
-      To unlink this service, you must either link another service or
-      <a href="{{ set_password_url }}">set a password</a> for your account.
-    {% endblocktranslate %}
-  </p>
-  {% else %}
-  <p>
-    {% blocktranslate trimmed %}
-      To unlink this service, you must <a href="{{ set_password_url }}">set a password</a> for your account.
-    {% endblocktranslate %}
-  </p>
-  {% endif %}
+    <p>
+      {% blocktranslate trimmed %}
+        Unlinking is currently disabled to prevent you from being locked out.
+      {% endblocktranslate %}
+    <p>
+
+    {% if oidc_available_providers %}
+      <p>
+        {% blocktranslate trimmed %}
+          To unlink this service, you must either link another service or
+          <a href="{{ set_password_url }}">set a password</a> for your account.
+        {% endblocktranslate %}
+      </p>
+
+    {% else %}
+      <p>
+        {% blocktranslate trimmed %}
+          To unlink this service, you must <a href="{{ set_password_url }}">set a password</a> for your account.
+        {% endblocktranslate %}
+      </p>
+
+    {% endif %}
   {% endif %}
 
   {% if oidc_available_providers %}
-  <h2>{% translate 'Available services' %}</h2>
-  {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_available_providers %}
+    <h2>{% translate 'Available services' %}</h2>
+
+    {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_available_providers %}
+
   {% endif %}
 
   {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}

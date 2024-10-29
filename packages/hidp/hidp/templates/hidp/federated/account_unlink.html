@@ -7,17 +7,17 @@
   <h1>{% translate 'Unlink account' %}</h1>
 
   <p>
-  {% blocktranslate trimmed with provider.name as provider %}
-  You are about to unlink your {{ provider }} account from your account.
-  {% endblocktranslate %}
+    {% blocktranslate trimmed with provider.name as provider %}
+      You are about to unlink your {{ provider }} account from your account.
+    {% endblocktranslate %}
   </p>
 
   <p>
-  {% blocktranslate trimmed with provider.name as provider %}
-  This will remove the possibility to use your {{ provider }} account to log in.
-  {% endblocktranslate %}
+    {% blocktranslate trimmed with provider.name as provider %}
+      This will remove the possibility to use your {{ provider }} account to log in.
+    {% endblocktranslate %}
 
-  {% translate 'Are you sure you want to do this?' %}
+    {% translate 'Are you sure you want to do this?' %}
   </p>
 
   <form method="post">

@@ -5,23 +5,25 @@
 
 {% block main %}
   {% if validlink %}
-  <h1>{% translate 'Verification required' %}</h1>
+    <h1>{% translate 'Verification required' %}</h1>
 
-  <p>{% translate 'You need to verify your email address before you can log in.' %}</p>
+    <p>{% translate 'You need to verify your email address before you can log in.' %}</p>
 
-  <p>
-  {% blocktranslate trimmed %}
-  Please check your email for a message with a verification link. This message may take a few minutes to arrive.
-  If you don't see it, check your spam folder. If you still can't find it, you can request a new verification email.
-  {% endblocktranslate %}
-  </p>
+    <p>
+      {% blocktranslate trimmed %}
+        Please check your email for a message with a verification link. This message may take a few minutes to arrive.
+        If you don't see it, check your spam folder. If you still can't find it, you can request a new verification
+        email.
+      {% endblocktranslate %}
+    </p>
 
-  <form method="post">
-    {% csrf_token %}
-    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Resend verification email') %}
-  </form>
+    <form method="post">
+      {% csrf_token %}
+      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Resend verification email') %}
+    </form>
 
   {% else %}
-  <p>{% translate 'The link you followed is invalid. It may have expired or been used already.' %}</p>
+    <p>{% translate 'The link you followed is invalid. It may have expired or been used already.' %}</p>
+
   {% endif %}
 {% endblock %}

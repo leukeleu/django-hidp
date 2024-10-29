@@ -4,23 +4,23 @@
 {% block title %}{% translate 'Log in' %}{% endblock %}
 
 {% block main %}
-{% if oidc_error_message %}
-<ul>
-  <li>
-    {{ oidc_error_message }}
-  </li>
-</ul>
-{% endif %}
+  {% if oidc_error_message %}
+    <ul>
+      <li>
+        {{ oidc_error_message }}
+      </li>
+    </ul>
+  {% endif %}
 
   <h1>{% translate 'Log in with username and password' %}</h1>
 
   {% if is_rate_limited %}
-  <p>
-    {% blocktranslate trimmed %}
-    Excessive login attempts have been detected for this account.
-    For your safety, additional security measures are now in place.
-    {% endblocktranslate %}
-  </p>
+    <p>
+      {% blocktranslate trimmed %}
+        Excessive login attempts have been detected for this account.
+        For your safety, additional security measures are now in place.
+      {% endblocktranslate %}
+    </p>
   {% endif %}
 
   <form method="post">
@@ -36,11 +36,11 @@
   </p>
 
   {% if oidc_login_providers %}
-  <hr>
+    <hr>
 
-  <h1>{% translate 'Log in using a trusted service' %}</h1>
+    <h1>{% translate 'Log in using a trusted service' %}</h1>
 
-  {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_login_providers next_url=next %}
+    {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_login_providers next_url=next %}
 
   {% endif %}
 

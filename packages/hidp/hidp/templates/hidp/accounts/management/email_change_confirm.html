@@ -5,25 +5,26 @@
 
 {% block main %}
   {% if validlink %}
-  <h1>{% translate 'Confirm email change' %}</h1>
+    <h1>{% translate 'Confirm email change' %}</h1>
 
-  <p>
-    {% blocktranslate trimmed %}
-    Are you sure you want to change your email address from {{ current_email }} to {{ proposed_email }}?
-    {% endblocktranslate %}
-  </p>
-  <p>{% translate "Please note that changing your email address will also change the username you use to login." %}</p>
+    <p>
+      {% blocktranslate trimmed %}
+        Are you sure you want to change your email address from {{ current_email }} to {{ proposed_email }}?
+      {% endblocktranslate %}
+    </p>
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form }}
-    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Confirm') %}
-  </form>
+    <p>{% translate "Please note that changing your email address will also change the username you use to login." %}</p>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form }}
+      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Confirm') %}
+    </form>
 
   {% else %}
-  <p>
-    {% translate 'The link you followed is invalid. It may have expired or been used already.' %}
-  </p>
+    <p>
+      {% translate 'The link you followed is invalid. It may have expired or been used already.' %}
+    </p>
 
   {% endif %}
 {% endblock %}

@@ -4,54 +4,57 @@
 {% block title %}{% translate 'Sign up' %}{% endblock %}
 
 {% block main %}
+  {% if oidc_error_message %}
+    <ul>
+      <li>
+        {{ oidc_error_message }}
+      </li>
+    </ul>
+  {% endif %}
+
   <h1>{% translate 'Create a new account' %}</h1>
 
-  {% if oidc_error_message %}
-  <ul>
-    <li>
-      {{ oidc_error_message }}
-    </li>
-  </ul>
-  {% endif %}
-
   {% if not can_register %}
-  <p>
-    {% blocktranslate %}You are currently logged in as {{ user }}.{% endblocktranslate %}
-    {% translate 'To create a new account, please log out first.' %}
-  </p>
+    <p>
+      {% blocktranslate %}You are currently logged in as {{ user }}.{% endblocktranslate %}
+      {% translate 'To create a new account, please log out first.' %}
+    </p>
 
-  <form action="{{ logout_url }}" method="post">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ logout_next_url }}">
-    <p><button type="submit">{% translate 'Log out' %}</button></p>
-  </form>
+    <form action="{{ logout_url }}" method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ logout_next_url }}">
+      <p>
+        <button type="submit">{% translate 'Log out' %}</button>
+      </p>
+    </form>
 
-  <p>
-    {% blocktranslate trimmed %}
-    Alternatively, you can <a href="{{ next }}">continue using your current account</a>.
-    {% endblocktranslate %}
-  </p>
+    <p>
+      {% blocktranslate trimmed %}
+        Alternatively, you can <a href="{{ next }}">continue using your current account</a>.
+      {% endblocktranslate %}
+    </p>
 
   {% else %}
-  <form method="post">
-    {% csrf_token %}
-    {{ form }}
-    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Sign up') %}
-  </form>
+    <form method="post">
+      {% csrf_token %}
+      {{ form }}
+      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Sign up') %}
+    </form>
 
-  {% if oidc_login_providers %}
-  <hr>
+    {% if oidc_login_providers %}
+      <hr>
 
-  <h1>{% translate 'Sign up using a trusted service' %}</h1>
+      <h1>{% translate 'Sign up using a trusted service' %}</h1>
 
-  {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_login_providers next_url=next %}
-  {% endif %}
+      {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_login_providers next_url=next %}
+    {% endif %}
 
-  <hr>
+    <hr>
 
-  <p>
-    {% translate 'Already have an account?' %}
-    <a href="{{ login_url }}">{% translate 'Log in' %}</a>
-  </p>
+    <p>
+      {% translate 'Already have an account?' %}
+      <a href="{{ login_url }}">{% translate 'Log in' %}</a>
+    </p>
+
   {% endif %}
 {% endblock %}

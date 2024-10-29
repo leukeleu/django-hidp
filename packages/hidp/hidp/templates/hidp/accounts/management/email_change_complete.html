@@ -7,19 +7,19 @@
   <h1>{% translate 'Change email address' %}</h1>
 
   {% if current_email_confirmation_required %}
-  <p>{% translate 'Successfully confirmed the change from your new email address.' %}</p>
-  <p>{% translate 'You also need to confirm the change from your current email.' %}</p>
+    <p>{% translate 'Successfully confirmed the change from your new email address.' %}</p>
+    <p>{% translate 'You also need to confirm the change from your current email.' %}</p>
 
   {% elif proposed_email_confirmation_required %}
-  <p>{% translate 'Successfully confirmed the change from your current email address.' %}</p>
-  <p>{% translate 'You also need to confirm the change from your new email.' %}</p>
+    <p>{% translate 'Successfully confirmed the change from your current email address.' %}</p>
+    <p>{% translate 'You also need to confirm the change from your new email.' %}</p>
 
   {% elif email_change_request_completed %}
-  <p>{% translate 'Successfully confirmed the change from both your current and new email address.' %}</p>
-  <p>{% translate 'Your email address has been changed.' %}</p>
+    <p>{% translate 'Successfully confirmed the change from both your current and new email address.' %}</p>
+    <p>{% translate 'Your email address has been changed.' %}</p>
 
   {% else %}
-  <p>{% translate 'Something went wrong'%}</p>
+    <p>{% translate 'Something went wrong' %}</p>
   {% endif %}
 
   {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
