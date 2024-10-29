@@ -18,7 +18,7 @@
 
   <form method="post">
     {% csrf_token %}
-    <button>{% translate 'Resend verification email' %}</button>
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Resend verification email') %}
   </form>
 
   {% else %}

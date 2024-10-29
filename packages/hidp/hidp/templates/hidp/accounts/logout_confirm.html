@@ -25,8 +25,7 @@
     {% endif %}
     {% endfor %}
 
-    <button type="submit" value="Cancel">{% translate 'Cancel' %}</button>
-    <button type="submit" name="allow" value="Log out">{% translate 'Log out' %}</button>
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Log out') submit_name='allow' submit_value='true' cancel_label=_('Cancel') %}
   </form>
 
   {% else %}

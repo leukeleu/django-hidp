@@ -115,6 +115,8 @@ class OIDCAccountUnlinkForm(forms.Form):
     allow_unlink = forms.BooleanField(
         label=_("Yes, I want to unlink this account."),
         required=True,
+        initial=True,
+        widget=forms.HiddenInput(),
     )
 
     def __init__(self, *, user, provider_key, **kwargs):

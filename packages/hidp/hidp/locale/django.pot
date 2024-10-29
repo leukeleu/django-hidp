@@ -257,10 +257,7 @@ msgid "Sign up"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
-#: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/password_change.html
-#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/includes/forms/submit_row.html
 msgid "Cancel"
 msgstr ""
 
@@ -719,11 +716,6 @@ msgstr ""
 #: hidp/templates/hidp/federated/account_unlink.html
 #, python-format
 msgid "This will remove the possibility to use your %(provider)s account to log in."
-msgstr ""
-
-#: hidp/templates/hidp/federated/account_unlink.html
-#, python-format
-msgid "Unlink %(provider)s"
 msgstr ""
 
 #: hidp/templates/hidp/federated/account_unlink.html

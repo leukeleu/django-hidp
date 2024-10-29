@@ -258,10 +258,7 @@ msgid "Sign up"
 msgstr "Registreer"
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
-#: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/password_change.html
-#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/includes/forms/submit_row.html
 msgid "Cancel"
 msgstr "Annuleren"
 
@@ -721,11 +718,6 @@ msgstr "Je staat op het punt je %(provider)s-account te koppelen aan je bestaand
 #, python-format
 msgid "This will remove the possibility to use your %(provider)s account to log in."
 msgstr "Dit haalt de mogelijkheid weg om je %(provider)s-account te gebruiken om in te loggen."
-
-#: hidp/templates/hidp/federated/account_unlink.html
-#, python-format
-msgid "Unlink %(provider)s"
-msgstr "Ontkoppel %(provider)s"
 
 #: hidp/templates/hidp/federated/account_unlink.html
 msgid "Unlink account"

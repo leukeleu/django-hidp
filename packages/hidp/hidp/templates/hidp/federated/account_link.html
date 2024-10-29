@@ -30,6 +30,6 @@
   <form method="post">
     {% csrf_token %}
     {{ form }}
-    <button type="submit">{{ form.fields.allow_link.label }}</button>
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=form.fields.allow_link.label cancel_url=cancel_url %}
   </form>
 {% endblock %}

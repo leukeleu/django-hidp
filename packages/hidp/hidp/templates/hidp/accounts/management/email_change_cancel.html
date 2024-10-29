@@ -18,8 +18,7 @@
   <form method="post">
     {% csrf_token %}
     {{ form }}
-    <button type="submit">{{ form.fields.allow_cancel.label }}</button>
-    <a href="{{ cancel_url }}">{% translate 'Back' %}</a>
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=form.fields.allow_cancel.label cancel_url=cancel_url cancel_label=_('Back') %}
   </form>
   {% endif %}
 {% endblock %}

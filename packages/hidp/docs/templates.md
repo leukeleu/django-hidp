@@ -79,7 +79,17 @@ add anything over the base template and is only provided as an extension point.
 This template extends `base.html` and is used for all post-login pages. It does not
 add anything over the base template and is only provided as an extension point.
 
-### base_form.html
+---
+
+### Inclusion templates
+
+To make it easier to customize the look and feel of common elements across the
+application, HIdP provides a select number of inclusion templates that can be
+overridden to match your application's design.
+
+Inclusion templates are found in the `includes` directory.
+
+### forms/base_form.html
 
 This is the base template for all forms in HIdP. It extends the default Django form
 template (`django/forms/div.html`) (without any modifications). Override this template
@@ -87,6 +97,12 @@ to customize the layout of HIdP forms on a global basis.
 
 Each form is assigned a template that extends this base template (again, without any
 modifications). These templates are noted in the per-page documentation below.
+
+### forms/submit_row.html
+
+This template is used to render the submit button, and cancel button if available,
+for forms in HIdP. Override this template to customize the layout of the submit and
+cancel buttons on a global basis.
 
 ---
 
@@ -754,6 +770,9 @@ OIDC provider.
 `form`
 : The account link form.
 
+`cancel_url`
+: Link for the cancel button.
+
 `provider`
 : The OIDC provider that the user is linking their account to.
 
@@ -781,6 +800,9 @@ OIDC provider.
 
 `provider`
 : The OIDC provider that the user is unlinking.
+
+`cancel_url`
+: URL for the cancel button.
 
 ### registration.html
 

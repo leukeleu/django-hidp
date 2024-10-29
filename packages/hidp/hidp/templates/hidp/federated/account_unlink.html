@@ -20,20 +20,9 @@
   {% translate 'Are you sure you want to do this?' %}
   </p>
 
-  {% if form.non_field_errors %}
-    <ul>
-      {% for error in form.non_field_errors %}
-        <li>{{ error }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-
   <form method="post">
     {% csrf_token %}
-    <button type="submit" name="allow_unlink" value="true">
-      {% blocktranslate trimmed with provider.name as provider %}
-      Unlink {{ provider }}
-      {% endblocktranslate%}
-    </button>
+    {{ form }}
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=form.fields.allow_unlink.label cancel_url=cancel_url %}
   </form>
 {% endblock %}
