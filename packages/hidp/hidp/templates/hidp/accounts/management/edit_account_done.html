@@ -1,0 +1,12 @@
+{% extends 'hidp/base_post_login.html' %}
+{% load i18n %}
+
+{% block title %}{% translate 'Edit account' %}{% endblock %}
+
+{% block main %}
+  <h1>{% translate 'Edit your account information' %}</h1>
+
+  <p>{% translate 'Your account has been successfully updated.' %}</p>
+
+  {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
+{% endblock %}

@@ -165,6 +165,7 @@ msgstr "Wachtwoord wijzigen"
 
 #: hidp/accounts/views.py
 #: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/edit_account_done.html
 msgid "Edit account"
 msgstr "Account bewerken"
 
@@ -298,15 +299,7 @@ msgid "Logout requested by %(application)s"
 msgstr "Uitloggen aangevraagd door %(application)s"
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
-msgid "Account updated successfully."
-msgstr "Accountinformatie succesvol bijgewerkt."
-
-#: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Dismiss"
-msgstr "Sluiten"
-
-#: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/edit_account_done.html
 msgid "Edit your account information"
 msgstr "Bewerk je accountinformatie"
 
@@ -316,6 +309,20 @@ msgstr "Bewerk je accountinformatie"
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Save"
 msgstr "Opslaan"
+
+#: hidp/templates/hidp/accounts/management/edit_account_done.html
+#: hidp/templates/hidp/accounts/management/email_change_cancel.html
+#: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
+#: hidp/templates/hidp/accounts/management/set_password_done.html
+msgid "Back"
+msgstr "Terug"
+
+#: hidp/templates/hidp/accounts/management/edit_account_done.html
+msgid "Your account has been successfully updated."
+msgstr "Je account is succesvol bijgewerkt."
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 #: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
@@ -379,15 +386,6 @@ msgstr "E-mailadres wijziging"
 #, python-format
 msgid "Are you sure you want to cancel changing your email address from %(current_email)s to %(proposed_email)s?"
 msgstr "Weet je zeker dat je de wijziging van je e-mailadres van %(current_email)s naar %(proposed_email)s wilt annuleren?"
-
-#: hidp/templates/hidp/accounts/management/email_change_cancel.html
-#: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
-#: hidp/templates/hidp/accounts/management/email_change_complete.html
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#: hidp/templates/hidp/accounts/management/password_change_done.html
-#: hidp/templates/hidp/accounts/management/set_password_done.html
-msgid "Back"
-msgstr "Terug"
 
 #: hidp/templates/hidp/accounts/management/email_change_cancel.html
 #: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
@@ -490,6 +488,10 @@ msgstr "Je bent momenteel ingelogd als %(user)s."
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Available services"
 msgstr "Beschikbare diensten"
+
+#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
+msgid "Dismiss"
+msgstr "Sluiten"
 
 #: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 msgid "Manage linked trusted services"
