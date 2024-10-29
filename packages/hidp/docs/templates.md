@@ -298,44 +298,6 @@ Shows a message letting the user know that their account has been updated.
 `back_url`
 : Link back to the account management page.
 
-### oidc_linked_services.html
-
-Rendered by the `OIDCLinkedServicesView`.
-
-**Base template**: `base_post_login.html`
-
-**Context variables**
-
-`oidc_linked_providers`
-: List of OIDC Clients that are already linked to the user's account.
-
-`oidc_available_providers`
-: List of OIDC Clients that can be linked to the user's account.
-
-`can_unlink`
-: `False` if the user has not set a password and only has one linked provider.
-
-`set_password_url`
-: URL to the set password page.
-
-`back_url`
-: Link for the cancel button.
-
-`successfully_linked_provider`
-: Name of provider that was successfully linked.
-
-`removed_provider`
-: Name of provider that was successfully removed.
-
-`oidc_error_message`
-: Error message from the OIDC Authentication flow in case something went wrong.
-
-**Inclusion templates**
-
-`federated/oidc_provider_list.html`
-: Displays `oidc_linked_providers` (if available) to allow users to unlink OIDC providers.
-: Displays `oidc_available_providers` (if available) to allow users to link OIDC providers.
-
 ### password_change.html
 
 Rendered by the `PasswordChangeView`.
@@ -792,6 +754,44 @@ The subject of the email is set with this template: `account_exists_subject.txt`
 
 All templates related to the OIDC authentication and registration can be found
 in: `templates/hidp/federated`.
+
+### linked_services.html
+
+Rendered by the `OIDCLinkedServicesView`.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`oidc_linked_providers`
+: List of OIDC Clients that are already linked to the user's account.
+
+`oidc_available_providers`
+: List of OIDC Clients that can be linked to the user's account.
+
+`can_unlink`
+: `False` if the user has not set a password and only has one linked provider.
+
+`set_password_url`
+: URL to the set password page.
+
+`back_url`
+: Link for the cancel button.
+
+`successfully_linked_provider`
+: Name of provider that was successfully linked.
+
+`removed_provider`
+: Name of provider that was successfully removed.
+
+`oidc_error_message`
+: Error message from the OIDC Authentication flow in case something went wrong.
+
+**Inclusion templates**
+
+`federated/oidc_provider_list.html`
+: Displays `oidc_linked_providers` (if available) to allow users to unlink OIDC providers.
+: Displays `oidc_available_providers` (if available) to allow users to link OIDC providers.
 
 ### account_link.html
 

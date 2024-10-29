@@ -320,7 +320,7 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         redirect = urllib.parse.urlparse(response.url)
-        self.assertEqual(redirect.path, reverse("hidp_oidc_client:link_account"))
+        self.assertEqual(redirect.path, reverse("hidp_oidc_management:link_account"))
         query = urllib.parse.parse_qs(redirect.query)
         self.assertIn("token", query)
         token = query["token"][0]
@@ -491,9 +491,158 @@ class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
         )
 
 
+class TestOIDCClient(ExampleOIDCClient):
+    # Same as the ExampleOIDCClient, but with a different provider key.
+    provider_key = "test"
+
+
+class TestOIDCLinkedServicesView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory()
+        cls.user.set_unusable_password()
+        cls.user.save()
+        cls.oidc_linked_services_url = reverse("hidp_oidc_management:linked_services")
+
+    def setUp(self):
+        clients = [
+            ExampleOIDCClient(client_id="example"),
+            TestOIDCClient(client_id="test"),
+        ]
+        configure_oidc_clients(*clients)
+
+    def test_login_required(self):
+        """Anonymous users should be redirected to the login page."""
+        response = self.client.get(self.oidc_linked_services_url)
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_accounts:login')}?next={self.oidc_linked_services_url}",
+        )
+
+    def test_available_services(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.oidc_linked_services_url)
+
+        # No services linked
+        self.assertNotInHTML("Linked services", response.content.decode("utf-8"))
+
+        # List of available services should be displayed
+        self.assertInHTML(
+            "Available services",
+            response.content.decode("utf-8"),
+        )
+        for name in ("Example", "Test"):
+            self.assertInHTML(
+                f"<button type='submit'>Link with {name}</button>",
+                response.content.decode("utf-8"),
+            )
+
+    def test_linked_one_service(self):
+        models.OpenIdConnection.objects.create(
+            user=self.user,
+            provider_key="example",
+            issuer_claim="example",
+            subject_claim="test-subject",
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(self.oidc_linked_services_url)
+
+        # Unlinking is not possible with only one service linked and no password set
+        self.assertFalse(
+            response.context["can_unlink"], msg="Expected can_unlink to be False."
+        )
+
+        # The linked service should be displayed
+        self.assertInHTML(
+            "Linked services",
+            response.content.decode("utf-8"),
+        )
+
+        # Unlink option should be disabled
+        self.assertInHTML(
+            "<button type='submit' disabled>Unlink from Example</button>",
+            response.content.decode("utf-8"),
+        )
+
+        # The remaining service should be available
+        self.assertInHTML(
+            "Available services",
+            response.content.decode("utf-8"),
+        )
+        self.assertInHTML(
+            "<button type='submit'>Link with Test</button>",
+            response.content.decode("utf-8"),
+        )
+
+    def test_linked_all_services(self):
+        models.OpenIdConnection.objects.create(
+            user=self.user,
+            provider_key="example",
+            issuer_claim="example",
+            subject_claim="test-subject",
+        )
+        models.OpenIdConnection.objects.create(
+            user=self.user,
+            provider_key="test",
+            issuer_claim="example",
+            subject_claim="test-subject",
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(self.oidc_linked_services_url)
+
+        # Unlinking is possible with multiple services linked
+        self.assertTrue(
+            response.context["can_unlink"], msg="Expected can_unlink to be True."
+        )
+
+        self.assertInHTML(
+            "Linked services",
+            response.content.decode("utf-8"),
+        )
+        for key in ("example", "test"):
+            self.assertInHTML(
+                f"<button type='submit'>Unlink from {key.capitalize()}</button>",
+                response.content.decode("utf-8"),
+            )
+
+        # No additional services should be available
+        self.assertNotInHTML("Available services", response.content.decode("utf-8"))
+
+    def test_linked_one_service_with_password_set(self):
+        self.user.set_password("P@ssw0rd!")
+        self.user.save()
+
+        models.OpenIdConnection.objects.create(
+            user=self.user,
+            provider_key="example",
+            issuer_claim="example",
+            subject_claim="test-subject",
+        )
+
+        self.client.force_login(self.user)
+
+        response = self.client.get(self.oidc_linked_services_url)
+
+        # Unlinking is possible with one service linked and a password set
+        self.assertTrue(
+            response.context["can_unlink"], msg="Expected can_unlink to be True."
+        )
+
+        self.assertInHTML(
+            "Linked services",
+            response.content.decode("utf-8"),
+        )
+        self.assertInHTML(
+            "<button type='submit'>Unlink from Example</button>",
+            response.content.decode("utf-8"),
+        )
+
+
 class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
     view_class = views.OIDCAccountLinkView
-    view_name = "hidp_oidc_client:link_account"
+    view_name = "hidp_oidc_management:link_account"
 
     @classmethod
     def setUpTestData(cls):
@@ -531,7 +680,7 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
         # Redirected to linked services page
         self.assertRedirects(
             response,
-            reverse("hidp_accounts:oidc_linked_services") + "?success=example",
+            reverse("hidp_oidc_management:linked_services") + "?success=example",
         )
         # Linked services page
         self.assertInHTML(
@@ -542,7 +691,7 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
 
 
 class TestOIDCAccountUnlinkView(TestCase):
-    view_name = "hidp_oidc_client:unlink_account"
+    view_name = "hidp_oidc_management:unlink_account"
 
     @classmethod
     def setUpTestData(cls):
@@ -585,7 +734,7 @@ class TestOIDCAccountUnlinkView(TestCase):
         # Redirected to linked services page
         self.assertRedirects(
             response,
-            reverse("hidp_accounts:oidc_linked_services") + "?removed=example",
+            reverse("hidp_oidc_management:linked_services") + "?removed=example",
         )
         # Linked services page
         self.assertInHTML(

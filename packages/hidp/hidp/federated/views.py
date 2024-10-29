@@ -14,6 +14,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
+from django.views import generic
 from django.views.generic import DeleteView, FormView, View
 
 from ..accounts import auth as hidp_auth
@@ -183,7 +184,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, View):
                 claims=claims,
                 user_info=user_info,
             )
-            view_name = "hidp_oidc_client:link_account"
+            view_name = "hidp_oidc_management:link_account"
         else:
             # `sub` claim does not match an existing user, and no user is logged in:
             # Check if a user exists for the given email.
@@ -399,9 +400,9 @@ class OIDCAccountLinkView(TokenDataMixin, FormView):
 
     form_class = forms.OIDCAccountLinkForm
     template_name = "hidp/federated/account_link.html"
-    success_url = reverse_lazy("hidp_accounts:oidc_linked_services")
+    success_url = reverse_lazy("hidp_oidc_management:linked_services")
     token_generator = tokens.OIDCAccountLinkTokenGenerator()
-    invalid_token_redirect_url = reverse_lazy("hidp_accounts:oidc_linked_services")
+    invalid_token_redirect_url = reverse_lazy("hidp_oidc_management:linked_services")
 
     def get_success_url(self):
         return super().get_success_url() + f"?success={self.provider.provider_key}"
@@ -436,7 +437,7 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
 
     form_class = forms.OIDCAccountUnlinkForm
     template_name = "hidp/federated/account_unlink.html"
-    success_url = reverse_lazy("hidp_accounts:oidc_linked_services")
+    success_url = reverse_lazy("hidp_oidc_management:linked_services")
     slug_field = "provider_key"
     slug_url_kwarg = "provider_key"
 
@@ -460,5 +461,53 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, DeleteView):
         context = {
             "provider": self.provider,
             "cancel_url": self.success_url,
+        }
+        return super().get_context_data() | context | kwargs
+
+
+@method_decorator(hidp_csp_protection, name="dispatch")
+class OIDCLinkedServicesView(
+    LoginRequiredMixin, OIDCContextMixin, generic.TemplateView
+):
+    """Display the linked services page."""
+
+    template_name = "hidp/federated/linked_services.html"
+
+    def get_context_data(self, **kwargs):
+        oidc_linked_provider_keys = self.request.user.openid_connections.values_list(
+            "provider_key", flat=True
+        )
+        # Do not allow the user to unlink the only available login method.
+        user = self.request.user
+        can_unlink = user.has_usable_password() or user.openid_connections.count() > 1
+        linked_provider = oidc_clients.get_oidc_client_or_none(
+            self.request.GET.get("success")
+        )
+        removed_provider = oidc_clients.get_oidc_client_or_none(
+            self.request.GET.get("removed")
+        )
+        context = {
+            "successfully_linked_provider": linked_provider,
+            "removed_provider": removed_provider,
+            "oidc_linked_providers": self._build_provider_url_list(
+                (
+                    provider
+                    for provider in oidc_clients.get_registered_oidc_clients()
+                    if provider.provider_key in oidc_linked_provider_keys
+                ),
+                url_name="hidp_oidc_management:unlink_account",
+                label=_("Unlink from {provider}"),
+            ),
+            "oidc_available_providers": self._build_provider_url_list(
+                (
+                    provider
+                    for provider in oidc_clients.get_registered_oidc_clients()
+                    if provider.provider_key not in oidc_linked_provider_keys
+                ),
+                label=_("Link with {provider}"),
+            ),
+            "can_unlink": can_unlink,
+            "set_password_url": reverse("hidp_accounts:set_password"),
+            "back_url": reverse("hidp_accounts:manage_account"),
         }
         return super().get_context_data() | context | kwargs

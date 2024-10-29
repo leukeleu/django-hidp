@@ -819,7 +819,7 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
         if oidc_clients.get_registered_oidc_clients():
             links.append(
                 {
-                    "url": reverse("hidp_accounts:oidc_linked_services"),
+                    "url": reverse("hidp_oidc_management:linked_services"),
                     "text": _("Linked services"),
                 },
             )
@@ -868,54 +868,6 @@ class EditAccountDoneView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "back_url": reverse("hidp_accounts:manage_account"),
-        }
-        return super().get_context_data() | context | kwargs
-
-
-@method_decorator(hidp_csp_protection, name="dispatch")
-class OIDCLinkedServicesView(
-    LoginRequiredMixin, OIDCContextMixin, generic.TemplateView
-):
-    """Display the linked services page."""
-
-    template_name = "hidp/accounts/management/oidc_linked_services.html"
-
-    def get_context_data(self, **kwargs):
-        oidc_linked_provider_keys = self.request.user.openid_connections.values_list(
-            "provider_key", flat=True
-        )
-        # Do not allow the user to unlink the only available login method.
-        user = self.request.user
-        can_unlink = user.has_usable_password() or user.openid_connections.count() > 1
-        linked_provider = oidc_clients.get_oidc_client_or_none(
-            self.request.GET.get("success")
-        )
-        removed_provider = oidc_clients.get_oidc_client_or_none(
-            self.request.GET.get("removed")
-        )
-        context = {
-            "successfully_linked_provider": linked_provider,
-            "removed_provider": removed_provider,
-            "oidc_linked_providers": self._build_provider_url_list(
-                (
-                    provider
-                    for provider in oidc_clients.get_registered_oidc_clients()
-                    if provider.provider_key in oidc_linked_provider_keys
-                ),
-                url_name="hidp_oidc_client:unlink_account",
-                label=_("Unlink from {provider}"),
-            ),
-            "oidc_available_providers": self._build_provider_url_list(
-                (
-                    provider
-                    for provider in oidc_clients.get_registered_oidc_clients()
-                    if provider.provider_key not in oidc_linked_provider_keys
-                ),
-                label=_("Link with {provider}"),
-            ),
-            "can_unlink": can_unlink,
-            "set_password_url": reverse("hidp_accounts:set_password"),
             "back_url": reverse("hidp_accounts:manage_account"),
         }
         return super().get_context_data() | context | kwargs
