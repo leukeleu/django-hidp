@@ -1,3 +1,3 @@
 {% load i18n %}{% autoescape off %}
-{% translate "Verify your email address" %}
+{% translate 'Verify your email address' %}
 {% endautoescape %}

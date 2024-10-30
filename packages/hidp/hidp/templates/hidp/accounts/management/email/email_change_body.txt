@@ -3,9 +3,9 @@
 You're receiving this email because you want to change your email address from {{ current_email }} to {{ proposed_email }}.
 {% endblocktranslate %}
 
-{% translate "Please note that changing your email address will also change the username you use to login." %}
+{% translate 'Please note that changing your email address will also change the username you use to login.' %}
 
-{% translate "Please go to the following page and confirm the change:" %}
+{% translate 'Please go to the following page and confirm the change:' %}
 
 {{ confirmation_url }}
 

@@ -1,4 +1,4 @@
-{% extends "hidp/base_post_login.html" %}
+{% extends 'hidp/base_post_login.html' %}
 {% load i18n %}
 
 {% block title %}{% translate 'Confirm email change' %}{% endblock %}
@@ -12,7 +12,7 @@
     {% endblocktranslate %}
   </p>
 
-  <p>{% translate "Please note that changing your email address will also change the username you use to login." %}</p>
+  <p>{% translate 'Please note that changing your email address will also change the username you use to login.' %}</p>
 
   <form method="post">
     {% csrf_token %}

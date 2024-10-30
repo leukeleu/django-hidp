@@ -9,5 +9,5 @@ If you have forgotten your password, you can reset it using this link:
 
 {{ password_reset_url }}
 
-{% translate "If you did not attempt to sign up, you can safely ignore this email." %}
+{% translate 'If you did not attempt to sign up, you can safely ignore this email.' %}
 {% endautoescape %}
