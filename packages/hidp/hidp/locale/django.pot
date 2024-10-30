@@ -393,10 +393,6 @@ msgstr ""
 msgid "Cancel email change"
 msgstr ""
 
-#: hidp/templates/hidp/accounts/management/email_change_cancel.html
-msgid "The link you followed is invalid or has expired."
-msgstr ""
-
 #: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
 msgid "Successfully cancelled the email address change."
 msgstr ""
@@ -440,12 +436,6 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Confirm email change"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_confirm.html
-#: hidp/templates/hidp/accounts/verification/email_verification_required.html
-#: hidp/templates/hidp/accounts/verification/verify_email.html
-msgid "The link you followed is invalid. It may have expired or been used already."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
@@ -536,10 +526,6 @@ msgstr ""
 #: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
 #: hidp/templates/hidp/accounts/recovery/password_reset_request.html
 msgid "Reset password"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/recovery/password_reset.html
-msgid "The password reset link was invalid, possibly because it has already been used. Please request a new password reset."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
@@ -635,15 +621,19 @@ msgid "You need to verify your email address before you can log in."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
-msgid "Log in to your account to receive a new verification email."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "Please fill in your first and last name."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "Verify email"
+msgstr ""
+
+#: hidp/templates/hidp/base_invalid_link.html
+msgid "Invalid link"
+msgstr ""
+
+#: hidp/templates/hidp/base_invalid_link.html
+msgid "The link you followed is invalid. It may have expired or been used already."
 msgstr ""
 
 #: hidp/templates/hidp/federated/account_link.html

@@ -79,6 +79,16 @@ add anything over the base template and is only provided as an extension point.
 This template extends `base.html` and is used for all post-login pages. It does not
 add anything over the base template and is only provided as an extension point.
 
+### base_invalid_link.html
+
+When a user accesses a page through a link that is no longer valid an error message
+is shown. To customize this message and the layout of the error page on a global basis,
+override this template.
+
+This template extends `base_pre_login.html`. All cases that may result in an invalid
+link also have a dedicated template that extends this template. These templates are
+noted in the per-page documentation below.
+
 ---
 
 ## Inclusion templates
@@ -412,7 +422,7 @@ Rendered by the `EmailChangeRequestSentView`.
 
 ### email_change_confirm.html
 
-Rendered by the `EmailChangeConfirmView`.
+Rendered by the `EmailChangeConfirmView` when accessed with a valid token.
 
 **Base template**: `base_post_login.html`
 
@@ -422,11 +432,6 @@ Rendered by the `EmailChangeConfirmView`.
 
 `form`
 : The email change confirm form, where users need to confirm the change.
-
-`validlink`
-: boolean that indicates the validity of the used token.
-
-If `validlink` is `True` the following context variables are also available:
 
 `already_confirmed_for_this_email`
 : boolean that indicates if the user has already confirmed the change via the
@@ -441,6 +446,12 @@ If `validlink` is `True` the following context variables are also available:
 
 `proposed_email`
 : The proposed new email address.
+
+### email_change_confirm_invalid_link.html
+
+Rendered by the `EmailChangeConfirmView` when accessed with an invalid token.
+
+**Base template**: `base_invalid_link.html`
 
 ### email_change_complete.html
 
@@ -466,18 +477,13 @@ Rendered by the `EmailChangeCompleteView`.
 
 ### email_change_cancel.html
 
-Rendered by the `EmailChangeCancelView`.
+Rendered by the `EmailChangeCancelView` if there is a pending email change request.
 
 **Base template**: `base_post_login.html`
 
 **Form template**: `accounts/forms/email_change_cancel_form.html`
 
 **Context variables**
-
-`validlink`
-: boolean that indicates whether the request can be cancelled.
-
-If `validlink` is `True` the following context variables are also available:
 
 `current_email`
 : The current email address.
@@ -487,6 +493,12 @@ If `validlink` is `True` the following context variables are also available:
 
 `cancel_url`
 : Link for the back button.
+
+### email_change_cancel_invalid_link.html
+
+Rendered by the `EmailChangeCancelView` if there is no pending email change request.
+
+**Base template**: `base_invalid_link.html`
 
 ### email_change_cancel_done.html
 
@@ -613,7 +625,8 @@ Rendered by the `PasswordResetEmailSentView`.
 
 ### password_reset.html
 
-Rendered by the `PasswordResetView`, which is a subclass of Django's `PasswordResetConfirmView`.
+Rendered by the `PasswordResetView` (a subclass of `PasswordResetConfirmView`)
+when accessed with a valid token.
 
 **Base template**: `base_pre_login.html`
 
@@ -624,8 +637,11 @@ Rendered by the `PasswordResetView`, which is a subclass of Django's `PasswordRe
 `form`
 : The password reset form.
 
-`validlink`
-: boolean that indicates the validity of the used token.
+### password_reset_invalid_link.html
+
+Rendered by the `PasswordResetView` when accessed with an invalid token.
+
+**Base template**: `base_invalid_link.html`
 
 ### password_reset_complete.html
 
@@ -681,18 +697,19 @@ in `templates/hidp/accounts/verification`.
 
 ### email_verification_required.html
 
-Rendered by the `EmailVerificationRequiredView`.
+Rendered by the `EmailVerificationRequiredView` when accessed with a valid token.
 
 **Base template**: `base_pre_login.html`
 
-**Context variables**
+### email_verification_required_invalid_link.html
 
-`validlink`
-: boolean that indicates the validity of the used token.
+Rendered by the `EmailVerificationRequiredView` when accessed with an invalid token.
+
+**Base template**: `base_invalid_link.html`
 
 ### verify_email.html
 
-Rendered by the `EmailVerificationView`.
+Rendered by the `EmailVerificationView` when accessed with a valid token.
 
 **Base template**: `base_pre_login.html`
 
@@ -703,8 +720,11 @@ Rendered by the `EmailVerificationView`.
 `form`
 : The email verification form.
 
-`validlink`
-: boolean that indicates the validity of the used token.
+### verify_email_invalid_link.html
+
+Rendered by the `EmailVerificationView` when accessed with an invalid token.
+
+**Base template**: `base_invalid_link.html`
 
 ### email_verification_complete.html
 

@@ -328,79 +328,69 @@ class TestEmailChangeConfirm(TestCase):
     def setUp(self):
         self.client.force_login(self.user)
 
+    def _assert_response(self, response, *, validlink=True):
+        """Convenience method to assert the response."""
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        if validlink:
+            self.assertTemplateUsed(
+                response, "hidp/accounts/management/email_change_confirm.html"
+            )
+        else:
+            self.assertTemplateUsed(
+                response,
+                "hidp/accounts/management/email_change_confirm_invalid_link.html",
+            )
+
     def test_get_unauthenticated_user(self):
         self.client.logout()
         response = self.client.get(self.current_email_url)
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertRedirects(
+            response, f"{reverse('hidp_accounts:login')}?next={self.current_email_url}"
+        )
 
     def test_get_invalid_token(self):
-        response = self.client.get(
-            reverse(
-                "hidp_account_management:email_change_confirm",
-                kwargs={"token": "invalid"},
+        self._assert_response(
+            self.client.get(
+                reverse(
+                    "hidp_account_management:email_change_confirm",
+                    kwargs={"token": "invalid"},
+                ),
+                follow=True,
             ),
-            follow=True,
-        )
-        self.assertTemplateUsed(
-            response, "hidp/accounts/management/email_change_confirm.html"
-        )
-        self.assertInHTML(
-            "The link you followed is invalid."
-            " It may have expired or been used already.",
-            response.content.decode(),
+            validlink=False,
         )
 
     def test_no_token_in_session(self):
         """Placeholder token, no token in session."""
-        response = self.client.get(
-            reverse(
-                "hidp_account_management:email_change_confirm",
-                kwargs={"token": "email-change"},
+        self._assert_response(
+            self.client.get(
+                reverse(
+                    "hidp_account_management:email_change_confirm",
+                    kwargs={"token": "email-change"},
+                ),
+                follow=True,
             ),
-            follow=True,
-        )
-        self.assertTemplateUsed(
-            response, "hidp/accounts/management/email_change_confirm.html"
-        )
-        self.assertInHTML(
-            "The link you followed is invalid."
-            " It may have expired or been used already.",
-            response.content.decode(),
+            validlink=False,
         )
 
     def test_valid_token_wrong_user(self):
         self.client.force_login(user_factories.UserFactory())
-        response = self.client.get(self.current_email_url, follow=True)
-        self.assertTemplateUsed(
-            response, "hidp/accounts/management/email_change_confirm.html"
-        )
-        self.assertInHTML(
-            "The link you followed is invalid."
-            " It may have expired or been used already.",
-            response.content.decode(),
+
+        self._assert_response(
+            self.client.get(self.current_email_url, follow=True), validlink=False
         )
 
     def test_get_valid_token(self):
-        response = self.client.get(self.current_email_url, follow=True)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertTemplateUsed(
-            response, "hidp/accounts/management/email_change_confirm.html"
-        )
-        self.assertIn("validlink", response.context)
+        self._assert_response(self.client.get(self.current_email_url, follow=True))
 
     def test_get_already_confirmed(self):
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.save()
 
-        response = self.client.get(self.current_email_url, follow=True)
-        self.assertTemplateUsed(
-            response, "hidp/accounts/management/email_change_confirm.html"
-        )
-        self.assertInHTML(
-            "The link you followed is invalid."
-            " It may have expired or been used already.",
-            response.content.decode(),
+        self._assert_response(
+            self.client.get(self.current_email_url, follow=True), validlink=False
         )
 
     def test_post_current_email_valid_token(self):
@@ -519,21 +509,16 @@ class TestEmailChangeConfirm(TestCase):
         )
 
     def test_post_invalid_token(self):
-        response = self.client.post(
-            reverse(
-                "hidp_account_management:email_change_confirm",
-                kwargs={"token": "invalid"},
+        self._assert_response(
+            self.client.post(
+                reverse(
+                    "hidp_account_management:email_change_confirm",
+                    kwargs={"token": "invalid"},
+                ),
+                {"allow_change": "on"},
+                follow=True,
             ),
-            {"allow_change": "on"},
-            follow=True,
-        )
-        self.assertTemplateUsed(
-            response, "hidp/accounts/management/email_change_confirm.html"
-        )
-        self.assertInHTML(
-            "The link you followed is invalid."
-            " It may have expired or been used already.",
-            response.content.decode(),
+            validlink=False,
         )
 
     def test_post_proposed_email_already_exists(self):
@@ -561,14 +546,11 @@ class TestEmailChangeConfirm(TestCase):
         self.email_change_request.confirmed_by_proposed_email = True
         self.email_change_request.save()
 
-        response = self.client.post(
-            self.current_email_url, {"allow_change": "on"}, follow=True
-        )
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertInHTML(
-            "The link you followed is invalid."
-            " It may have expired or been used already.",
-            response.content.decode(),
+        self._assert_response(
+            self.client.post(
+                self.current_email_url, {"allow_change": "on"}, follow=True
+            ),
+            validlink=False,
         )
 
 
@@ -589,51 +571,37 @@ class TestEmailChangeCancel(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertRedirects(
+            response, f"{reverse('hidp_accounts:login')}?next={self.url}"
+        )
+
+    def _assert_response(self, response, *, validlink=True):
+        """Convenience method to assert the response."""
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        if validlink:
+            self.assertTemplateUsed(
+                response, "hidp/accounts/management/email_change_cancel.html"
+            )
+        else:
+            self.assertTemplateUsed(
+                response,
+                "hidp/accounts/management/email_change_cancel_invalid_link.html",
+            )
 
     def test_get_no_change_request(self):
         self.email_change_request.delete()
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-        self.assertIn("validlink", response.context)
-        self.assertFalse(
-            response.context["validlink"], msg="Expected the link to be invalid."
-        )
-        self.assertInHTML(
-            "The link you followed is invalid or has expired.",
-            response.content.decode(),
-        )
+        self._assert_response(self.client.get(self.url), validlink=False)
 
     def test_get_completed_change_request(self):
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.confirmed_by_proposed_email = True
         self.email_change_request.save()
 
-        response = self.client.get(self.url)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-        self.assertIn("validlink", response.context)
-        self.assertFalse(
-            response.context["validlink"], msg="Expected the link to be invalid."
-        )
-        self.assertInHTML(
-            "The link you followed is invalid or has expired.",
-            response.content.decode(),
-        )
+        self._assert_response(self.client.get(self.url), validlink=False)
 
     def test_get(self):
-        response = self.client.get(self.url)
-
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertTemplateUsed(
-            response, "hidp/accounts/management/email_change_cancel.html"
-        )
-
-        self.assertIn("validlink", response.context)
-        self.assertTrue(
-            response.context["validlink"], msg="Expected the link to be valid."
-        )
+        self._assert_response(self.client.get(self.url))
 
     def test_post_expired_change_request(self):
         self.email_change_request.created_at = timezone.now() - timezone.timedelta(
@@ -641,23 +609,15 @@ class TestEmailChangeCancel(TestCase):
         )
         self.email_change_request.save()
 
-        response = self.client.post(self.url, {"allow_cancel": "on"})
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-        self.assertInHTML(
-            "The link you followed is invalid or has expired.",
-            response.content.decode(),
+        self._assert_response(
+            self.client.post(self.url, {"allow_cancel": "on"}), validlink=False
         )
 
     def test_post_no_change_request(self):
         self.email_change_request.delete()
 
-        response = self.client.post(self.url, {"allow_cancel": "on"})
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-        self.assertInHTML(
-            "The link you followed is invalid or has expired.",
-            response.content.decode(),
+        self._assert_response(
+            self.client.post(self.url, {"allow_cancel": "on"}), validlink=False
         )
 
     def test_post(self):

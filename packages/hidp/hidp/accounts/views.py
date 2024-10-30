@@ -143,6 +143,7 @@ class BaseTokenMixin:
     token_generator = NotImplemented
     token_session_key = NotImplemented
     token_placeholder = "token"  # noqa: S105 (not a password)
+    template_name_invalid_link = NotImplemented
 
     def _remove_token_from_url(self, token):
         """
@@ -161,11 +162,12 @@ class BaseTokenMixin:
         )
         return HttpResponseRedirect(redirect_url, status=308)
 
-    def get_context_data(self, **kwargs):
-        context = {
-            "validlink": self.validlink,
-        }
-        return super().get_context_data() | context | kwargs
+    def get_template_names(self):
+        """Return the template names to use for the view."""
+        if self.validlink:
+            return super().get_template_names()
+        else:
+            return [self.template_name_invalid_link]
 
     def validate_token_data(self, token_data):  # noqa: PLR6301 (no-self-use)
         """
@@ -200,8 +202,8 @@ class BaseTokenMixin:
         self.validlink = self.validate_token_data(token_data)
 
         if not self.validlink:
-            # Invalid token, handle it in the `get` method.
-            return self.get(request, token=token)
+            # Invalid token, render the invalid link template.
+            return self.render_to_response({})
 
         return super().dispatch(request, token=token)
 
@@ -319,6 +321,9 @@ class EmailVerificationRequiredView(
     """
 
     template_name = "hidp/accounts/verification/email_verification_required.html"
+    template_name_invalid_link = (
+        "hidp/accounts/verification/email_verification_required_invalid_link.html"
+    )
     token_generator = tokens.email_verification_request_token_generator
     verification_mailer = mailers.EmailVerificationMailer
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
@@ -361,6 +366,9 @@ class EmailVerificationView(
 
     form_class = forms.EmailVerificationForm
     template_name = "hidp/accounts/verification/verify_email.html"
+    template_name_invalid_link = (
+        "hidp/accounts/verification/verify_email_invalid_link.html"
+    )
     token_generator = tokens.email_verification_token_generator
     success_url = reverse_lazy("hidp_accounts:email_verification_complete")
     token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
@@ -622,8 +630,18 @@ class PasswordResetView(auth_views.PasswordResetConfirmView):
 
     form_class = forms.PasswordResetForm
     template_name = "hidp/accounts/recovery/password_reset.html"
+    template_name_invalid_link = (
+        "hidp/accounts/recovery/password_reset_invalid_link.html"
+    )
     success_url = reverse_lazy("hidp_accounts:password_reset_complete")
     password_changed_mailer = mailers.PasswordChangedMailer
+
+    def get_template_names(self):
+        """Return the template names to use for the view."""
+        if self.validlink:
+            return super().get_template_names()
+        else:
+            return [self.template_name_invalid_link]
 
     def send_email(self):
         """Send the password changed email."""
@@ -965,20 +983,20 @@ class EmailChangeConfirmView(
 
     form_class = forms.EmailChangeConfirmForm
     template_name = "hidp/accounts/management/email_change_confirm.html"
+    template_name_invalid_link = (
+        "hidp/accounts/management/email_change_confirm_invalid_link.html"
+    )
     success_url = reverse_lazy("hidp_account_management:email_change_complete")
     token_generator = tokens.email_change_token_generator
     token_session_key = "_email_change_request_token"  # noqa: S105 (not a password)
     email_changed_mailer = mailers.EmailChangedMailer
 
     def get_context_data(self, **kwargs):
-        if self.validlink:
-            context = {
-                "recipient": self.recipient,
-                "current_email": self.email_change_request.current_email,
-                "proposed_email": self.email_change_request.proposed_email,
-            }
-        else:
-            context = {}
+        context = {
+            "recipient": self.recipient,
+            "current_email": self.email_change_request.current_email,
+            "proposed_email": self.email_change_request.proposed_email,
+        }
         return super().get_context_data() | context | kwargs
 
     def get_form_kwargs(self):
@@ -1053,24 +1071,36 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
 
     form_class = forms.EmailChangeCancelForm
     template_name = "hidp/accounts/management/email_change_cancel.html"
+    template_name_invalid_link = (
+        "hidp/accounts/management/email_change_cancel_invalid_link.html"
+    )
     success_url = reverse_lazy("hidp_account_management:email_change_cancel_done")
     # This view does not use a token. The token generator is only used
     # to limit the change request lookup to those that have not expired.
     token_generator = tokens.email_change_token_generator
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        self.object = self.get_object()
+        if not self.object:
+            # No object found, show invalid or expired link message.
+            return self.render_to_response({})
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_template_names(self):
+        if self.object:
+            return super().get_template_names()
+        else:
+            # No object found, show invalid or expired link message.
+            return [self.template_name_invalid_link]
+
     def get_context_data(self, **kwargs):
-        validlink = self.object is not None
         context = {
-            "validlink": validlink,
+            "current_email": self.object.current_email,
+            "proposed_email": self.object.proposed_email,
+            "cancel_url": reverse("hidp_account_management:manage_account"),
         }
-
-        if validlink:
-            context |= {
-                "current_email": self.object.current_email,
-                "proposed_email": self.object.proposed_email,
-                "cancel_url": reverse("hidp_account_management:manage_account"),
-            }
-
         return super().get_context_data() | context | kwargs
 
     def get_object(self, queryset=None):
@@ -1080,6 +1110,10 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
         But only if there is a request for the current user that has not been confirmed
         by both the current and proposed email addresses, and has not expired.
         """
+        if hasattr(self, "object"):
+            # To avoid duplicate queries in the get and post handlers, return
+            # the object that was already retrieved in the dispatch method.
+            return self.object
         return (
             EmailChangeRequest.objects.filter(
                 user=self.request.user,
@@ -1094,13 +1128,6 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
             )
             .first()
         )
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        if self.object is None:
-            # Show invalid or expired link message.
-            return self.get(request, *args, **kwargs)
-        return super().post(request, *args, **kwargs)
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")

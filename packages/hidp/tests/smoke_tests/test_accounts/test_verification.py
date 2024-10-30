@@ -34,17 +34,14 @@ class TestEmailVerificationRequiredView(TestCase):
     def _assert_response(self, response, *, validlink=True):
         """Convenience method to assert the response."""
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertTemplateUsed(
-            response, "hidp/accounts/verification/email_verification_required.html"
-        )
-        self.assertIn("validlink", response.context)
         if validlink:
-            self.assertTrue(
-                response.context["validlink"], msg="Expected the link to be valid."
+            self.assertTemplateUsed(
+                response, "hidp/accounts/verification/email_verification_required.html"
             )
         else:
-            self.assertFalse(
-                response.context["validlink"], msg="Expected the link to be invalid."
+            self.assertTemplateUsed(
+                response,
+                "hidp/accounts/verification/email_verification_required_invalid_link.html",
             )
 
     def test_valid_get(self):
@@ -118,17 +115,13 @@ class TestEmailVerificationView(TestCase):
     def _assert_response(self, response, *, validlink=True):
         """Convenience method to assert the response."""
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertTemplateUsed(
-            response, "hidp/accounts/verification/verify_email.html"
-        )
-        self.assertIn("validlink", response.context)
         if validlink:
-            self.assertTrue(
-                response.context["validlink"], msg="Expected the link to be valid."
+            self.assertTemplateUsed(
+                response, "hidp/accounts/verification/verify_email.html"
             )
         else:
-            self.assertFalse(
-                response.context["validlink"], msg="Expected the link to be invalid."
+            self.assertTemplateUsed(
+                response, "hidp/accounts/verification/verify_email_invalid_link.html"
             )
 
     def test_valid_get(self):
