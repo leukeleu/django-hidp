@@ -658,17 +658,17 @@ class PasswordChangeView(LoginRequiredMixin, auth_views.PasswordChangeView):
 
     form_class = forms.PasswordChangeForm
     template_name = "hidp/accounts/management/password_change.html"
-    success_url = reverse_lazy("hidp_accounts:change_password_done")
+    success_url = reverse_lazy("hidp_account_management:change_password_done")
     password_changed_mailer = mailers.PasswordChangedMailer
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and not request.user.has_usable_password():
-            return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
+            return HttpResponseRedirect(reverse("hidp_account_management:set_password"))
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = {
-            "cancel_url": reverse("hidp_accounts:manage_account"),
+            "cancel_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -693,7 +693,7 @@ class PasswordChangeDoneView(auth_views.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "back_url": reverse("hidp_accounts:manage_account"),
+            "back_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -707,7 +707,7 @@ class SetPasswordView(
 
     form_class = forms.SetPasswordForm
     template_name = "hidp/accounts/management/set_password.html"
-    success_url = reverse_lazy("hidp_accounts:set_password_done")
+    success_url = reverse_lazy("hidp_account_management:set_password_done")
     login_delta = timedelta(minutes=5)
     password_changed_mailer = mailers.PasswordChangedMailer
 
@@ -716,7 +716,9 @@ class SetPasswordView(
             return self.handle_no_permission()
 
         if request.user.has_usable_password():
-            return HttpResponseRedirect(reverse_lazy("hidp_accounts:change_password"))
+            return HttpResponseRedirect(
+                reverse_lazy("hidp_account_management:change_password")
+            )
 
         last_login = request.user.last_login
         # If the user has not logged in recently, they must re-authenticate
@@ -738,7 +740,7 @@ class SetPasswordView(
 
     def get_context_data(self, **kwargs):
         context = {
-            "cancel_url": reverse("hidp_accounts:manage_account"),
+            "cancel_url": reverse("hidp_account_management:manage_account"),
             "must_reauthenticate": self.must_reauthenticate,
             "oidc_linked_providers": self._build_provider_url_list(
                 self._get_linked_oidc_providers() if self.must_reauthenticate else (),
@@ -754,7 +756,7 @@ class SetPasswordView(
             # The user was able to POST the form, but has not logged in recently.
             # Redirect to this view using a GET so they are shown the message
             # that they must re-authenticate.
-            return HttpResponseRedirect(reverse("hidp_accounts:set_password"))
+            return HttpResponseRedirect(reverse("hidp_account_management:set_password"))
         return super().post(request, *args, **kwargs)
 
     def send_email(self):
@@ -778,7 +780,7 @@ class SetPasswordDoneView(auth_views.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "back_url": reverse("hidp_accounts:manage_account"),
+            "back_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -792,11 +794,11 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
     def get_account_management_links(self):
         links = [
             {
-                "url": reverse("hidp_accounts:edit_account"),
+                "url": reverse("hidp_account_management:edit_account"),
                 "text": _("Edit account"),
             },
             {
-                "url": reverse("hidp_accounts:email_change_request"),
+                "url": reverse("hidp_account_management:email_change_request"),
                 "text": _("Change email address"),
             },
         ]
@@ -804,14 +806,14 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
         if self.request.user.has_usable_password():
             links.append(
                 {
-                    "url": reverse("hidp_accounts:change_password"),
+                    "url": reverse("hidp_account_management:change_password"),
                     "text": _("Change password"),
                 },
             )
         else:
             links.append(
                 {
-                    "url": reverse("hidp_accounts:set_password"),
+                    "url": reverse("hidp_account_management:set_password"),
                     "text": _("Set password"),
                 },
             )
@@ -842,11 +844,11 @@ class EditAccountView(LoginRequiredMixin, generic.FormView):
 
     template_name = "hidp/accounts/management/edit_account.html"
     form_class = forms.EditUserForm
-    success_url = reverse_lazy("hidp_accounts:edit_account_done")
+    success_url = reverse_lazy("hidp_account_management:edit_account_done")
 
     def get_context_data(self, **kwargs):
         context = {
-            "cancel_url": reverse("hidp_accounts:manage_account"),
+            "cancel_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -868,7 +870,7 @@ class EditAccountDoneView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "back_url": reverse("hidp_accounts:manage_account"),
+            "back_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -886,7 +888,7 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
 
     form_class = forms.EmailChangeRequestForm
     template_name = "hidp/accounts/management/email_change_request.html"
-    success_url = reverse_lazy("hidp_accounts:email_change_request_sent")
+    success_url = reverse_lazy("hidp_account_management:email_change_request_sent")
     email_change_request_mailer = mailers.EmailChangeRequestMailer
     proposed_email_exists_mailer = mailers.ProposedEmailExistsMailer
 
@@ -899,8 +901,8 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
     def get_context_data(self, **kwargs):
         context = {
             "can_change_email": self.request.user.has_usable_password(),
-            "set_password_url": reverse("hidp_accounts:set_password"),
-            "cancel_url": reverse("hidp_accounts:manage_account"),
+            "set_password_url": reverse("hidp_account_management:set_password"),
+            "cancel_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -963,7 +965,7 @@ class EmailChangeConfirmView(
 
     form_class = forms.EmailChangeConfirmForm
     template_name = "hidp/accounts/management/email_change_confirm.html"
-    success_url = reverse_lazy("hidp_accounts:email_change_complete")
+    success_url = reverse_lazy("hidp_account_management:email_change_complete")
     token_generator = tokens.email_change_token_generator
     token_session_key = "_email_change_request_token"  # noqa: S105 (not a password)
     email_changed_mailer = mailers.EmailChangedMailer
@@ -1023,7 +1025,7 @@ class EmailChangeCompleteView(auth_views.TemplateView):
             user=self.request.user
         ).first()
         context = {
-            "back_url": reverse("hidp_accounts:manage_account"),
+            "back_url": reverse("hidp_account_management:manage_account"),
         }
         if email_change_request is None or email_change_request.is_complete():
             context |= {
@@ -1051,7 +1053,7 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
 
     form_class = forms.EmailChangeCancelForm
     template_name = "hidp/accounts/management/email_change_cancel.html"
-    success_url = reverse_lazy("hidp_accounts:email_change_cancel_done")
+    success_url = reverse_lazy("hidp_account_management:email_change_cancel_done")
     # This view does not use a token. The token generator is only used
     # to limit the change request lookup to those that have not expired.
     token_generator = tokens.email_change_token_generator
@@ -1066,7 +1068,7 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
             context |= {
                 "current_email": self.object.current_email,
                 "proposed_email": self.object.proposed_email,
-                "cancel_url": reverse("hidp_accounts:manage_account"),
+                "cancel_url": reverse("hidp_account_management:manage_account"),
             }
 
         return super().get_context_data() | context | kwargs
@@ -1109,6 +1111,6 @@ class EmailChangeCancelDoneView(auth_views.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "back_url": reverse("hidp_accounts:manage_account"),
+            "back_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs

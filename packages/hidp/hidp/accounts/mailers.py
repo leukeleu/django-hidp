@@ -193,7 +193,7 @@ class SetPasswordMailer(BaseMailer):
         self.user = user
 
     def get_set_password_url(self):
-        return urljoin(self.base_url, reverse("hidp_accounts:set_password"))
+        return urljoin(self.base_url, reverse("hidp_account_management:set_password"))
 
     def get_context(self, extra_context=None):
         return super().get_context(
@@ -248,7 +248,7 @@ class EmailChangeRequestMailer(BaseMailer):
         return urljoin(
             self.base_url,
             reverse(
-                "hidp_accounts:email_change_confirm",
+                "hidp_account_management:email_change_confirm",
                 kwargs={
                     "token": (
                         tokens.email_change_token_generator.make_token(
@@ -262,7 +262,7 @@ class EmailChangeRequestMailer(BaseMailer):
     def get_cancel_url(self):
         return urljoin(
             self.base_url,
-            reverse("hidp_accounts:email_change_cancel"),
+            reverse("hidp_account_management:email_change_cancel"),
         )
 
     def get_context(self, extra_context=None):
