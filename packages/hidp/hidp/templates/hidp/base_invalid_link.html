@@ -1,10 +1,10 @@
-{% extends "hidp/base_pre_login.html" %}
+{% extends 'hidp/base_pre_login.html' %}
 {% load i18n %}
 
 {% block title %}{% translate 'Invalid link' %}{% endblock %}
 
 {% block main %}
   <h1>{% translate 'Invalid link' %}</h1>
-  
+
   <p>{% translate 'The link you followed is invalid. It may have expired or been used already.' %}</p>
 {% endblock %}

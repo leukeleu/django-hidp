@@ -1,4 +1,4 @@
-{% extends "hidp/base_post_login.html" %}
+{% extends 'hidp/base_post_login.html' %}
 {% load i18n %}
 
 {% block title %}{% translate 'Manage linked trusted services' %}{% endblock %}
@@ -13,7 +13,7 @@
       </li>
     </ul>
   {% endif %}
-  
+
   {% if oidc_linked_providers %}
     <h2>{% translate 'Linked services' %}</h2>
 

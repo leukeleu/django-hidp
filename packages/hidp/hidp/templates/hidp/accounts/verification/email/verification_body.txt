@@ -7,5 +7,5 @@ Please go to the following page and verify your email address:
 
 {{ verification_url }}
 
-{% translate "If you did not attempt to sign up, you can safely ignore this email." %}
+{% translate 'If you did not attempt to sign up, you can safely ignore this email.' %}
 {% endautoescape %}

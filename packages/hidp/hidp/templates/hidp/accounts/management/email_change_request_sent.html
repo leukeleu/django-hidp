@@ -1,4 +1,4 @@
-{% extends "hidp/base_post_login.html" %}
+{% extends 'hidp/base_post_login.html' %}
 {% load i18n %}
 
 {% block title %}{% translate 'Change email address' %}{% endblock %}
@@ -6,6 +6,6 @@
 {% block main %}
   <p>{% translate "We've emailed you on your current and new email address to confirm the change. You should receive both emails shortly." %}</p>
   <p>{% translate "If you don't receive an email, please make sure you've entered the correct new address, and check your spam folder." %}</p>
-  <p>{% translate "Only after you confirmed through both email addresses, your email address will be changed." %}</p>
-  <p>{% translate "Please note that changing your email address will also change the username you use to login." %}</p>
+  <p>{% translate 'Only after you confirmed through both email addresses, your email address will be changed.' %}</p>
+  <p>{% translate 'Please note that changing your email address will also change the username you use to login.' %}</p>
 {% endblock %}
