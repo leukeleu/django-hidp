@@ -118,14 +118,6 @@ set_password_urls = [
     ),
 ]
 
-linked_services_urls = [
-    path(
-        "linked-services/",
-        views.OIDCLinkedServicesView.as_view(),
-        name="oidc_linked_services",
-    ),
-]
-
 change_email_urls = [
     path(
         "change-email/",
@@ -163,11 +155,7 @@ management_urls = [
     path(
         "manage/",
         include(
-            account_urls
-            + change_password_urls
-            + set_password_urls
-            + linked_services_urls
-            + change_email_urls
+            account_urls + change_password_urls + set_password_urls + change_email_urls
         ),
     ),
 ]

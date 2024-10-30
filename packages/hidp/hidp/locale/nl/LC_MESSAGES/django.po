@@ -170,13 +170,8 @@ msgid "Edit account"
 msgstr "Account bewerken"
 
 #: hidp/accounts/views.py
-#, python-brace-format
-msgid "Link with {provider}"
-msgstr "Koppel met {provider}"
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/federated/linked_services.html
 msgid "Linked services"
 msgstr "Gekoppelde diensten"
 
@@ -195,11 +190,6 @@ msgstr "Registreer met {provider}"
 #: hidp/accounts/views.py
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
-
-#: hidp/accounts/views.py
-#, python-brace-format
-msgid "Unlink from {provider}"
-msgstr "Ontkoppelen van {provider}"
 
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
@@ -231,6 +221,11 @@ msgstr "Verlopen of ongeldig token. Probeer het opnieuw."
 
 #: hidp/federated/views.py
 #, python-brace-format
+msgid "Link with {provider}"
+msgstr "Koppel met {provider}"
+
+#: hidp/federated/views.py
+#, python-brace-format
 msgid "Log in with {provider}"
 msgstr "Log in met {provider}"
 
@@ -241,6 +236,11 @@ msgstr "Inloggen mislukt. Ongeldige inloggegevens."
 #: hidp/federated/views.py
 msgid "The authentication request has expired. Please try again."
 msgstr "Het authenticatieverzoek is verlopen. Probeer het opnieuw."
+
+#: hidp/federated/views.py
+#, python-brace-format
+msgid "Unlink from {provider}"
+msgstr "Ontkoppelen van {provider}"
 
 #: hidp/federated/views.py
 msgid "You already have an account with this email address. Please log in to link your account."
@@ -314,9 +314,9 @@ msgstr "Opslaan"
 #: hidp/templates/hidp/accounts/management/email_change_cancel.html
 #: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/federated/linked_services.html
 msgid "Back"
 msgstr "Terug"
 
@@ -484,52 +484,6 @@ msgstr "Beheer je accountinformatie"
 #, python-format
 msgid "You are currently logged in as %(user)s."
 msgstr "Je bent momenteel ingelogd als %(user)s."
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Available services"
-msgstr "Beschikbare diensten"
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Dismiss"
-msgstr "Sluiten"
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Manage linked trusted services"
-msgstr "Beheer gekoppelde vertrouwde diensten"
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Manage your linked trusted services"
-msgstr "Beheer jouw gekoppelde vertrouwde diensten"
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#, python-format
-msgid "Successfully linked your %(provider)s account."
-msgstr "Je %(provider)s-account is nu gekoppeld."
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#, python-format
-msgid "Successfully unlinked your %(provider)s account."
-msgstr "Je %(provider)s-account is nu ontkoppeld."
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#, python-format
-msgid "To unlink this service, you must <a href=\"%(set_password_url)s\">set a password</a> for your account."
-msgstr "Om deze dienst te ontkoppelen, moet je <a href=\"%(set_password_url)s\">een wachtwoord instellen</a> voor je account."
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-#, python-format
-msgid "To unlink this service, you must either link another service or <a href=\"%(set_password_url)s\">set a password</a> for your account."
-msgstr "Om deze dienst te ontkoppelen, moet je een andere dienst koppelen of <a href=\"%(set_password_url)s\">een wachtwoord instellen</a> voor je account."
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Unlinking is currently disabled to prevent you from being locked out."
-msgstr "Ontkoppelen is momenteel uitgeschakeld om te voorkomen dat je wordt buitengesloten."
-
-#: hidp/templates/hidp/accounts/management/oidc_linked_services.html
-msgid "Your account is currently linked with the following service:"
-msgid_plural "Your account is currently linked with the following services:"
-msgstr[0] "Je account is momenteel aan de volgende dienst gekoppeld:"
-msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"
 
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 msgid "Your password has been changed."
@@ -728,3 +682,49 @@ msgstr "Account ontkoppelen"
 #, python-format
 msgid "You are about to unlink your %(provider)s account from your account."
 msgstr "Je staat op het punt je %(provider)s-account te ontkoppelen."
+
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Available services"
+msgstr "Beschikbare diensten"
+
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Dismiss"
+msgstr "Sluiten"
+
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Manage linked trusted services"
+msgstr "Beheer gekoppelde vertrouwde diensten"
+
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Manage your linked trusted services"
+msgstr "Beheer jouw gekoppelde vertrouwde diensten"
+
+#: hidp/templates/hidp/federated/linked_services.html
+#, python-format
+msgid "Successfully linked your %(provider)s account."
+msgstr "Je %(provider)s-account is nu gekoppeld."
+
+#: hidp/templates/hidp/federated/linked_services.html
+#, python-format
+msgid "Successfully unlinked your %(provider)s account."
+msgstr "Je %(provider)s-account is nu ontkoppeld."
+
+#: hidp/templates/hidp/federated/linked_services.html
+#, python-format
+msgid "To unlink this service, you must <a href=\"%(set_password_url)s\">set a password</a> for your account."
+msgstr "Om deze dienst te ontkoppelen, moet je <a href=\"%(set_password_url)s\">een wachtwoord instellen</a> voor je account."
+
+#: hidp/templates/hidp/federated/linked_services.html
+#, python-format
+msgid "To unlink this service, you must either link another service or <a href=\"%(set_password_url)s\">set a password</a> for your account."
+msgstr "Om deze dienst te ontkoppelen, moet je een andere dienst koppelen of <a href=\"%(set_password_url)s\">een wachtwoord instellen</a> voor je account."
+
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Unlinking is currently disabled to prevent you from being locked out."
+msgstr "Ontkoppelen is momenteel uitgeschakeld om te voorkomen dat je wordt buitengesloten."
+
+#: hidp/templates/hidp/federated/linked_services.html
+msgid "Your account is currently linked with the following service:"
+msgid_plural "Your account is currently linked with the following services:"
+msgstr[0] "Je account is momenteel aan de volgende dienst gekoppeld:"
+msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"

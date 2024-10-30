@@ -1,3 +1,23 @@
+"""
+OIDC client URLs.
+
+Provides the URL patterns for OIDC client authentication and registration.
+
+Include this module in the root URL configuration:
+
+    from hidp.federated import oidc_client_urls
+
+    urlpatterns = [
+        path("login/oidc/", include(oidc_client_urls)),
+    ]
+
+This module also defines the namespace `hidp_oidc_client` for these URLs.
+
+Include this namespace when reversing URLs, for example:
+
+    reverse("hidp_oidc_client:authenticate", kwargs={"provider_key": "example"})
+"""
+
 from django.urls import path
 
 from . import views
@@ -29,16 +49,6 @@ urlpatterns = [
         "register/",
         views.OIDCRegistrationView.as_view(),
         name="register",
-    ),
-    path(
-        "link-account/",
-        views.OIDCAccountLinkView.as_view(),
-        name="link_account",
-    ),
-    path(
-        "unlink-account/<str:provider_key>/",
-        views.OIDCAccountUnlinkView.as_view(),
-        name="unlink_account",
     ),
     path(
         "login/",
