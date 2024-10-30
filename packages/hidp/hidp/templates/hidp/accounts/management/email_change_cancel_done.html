@@ -5,6 +5,7 @@
 
 {% block main %}
   <h1>{% translate 'Cancel email change' %}</h1>
+
   <p>{% translate 'Successfully cancelled the email address change.' %}</p>
 
   {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}

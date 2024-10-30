@@ -5,7 +5,7 @@
 
 {% block main %}
   <h1>{% translate 'Edit your account information' %}</h1>
-  
+
   <form method="post">
     {% csrf_token %}
     {{ form }}
