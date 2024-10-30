@@ -138,10 +138,6 @@ class TestPasswordResetFlow(TestCase):
         response = self.client.get(password_reset_url, follow=True)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertTemplateUsed(response, "hidp/accounts/recovery/password_reset.html")
-        self.assertIn("validlink", response.context)
-        self.assertTrue(
-            response.context["validlink"], msg="Expected the link to be valid."
-        )
         self.assertIsInstance(response.context["form"], forms.PasswordResetForm)
 
     def test_post_password_reset_url(self):
@@ -198,7 +194,7 @@ class TestPasswordResetFlow(TestCase):
 
         with self.subTest("The password reset URL is invalid after use."):
             response = self.client.get(password_reset_url, follow=True)
-            self.assertIn("validlink", response.context)
-            self.assertFalse(
-                response.context["validlink"], msg="Expected the link to be invalid."
+            self.assertTemplateUsed(
+                response,
+                "hidp/accounts/recovery/password_reset_invalid_link.html",
             )

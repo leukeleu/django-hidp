@@ -394,10 +394,6 @@ msgstr "Weet je zeker dat je de wijziging van je e-mailadres van %(current_email
 msgid "Cancel email change"
 msgstr "Annuleer e-mailadres wijziging"
 
-#: hidp/templates/hidp/accounts/management/email_change_cancel.html
-msgid "The link you followed is invalid or has expired."
-msgstr "De link die je hebt gevolgd is ongeldig of verlopen."
-
 #: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
 msgid "Successfully cancelled the email address change."
 msgstr "Het wijzigen van je e-mailadres is succesvol geannuleerd."
@@ -442,12 +438,6 @@ msgstr "Bevestig"
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
 msgid "Confirm email change"
 msgstr "Bevestig e-mailadres wijziging"
-
-#: hidp/templates/hidp/accounts/management/email_change_confirm.html
-#: hidp/templates/hidp/accounts/verification/email_verification_required.html
-#: hidp/templates/hidp/accounts/verification/verify_email.html
-msgid "The link you followed is invalid. It may have expired or been used already."
-msgstr "De link die je hebt gevolgd is ongeldig. Het kan zijn dat deze is verlopen of al is gebruikt."
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Enter your new email address."
@@ -538,10 +528,6 @@ msgstr "Voer je nieuwe wachtwoord twee keer in, zodat we kunnen verifiëren dat 
 #: hidp/templates/hidp/accounts/recovery/password_reset_request.html
 msgid "Reset password"
 msgstr "Wachtwoord resetten"
-
-#: hidp/templates/hidp/accounts/recovery/password_reset.html
-msgid "The password reset link was invalid, possibly because it has already been used. Please request a new password reset."
-msgstr "De link om je wachtwoord te resetten is ongeldig, mogelijk omdat deze al is gebruikt. Vraag een nieuwe aan."
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
 msgid "Your password has been set. You may go ahead and log in now."
@@ -636,16 +622,20 @@ msgid "You need to verify your email address before you can log in."
 msgstr "Je moet je e-mailadres verifiëren voordat je kunt inloggen."
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
-msgid "Log in to your account to receive a new verification email."
-msgstr "Log in op je account om een nieuwe verificatie-e-mail te ontvangen."
-
-#: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "Please fill in your first and last name."
 msgstr "Voer je voor- en achternaam in."
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "Verify email"
 msgstr "E-mailadres verifiëren"
+
+#: hidp/templates/hidp/base_invalid_link.html
+msgid "Invalid link"
+msgstr "Ongeldige link"
+
+#: hidp/templates/hidp/base_invalid_link.html
+msgid "The link you followed is invalid. It may have expired or been used already."
+msgstr "De link die je hebt gevolgd is ongeldig. Het kan zijn dat deze is verlopen of al is gebruikt."
 
 #: hidp/templates/hidp/federated/account_link.html
 #: hidp/templates/hidp/federated/account_unlink.html

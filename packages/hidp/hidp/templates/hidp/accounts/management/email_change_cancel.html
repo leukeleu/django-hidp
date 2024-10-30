@@ -6,21 +6,15 @@
 {% block main %}
   <h1>{% translate 'Cancel email change' %}</h1>
 
-  {% if not validlink %}
-    <p>{% translate 'The link you followed is invalid or has expired.' %}</p>
+  <p>
+    {% blocktranslate trimmed %}
+      Are you sure you want to cancel changing your email address from {{ current_email }} to {{ proposed_email }}?
+    {% endblocktranslate %}
+  </p>
 
-  {% else %}
-    <p>
-      {% blocktranslate trimmed %}
-        Are you sure you want to cancel changing your email address from {{ current_email }} to {{ proposed_email }}?
-      {% endblocktranslate %}
-    </p>
-
-    <form method="post">
-      {% csrf_token %}
-      {{ form }}
-      {% include 'hidp/includes/forms/submit_row.html' with submit_label=form.fields.allow_cancel.label cancel_url=cancel_url cancel_label=_('Back') %}
-    </form>
-
-  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form }}
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=form.fields.allow_cancel.label cancel_url=cancel_url cancel_label=_('Back') %}
+  </form>
 {% endblock %}
