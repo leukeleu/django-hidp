@@ -778,12 +778,6 @@ Rendered by the `OIDCLinkedServicesView`.
 `back_url`
 : Link for the cancel button.
 
-`successfully_linked_provider`
-: Name of provider that was successfully linked.
-
-`removed_provider`
-: Name of provider that was successfully removed.
-
 `oidc_error_message`
 : Error message from the OIDC Authentication flow in case something went wrong.
 
@@ -797,8 +791,7 @@ Rendered by the `OIDCLinkedServicesView`.
 
 Rendered by the `OIDCAccountLinkView`.
 
-Redirects to `OIDCLinkedServicesView` after successfully linking the account to the
-OIDC provider.
+Asks the user to confirm that they want to link their account to the OIDC provider.
 
 **Base template**: `base_post_login.html`
 
@@ -821,12 +814,27 @@ OIDC provider.
 `provider_email`
 : The email address retrieved from the OIDC provider.
 
+### account_link_done.html
+
+Rendered by the `OIDCAccountLinkDoneView`.
+
+Shows a message letting the user know that their account has been linked.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`provider`
+: The OIDC provider that the user linked their account to.
+
+`back_url`
+: Link back to the linked services page.
+
 ### account_unlink.html
 
 Rendered by the `OIDCAccountUnlinkView`.
 
-Redirects to `OIDCLinkedServicesView` after successfully unlinking the account from the
-OIDC provider.
+Asks the user to confirm that they want to unlink their account from the OIDC provider.
 
 **Base template**: `base_post_login.html`
 
@@ -842,6 +850,22 @@ OIDC provider.
 
 `cancel_url`
 : URL for the cancel button.
+
+### account_unlink_done.html
+
+Rendered by the `OIDCAccountUnlinkDoneView`.
+
+Shows a message letting the user know that their account has been unlinked.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`provider`
+: The OIDC provider that the user unlinked their account from.
+
+`back_url`
+: Link back to the linked services page.
 
 ### registration.html
 
