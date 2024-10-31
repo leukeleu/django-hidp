@@ -313,6 +313,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/email_change_cancel.html
 #: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
 #: hidp/templates/hidp/accounts/recovery/password_reset_request.html
