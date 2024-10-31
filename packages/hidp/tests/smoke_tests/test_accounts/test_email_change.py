@@ -400,7 +400,7 @@ class TestEmailChangeConfirm(TestCase):
         self.assertRedirects(
             response,
             reverse("hidp_account_management:email_change_complete"),
-            status_code=308,
+            status_code=307,
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_complete.html"
@@ -430,7 +430,7 @@ class TestEmailChangeConfirm(TestCase):
         self.assertRedirects(
             response,
             reverse("hidp_account_management:email_change_complete"),
-            status_code=308,
+            status_code=307,
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_complete.html"
@@ -463,7 +463,7 @@ class TestEmailChangeConfirm(TestCase):
         self.assertRedirects(
             response,
             reverse("hidp_account_management:email_change_complete"),
-            status_code=308,
+            status_code=307,
         )
         self.assertTemplateUsed(
             response, "hidp/accounts/management/email_change_complete.html"
