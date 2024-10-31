@@ -25,7 +25,7 @@ class TestUiLocalesMiddleware(TestCase):
         )
         self.assertEqual(active_language, translation.get_language())
         self.assertNotIn(
-            "hidp_language",
+            "django_language",
             response.cookies,
         )
 
@@ -35,7 +35,7 @@ class TestUiLocalesMiddleware(TestCase):
         response = self.middleware(request)
         # Sets the language cookie.
         self.assertEqual(
-            response.cookies["hidp_language"].value,
+            response.cookies["django_language"].value,
             "fr",
         )
 
@@ -45,7 +45,7 @@ class TestUiLocalesMiddleware(TestCase):
         response = self.middleware(request)
         # Sets the language cookie.
         self.assertEqual(
-            response.cookies["hidp_language"].value,
+            response.cookies["django_language"].value,
             # 'de' is not supported, 'fr-be' is a variant of 'fr', so 'fr' is picked.
             "fr",
         )
@@ -56,45 +56,6 @@ class TestUiLocalesMiddleware(TestCase):
         response = self.middleware(request)
         # Does not set the language cookie.
         self.assertNotIn(
-            "hidp_language",
+            "django_language",
             response.cookies,
-        )
-
-    def test_activates_language(self):
-        """Activates the language if it is supported."""
-        request = self.client.get("/", HTTP_COOKIE="hidp_language=fr")
-        response = self.middleware(request)
-        self.assertEqual(
-            response,
-            self.get_response.return_value,
-        )
-        self.assertEqual(
-            translation.get_language(),
-            "fr",
-        )
-
-    def test_does_not_activate_unsupported_language(self):
-        """Does not activate the language if it is not supported."""
-        request = self.client.get("/", HTTP_COOKIE="hidp_language=de")
-        response = self.middleware(request)
-        self.assertEqual(
-            response,
-            self.get_response.return_value,
-        )
-        self.assertNotEqual(
-            translation.get_language(),
-            "de",
-        )
-
-    def test_prefers_query_string_over_cookie(self):
-        """Prefers the query string over the cookie."""
-        request = self.client.get("/?ui_locales=fr", HTTP_COOKIE="hidp_language=en")
-        response = self.middleware(request)
-        self.assertEqual(
-            response.cookies["hidp_language"].value,
-            "fr",
-        )
-        self.assertEqual(
-            translation.get_language(),
-            "fr",
         )

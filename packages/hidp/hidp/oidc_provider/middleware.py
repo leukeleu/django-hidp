@@ -1,5 +1,7 @@
 import contextlib
 
+from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.utils import translation
 
 
@@ -8,44 +10,50 @@ def _get_supported_language_variant(language_code):
         return translation.get_supported_language_variant(language_code)
 
 
-def _get_language_from_cookie(request):
-    language = request.COOKIES.get(UiLocalesMiddleware.LANGUAGE_COOKIE_NAME)
-    if language and _get_supported_language_variant(language):
-        return language
-    return None
-
-
 def _get_language_from_ui_locales(request):
     ui_locales = request.GET.get("ui_locales", "").strip()
     for ui_locale in ui_locales.split():
-        if language := _get_supported_language_variant(ui_locale):
-            return language
+        if not translation.check_for_language(ui_locale):
+            continue
+        if lang_code := _get_supported_language_variant(ui_locale):
+            return lang_code
     return None
-
-
-def _get_language_from_request(request):
-    return _get_language_from_ui_locales(request) or _get_language_from_cookie(request)
 
 
 class UiLocalesMiddleware:
     """
-    Handle the 'ui_locales' query parameter and set the language accordingly.
+    Set the language preference based on the 'ui_locales' parameter in the query.
 
-    If the 'ui_locales' parameter contains a supported language, it is activated
-    and stored in a cookie for future requests.
+    The 'ui_locales' parameter is a space-separated list of language tags, ordered by
+    preference. The first language tag that is supported by the application is stored
+    in a cookie. If no supported language is found, the language cookie is not set.
 
-    Otherwise, the language is set to the one stored in the cookie, if any.
+    This cookie is used by Django's LocaleMiddleware to set the language for
+    the request and may also be set using Django's set_language view.
     """
-
-    LANGUAGE_COOKIE_NAME = "hidp_language"
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if language := _get_language_from_request(request):
-            translation.activate(language)
-            response = self.get_response(request)
-            response.set_cookie(UiLocalesMiddleware.LANGUAGE_COOKIE_NAME, language)
+        if lang_code := _get_language_from_ui_locales(request):
+            # The 'ui_locales' parameter contains a supported language.
+            # Remove the parameter from the query string:
+            query = request.GET.copy()
+            query.pop("ui_locales")
+            request.META["QUERY_STRING"] = query.urlencode()
+            response = HttpResponseRedirect(request.build_absolute_uri())
+            # Set the language preference cookie,
+            # exactly as Django's set_language view does:
+            response.set_cookie(
+                settings.LANGUAGE_COOKIE_NAME,
+                lang_code,
+                max_age=settings.LANGUAGE_COOKIE_AGE,
+                path=settings.LANGUAGE_COOKIE_PATH,
+                domain=settings.LANGUAGE_COOKIE_DOMAIN,
+                secure=settings.LANGUAGE_COOKIE_SECURE,
+                httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+                samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+            )
             return response
         return self.get_response(request)
