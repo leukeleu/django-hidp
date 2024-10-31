@@ -315,6 +315,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
 #: hidp/templates/hidp/accounts/management/password_change_done.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/accounts/recovery/password_reset_request.html
 #: hidp/templates/hidp/federated/account_link_done.html
 #: hidp/templates/hidp/federated/account_unlink_done.html
 #: hidp/templates/hidp/federated/linked_services.html
@@ -538,6 +539,10 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
 msgid "We've emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/recovery/password_reset_request.html
+msgid "Continue"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_request.html
