@@ -6,15 +6,9 @@
 {% block main %}
   <h1>{% translate 'Verification required' %}</h1>
 
-  <p>{% translate 'You need to verify your email address before you can log in.' %}</p>
+  <p>{% translate 'You need to verify your email address before you can sign in. Please check your email for a verification link.' %}</p>
 
-  <p>
-    {% blocktranslate trimmed %}
-      Please check your email for a message with a verification link. This message may take a few minutes to arrive.
-      If you don't see it, check your spam folder. If you still can't find it, you can request a new verification
-      email.
-    {% endblocktranslate %}
-  </p>
+  <p>{% translate 'It may take a few minutes for this email to arrive. If you do not see it, check your spam folder. If you still cannot find it, make sure you entered the correct email address.' %}</p>
 
   <form method="post">
     {% csrf_token %}

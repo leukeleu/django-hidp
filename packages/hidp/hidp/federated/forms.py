@@ -134,5 +134,5 @@ class OIDCAccountUnlinkForm(forms.Form):
             ).exists()
         )
         if not can_unlink:
-            raise ValidationError(_("You cannot unlink your only way to log in."))
+            raise ValidationError(_("You cannot unlink your only way to sign in."))
         return cleaned_data

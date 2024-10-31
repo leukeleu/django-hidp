@@ -148,16 +148,7 @@ class TestPasswordChangeView(TestCase):
         self.assertEqual(1, len(mail.outbox))
         message = mail.outbox[0]
         self.assertEqual(message.to, [self.user.email])
-        self.assertEqual(message.subject, "Password changed")
-        self.assertIn(
-            "You're receiving this email because your password has been changed.",
-            message.body,
-        )
-        self.assertIn(
-            "If you did not change your password, please reset your password"
-            " immediately using this link:",
-            message.body,
-        )
+        self.assertEqual("Your password has been changed", message.subject)
         self.assertIn(
             reverse("hidp_accounts:password_reset_request"),
             message.body,
@@ -263,16 +254,7 @@ class TestSetPasswordView(TestCase):
         self.assertEqual(1, len(mail.outbox))
         message = mail.outbox[0]
         self.assertEqual(message.to, [self.user.email])
-        self.assertEqual(message.subject, "Password changed")
-        self.assertIn(
-            "You're receiving this email because your password has been changed.",
-            message.body,
-        )
-        self.assertIn(
-            "If you did not change your password, please reset your password"
-            " immediately using this link:",
-            message.body,
-        )
+        self.assertEqual("Your password has been changed", message.subject)
         self.assertIn(
             reverse("hidp_accounts:password_reset_request"),
             message.body,

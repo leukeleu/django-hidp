@@ -838,7 +838,7 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
             links.append(
                 {
                     "url": reverse("hidp_account_management:set_password"),
-                    "text": _("Set password"),
+                    "text": _("Set a password"),
                 },
             )
 

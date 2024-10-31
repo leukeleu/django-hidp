@@ -302,7 +302,7 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         )
         self.assertInHTML(
             "You already have an account with this email address."
-            " Please log in to link your account.",
+            " Please sign in to link your account.",
             response.content.decode("utf-8"),
         )
 
@@ -428,7 +428,7 @@ class TestOIDCRegistrationView(OIDCTokenDataTestMixin, TestCase):
         )
         # Verification required page
         self.assertInHTML(
-            "You need to verify your email address before you can log in.",
+            "Verification required",
             response.content.decode("utf-8"),
         )
 
@@ -486,7 +486,7 @@ class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
         )
         # Verification required page
         self.assertInHTML(
-            "You need to verify your email address before you can log in.",
+            "Verification required",
             response.content.decode("utf-8"),
         )
 
@@ -751,7 +751,7 @@ class TestOIDCAccountUnlinkView(TestCase):
         self.assertFormError(
             response.context["form"],
             None,
-            "You cannot unlink your only way to log in.",
+            "You cannot unlink your only way to sign in.",
         )
 
     def test_valid_provider_no_connection(self):

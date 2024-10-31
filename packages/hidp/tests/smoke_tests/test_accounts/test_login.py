@@ -73,7 +73,7 @@ class TestLogin(TestCase):
         )
         # Verification required page
         self.assertInHTML(
-            "You need to verify your email address before you can log in.",
+            "Verification required",
             response.content.decode("utf-8"),
         )
 

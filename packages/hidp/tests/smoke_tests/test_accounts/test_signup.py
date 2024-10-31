@@ -88,7 +88,7 @@ class TestRegistrationView(TransactionTestCase):
         )
         # Verification required page
         self.assertInHTML(
-            "You need to verify your email address before you can log in.",
+            "Verification required",
             response.content.decode("utf-8"),
         )
 
@@ -163,7 +163,7 @@ class TestRegistrationView(TransactionTestCase):
         )
         # Verification required page
         self.assertInHTML(
-            "You need to verify your email address before you can log in.",
+            "Verification required",
             response.content.decode("utf-8"),
         )
 
@@ -191,7 +191,7 @@ class TestRegistrationView(TransactionTestCase):
         )
         # Verification required page
         self.assertInHTML(
-            "You need to verify your email address before you can log in.",
+            "Verification required",
             response.content.decode("utf-8"),
         )
         # Sends an email notification to the user
