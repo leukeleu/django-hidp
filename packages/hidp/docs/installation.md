@@ -208,3 +208,10 @@ created earlier.
 HIdP comes with a set of templates that can be overridden in your project.
 
 See [Customizing Templates](project:customizing-templates.md) for more information.
+
+## Translations
+
+HIdP can be translated into different languages, and ships with Dutch translations out of the box.
+
+For more information on how to enable translations and create your own translations, see the
+[Translations](project:translations.md) documentation.
