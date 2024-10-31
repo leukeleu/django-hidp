@@ -160,7 +160,7 @@ class BaseTokenMixin:
         redirect_url = self.request.get_full_path().replace(
             token, self.token_placeholder
         )
-        return HttpResponseRedirect(redirect_url, status=308)
+        return HttpResponseRedirect(redirect_url, status=307)
 
     def get_template_names(self):
         """Return the template names to use for the view."""
