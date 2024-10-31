@@ -594,6 +594,12 @@ class PasswordResetRequestView(generic.FormView):
     password_reset_request_mailer = mailers.PasswordResetRequestMailer
     set_password_mailer = mailers.SetPasswordMailer
 
+    def get_context_data(self, **kwargs):
+        context = {
+            "cancel_url": resolve_url(settings.LOGIN_URL),
+        }
+        return super().get_context_data() | context | kwargs
+
     def send_email(self, user):
         """Send the appropriate email to the user."""
         if user.has_usable_password():

@@ -617,6 +617,9 @@ Rendered by the `PasswordResetRequestView`.
 `form`
 : The password reset request form, where users need to fill in their email address.
 
+`cancel_url`
+: Link for the cancel button.
+
 ### password_reset_email_sent.html
 
 Rendered by the `PasswordResetEmailSentView`.
