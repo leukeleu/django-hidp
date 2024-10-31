@@ -16,6 +16,7 @@ content-security-policy
 user-model
 password-validation
 templates
+translations
 management-commands
 rate-limiting
 :::

@@ -196,3 +196,9 @@ The settings provided by `get_oauth2_provider_settings` are as follows:
 
 Refer to the [Django OAuth Toolkit documentation](https://django-oauth-toolkit.readthedocs.io/en/latest/settings.html)
 for more information on the settings provided by DOT and a list of all available settings.
+
+## Translations
+
+If your application supports multiple languages, you can add support for the OIDC `ui_locales` parameter
+using the `UiLocalesMiddleware` provided by HIdP. See the [Translations](project:./translations.md) documentation
+for more information.

@@ -177,7 +177,7 @@ Rendered by the `LoginView`.
 **Inclusion templates**
 
 `federated/oidc_provider_list.html`
-: Displays `oidc_login_providers` (if available) to allow users to login with OIDC.
+: Displays `oidc_login_providers` (if available) to allow users to log in with OIDC.
 
 ### logout_confirm.html
 
