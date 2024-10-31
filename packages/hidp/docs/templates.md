@@ -420,6 +420,11 @@ Rendered by the `EmailChangeRequestSentView`.
 
 **Base template**: `base_post_login.html`
 
+**Context variables**
+
+`back_url`
+: Link back to the account management page.
+
 ### email_change_confirm.html
 
 Rendered by the `EmailChangeConfirmView` when accessed with a valid token.
@@ -446,6 +451,9 @@ Rendered by the `EmailChangeConfirmView` when accessed with a valid token.
 
 `proposed_email`
 : The proposed new email address.
+
+`cancel_url`
+: Link for the cancel button.
 
 ### email_change_confirm_invalid_link.html
 

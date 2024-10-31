@@ -973,6 +973,12 @@ class EmailChangeRequestSentView(generic.TemplateView):
 
     template_name = "hidp/accounts/management/email_change_request_sent.html"
 
+    def get_context_data(self, **kwargs):
+        context = {
+            "back_url": reverse("hidp_account_management:manage_account"),
+        }
+        return super().get_context_data() | context | kwargs
+
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
@@ -999,6 +1005,7 @@ class EmailChangeConfirmView(
 
     def get_context_data(self, **kwargs):
         context = {
+            "cancel_url": reverse("hidp_account_management:manage_account"),
             "recipient": self.recipient,
             "current_email": self.email_change_request.current_email,
             "proposed_email": self.email_change_request.proposed_email,

@@ -8,4 +8,6 @@
   <p>{% translate "If you don't receive an email, please make sure you've entered the correct new address, and check your spam folder." %}</p>
   <p>{% translate 'Only after you confirmed through both email addresses, your email address will be changed.' %}</p>
   <p>{% translate 'Please note that changing your email address will also change the username you use to login.' %}</p>
+
+  {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
 {% endblock %}
