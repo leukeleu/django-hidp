@@ -59,6 +59,8 @@
   {% endif %}
 
   {% if oidc_available_providers %}
+    <hr>
+    
     <h2>{% translate 'Available services' %}</h2>
 
     {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_available_providers %}
