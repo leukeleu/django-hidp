@@ -1,15 +1,15 @@
 {% load i18n %}{% autoescape off %}
 {% blocktranslate trimmed %}
-You're receiving this email because you want to change your email address from {{ current_email }} to {{ proposed_email }}.
+You requested to change your account email address from {{ current_email }} to {{ proposed_email }}.
 {% endblocktranslate %}
 
-{% translate 'Please note that changing your email address will also change the username you use to login.' %}
-
-{% translate 'Please go to the following page and confirm the change:' %}
+{% translate 'To confirm this change, use the following link:' %}
 
 {{ confirmation_url }}
 
-{% translate "If you didn't request this change, you can cancel the request by visiting the following page:" %}
+{% translate 'Please note that this also changes the username you use to sign in.' %}
+
+{% translate 'If you did not make this request, you can cancel it using the following link:' %}
 
 {{ cancel_url }}
 

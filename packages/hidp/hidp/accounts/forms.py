@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth import get_user_model
+from django.contrib.auth import password_validation as django_password_validation
 from django.db import transaction
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -290,6 +291,22 @@ class SetPasswordForm(auth_forms.SetPasswordForm):
 
     template_name = "hidp/accounts/management/forms/set_password_form.html"
 
+    # Fields
+    password1 = forms.CharField(
+        label=_("Password"),
+        required=False,
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+        help_text=django_password_validation.password_validators_help_text_html(),
+    )
+    password2 = forms.CharField(
+        label=_("Password confirmation"),
+        required=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
+        strip=False,
+        help_text=_("Enter the same password as before, for verification."),
+    )
+
 
 class RateLimitedAuthenticationForm(AuthenticationForm):
     """
@@ -337,8 +354,7 @@ class EmailChangeRequestForm(forms.ModelForm):
         max_length=254,
         widget=forms.EmailInput(),
         help_text=_(
-            "Please note that changing your email address will also"
-            " change the username you use to login."
+            "Please note that this also changes the username you use to sign in."
         ),
     )
     password = forms.CharField(

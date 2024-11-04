@@ -57,7 +57,7 @@ class OIDCContextMixin:
     oidc_error_messages = {
         OIDCError.ACCOUNT_EXISTS: _(
             "You already have an account with this email address."
-            " Please log in to link your account."
+            " Please sign in to link your account."
         ),
         OIDCError.REQUEST_EXPIRED: _(
             "The authentication request has expired. Please try again."
@@ -85,7 +85,7 @@ class OIDCContextMixin:
                     },
                 ),
                 "label": format_lazy(
-                    label or _("Log in with {provider}"),
+                    label or _("Sign in with {provider}"),
                     provider=provider.name,
                 ),
             }

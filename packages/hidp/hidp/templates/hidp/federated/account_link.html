@@ -15,13 +15,13 @@
   <p>
     {% if user_email != provider_email %}
       {% blocktranslate trimmed with provider.name as provider %}
-        This will allow you to use your {{ provider }} account ({{ provider_email }}) to log in to
+        This will allow you to use your {{ provider }} account ({{ provider_email }}) to sign in to
         your existing account ({{ user_email }}).
       {% endblocktranslate %}
 
     {% else %}
       {% blocktranslate trimmed with provider.name as provider %}
-        This will allow you to use your {{ provider }} account to log in to your existing account.
+        This will allow you to use your {{ provider }} account to sign in to your existing account.
       {% endblocktranslate %}
 
     {% endif %}

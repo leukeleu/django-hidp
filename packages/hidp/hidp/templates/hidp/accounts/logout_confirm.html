@@ -11,7 +11,7 @@
           Logout requested by {{ application }}
         {% endblocktranslate %}
       {% else %}
-        {% translate 'Logout' %}
+        {% translate 'Sign out' %}
       {% endif %}
     </h1>
 
@@ -24,7 +24,7 @@
         {% endif %}
       {% endfor %}
 
-      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Log out') submit_name='allow' submit_value='true' cancel_label=_('Cancel') %}
+      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Sign out') submit_name='allow' submit_value='true' cancel_label=_('Cancel') %}
     </form>
 
   {% else %}

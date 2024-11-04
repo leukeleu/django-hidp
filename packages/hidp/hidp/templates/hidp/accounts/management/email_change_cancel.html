@@ -1,14 +1,14 @@
 {% extends 'hidp/base_post_login.html' %}
 {% load i18n %}
 
-{% block title %}{% translate 'Cancel email change' %}{% endblock %}
+{% block title %}{% translate 'Cancel email change request' %}{% endblock %}
 
 {% block main %}
-  <h1>{% translate 'Cancel email change' %}</h1>
+  <h1>{% translate 'Cancel email change request' %}</h1>
 
   <p>
     {% blocktranslate trimmed %}
-      Are you sure you want to cancel changing your email address from {{ current_email }} to {{ proposed_email }}?
+      Are you sure you want to cancel the request to change your account email address from {{ current_email }} to {{ proposed_email }}?
     {% endblocktranslate %}
   </p>
 

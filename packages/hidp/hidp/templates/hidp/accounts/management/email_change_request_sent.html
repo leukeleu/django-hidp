@@ -4,10 +4,15 @@
 {% block title %}{% translate 'Change email address' %}{% endblock %}
 
 {% block main %}
-  <p>{% translate "We've emailed you on your current and new email address to confirm the change. You should receive both emails shortly." %}</p>
-  <p>{% translate "If you don't receive an email, please make sure you've entered the correct new address, and check your spam folder." %}</p>
-  <p>{% translate 'Only after you confirmed through both email addresses, your email address will be changed.' %}</p>
-  <p>{% translate 'Please note that changing your email address will also change the username you use to login.' %}</p>
+  <h1>{% translate 'Change email address' %}</h1>
+
+  <p>{% translate 'Changing your account email address requires confirmation from both your current and new email addresses. Please check your email for a confirmation link.' %}</p>
+
+  <p>{% translate 'It may take a few minutes for this email to arrive. If you do not see it, check your spam folder. If you still cannot find it, make sure you entered the correct email address.' %}</p>
+
+  <p>{% translate 'Your account email address will only be changed after you confirm from both email addresses.' %}</p>
+
+  <p>{% translate 'Please note that this also changes the username you use to sign in.' %}</p>
 
   {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
 {% endblock %}

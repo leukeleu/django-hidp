@@ -7,16 +7,17 @@
   <h1>{% translate 'Change email address' %}</h1>
 
   {% if not can_change_email %}
-    <p>{% translate 'You cannot change your email address because you do not have a password set.' %}</p>
+    <p>{% translate 'Your account does not currently have a password set.' %}</p>
     <p>{% translate 'Your password is required to verify your identity.' %}</p>
+    <p>{% translate 'To change your account email address, please set a password first.' %}</p>
 
     <form action="{{ set_password_url }}" method="get">
-      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Set password') cancel_url=cancel_url %}
+      {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Set a password') cancel_url=cancel_url %}
     </form>
 
   {% else %}
-    <p>{% translate 'Enter your new email address.' %}</p>
-    <p>{% translate 'You will receive an email on your current and new email address with a link to confirm the change.' %}</p>
+    <p>{% translate 'Enter the email address you would like to use for your account.' %}</p>
+    <p>{% translate 'You will receive an email on both your current and the new email address with a link to confirm this change.' %}</p>
 
     <form method="post">
       {% csrf_token %}

@@ -11,6 +11,10 @@ msgid "Email"
 msgstr ""
 
 #: hidp/accounts/forms.py
+msgid "Enter the same password as before, for verification."
+msgstr ""
+
+#: hidp/accounts/forms.py
 msgid "I am not a robot"
 msgstr ""
 
@@ -28,6 +32,10 @@ msgid "Password"
 msgstr ""
 
 #: hidp/accounts/forms.py
+msgid "Password confirmation"
+msgstr ""
+
+#: hidp/accounts/forms.py
 msgid "Please confirm that you are not a robot."
 msgstr ""
 
@@ -35,7 +43,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-msgid "Please note that changing your email address will also change the username you use to login."
+msgid "Please note that this also changes the username you use to sign in."
 msgstr ""
 
 #: hidp/accounts/forms.py
@@ -178,7 +186,8 @@ msgstr ""
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 #: hidp/templates/hidp/accounts/management/set_password.html
 #: hidp/templates/hidp/accounts/management/set_password_done.html
-msgid "Set password"
+#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
+msgid "Set a password"
 msgstr ""
 
 #: hidp/accounts/views.py
@@ -199,7 +208,7 @@ msgid "Yes, I want to unlink this account"
 msgstr ""
 
 #: hidp/federated/forms.py
-msgid "You cannot unlink your only way to log in."
+msgid "You cannot unlink your only way to sign in."
 msgstr ""
 
 #: hidp/federated/models.py
@@ -224,12 +233,12 @@ msgid "Link with {provider}"
 msgstr ""
 
 #: hidp/federated/views.py
-#, python-brace-format
-msgid "Log in with {provider}"
+msgid "Login failed. Invalid credentials."
 msgstr ""
 
 #: hidp/federated/views.py
-msgid "Login failed. Invalid credentials."
+#, python-brace-format
+msgid "Sign in with {provider}"
 msgstr ""
 
 #: hidp/federated/views.py
@@ -242,11 +251,7 @@ msgid "Unlink from {provider}"
 msgstr ""
 
 #: hidp/federated/views.py
-msgid "You already have an account with this email address. Please log in to link your account."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/login.html
-msgid "Don't have an account yet?"
+msgid "You already have an account with this email address. Please sign in to link your account."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html
@@ -258,17 +263,13 @@ msgid "Forgot your password?"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html
+msgid "No account yet?"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
 #: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
 #: hidp/templates/hidp/accounts/register.html
-msgid "Log in"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/login.html
-msgid "Log in using a trusted service"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/login.html
-msgid "Log in with username and password"
+msgid "Sign in"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html
@@ -277,15 +278,17 @@ msgstr ""
 msgid "Sign up"
 msgstr ""
 
-#: hidp/templates/hidp/accounts/logout_confirm.html
-#: hidp/templates/hidp/includes/forms/submit_row.html
-msgid "Cancel"
+#: hidp/templates/hidp/accounts/login.html
+msgid "With a trusted service"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/login.html
+msgid "With your email and password"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
-#: hidp/templates/hidp/accounts/management/manage_account.html
-#: hidp/templates/hidp/accounts/register.html
-msgid "Log out"
+#: hidp/templates/hidp/includes/forms/submit_row.html
+msgid "Cancel"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/logout_confirm.html
@@ -295,6 +298,12 @@ msgstr ""
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #, python-format
 msgid "Logout requested by %(application)s"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/logout_confirm.html
+#: hidp/templates/hidp/accounts/management/manage_account.html
+#: hidp/templates/hidp/accounts/register.html
+msgid "Sign out"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
@@ -329,17 +338,16 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
 #: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
-msgid "If you didn't request this change, you can cancel the request by visiting the following page:"
+msgid "If you did not make this request, you can cancel it using the following link:"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
-msgid "Please go to the following page and confirm the change:"
+msgid "To confirm this change, use the following link:"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_change_body.txt
-#: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
 #, python-format
-msgid "You're receiving this email because you want to change your email address from %(current_email)s to %(proposed_email)s."
+msgid "You requested to change your account email address from %(current_email)s to %(proposed_email)s."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_change_subject.txt
@@ -348,37 +356,38 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_changed_body.txt
 #, python-format
-msgid "Please note that this means you'll need to use %(proposed_email)s to log in from now on."
+msgid "Please remember to use %(proposed_email)s to sign in from now on. No further action is required."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_changed_body.txt
 #, python-format
-msgid "You're receiving this email because the email address of your account has been changed from %(current_email)s to %(proposed_email)s."
+msgid "Your account email address has been changed from %(current_email)s to %(proposed_email)s."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/email_changed_subject.txt
-msgid "Email address changed"
+msgid "Your account email address has been changed"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/password_changed_body.txt
-msgid "If you did not change your password, please reset your password immediately using this link:"
+msgid "If you did not change your password, please reset your password immediately using the following link:"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/password_changed_body.txt
-msgid "You're receiving this email because your password has been changed."
+#: hidp/templates/hidp/accounts/management/password_change_done.html
+msgid "Your password has been changed."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/password_changed_subject.txt
-msgid "Password changed"
+msgid "Your password has been changed"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
+msgid "Please change the email address of the other account first, then try again."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
 #, python-format
-msgid "However, %(proposed_email)s is already in use by another account."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email/proposed_email_exists_body.txt
-msgid "If you want to use this email address, you'll need to change the email address of the other account first."
+msgid "You requested to change your account email address from %(current_email)s to %(proposed_email)s. However, you already have an account that uses %(proposed_email)s."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email/proposed_email_exists_subject.txt
@@ -387,16 +396,28 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_cancel.html
 #, python-format
-msgid "Are you sure you want to cancel changing your email address from %(current_email)s to %(proposed_email)s?"
+msgid "Are you sure you want to cancel the request to change your account email address from %(current_email)s to %(proposed_email)s?"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_cancel.html
 #: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
-msgid "Cancel email change"
+msgid "Cancel email change request"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_cancel_done.html
-msgid "Successfully cancelled the email address change."
+msgid "The request to change your account email address has been successfully canceled."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Please also confirm the change from your current email address."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Please also confirm the change from your new email address."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
+msgid "Please remember to use your new email address to sign in from now on."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
@@ -404,32 +425,24 @@ msgid "Something went wrong"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
-msgid "Successfully confirmed the change from both your current and new email address."
+msgid "You have confirmed the change from both your current and new email addresses."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
-msgid "Successfully confirmed the change from your current email address."
+msgid "You have confirmed the change from your current email address."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
-msgid "Successfully confirmed the change from your new email address."
+msgid "You have confirmed the change from your new email address."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
-msgid "You also need to confirm the change from your current email."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_complete.html
-msgid "You also need to confirm the change from your new email."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/email_change_complete.html
-msgid "Your email address has been changed."
+msgid "Your account email address has been changed successfully."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
 #, python-format
-msgid "Are you sure you want to change your email address from %(current_email)s to %(proposed_email)s?"
+msgid "Are you sure you want to change your account email address from %(current_email)s to %(proposed_email)s?"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_confirm.html
@@ -441,27 +454,33 @@ msgid "Confirm email change"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "Enter your new email address."
+msgid "Enter the email address you would like to use for your account."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "You cannot change your email address because you do not have a password set."
+msgid "To change your account email address, please set a password first."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "You will receive an email on your current and new email address with a link to confirm the change."
+msgid "You will receive an email on both your current and the new email address with a link to confirm this change."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Your account does not currently have a password set."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-msgid "If you don't receive an email, please make sure you've entered the correct new address, and check your spam folder."
+msgid "Changing your account email address requires confirmation from both your current and new email addresses. Please check your email for a confirmation link."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-msgid "Only after you confirmed through both email addresses, your email address will be changed."
+#: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
+#: hidp/templates/hidp/accounts/verification/email_verification_required.html
+msgid "It may take a few minutes for this email to arrive. If you do not see it, check your spam folder. If you still cannot find it, make sure you entered the correct email address."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-msgid "We've emailed you on your current and new email address to confirm the change. You should receive both emails shortly."
+msgid "Your account email address will only be changed after you confirm from both email addresses."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/manage_account.html
@@ -478,8 +497,8 @@ msgstr ""
 msgid "You are currently logged in as %(user)s."
 msgstr ""
 
-#: hidp/templates/hidp/accounts/management/password_change_done.html
-msgid "Your password has been changed."
+#: hidp/templates/hidp/accounts/management/set_password.html
+msgid "Add a password to your account. This will allow you to sign in using your email address and password as well as any linked services."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/set_password.html
@@ -495,32 +514,27 @@ msgid "Your password has been set."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
-msgid "Please go to the following page and choose a new password:"
-msgstr ""
-
-#: hidp/templates/hidp/accounts/recovery/email/password_reset_body.txt
-#: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
-msgid "You're receiving this email because you requested a password reset."
+msgid "Use the following link to reset your password:"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/email/password_reset_subject.txt
-msgid "Password reset request"
+msgid "Reset your password"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
-msgid "Go to the following page to set a password:"
+msgid "However, your account does not currently have a password set."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
-msgid "However, you haven't set a password yet."
+msgid "Use the following link to set a password:"
 msgstr ""
 
-#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
-msgid "Set password request"
+#: hidp/templates/hidp/accounts/recovery/email/set_password_body.txt
+msgid "You requested a link to reset your password."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
-msgid "Please enter your new password twice so we can verify you typed it in correctly."
+msgid "Please enter your new password twice to ensure you typed it correctly."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset.html
@@ -531,15 +545,11 @@ msgid "Reset password"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_complete.html
-msgid "Your password has been set. You may go ahead and log in now."
+msgid "Your password has been set. You can now sign in using your new password."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
-msgid "If you don't receive an email, please make sure you've entered the address you registered with, and check your spam folder."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/recovery/password_reset_email_sent.html
-msgid "We've emailed you instructions for setting your password, if an account exists with the email you entered. You should receive them shortly."
+msgid "Please check your email for a link to reset your password."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_request.html
@@ -547,7 +557,7 @@ msgid "Continue"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/recovery/password_reset_request.html
-msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
+msgid "Forgotten your password? Enter your email address to receive a link to reset your password."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/register.html
@@ -569,7 +579,7 @@ msgid "Sign up using a trusted service"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/register.html
-msgid "To create a new account, please log out first."
+msgid "To create a new account, please sign out first."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/tos.html
@@ -603,15 +613,11 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/email_verification_complete.html
 #, python-format
-msgid "You can now <a href=\"%(login_url)s\">log in</a>."
+msgid "You can now <a href=\"%(login_url)s\">sign in</a>."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/email_verification_complete.html
 msgid "Your email address is now verified."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/verification/email_verification_required.html
-msgid "Please check your email for a message with a verification link. This message may take a few minutes to arrive. If you don't see it, check your spam folder. If you still can't find it, you can request a new verification email."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
@@ -623,7 +629,7 @@ msgid "Verification required"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/email_verification_required.html
-msgid "You need to verify your email address before you can log in."
+msgid "You need to verify your email address before you can sign in. Please check your email for a verification link."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
@@ -653,12 +659,12 @@ msgstr ""
 
 #: hidp/templates/hidp/federated/account_link.html
 #, python-format
-msgid "This will allow you to use your %(provider)s account (%(provider_email)s) to log in to your existing account (%(user_email)s)."
+msgid "This will allow you to use your %(provider)s account (%(provider_email)s) to sign in to your existing account (%(user_email)s)."
 msgstr ""
 
 #: hidp/templates/hidp/federated/account_link.html
 #, python-format
-msgid "This will allow you to use your %(provider)s account to log in to your existing account."
+msgid "This will allow you to use your %(provider)s account to sign in to your existing account."
 msgstr ""
 
 #: hidp/templates/hidp/federated/account_link.html
@@ -685,7 +691,7 @@ msgstr ""
 
 #: hidp/templates/hidp/federated/account_unlink.html
 #, python-format
-msgid "This will remove the possibility to use your %(provider)s account to log in."
+msgid "After unlinking, you will no longer be able to use your %(provider)s account to sign in."
 msgstr ""
 
 #: hidp/templates/hidp/federated/account_unlink.html

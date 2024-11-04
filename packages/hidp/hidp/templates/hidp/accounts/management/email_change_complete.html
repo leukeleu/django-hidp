@@ -7,16 +7,17 @@
   <h1>{% translate 'Change email address' %}</h1>
 
   {% if current_email_confirmation_required %}
-    <p>{% translate 'Successfully confirmed the change from your new email address.' %}</p>
-    <p>{% translate 'You also need to confirm the change from your current email.' %}</p>
+    <p>{% translate 'You have confirmed the change from your new email address.' %}</p>
+    <p>{% translate 'Please also confirm the change from your current email address.' %}</p>
 
   {% elif proposed_email_confirmation_required %}
-    <p>{% translate 'Successfully confirmed the change from your current email address.' %}</p>
-    <p>{% translate 'You also need to confirm the change from your new email.' %}</p>
+    <p>{% translate 'You have confirmed the change from your current email address.' %}</p>
+    <p>{% translate 'Please also confirm the change from your new email address.' %}</p>
 
   {% elif email_change_request_completed %}
-    <p>{% translate 'Successfully confirmed the change from both your current and new email address.' %}</p>
-    <p>{% translate 'Your email address has been changed.' %}</p>
+    <p>{% translate 'You have confirmed the change from both your current and new email addresses.' %}</p>
+    <p>{% translate 'Your account email address has been changed successfully.' %}</p>
+    <p>{% translate 'Please remember to use your new email address to sign in from now on.' %}</p>
 
   {% else %}
     <p>{% translate 'Something went wrong' %}</p>

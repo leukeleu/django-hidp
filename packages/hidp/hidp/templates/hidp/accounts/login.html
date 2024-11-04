@@ -1,7 +1,7 @@
 {% extends 'hidp/base_pre_login.html' %}
 {% load i18n %}
 
-{% block title %}{% translate 'Log in' %}{% endblock %}
+{% block title %}{% translate 'Sign in' %}{% endblock %}
 
 {% block main %}
   {% if oidc_error_message %}
@@ -12,7 +12,9 @@
     </ul>
   {% endif %}
 
-  <h1>{% translate 'Log in with username and password' %}</h1>
+  <h1>{% translate 'Sign in' %}</h1>
+
+  <h2>{% translate 'With your email and password' %}</h2>
 
   {% if is_rate_limited %}
     <p>
@@ -26,7 +28,7 @@
   <form method="post">
     {% csrf_token %}
     {{ form }}
-    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Log in') %}
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Sign in') %}
   </form>
 
   <p>
@@ -38,7 +40,7 @@
   {% if oidc_login_providers %}
     <hr>
 
-    <h1>{% translate 'Log in using a trusted service' %}</h1>
+    <h2>{% translate 'With a trusted service' %}</h2>
 
     {% include 'hidp/includes/federated/oidc_provider_list.html' with providers=oidc_login_providers next_url=next %}
 
@@ -47,7 +49,7 @@
   <hr>
 
   <p>
-    {% translate "Don't have an account yet?" %}
+    {% translate 'No account yet?' %}
     <a href="{{ register_url }}">{% translate 'Sign up' %}</a>
   </p>
 {% endblock %}

@@ -1,15 +1,12 @@
 {% load i18n %}{% autoescape off %}
 {% blocktranslate trimmed %}
-You're receiving this email because you want to change your email address from {{ current_email }} to {{ proposed_email }}.
+You requested to change your account email address from {{ current_email }} to {{ proposed_email }}.
+However, you already have an account that uses {{ proposed_email }}.
 {% endblocktranslate %}
 
-{% blocktranslate trimmed %}
- However, {{ proposed_email }} is already in use by another account.
- {% endblocktranslate %}
+{% translate 'Please change the email address of the other account first, then try again.' %}
 
-{% translate "If you want to use this email address, you'll need to change the email address of the other account first." %}
-
-{% translate "If you didn't request this change, you can cancel the request by visiting the following page:" %}
+{% translate 'If you did not make this request, you can cancel it using the following link:' %}
 
 {{ cancel_url }}
 

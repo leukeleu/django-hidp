@@ -1,12 +1,12 @@
 {% extends 'hidp/base_post_login.html' %}
 {% load i18n %}
 
-{% block title %}{% translate 'Cancel email change' %}{% endblock %}
+{% block title %}{% translate 'Cancel email change request' %}{% endblock %}
 
 {% block main %}
-  <h1>{% translate 'Cancel email change' %}</h1>
+  <h1>{% translate 'Cancel email change request' %}</h1>
 
-  <p>{% translate 'Successfully cancelled the email address change.' %}</p>
+  <p>{% translate 'The request to change your account email address has been successfully canceled.' %}</p>
 
   {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
 {% endblock %}

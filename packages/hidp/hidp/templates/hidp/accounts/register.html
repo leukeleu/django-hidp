@@ -17,14 +17,14 @@
   {% if not can_register %}
     <p>
       {% blocktranslate %}You are currently logged in as {{ user }}.{% endblocktranslate %}
-      {% translate 'To create a new account, please log out first.' %}
+      {% translate 'To create a new account, please sign out first.' %}
     </p>
 
     <form action="{{ logout_url }}" method="post">
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ logout_next_url }}">
       <p>
-        <button type="submit">{% translate 'Log out' %}</button>
+        <button type="submit">{% translate 'Sign out' %}</button>
       </p>
     </form>
 
@@ -53,7 +53,7 @@
 
     <p>
       {% translate 'Already have an account?' %}
-      <a href="{{ login_url }}">{% translate 'Log in' %}</a>
+      <a href="{{ login_url }}">{% translate 'Sign in' %}</a>
     </p>
 
   {% endif %}

@@ -8,11 +8,11 @@
 
   <p>
     {% blocktranslate trimmed %}
-      Are you sure you want to change your email address from {{ current_email }} to {{ proposed_email }}?
+      Are you sure you want to change your account email address from {{ current_email }} to {{ proposed_email }}?
     {% endblocktranslate %}
   </p>
 
-  <p>{% translate 'Please note that changing your email address will also change the username you use to login.' %}</p>
+  <p>{% translate 'Please note that this also changes the username you use to sign in.' %}</p>
 
   <form method="post">
     {% csrf_token %}

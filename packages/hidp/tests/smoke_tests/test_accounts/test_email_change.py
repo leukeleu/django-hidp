@@ -47,8 +47,7 @@ class TestEmailChangeRequest(TestCase):
 
         response = self.client.get(self.url)
         self.assertInHTML(
-            "You cannot change your email address because you do not have a"
-            " password set.",
+            "Your account does not currently have a password set.",
             response.content.decode(),
         )
 
@@ -201,12 +200,7 @@ class TestEmailChangeRequest(TestCase):
         )
         self.assertEqual(message.to, ["existing@example.com"])
         self.assertIn(
-            "However, existing@example.com is already in use by another account.",
-            message.body,
-        )
-        self.assertIn(
-            "If you want to use this email address, you'll need to change the "
-            "email address of the other account first.",
+            "However, you already have an account that uses existing@example.com",
             message.body,
         )
         self.assertIn(
@@ -406,11 +400,7 @@ class TestEmailChangeConfirm(TestCase):
             response, "hidp/accounts/management/email_change_complete.html"
         )
         self.assertInHTML(
-            "Successfully confirmed the change from your current email address.",
-            response.content.decode(),
-        )
-        self.assertInHTML(
-            "You also need to confirm the change from your new email.",
+            "Please also confirm the change from your new email address.",
             response.content.decode(),
         )
         self.email_change_request.refresh_from_db()
@@ -436,11 +426,7 @@ class TestEmailChangeConfirm(TestCase):
             response, "hidp/accounts/management/email_change_complete.html"
         )
         self.assertInHTML(
-            "Successfully confirmed the change from your new email address.",
-            response.content.decode(),
-        )
-        self.assertInHTML(
-            "You also need to confirm the change from your current email.",
+            "Please also confirm the change from your current email address.",
             response.content.decode(),
         )
         self.email_change_request.refresh_from_db()
@@ -469,12 +455,7 @@ class TestEmailChangeConfirm(TestCase):
             response, "hidp/accounts/management/email_change_complete.html"
         )
         self.assertInHTML(
-            "Successfully confirmed the change from both your current and new "
-            " email address.",
-            response.content.decode(),
-        )
-        self.assertInHTML(
-            "Your email address has been changed.",
+            "Your account email address has been changed successfully.",
             response.content.decode(),
         )
 
@@ -490,22 +471,12 @@ class TestEmailChangeConfirm(TestCase):
         # Email changed mail should be sent
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(
+            "Your account email address has been changed",
             mail.outbox[0].subject,
-            "Email address changed",
         )
         self.assertEqual(
             mail.outbox[0].to,
             ["current@example.com", "newemail@example.com"],
-        )
-        self.assertIn(
-            "You're receiving this email because the email address of your account"
-            " has been changed from current@example.com to newemail@example.com.",
-            mail.outbox[0].body,
-        )
-        self.assertIn(
-            "Please note that this means you'll need to use"
-            " newemail@example.com to log in from now on.",
-            mail.outbox[0].body,
         )
 
     def test_post_invalid_token(self):
