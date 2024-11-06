@@ -3,14 +3,10 @@
 <head>
   <meta charset="utf-8">
   <title>{% block title %}{% endblock %}</title>
-  {% block extra_head %}
-  {% endblock %}
 </head>
 <body>
 {% block body %}
   {% block main %}{# Main application content #}{% endblock %}
-{% endblock %}
-{% block extra_body %}
 {% endblock %}
 </body>
 </html>
