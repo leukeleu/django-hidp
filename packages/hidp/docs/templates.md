@@ -60,15 +60,6 @@ This template defines two blocks that all other templates depend on:
 `main`
 : inside the `body` block, where the main application content is rendered.
 
-This template also defines two blocks that you can extend to inject extra styles and/or
-scripts:
-
-`extra_head`
-: inside the HTML head tag, after the `title` tag.
-
-`extra_body`
-: inside the HTML body tag, below the `body` block.
-
 ### base_pre_login.html
 
 This template extends `base.html` and is used for all pre-login pages. It does not
