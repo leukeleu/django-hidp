@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 dependencies = [
   # Linting
   "check-manifest == 0.49",
-  "readme-renderer ~= 43.0",
+  "readme-renderer ~= 44.0",
   "ruff == 0.5.5",
 
   # Testing
