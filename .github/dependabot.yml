@@ -3,6 +3,7 @@ updates:
   - package-ecosystem: pip
     directories:
       - '/packages/hidp'
+      - '/packages/hidp-pycqa'
       - '/project'
     schedule:
       interval: 'weekly'
