@@ -1,3 +1,5 @@
+import string
+
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase
 
@@ -77,7 +79,7 @@ class TestPasswordValidation(SimpleTestCase):
 
     def test_symbol_validator(self):
         validator = SymbolValidator()
-        punctuation = r"""!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"""
+        punctuation = string.punctuation
 
         self.assertEqual(
             validator.get_help_text(),
