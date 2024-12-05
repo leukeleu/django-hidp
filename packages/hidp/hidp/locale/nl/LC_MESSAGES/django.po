@@ -220,6 +220,11 @@ msgstr "OpenID-koppeling"
 msgid "OpenID connections"
 msgstr "OpenID-koppelingen"
 
+#: hidp/federated/models.py
+#, python-brace-format
+msgid "Unknown provider: {provider_key}"
+msgstr "Onbekende dienst: {provider_key}"
+
 #: hidp/federated/views.py
 msgid "An unexpected error occurred during authentication. Please try again."
 msgstr "Onverwachte fout tijdens authenticatie. Probeer het opnieuw."

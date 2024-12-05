@@ -1,8 +1,10 @@
 from django.conf import settings
 from django.db import models
+from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
 from ..compat.uuid7 import uuid7
+from ..config import oidc_clients
 
 
 class OpenIdConnectionQuerySet(models.QuerySet):
@@ -72,9 +74,13 @@ class OpenIdConnection(models.Model):
         verbose_name_plural = _("OpenID connections")
 
     def __str__(self):
-        return (
-            f"user: {str(self.user_id)!r}"
-            f" provider: {self.provider_key!r}"
-            f" iss: {self.issuer_claim!r}"
-            f" sub: {self.subject_claim!r}"
+        provider = oidc_clients.get_oidc_client_or_none(self.provider_key)
+        provider_name = (
+            provider.name
+            if provider
+            else format_lazy(
+                _("Unknown provider: {provider_key}"),
+                provider_key=self.provider_key,
+            )
         )
+        return f"{provider_name} ({self.subject_claim})"
