@@ -11,7 +11,7 @@ dependencies = [
   # Linting
   "check-manifest == 0.50",
   "readme-renderer ~= 44.0",
-  "ruff == 0.8.3",
+  "ruff == 0.8.4",
 
   # Testing
   "coverage ~= 7.1",
