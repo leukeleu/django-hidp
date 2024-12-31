@@ -1,0 +1,14 @@
+{% extends "hidp/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+  <p>
+    {% blocktranslate trimmed %}
+    You requested to change your account email address from {{ current_email }} to {{ proposed_email }}.
+    However, you already have an account that uses {{ proposed_email }}.
+    {% endblocktranslate %}
+  </p>
+  <p>{% translate 'Please change the email address of the other account first, then try again.' %}</p>
+  <p>{% translate 'If you did not make this request, you can cancel it using the following link:' %}</p>
+  <p><a href="{{ cancel_url }}">{{ cancel_url }}</a></p>
+{% endblock %}

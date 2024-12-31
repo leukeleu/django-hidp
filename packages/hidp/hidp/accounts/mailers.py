@@ -87,6 +87,7 @@ class BaseMailer:
 class EmailVerificationMailer(BaseMailer):
     subject_template_name = "hidp/accounts/verification/email/verification_subject.txt"
     email_template_name = "hidp/accounts/verification/email/verification_body.txt"
+    html_email_template_name = "hidp/accounts/verification/email/verification_body.html"
 
     def __init__(self, user, *, base_url, post_verification_redirect=None):
         super().__init__(base_url=base_url)
@@ -120,6 +121,9 @@ class AccountExistsMailer(BaseMailer):
         "hidp/accounts/verification/email/account_exists_subject.txt"
     )
     email_template_name = "hidp/accounts/verification/email/account_exists_body.txt"
+    html_email_template_name = (
+        "hidp/accounts/verification/email/account_exists_body.html"
+    )
 
     def __init__(self, user, *, base_url):
         super().__init__(base_url=base_url)
@@ -144,6 +148,7 @@ class AccountExistsMailer(BaseMailer):
 class PasswordResetRequestMailer(BaseMailer):
     subject_template_name = "hidp/accounts/recovery/email/password_reset_subject.txt"
     email_template_name = "hidp/accounts/recovery/email/password_reset_body.txt"
+    html_email_template_name = "hidp/accounts/recovery/email/password_reset_body.html"
     token_generator = default_token_generator
 
     def __init__(self, user, *, base_url):
@@ -187,6 +192,7 @@ class PasswordResetRequestMailer(BaseMailer):
 class SetPasswordMailer(BaseMailer):
     subject_template_name = "hidp/accounts/recovery/email/set_password_subject.txt"
     email_template_name = "hidp/accounts/recovery/email/set_password_body.txt"
+    html_email_template_name = "hidp/accounts/recovery/email/set_password_body.html"
 
     def __init__(self, user, *, base_url):
         super().__init__(base_url=base_url)
@@ -213,6 +219,9 @@ class PasswordChangedMailer(BaseMailer):
         "hidp/accounts/management/email/password_changed_subject.txt"
     )
     email_template_name = "hidp/accounts/management/email/password_changed_body.txt"
+    html_email_template_name = (
+        "hidp/accounts/management/email/password_changed_body.html"
+    )
 
     def __init__(self, user, *, base_url):
         super().__init__(base_url=base_url)
@@ -237,6 +246,7 @@ class PasswordChangedMailer(BaseMailer):
 class EmailChangeRequestMailer(BaseMailer):
     subject_template_name = "hidp/accounts/management/email/email_change_subject.txt"
     email_template_name = "hidp/accounts/management/email/email_change_body.txt"
+    html_email_template_name = "hidp/accounts/management/email/email_change_body.html"
 
     def __init__(self, user, *, base_url, email_change_request, recipient):
         super().__init__(base_url=base_url)
@@ -295,6 +305,9 @@ class ProposedEmailExistsMailer(EmailChangeRequestMailer):
     email_template_name = (
         "hidp/accounts/management/email/proposed_email_exists_body.txt"
     )
+    html_email_template_name = (
+        "hidp/accounts/management/email/proposed_email_exists_body.html"
+    )
 
     def get_context(self, extra_context=None):
         return {
@@ -307,6 +320,7 @@ class ProposedEmailExistsMailer(EmailChangeRequestMailer):
 class EmailChangedMailer(BaseMailer):
     subject_template_name = "hidp/accounts/management/email/email_changed_subject.txt"
     email_template_name = "hidp/accounts/management/email/email_changed_body.txt"
+    html_email_template_name = "hidp/accounts/management/email/email_changed_body.html"
 
     def __init__(self, user, *, email_change_request, base_url):
         super().__init__(base_url=base_url)

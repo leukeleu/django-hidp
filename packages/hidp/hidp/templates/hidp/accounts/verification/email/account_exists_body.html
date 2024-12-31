@@ -1,0 +1,16 @@
+{% extends "hidp/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+  <p>
+    {% blocktranslate trimmed %}
+    You're receiving this email because you attempted to create an account using this email address.
+
+    However, an account already exists with this email address.
+
+    If you have forgotten your password, you can reset it using this link:
+    {% endblocktranslate %}
+  </p>
+  <p><a href="{{ password_reset_url }}">{{ password_reset_url }}</a></p>
+  <p>{% translate 'If you did not attempt to sign up, you can safely ignore this email.' %}</p>
+{% endblock %}

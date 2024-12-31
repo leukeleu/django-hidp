@@ -1,0 +1,14 @@
+{% extends "hidp/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+  <p>
+    {% blocktranslate trimmed %}
+    You're receiving this email because you created an account with this email address.
+
+    Please go to the following page and verify your email address:
+    {% endblocktranslate %}
+  </p>
+  <p><a href="{{ verification_url }}">{{ verification_url }}</a></p>
+  <p>{% translate 'If you did not attempt to sign up, you can safely ignore this email.' %}</p>
+{% endblock %}
