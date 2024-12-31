@@ -80,6 +80,19 @@ This template extends `base_pre_login.html`. All cases that may result in an inv
 link also have a dedicated template that extends this template. These templates are
 noted in the per-page documentation below.
 
+### base_email.html
+
+This is the base template for all email templates in HIdP. It includes the basic HTML
+boilerplate for each email.
+
+This template defines two blocks that all other email templates depend on:
+
+`body`
+: inside the HTML `body` tag.
+
+`content`
+: inside the `body` block, where the email content is rendered.
+
 ---
 
 ## Inclusion templates
@@ -515,7 +528,7 @@ Rendered by the `EmailChangeCancelDoneView`.
 Templates for the password and email change emails can be found
 in `templates/hidp/accounts/management/email`.
 
-### password_changed_body.txt
+### password_changed_body.txt (and .html)
 
 Sent by the `PasswordResetView`, `SetPasswordView` and `PasswordChangeView` when a user
 successfully changes their password.
@@ -529,7 +542,7 @@ successfully changes their password.
 
 The subject of the email is set with this template: `password_changed_subject.txt`.
 
-### email_change_body.txt
+### email_change_body.txt  (and .html)
 
 Sent by the `EmailChangeRequestView` to both old and new email address when a user
 requests to change their email address.
@@ -559,7 +572,7 @@ requests to change their email address.
 
 The subject of the email is set with this template: `email_change_subject.txt`.
 
-### email_changed_body.txt
+### email_changed_body.txt (and .html)
 
 Sent by the `EmailChangeConfirmView` to both old and new email address when a user
 changed their email address.
@@ -576,7 +589,7 @@ changed their email address.
 
 The subject of the email is set with this template: `email_changed_subject.txt`.
 
-### proposed_email_exists_body.txt
+### proposed_email_exists_body.txt (and .html)
 
 Sent by the `EmailChangeRequestView` to the new email address when a user
 requests to change their email address to an email address of an existing account.
@@ -661,7 +674,7 @@ Rendered by the `PasswordResetCompleteView`.
 Templates for to password recovery emails can be found
 in `templates/hidp/accounts/recovery/email`.
 
-### password_reset_body.txt
+### password_reset_body.txt (and .html)
 
 Sent by the `PasswordResetRequestView` for users that have a password set.
 
@@ -677,7 +690,7 @@ Sent by the `PasswordResetRequestView` for users that have a password set.
 
 The subject of the email is set with this template: `password_reset_subject.txt`.
 
-### set_password_body.txt
+### set_password_body.txt (and .html)
 
 Sent by the `SetPasswordView` for users that don't have a password set.
 
@@ -744,7 +757,7 @@ Rendered by the `EmailVerificationCompleteView`.
 Templates for to verification emails can be found email
 in `templates/hidp/accounts/verification/email`.
 
-### verification_body.txt
+### verification_body.txt (and .html)
 
 Sent by the `RegistrationView`.
 
@@ -757,7 +770,7 @@ Sent by the `RegistrationView`.
 
 The subject of the email is set with this template: `verification_subject.txt`.
 
-### account_exists_body.txt
+### account_exists_body.txt (and .html)
 
 Sent by the `RegistrationView` if an account already exists with that email address.
 
