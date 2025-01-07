@@ -1,0 +1,15 @@
+{% extends "hidp/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+  <p>
+    {% blocktranslate trimmed %}
+    Your account email address has been changed from {{ current_email }} to {{ proposed_email }}.
+    {% endblocktranslate %}
+  </p>
+  <p>
+    {% blocktranslate trimmed %}
+    Please remember to use {{ proposed_email }} to sign in from now on. No further action is required.
+    {% endblocktranslate %}
+  </p>
+{% endblock %}

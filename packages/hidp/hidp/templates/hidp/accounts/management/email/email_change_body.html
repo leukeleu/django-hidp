@@ -1,0 +1,15 @@
+{% extends "hidp/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+  <p>
+    {% blocktranslate trimmed %}
+    You requested to change your account email address from {{ current_email }} to {{ proposed_email }}.
+    {% endblocktranslate %}
+  </p>
+  <p>{% translate 'To confirm this change, use the following link:' %}</p>
+  <p><a href="{{ confirmation_url }}">{{ confirmation_url }}</a></p>
+  <p>{% translate 'Please note that this also changes the username you use to sign in.' %}</p>
+  <p>{% translate 'If you did not make this request, you can cancel it using the following link:' %}</p>
+  <p><a href="{{ cancel_url }}">{{ cancel_url }}</a></p>
+{% endblock %}
