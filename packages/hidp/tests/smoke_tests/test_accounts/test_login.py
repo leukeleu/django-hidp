@@ -47,14 +47,19 @@ class TestLogin(TestCase):
     @mock.patch("hidp.accounts.views.hidp_auth.login", wraps=hidp_auth.login)
     def test_valid_login_unverified_email(self, mock_login):
         user = user_factories.UserFactory()
-        response = self.client.post(
-            self.login_url,
-            {
-                "username": user.email,
-                "password": "P@ssw0rd!",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.login_url,
+                {
+                    "username": user.email,
+                    "password": "P@ssw0rd!",
+                },
+                follow=True,
+            )
         # Does not log in the user
         mock_login.assert_not_called()
         # Verification email sent

@@ -398,15 +398,20 @@ class TestOIDCRegistrationView(OIDCTokenDataTestMixin, TestCase):
 
     def test_post_with_valid_token(self):
         token = self._add_oidc_data_to_session()
-        response = self.client.post(
-            self.url + f"?token={token}",
-            {
-                "first_name": "Firstname",
-                "last_name": "Lastname",
-                "agreed_to_tos": "on",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.url + f"?token={token}",
+                {
+                    "first_name": "Firstname",
+                    "last_name": "Lastname",
+                    "agreed_to_tos": "on",
+                },
+                follow=True,
+            )
         user = UserModel.objects.filter(email="user@example.com").first()
         self.assertIsNotNone(user, msg="Expected a user to be created.")
 
@@ -468,7 +473,12 @@ class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
         self.user.email_verified = None
         self.user.save()
         token = self._add_oidc_data_to_session()
-        response = self.client.get(self.url, {"token": token}, follow=True)
+        with (
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.html"),
+        ):  # fmt: skip
+            response = self.client.get(self.url, {"token": token}, follow=True)
 
         # Verification email sent
         self.assertEqual(len(mail.outbox), 1)
