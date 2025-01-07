@@ -51,16 +51,21 @@ class TestRegistrationView(TransactionTestCase):
 
     def test_valid_registration(self):
         """A new user should be created and logged in."""
-        response = self.client.post(
-            self.signup_url,
-            {
-                "email": "test@example.com",
-                "password1": "P@ssw0rd!",
-                "password2": "P@ssw0rd!",
-                "agreed_to_tos": "on",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.signup_url,
+                {
+                    "email": "test@example.com",
+                    "password1": "P@ssw0rd!",
+                    "password2": "P@ssw0rd!",
+                    "agreed_to_tos": "on",
+                },
+                follow=True,
+            )
         self.assertTrue(
             User.objects.filter(email="test@example.com").exists(),
             msg="Expected user to be created",
@@ -171,17 +176,22 @@ class TestRegistrationView(TransactionTestCase):
         """Verified users should get a reminder mail."""
         self.test_user.email_verified = timezone.now()
         self.test_user.save()
-        response = self.client.post(
-            self.signup_url,
-            {
-                # Different case, still considered duplicate
-                "email": "USER@EXAMPLE.COM",
-                "password1": "P@ssw0rd!",
-                "password2": "P@ssw0rd!",
-                "agreed_to_tos": "on",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/verification/email/account_exists_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/account_exists_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/account_exists_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.signup_url,
+                {
+                    # Different case, still considered duplicate
+                    "email": "USER@EXAMPLE.COM",
+                    "password1": "P@ssw0rd!",
+                    "password2": "P@ssw0rd!",
+                    "agreed_to_tos": "on",
+                },
+                follow=True,
+            )
         # Redirected to verification required page
         self.assertRedirects(
             response,
@@ -217,16 +227,21 @@ class TestRegistrationView(TransactionTestCase):
     def test_account_exists(self):
         """Existing users should be notified if someone tries to use their email."""
         existing_user = user_factories.VerifiedUserFactory()
-        response = self.client.post(
-            self.signup_url,
-            {
-                "email": existing_user.email,
-                "password1": "P@ssw0rd!",
-                "password2": "P@ssw0rd!",
-                "agreed_to_tos": "on",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/verification/email/account_exists_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/account_exists_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/account_exists_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.signup_url,
+                {
+                    "email": existing_user.email,
+                    "password1": "P@ssw0rd!",
+                    "password2": "P@ssw0rd!",
+                    "agreed_to_tos": "on",
+                },
+                follow=True,
+            )
 
         # Pretend the registration was successful
         self.assertRedirects(

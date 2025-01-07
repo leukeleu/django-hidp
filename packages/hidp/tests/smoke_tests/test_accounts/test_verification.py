@@ -75,7 +75,12 @@ class TestEmailVerificationRequiredView(TestCase):
         # Get the page first, to populate the session
         response = self.client.get(self.url, follow=True)
         # Post to the redirected URL
-        self.client.post(response.redirect_chain[-1][0], follow=True)
+        with (
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/verification/email/verification_body.html"),
+        ):  # fmt: skip
+            self.client.post(response.redirect_chain[-1][0], follow=True)
         # Verification email sent
         self.assertEqual(len(mail.outbox), 1)
         message = mail.outbox[0]

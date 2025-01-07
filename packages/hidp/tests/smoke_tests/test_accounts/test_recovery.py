@@ -154,16 +154,21 @@ class TestPasswordResetFlow(TestCase):
             follow=True,
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        response = self.client.post(
-            # There is a redirect to remove the token from the URL.
-            # The final destination is the URL we need to POST to.
-            response.redirect_chain[-1][0],
-            {
-                "new_password1": "newpassword",
-                "new_password2": "newpassword",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                # There is a redirect to remove the token from the URL.
+                # The final destination is the URL we need to POST to.
+                response.redirect_chain[-1][0],
+                {
+                    "new_password1": "newpassword",
+                    "new_password2": "newpassword",
+                },
+                follow=True,
+            )
         self.user.refresh_from_db()
         self.assertTrue(self.user.check_password("newpassword"))
         self.assertRedirects(

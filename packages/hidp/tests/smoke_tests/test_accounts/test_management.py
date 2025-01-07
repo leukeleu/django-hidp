@@ -124,15 +124,20 @@ class TestPasswordChangeView(TestCase):
     def test_change_password(self):
         """The user's password should be updated."""
         self.client.force_login(self.user)
-        response = self.client.post(
-            self.change_password_url,
-            {
-                "old_password": "P@ssw0rd!",
-                "new_password1": "new_password",
-                "new_password2": "new_password",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.change_password_url,
+                {
+                    "old_password": "P@ssw0rd!",
+                    "new_password1": "new_password",
+                    "new_password2": "new_password",
+                },
+                follow=True,
+            )
 
         # User's password should be updated
         self.user.refresh_from_db()
@@ -229,14 +234,19 @@ class TestSetPasswordView(TestCase):
     def test_set_password(self):
         """The user's password should be set."""
         self.client.force_login(self.user)
-        response = self.client.post(
-            self.set_password_url,
-            {
-                "new_password1": "new_password",
-                "new_password2": "new_password",
-            },
-            follow=True,
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/password_changed_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.set_password_url,
+                {
+                    "new_password1": "new_password",
+                    "new_password2": "new_password",
+                },
+                follow=True,
+            )
 
         # User's password should be updated
         self.user.refresh_from_db()

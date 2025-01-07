@@ -446,9 +446,15 @@ class TestEmailChangeConfirm(TestCase):
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.save()
 
-        response = self.client.post(
-            self.proposed_email_url, {"allow_change": "on"}, follow=True
-        )
+        with (
+            self.assertTemplateUsed("hidp/accounts/management/email/email_changed_subject.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/email_changed_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/email_changed_body.html"),
+        ):  # fmt: skip
+            response = self.client.post(
+                self.proposed_email_url, {"allow_change": "on"}, follow=True
+            )
+
         self.assertRedirects(
             response,
             reverse("hidp_account_management:email_change_complete"),
