@@ -70,6 +70,7 @@ class TestEmailChangeRequest(TestCase):
         with (
             self.assertTemplateUsed("hidp/accounts/management/email/email_change_subject.txt"),
             self.assertTemplateUsed("hidp/accounts/management/email/email_change_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/email_change_body.html"),
         ):  # fmt: skip
             response = self.client.post(
                 self.url,
@@ -145,8 +146,10 @@ class TestEmailChangeRequest(TestCase):
         with (
             self.assertTemplateUsed("hidp/accounts/management/email/email_change_subject.txt"),
             self.assertTemplateUsed("hidp/accounts/management/email/email_change_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/email_change_body.html"),
             self.assertTemplateUsed("hidp/accounts/management/email/proposed_email_exists_subject.txt"),
             self.assertTemplateUsed("hidp/accounts/management/email/proposed_email_exists_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/management/email/proposed_email_exists_body.html"),
         ):  # fmt: skip
             response = self.client.post(
                 self.url,

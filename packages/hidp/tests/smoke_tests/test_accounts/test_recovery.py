@@ -59,6 +59,7 @@ class TestPasswordResetFlow(TestCase):
         with (
             self.assertTemplateUsed("hidp/accounts/recovery/email/set_password_subject.txt"),
             self.assertTemplateUsed("hidp/accounts/recovery/email/set_password_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/recovery/email/set_password_body.html")
         ):  # fmt: skip
             response = self.client.post(
                 reverse("hidp_accounts:password_reset_request"),
@@ -87,6 +88,7 @@ class TestPasswordResetFlow(TestCase):
         with (
             self.assertTemplateUsed("hidp/accounts/recovery/email/password_reset_subject.txt"),
             self.assertTemplateUsed("hidp/accounts/recovery/email/password_reset_body.txt"),
+            self.assertTemplateUsed("hidp/accounts/recovery/email/password_reset_body.html"),
         ):  # fmt: skip
             response = self.client.post(
                 reverse("hidp_accounts:password_reset_request"),
