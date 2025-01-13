@@ -239,8 +239,7 @@ class TestOAuthFlow(TestCase):
         with self.subTest("No user logged in"):
             response = self.authorization_request(prompt="create")
             next_url = (
-                f"{response.request['PATH_INFO']}"
-                f"?{response.request['QUERY_STRING']}"
+                f"{response.request['PATH_INFO']}?{response.request['QUERY_STRING']}"
             ).replace("&prompt=create", "")
             self.assertRedirects(
                 response,
@@ -254,8 +253,7 @@ class TestOAuthFlow(TestCase):
             self.client.force_login(self.user)
             response = self.authorization_request(prompt="create")
             next_url = (
-                f"{response.request['PATH_INFO']}"
-                f"?{response.request['QUERY_STRING']}"
+                f"{response.request['PATH_INFO']}?{response.request['QUERY_STRING']}"
             ).replace("&prompt=create", "")
             self.assertRedirects(
                 response,

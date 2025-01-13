@@ -788,8 +788,7 @@ class TestGetUserInfo(TestCase):
         }
         with self.assertRaisesMessage(
             exceptions.OIDCError,
-            "User information from 'example' does not match the"
-            " ID token 'sub' claim.",
+            "User information from 'example' does not match the ID token 'sub' claim.",
         ):
             authorization_code_flow.get_user_info(
                 client=client,
