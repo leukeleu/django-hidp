@@ -48,8 +48,7 @@ class TestCustomProvider(SimpleTestCase):
         """An OIDC client with unsafe endpoints raises a ValueError."""
         with self.assertRaisesMessage(
             ValueError,
-            "All endpoints must use TLS (https):"
-            " 'http://example.com/auth' does not.",
+            "All endpoints must use TLS (https): 'http://example.com/auth' does not.",
         ):
             UnsafeOIDCClient(client_id="test")
 
