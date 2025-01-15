@@ -67,7 +67,7 @@ msgstr "Ja, ik wil mijn e-mailadres wijzigen"
 #: hidp/accounts/forms.py
 #: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "Your password is required to verify your identity."
-msgstr "Je wachtwoord is nodig om je identiteit te verfifiëren."
+msgstr "Je wachtwoord is nodig om je identiteit te verifiëren."
 
 #: hidp/accounts/models.py
 msgid "agreed to terms of service"
