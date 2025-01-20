@@ -658,8 +658,12 @@ msgid "You need to verify your email address before you can sign in. Please chec
 msgstr "Je moet je e-mailadres verifiëren voordat je kunt inloggen. Check je e-mail voor een verificatielink."
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
-msgid "Please fill in your first and last name."
-msgstr "Voer je voor- en achternaam in."
+msgid "To continue, please fill in your first and last name before verifying your email."
+msgstr "Vul je voor- en achternaam in voordat je je e-mailadres verifieert."
+
+#: hidp/templates/hidp/accounts/verification/verify_email.html
+msgid "To continue, please verify your email."
+msgstr "Verifieer je e-mailadres om verder te gaan."
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
 msgid "Verify email"
