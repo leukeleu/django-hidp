@@ -16,11 +16,14 @@ else:
     # Taken from the CPython pull request:
     # * https://github.com/python/cpython/pull/121119
     # * Commit (2024-06-28T09:40:44Z)
-    # * https://github.com/python/cpython/blob/bcd1417e8c8a1d23091930d6e5ca3190873d7191/Lib/uuid.py#L723-L779
+    # * https://github.com/python/cpython/blob/ef85b200602ab00c23ef158813fa57076f561cfd/Lib/uuid.py#L752-L815
     # Modifications:
     # * Added noqa comments to supress ruff warnings
-    # * Manually set the variant and version bits.
+    # * Minor formatting changes
+    # * Use int constructor argument instead of private _from_int method,
+    #   the latter does not (yet) exist
 
+    _RFC_4122_VERSION_7_FLAGS = (7 << 76) | (0x8000 << 48)
     _last_timestamp_v7 = None
     _last_counter_v7 = 0  # 42-bit counter
 
@@ -46,9 +49,9 @@ else:
         def get_counter_and_tail():
             rand = int.from_bytes(os.urandom(10))
             # 42-bit counter with MSB set to 0
-            counter = (rand >> 32) & 0x1FFFFFFFFFF
+            counter = (rand >> 32) & 0x1FF_FFFF_FFFF
             # 32-bit random data
-            tail = rand & 0xFFFFFFFF
+            tail = rand & 0xFFFF_FFFF
             return counter, tail
 
         global _last_timestamp_v7, _last_counter_v7  # noqa: PLW0603
@@ -56,17 +59,17 @@ else:
         import time  # noqa: PLC0415
 
         nanoseconds = time.time_ns()
-        timestamp_ms, _ = divmod(nanoseconds, 1_000_000)
+        timestamp_ms = nanoseconds // 1_000_000
 
         if _last_timestamp_v7 is None or timestamp_ms > _last_timestamp_v7:
             counter, tail = get_counter_and_tail()
         else:
             if timestamp_ms < _last_timestamp_v7:
                 timestamp_ms = _last_timestamp_v7 + 1
-            # advance the counter
+            # advance the 42-bit counter
             counter = _last_counter_v7 + 1
-            if counter > 0x3FFFFFFFFFF:  # noqa: PLR2004
-                timestamp_ms += 1  # advance the timestamp
+            if counter > 0x3FF_FFFF_FFFF:  # noqa: PLR2004
+                timestamp_ms += 1  # advance the 48-bit timestamp
                 counter, tail = get_counter_and_tail()
             else:
                 tail = int.from_bytes(os.urandom(4))
@@ -74,22 +77,16 @@ else:
         _last_timestamp_v7 = timestamp_ms
         _last_counter_v7 = counter
 
-        int_uuid_7 = (timestamp_ms & 0xFFFFFFFFFFFF) << 80
-        int_uuid_7 |= ((counter >> 30) & 0xFFF) << 64
-        int_uuid_7 |= (counter & 0x3FFFFFFF) << 32
-        int_uuid_7 |= tail & 0xFFFFFFFF
+        unix_ts_ms = timestamp_ms & 0xFFFF_FFFF_FFFF
+        counter_msbs = counter >> 30
+        counter_hi = counter_msbs & 0x0FFF  # keep 12 bits and clear variant bits
+        counter_lo = counter & 0x3FFF_FFFF  # keep 30 bits and clear version bits
 
-        # Manually set the variant and version bits, to avoid a
-        # `ValueError('illegal version number')` when calling the UUID constructor
-        # with `version` set to 7.
-        # Copied from UUID.__init__, hardcoded version:
-        # https://github.com/python/cpython/blob/a86e6255c371e14cab8680dee979a7393b339ce5/Lib/uuid.py#L219-L224
-
-        # Set the variant to RFC 4122.
-        int_uuid_7 &= ~(0xC000 << 48)
-        int_uuid_7 |= 0x8000 << 48
-        # Set the version number to 7.
-        int_uuid_7 &= ~(0xF000 << 64)
-        int_uuid_7 |= 7 << 76
+        int_uuid_7 = unix_ts_ms << 80
+        int_uuid_7 |= counter_hi << 64
+        int_uuid_7 |= counter_lo << 32
+        int_uuid_7 |= tail & 0xFFFF_FFFF
+        # by construction, the variant and version bits are already cleared
+        int_uuid_7 |= _RFC_4122_VERSION_7_FLAGS
 
         return uuid.UUID(int=int_uuid_7)
