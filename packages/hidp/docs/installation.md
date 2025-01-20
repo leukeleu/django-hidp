@@ -16,11 +16,8 @@ HIdP provides all the default Django authentication functionalities and more:
 pip install hidp[recommended]
 ```
 
-This will install HIdP with the recommended dependencies. If you want to install HIdP without the recommended 
-dependencies, you can do so with:
-```
-pip install hidp
-```
+This will install HIdP with the recommended dependencies. See [Installation Extras](project:installation-extras.md) for
+more information.
 
 ## Settings
 :::{note}
