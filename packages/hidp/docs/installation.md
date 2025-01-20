@@ -5,12 +5,19 @@ Headless Identity Provider is an all-in-one solution for your user management ne
 HIdP provides all the default Django authentication functionalities and more:
 - Registration (including email verification)
 - OpenID Connect (OIDC) Clients (Google and Microsoft included)
+- One-time passwords (OTP)
 - Rate limiting
 - Content Security Policy (see [Content Security Policy](project:content-security-policy.md))
 - Can be used as a standalone OpenID Connect (OIDC) provider (see [Configure as Identity Provider](project:configure-as-oidc-provider.md))
 
 
 ## Install with pip
+```
+pip install hidp[recommended]
+```
+
+This will install HIdP with the recommended dependencies. If you want to install HIdP without the recommended 
+dependencies, you can do so with:
 ```
 pip install hidp
 ```
