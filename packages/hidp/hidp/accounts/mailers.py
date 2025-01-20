@@ -37,14 +37,18 @@ class BaseMailer:
 
     def get_recipients(self):
         """Return a list of email addresses to send the email to."""
-        raise NotImplementedError  # pragma: no cover
+        raise NotImplementedError("Method get_recipients must be implemented")
 
     def _get_subject(self, context):
+        if self.subject_template_name is NotImplemented:
+            raise NotImplementedError("Attribute subject_template_name must be set")
         subject = loader.render_to_string(self.subject_template_name, context)
         # Email subject *must not* contain newlines
         return "".join(subject.splitlines())
 
     def _get_body(self, context):
+        if self.email_template_name is NotImplemented:
+            raise NotImplementedError("Attribute email_template_name must be set")
         return loader.render_to_string(self.email_template_name, context)
 
     def _add_optional_html_body(self, email_message, context):
