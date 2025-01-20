@@ -657,7 +657,11 @@ msgid "You need to verify your email address before you can sign in. Please chec
 msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
-msgid "Please fill in your first and last name."
+msgid "To continue, please fill in your first and last name before verifying your email."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/verification/verify_email.html
+msgid "To continue, please verify your email."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/verification/verify_email.html
