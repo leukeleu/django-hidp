@@ -26,7 +26,7 @@ class BaseMailer:
             base_url:
                 The base URL to use when generating links in the email.
         """
-        self.base_url = base_url
+        self.base_url = base_url.rstrip("/")
 
     def get_context(self, extra_context=None):
         """Return a dictionary of context variables for the email templates."""
