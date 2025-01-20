@@ -211,7 +211,7 @@ created earlier.
 
 HIdP comes with a set of templates that can be overridden in your project.
 
-See [Customizing Templates](project:customizing-templates.md) for more information.
+See [Customizing Templates](project:templates.md) for more information.
 
 ## Translations
 
