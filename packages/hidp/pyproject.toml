@@ -49,6 +49,7 @@ omit = [
   "**/[aw]sgi.py",
   "**/migrations/*",
   "**/settings.py",
+  "tests/translations/management/commands/makemessages.py",
 ]
 
 [tool.coverage.report]
