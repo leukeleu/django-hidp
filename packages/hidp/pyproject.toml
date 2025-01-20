@@ -20,6 +20,13 @@ dependencies = {file = ["requirements.txt"]}
 optional-dependencies.oidc_provider = { file = "requirements_oidc_provider.txt" }
 optional-dependencies.otp = { file = "requirements_otp.txt" }
 
+[tool.setuptools.dynamic.optional-dependencies.all]
+file = [
+  "requirements.txt",
+  "requirements_oidc_provider.txt",
+  "requirements_otp.txt",
+]
+
 [tool.setuptools.packages.find]
 include = [
   "hidp",
