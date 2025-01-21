@@ -265,7 +265,7 @@ msgstr "Ontkoppelen van {provider}"
 msgid "You already have an account with this email address. Please sign in to link your account."
 msgstr "Je hebt al een account met dit e-mailadres. Log in om je account te koppelen."
 
-#: hidp/otp/devices.py hidp/templates/hidp/otp/overview.html
+#: hidp/otp/devices.py
 msgid "Authenticator app"
 msgstr "Authenticator-app"
 
@@ -773,6 +773,16 @@ msgid "Your account is currently linked with the following service:"
 msgid_plural "Your account is currently linked with the following services:"
 msgstr[0] "Je account is momenteel aan de volgende dienst gekoppeld:"
 msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"
+
+#: hidp/templates/hidp/otp/overview.html
+msgctxt "OTP device name"
+msgid "Authenticator app"
+msgstr "Authenticator-app"
+
+#: hidp/templates/hidp/otp/overview.html
+msgctxt "OTP device name"
+msgid "Recovery codes"
+msgstr "Herstelcodes"
 
 #: hidp/templates/hidp/otp/overview.html
 msgid "Two-factor methods"
