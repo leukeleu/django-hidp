@@ -3,7 +3,6 @@ from django.urls import include, path
 
 from ..accounts import account_management_urls, account_urls
 from ..federated import oidc_client_urls, oidc_management_urls
-from ..otp import otp_management_urls
 
 urlpatterns = [
     path("", include(account_urls)),
@@ -13,6 +12,8 @@ urlpatterns = [
 ]
 
 if "hidp.otp" in settings.INSTALLED_APPS:
+    from ..otp import otp_management_urls
+
     urlpatterns += [
         path("manage/otp/", include(otp_management_urls)),
     ]
