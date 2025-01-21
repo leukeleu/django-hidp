@@ -850,6 +850,14 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
                 },
             )
 
+        if "hidp.otp" in settings.INSTALLED_APPS:
+            links.append(
+                {
+                    "url": reverse("hidp_otp_management:manage"),
+                    "text": _("Two-factor authentication"),
+                },
+            )
+
         return links
 
     def get_context_data(self, **kwargs):
