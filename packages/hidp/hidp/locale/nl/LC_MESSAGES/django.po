@@ -203,6 +203,7 @@ msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een 
 
 #: hidp/accounts/views.py hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/overview.html
+#: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Two-factor authentication"
 msgstr "Twee-factor-authenticatie"
 
@@ -271,6 +272,7 @@ msgid "Authenticator app"
 msgstr "Authenticator-app"
 
 #: hidp/otp/devices.py hidp/templates/hidp/otp/overview.html
+#: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Recovery codes"
 msgstr "Herstelcodes"
 
@@ -350,6 +352,7 @@ msgstr "Opslaan"
 #: hidp/templates/hidp/federated/account_unlink_done.html
 #: hidp/templates/hidp/federated/linked_services.html
 #: hidp/templates/hidp/otp/overview.html
+#: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Back"
 msgstr "Terug"
 
@@ -784,6 +787,7 @@ msgid "Disabling two-factor authentication will make your account less secure."
 msgstr "Het uitschakelen van twee-factor-authenticatie maakt je account minder veilig."
 
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Warning"
 msgstr "Waarschuwing"
 
@@ -812,3 +816,28 @@ msgstr "uitschakelen"
 #: hidp/templates/hidp/otp/overview.html
 msgid "not configured"
 msgstr "niet geconfigureerd"
+
+#: hidp/templates/hidp/otp/overview.html
+msgid "view"
+msgstr "bekijken"
+
+#: hidp/templates/hidp/otp/recovery_codes.html
+msgid "Generate new codes"
+msgstr "Genereer nieuwe codes"
+
+#: hidp/templates/hidp/otp/recovery_codes.html
+#, fuzzy
+msgid ""
+"Keep these codes safe. These codes are the only way to log in\n"
+"if you lose access to your two-factor device."
+msgstr ""
+"Bewaar deze codes veilig. Deze codes zijn de enige manier om in te loggen\n"
+"als je geen toegang meer hebt tot je twee-factor-apparaat."
+
+#: hidp/templates/hidp/otp/recovery_codes.html
+msgid ""
+"These codes can be used to log in if you lose access to your two-factor device.\n"
+"You can generate new codes at any time, but you can only have one set of codes at a time."
+msgstr ""
+"Deze codes kunnen worden gebruikt om in te loggen als je geen toegang meer hebt tot je twee-factor-apparaat.\n"
+"Je kunt op elk moment nieuwe codes genereren, maar je kunt slechts één set codes tegelijk hebben."

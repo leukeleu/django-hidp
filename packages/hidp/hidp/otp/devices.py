@@ -23,7 +23,19 @@ def get_or_create_devices(user):
         defaults={"name": gettext_noop("Recovery codes"), "confirmed": False},
     )
     if backup_device_created or not backup_device.token_set.exists():
-        for _ in range(10):
-            backup_device.token_set.create(token=StaticToken.random_token())
+        reset_static_tokens(backup_device)
 
     return device, backup_device
+
+
+def reset_static_tokens(device, n=10):
+    """
+    Reset the static tokens for a device.
+
+    This function deletes all existing static tokens for a device and creates 10 new
+    ones. This amount should be sufficient for users to log in to disable MFA and
+    during the time they have no access to their device but need to log in.
+    """
+    device.token_set.all().delete()
+    for _ in range(n):
+        device.token_set.create(token=StaticToken.random_token())
