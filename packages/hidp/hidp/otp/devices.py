@@ -14,6 +14,13 @@ def get_or_create_devices(user):
     """
     # Note we're using gettext_noop because we want to mark the strings for translation
     # here, but we don't want to translate them before saving them to the database.
+    # The translation happens in the template, allowing the strings below to be
+    # translated to the user's language when they are displayed, but also allowing
+    # user-defined 'legacy' device names to be displayed as-is.
+    # XXX: Warning: changing the strings below will result in the old strings from the
+    #      database not being translated. If you need to change the strings, you should
+    #      update the existing entries in the database to match the new strings.
+
     device, _created = TOTPDevice.objects.get_or_create(
         user=user,
         defaults={"name": gettext_noop("Authenticator app"), "confirmed": False},
