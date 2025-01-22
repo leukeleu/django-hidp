@@ -1,0 +1,30 @@
+{% extends 'hidp/base_post_login.html' %}
+{% load i18n %}
+
+{% block title %}{% translate 'Two-factor Authentication' %}{% endblock %}
+
+{% block main %}
+  <h1>{% translate 'Set up two-factor authentication' %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <h2>{% translate 'Scan the QR code' %}</h2>
+    <div><img src="{{ qrcode.svg_data_uri|safe }}" width="200" height="200" alt="" /></div>
+
+    {{ form.otp_token.errors }}
+    {{ form.otp_token.label_tag }}
+    {{ form.otp_token }}
+
+    <h2>{% translate 'Recovery codes' %}</h2>
+    <pre>{% for token in backup_device.token_set.all %}{{ token.token }}
+{% endfor %}
+    </pre>
+
+    {{ form.confirm_stored_backup_tokens.errors }}
+    {{ form.confirm_stored_backup_tokens.label_tag }}
+    {{ form.confirm_stored_backup_tokens }}
+
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Submit') cancel_label=_('Back') cancel_url=back_url %}
+  </form>
+{% endblock %}
