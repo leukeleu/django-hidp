@@ -73,6 +73,10 @@ INSTALLED_APPS = [
     "django_filters",
     # Django OAuth Toolkit
     "oauth2_provider",
+    # Django OTP
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
     # Headless Identity Provider
     "hidp",
     "hidp.accounts",
@@ -80,6 +84,7 @@ INSTALLED_APPS = [
     "hidp.csp",
     "hidp.federated",
     "hidp.oidc_provider",
+    "hidp.otp",
     # Project
     "hidp_sandbox.accounts",
 ]
@@ -90,6 +95,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
