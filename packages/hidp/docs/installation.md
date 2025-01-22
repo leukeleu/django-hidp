@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     "hidp.accounts",
     "hidp.csp",
     "hidp.federated",
+    "hidp.otp",
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
     # Project
     "accounts",
     ...,
@@ -62,9 +66,16 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     ...,
 ]
 ```
+
+:::{note}
+HIdP comes with OTP enabled by default. If you don't want to use OTP, you can remove the `hidp.otp` and `django_otp` 
+apps from `INSTALLED_APPS`, and the `OTPMiddleware` from `MIDDLEWARE`.
+If you want to use your own django-otp based solution, you can remove just the `hidp.otp` app.
+:::
 
 ### `AUTH_USER_MODEL`
 
