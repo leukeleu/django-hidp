@@ -201,6 +201,10 @@ msgstr "Registreer met {provider}"
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
+#: hidp/accounts/views.py hidp/templates/hidp/otp/overview.html
+msgid "Two-factor authentication"
+msgstr "Twee-factor-authenticatie"
+
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
 msgstr "Ja, ik wil dit account koppelen"
@@ -260,6 +264,14 @@ msgstr "Ontkoppelen van {provider}"
 #: hidp/federated/views.py
 msgid "You already have an account with this email address. Please sign in to link your account."
 msgstr "Je hebt al een account met dit e-mailadres. Log in om je account te koppelen."
+
+#: hidp/otp/devices.py
+msgid "Authenticator app"
+msgstr "Authenticator-app"
+
+#: hidp/otp/devices.py hidp/templates/hidp/otp/overview.html
+msgid "Recovery codes"
+msgstr "Herstelcodes"
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Excessive login attempts have been detected for this account. For your safety, additional security measures are now in place."
@@ -336,6 +348,7 @@ msgstr "Opslaan"
 #: hidp/templates/hidp/federated/account_link_done.html
 #: hidp/templates/hidp/federated/account_unlink_done.html
 #: hidp/templates/hidp/federated/linked_services.html
+#: hidp/templates/hidp/otp/overview.html
 msgid "Back"
 msgstr "Terug"
 
@@ -760,3 +773,25 @@ msgid "Your account is currently linked with the following service:"
 msgid_plural "Your account is currently linked with the following services:"
 msgstr[0] "Je account is momenteel aan de volgende dienst gekoppeld:"
 msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"
+
+#: hidp/templates/hidp/otp/overview.html
+msgctxt "OTP device name"
+msgid "Authenticator app"
+msgstr "Authenticator-app"
+
+#: hidp/templates/hidp/otp/overview.html
+msgctxt "OTP device name"
+msgid "Recovery codes"
+msgstr "Herstelcodes"
+
+#: hidp/templates/hidp/otp/overview.html
+msgid "Two-factor methods"
+msgstr "Twee-factor-methoden"
+
+#: hidp/templates/hidp/otp/overview.html
+msgid "configured"
+msgstr "geconfigureerd"
+
+#: hidp/templates/hidp/otp/overview.html
+msgid "not configured"
+msgstr "niet geconfigureerd"

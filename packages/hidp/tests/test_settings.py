@@ -50,6 +50,10 @@ INSTALLED_APPS = [
     "hidp.csp",
     "hidp.federated",
     "hidp.oidc_provider",
+    "hidp.otp",
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
     # Custom user model
     "tests.custom_user",
     # Custom makemessages command

@@ -200,6 +200,10 @@ msgstr ""
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr ""
 
+#: hidp/accounts/views.py hidp/templates/hidp/otp/overview.html
+msgid "Two-factor authentication"
+msgstr ""
+
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
 msgstr ""
@@ -258,6 +262,14 @@ msgstr ""
 
 #: hidp/federated/views.py
 msgid "You already have an account with this email address. Please sign in to link your account."
+msgstr ""
+
+#: hidp/otp/devices.py
+msgid "Authenticator app"
+msgstr ""
+
+#: hidp/otp/devices.py hidp/templates/hidp/otp/overview.html
+msgid "Recovery codes"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html
@@ -335,6 +347,7 @@ msgstr ""
 #: hidp/templates/hidp/federated/account_link_done.html
 #: hidp/templates/hidp/federated/account_unlink_done.html
 #: hidp/templates/hidp/federated/linked_services.html
+#: hidp/templates/hidp/otp/overview.html
 msgid "Back"
 msgstr ""
 
@@ -759,3 +772,25 @@ msgid "Your account is currently linked with the following service:"
 msgid_plural "Your account is currently linked with the following services:"
 msgstr[0] ""
 msgstr[1] ""
+
+#: hidp/templates/hidp/otp/overview.html
+msgctxt "OTP device name"
+msgid "Authenticator app"
+msgstr ""
+
+#: hidp/templates/hidp/otp/overview.html
+msgctxt "OTP device name"
+msgid "Recovery codes"
+msgstr ""
+
+#: hidp/templates/hidp/otp/overview.html
+msgid "Two-factor methods"
+msgstr ""
+
+#: hidp/templates/hidp/otp/overview.html
+msgid "configured"
+msgstr ""
+
+#: hidp/templates/hidp/otp/overview.html
+msgid "not configured"
+msgstr ""

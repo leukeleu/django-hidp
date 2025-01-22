@@ -1,0 +1,32 @@
+{% extends 'hidp/base_post_login.html' %}
+{% load i18n %}
+
+{% block title %}{% translate 'Two-factor authentication' %}{% endblock %}
+
+{% block main %}
+  <h1>{% translate 'Two-factor authentication' %}</h1>
+
+  <p>{% translate "Two-factor methods" %}</p>
+  <ul>
+  {% for device in totp_devices %}
+    <li>
+      {% translate device.name context "OTP device name" %}: {% translate "configured" %}
+    </li>
+  {% empty %}
+    <li>{% translate "Authenticator app" context "OTP device name" %}: {% translate "not configured" %}</li>
+  {% endfor %}
+  </ul>
+
+  <p>{% translate "Recovery codes" %}</p>
+  <ul>
+  {% for device in static_devices %}
+    <li>
+      {% translate device.name context "OTP device name" %}: {% translate "configured" %}
+    </li>
+  {% empty %}
+    <li>{% translate "Recovery codes" context "OTP device name" %}: {% translate "not configured" %}</li>
+  {% endfor %}
+  </ul>
+
+  {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
+{% endblock %}

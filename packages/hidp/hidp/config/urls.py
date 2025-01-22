@@ -11,6 +11,13 @@ urlpatterns = [
     path("manage/oidc/", include(oidc_management_urls)),
 ]
 
+if "hidp.otp" in settings.INSTALLED_APPS:
+    from ..otp import otp_management_urls
+
+    urlpatterns += [
+        path("manage/otp/", include(otp_management_urls)),
+    ]
+
 if "hidp.oidc_provider" in settings.INSTALLED_APPS:
     urlpatterns += [
         path("o/", include("hidp.oidc_provider.urls")),
