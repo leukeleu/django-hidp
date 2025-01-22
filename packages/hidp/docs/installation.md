@@ -72,9 +72,8 @@ MIDDLEWARE = [
 ```
 
 :::{note}
-HIdP comes with OTP enabled by default. If you don't want to use OTP, you can remove the `hidp.otp` and `django_otp` 
-apps from `INSTALLED_APPS`, and the `OTPMiddleware` from `MIDDLEWARE`.
-If you want to use your own django-otp based solution, you can remove just the `hidp.otp` app.
+HIdP strongly recommends OTP to be enabled. If you installed HIdP without the recommended extra,
+do not include any of the OTP code in`INSTALLED_APPS` and `MIDDLEWARE`.
 :::
 
 ### `AUTH_USER_MODEL`
