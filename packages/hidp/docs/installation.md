@@ -45,6 +45,10 @@ INSTALLED_APPS = [
     "hidp.accounts",
     "hidp.csp",
     "hidp.federated",
+    "hidp.otp",
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
     # Project
     "accounts",
     ...,
@@ -62,9 +66,15 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     ...,
 ]
 ```
+
+:::{note}
+HIdP strongly recommends OTP to be enabled. If you installed HIdP without the recommended extra,
+do not include any of the OTP code in`INSTALLED_APPS` and `MIDDLEWARE`.
+:::
 
 ### `AUTH_USER_MODEL`
 

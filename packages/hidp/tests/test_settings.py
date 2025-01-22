@@ -66,6 +66,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
     "hidp.oidc_provider.middleware.UiLocalesMiddleware",
+    "django_otp.middleware.OTPMiddleware",
 ]
 
 USE_TZ = True

@@ -24,11 +24,22 @@ OIDC_PROVIDER_REQUIRED_APPS = [
     "hidp.api",
 ]
 
+OTP_REQUIRED_APPS = [
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_static",
+    "hidp.otp",
+]
+
 REQUIRED_MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
+]
+
+OTP_REQUIRED_MIDDLEWARE = [
+    "django_otp.middleware.OTPMiddleware",
 ]
 
 
@@ -165,3 +176,60 @@ if importlib.util.find_spec("oauth2_provider") is not None:
     # Only enable the OIDC provider checks if OAuth2 Provider is installed
     checks.register(Tags.settings)(check_oauth2_provider)
     checks.register(Tags.dependencies)(check_oidc_provider_installed_apps)
+
+
+# Make sure the required apps for OTP are installed
+E009 = checks.Error(
+    "INSTALLED_APPS does not include the required OTP apps.",
+    hint="INSTALLED_APPS should include the following apps: {}.".format(
+        ", ".join(f"{app_name!r}" for app_name in OTP_REQUIRED_APPS)
+    ),
+    id="hidp.E009",
+)
+
+
+@checks.register(Tags.dependencies)
+def check_otp_installed_apps(**kwargs):
+    if "hidp.otp" in settings.INSTALLED_APPS:
+        for app_name in OTP_REQUIRED_APPS:
+            if app_name not in settings.INSTALLED_APPS:
+                return [E009]
+    return []
+
+
+# Make sure the required middlewares for OTP are included
+E010 = checks.Error(
+    "MIDDLEWARE does not include the required middleware for OTP to work.",
+    hint="MIDDLEWARE should include the following middleware: {}.".format(
+        ", ".join(f"{middleware!r}" for middleware in OTP_REQUIRED_MIDDLEWARE)
+    ),
+    id="hidp.E010",
+)
+
+
+@checks.register(Tags.middleware)
+def check_otp_middleware(**kwargs):
+    if "hidp.otp" in settings.INSTALLED_APPS:
+        for middleware in OTP_REQUIRED_MIDDLEWARE:
+            if middleware not in settings.MIDDLEWARE:
+                return [E010]
+    return []
+
+
+# If django-otp is installed but hidp.otp is not, show a warning
+W001 = checks.Warning(
+    "django-otp is installed but hidp.otp is not in INSTALLED_APPS.",
+    hint="Consider adding 'hidp.otp' to INSTALLED_APPS for a more complete OTP"
+    " implementation.",
+    id="hidp.W001",
+)
+
+
+@checks.register(Tags.dependencies)
+def check_hidp_otp_installed_apps_when_django_otp_installed(**kwargs):
+    if (
+        importlib.util.find_spec("django_otp") is not None
+        and "hidp.otp" not in settings.INSTALLED_APPS
+    ):
+        return [W001]
+    return []

@@ -77,3 +77,41 @@ class TestConfigChecks(TestCase):
                 checks.E008,
             ],
         )
+
+    def test_django_otp_installed_but_hidp_otp_not_installed(self):
+        self.assertEqual(
+            checks.check_hidp_otp_installed_apps_when_django_otp_installed(),
+            [
+                checks.W001,
+            ],
+        )
+
+    def test_otp_required_apps_not_installed_not_triggered(self):
+        self.assertEqual(
+            checks.check_otp_installed_apps(),
+            [],
+        )
+
+    @override_settings(INSTALLED_APPS=["hidp.otp"])
+    def test_otp_required_apps_not_installed(self):
+        self.assertEqual(
+            checks.check_otp_installed_apps(),
+            [
+                checks.E009,
+            ],
+        )
+
+    def test_otp_required_middleware_not_installed_not_triggered(self):
+        self.assertEqual(
+            checks.check_otp_middleware(),
+            [],
+        )
+
+    @override_settings(INSTALLED_APPS=["hidp.otp"])
+    def test_otp_required_middleware_not_installed(self):
+        self.assertEqual(
+            checks.check_otp_middleware(),
+            [
+                checks.E010,
+            ],
+        )
