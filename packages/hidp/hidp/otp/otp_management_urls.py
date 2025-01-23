@@ -10,4 +10,9 @@ urlpatterns = [
         views.OTPOverviewView.as_view(),
         name="manage",
     ),
+    path(
+        "disable/",
+        views.OTPDisableView.as_view(),
+        name="disable",
+    ),
 ]
