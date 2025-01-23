@@ -14,18 +14,18 @@ def get_or_create_devices(user):
     """
     # Note we're using gettext_noop because we want to mark the strings for translation
     # here, but we don't want to translate them before saving them to the database.
-    device, _created = TOTPDevice.objects.get_or_create(
+    totp_device, _created = TOTPDevice.objects.get_or_create(
         user=user,
         defaults={"name": gettext_noop("Authenticator app"), "confirmed": False},
     )
-    backup_device, backup_device_created = StaticDevice.objects.get_or_create(
+    static_device, backup_device_created = StaticDevice.objects.get_or_create(
         user=user,
         defaults={"name": gettext_noop("Recovery codes"), "confirmed": False},
     )
-    if backup_device_created or not backup_device.token_set.exists():
-        reset_static_tokens(backup_device)
+    if backup_device_created or not static_device.token_set.exists():
+        reset_static_tokens(static_device)
 
-    return device, backup_device
+    return totp_device, static_device
 
 
 def reset_static_tokens(device, n=10):
