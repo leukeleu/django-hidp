@@ -10,12 +10,18 @@ from rest_framework.reverse import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.forms import Form
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, FormView, TemplateView
 
 from hidp.csp.decorators import hidp_csp_protection
-from hidp.otp.devices import STATIC_DEVICE_NAME, TOTP_DEVICE_NAME, get_or_create_devices, reset_static_tokens
+from hidp.otp.devices import (
+    STATIC_DEVICE_NAME,
+    TOTP_DEVICE_NAME,
+    get_or_create_devices,
+    reset_static_tokens,
+)
 from hidp.otp.forms import OTPSetupForm
 from hidp.rate_limit.decorators import rate_limit_strict
 
@@ -130,6 +136,11 @@ class OTPSetupDeviceView(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         self.user = request.user
+
+        # If the user already has a confirmed TOTP device, redirect to the manage page
+        if TOTPDevice.objects.devices_for_user(self.user, confirmed=True).exists():
+            return HttpResponseRedirect(self.success_url)
+
         self.device, self.backup_device = get_or_create_devices(self.user)
 
         return super().dispatch(request, *args, **kwargs)

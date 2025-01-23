@@ -1,6 +1,9 @@
 from http import HTTPStatus
 from unittest import mock
 
+from django_otp.plugins.otp_static.models import StaticDevice
+from django_otp.plugins.otp_totp.models import TOTPDevice
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -129,6 +132,14 @@ class TestOTPSetupView(TestCase):
             response, f"/login/?next={reverse('hidp_otp_management:setup')}"
         )
 
+    def test_redirects_to_manage_when_already_setup(self):
+        """The user should be redirected to the manage page if OTP is already set up."""
+        otp_factories.TOTPDeviceFactory(user=self.user, confirmed=True)
+        otp_factories.StaticDeviceFactory(user=self.user, confirmed=True)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("hidp_otp_management:setup"))
+        self.assertRedirects(response, reverse("hidp_otp_management:manage"))
+
     @mock.patch("hidp.otp.forms.verify_token", return_value=True)
     def test_valid_form_confirms_devices(self, mock_verify_token):
         """A valid form should confirm the TOTP and static devices."""
@@ -140,42 +151,13 @@ class TestOTPSetupView(TestCase):
         response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
 
-        totp_device = otp_factories.TOTPDevice.objects.get(user=self.user)
+        totp_device = TOTPDevice.objects.get(user=self.user)
         self.assertTrue(totp_device.confirmed, "Expected TOTP device to be confirmed")
 
-        static_device = otp_factories.StaticDevice.objects.get(user=self.user)
+        static_device = StaticDevice.objects.get(user=self.user)
         self.assertTrue(
             static_device.confirmed, "Expected static device to be confirmed"
         )
-
-    @mock.patch("hidp.otp.forms.verify_token", return_value=True)
-    def test_setting_up_existing_devices(self, mock_verify_token):
-        """Setting up OTP should not create new devices if they already exist."""
-        existing_totp_device = otp_factories.TOTPDeviceFactory(
-            user=self.user, confirmed=True
-        )
-        existing_static_device = otp_factories.StaticDeviceFactory(
-            user=self.user, confirmed=True
-        )
-
-        self.client.force_login(self.user)
-        form_data = {
-            "otp_token": "123456",
-            "confirm_stored_backup_tokens": True,
-        }
-        response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
-        self.assertRedirects(response, reverse("hidp_otp_management:manage"))
-
-        totp_device = otp_factories.TOTPDevice.objects.get(user=self.user)
-        self.assertTrue(totp_device.confirmed, "Expected TOTP device to be confirmed")
-        self.assertEqual(totp_device, existing_totp_device)
-        self.assertEqual(totp_device.key, existing_totp_device.key)
-
-        static_device = otp_factories.StaticDevice.objects.get(user=self.user)
-        self.assertTrue(
-            static_device.confirmed, "Expected static device to be confirmed"
-        )
-        self.assertEqual(static_device, existing_static_device)
 
     @mock.patch("hidp.otp.forms.verify_token", return_value=False)
     def test_invalid_form_does_not_confirm_devices(self, mock_verify_token):
@@ -186,18 +168,19 @@ class TestOTPSetupView(TestCase):
             "confirm_stored_backup_tokens": True,
         }
         response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
-        self.assertFormError(
-            response.context["form"],
-            "otp_token",
-            "Enter a valid One-time Password token.",
-        )
+        form = response.context["form"]
+        self.assertFalse(form.is_valid())
+        # Check that the error is on the token field
+        self.assertIn("otp_token", form.errors)
+        errors = form.errors.as_data()
+        self.assertEqual(errors["otp_token"][0].code, "token_invalid")
 
-        totp_device = otp_factories.TOTPDevice.objects.get(user=self.user)
+        totp_device = TOTPDevice.objects.get(user=self.user)
         self.assertFalse(
             totp_device.confirmed, "Expected TOTP device to be unconfirmed"
         )
 
-        static_device = otp_factories.StaticDevice.objects.get(user=self.user)
+        static_device = StaticDevice.objects.get(user=self.user)
         self.assertFalse(
             static_device.confirmed, "Expected static device to be unconfirmed"
         )

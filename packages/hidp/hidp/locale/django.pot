@@ -277,7 +277,7 @@ msgid "Recovery codes"
 msgstr ""
 
 #: hidp/otp/forms.py
-msgid "Enter a valid One-time Password token."
+msgid "Enter a valid one-time password token."
 msgstr ""
 
 #: hidp/otp/forms.py

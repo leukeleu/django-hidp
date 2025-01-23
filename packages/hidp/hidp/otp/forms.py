@@ -37,7 +37,7 @@ class OTPSetupForm(forms.Form):
         token = self.cleaned_data["otp_token"]
         if not verify_token(self.user, self.device.persistent_id, token):
             raise ValidationError(
-                _("Enter a valid One-time Password token."), code="token_invalid"
+                _("Enter a valid one-time password token."), code="token_invalid"
             )
         return token
 
