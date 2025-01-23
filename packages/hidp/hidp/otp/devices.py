@@ -3,6 +3,9 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from django.utils.translation import trans_null
 
+# The translation happens in the template, allowing the device names below to be
+# translated to the user's language when they are displayed, but also allowing
+# user-defined 'legacy' device names to be displayed as-is.
 TOTP_DEVICE_NAME = trans_null.pgettext("OTP device name", "Authenticator app")
 STATIC_DEVICE_NAME = trans_null.pgettext("OTP device name", "Recovery codes")
 
@@ -15,8 +18,6 @@ def get_or_create_devices(user):
     device. If the user already has these devices, they are returned. If not, they are
     created in unconfirmed state.
     """
-    # Note we're using gettext_noop because we want to mark the strings for translation
-    # here, but we don't want to translate them before saving them to the database.
     totp_device, _created = TOTPDevice.objects.get_or_create(
         user=user,
         defaults={"name": TOTP_DEVICE_NAME, "confirmed": False},
