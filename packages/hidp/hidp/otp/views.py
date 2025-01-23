@@ -15,7 +15,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, FormView, TemplateView
 
 from hidp.csp.decorators import hidp_csp_protection
-from hidp.otp.devices import get_or_create_devices, reset_static_tokens
+from hidp.otp.devices import STATIC_DEVICE_NAME, TOTP_DEVICE_NAME, get_or_create_devices, reset_static_tokens
 from hidp.otp.forms import OTPSetupForm
 from hidp.rate_limit.decorators import rate_limit_strict
 
@@ -35,6 +35,8 @@ class OTPOverviewView(TemplateView):
             "static_devices": StaticDevice.objects.devices_for_user(
                 self.request.user, confirmed=True
             ),
+            "TOTP_DEVICE_NAME": TOTP_DEVICE_NAME,
+            "STATIC_DEVICE_NAME": STATIC_DEVICE_NAME,
             "back_url": reverse("hidp_account_management:manage_account"),
         }
         return super().get_context_data() | context | kwargs

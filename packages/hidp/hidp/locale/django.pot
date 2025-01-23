@@ -267,12 +267,12 @@ msgid "You already have an account with this email address. Please sign in to li
 msgstr ""
 
 #: hidp/otp/devices.py
+msgctxt "OTP device name"
 msgid "Authenticator app"
 msgstr ""
 
-#: hidp/otp/devices.py hidp/templates/hidp/otp/overview.html
-#: hidp/templates/hidp/otp/recovery_codes.html
-#: hidp/templates/hidp/otp/setup_device.html
+#: hidp/otp/devices.py
+msgctxt "OTP device name"
 msgid "Recovery codes"
 msgstr ""
 
@@ -809,12 +809,8 @@ msgid "Warning"
 msgstr ""
 
 #: hidp/templates/hidp/otp/overview.html
-msgctxt "OTP device name"
-msgid "Authenticator app"
-msgstr ""
-
-#: hidp/templates/hidp/otp/overview.html
-msgctxt "OTP device name"
+#: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/setup_device.html
 msgid "Recovery codes"
 msgstr ""
 

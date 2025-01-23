@@ -1,7 +1,10 @@
 from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from django.utils.translation import gettext_noop
+from django.utils.translation import trans_null
+
+TOTP_DEVICE_NAME = trans_null.pgettext("OTP device name", "Authenticator app")
+STATIC_DEVICE_NAME = trans_null.pgettext("OTP device name", "Recovery codes")
 
 
 def get_or_create_devices(user):
@@ -16,11 +19,11 @@ def get_or_create_devices(user):
     # here, but we don't want to translate them before saving them to the database.
     totp_device, _created = TOTPDevice.objects.get_or_create(
         user=user,
-        defaults={"name": gettext_noop("Authenticator app"), "confirmed": False},
+        defaults={"name": TOTP_DEVICE_NAME, "confirmed": False},
     )
     static_device, backup_device_created = StaticDevice.objects.get_or_create(
         user=user,
-        defaults={"name": gettext_noop("Recovery codes"), "confirmed": False},
+        defaults={"name": STATIC_DEVICE_NAME, "confirmed": False},
     )
     if backup_device_created or not static_device.token_set.exists():
         reset_static_tokens(static_device)
