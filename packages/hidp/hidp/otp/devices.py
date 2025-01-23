@@ -9,6 +9,14 @@ from django.utils.translation import trans_null
 TOTP_DEVICE_NAME = trans_null.pgettext("OTP device name", "Authenticator app")
 STATIC_DEVICE_NAME = trans_null.pgettext("OTP device name", "Recovery codes")
 
+# Warning: changing the names above will result in the old strings from the
+# database not being translated. If you need to change the names, you should
+# add the old names to the list below, wrapped in
+# trans_null.pgettext("OTP device name", ...).
+_LEGACY_DEVICE_NAMES = [
+    # trans_null.pgettext("OTP device name", "Old name"),  # noqa: ERA001
+]
+
 
 def get_or_create_devices(user):
     """
