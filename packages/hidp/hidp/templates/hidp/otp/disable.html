@@ -1,0 +1,18 @@
+{% extends 'hidp/base_post_login.html' %}
+{% load i18n %}
+
+{% block title %}{% translate 'Two-factor authentication' %}{% endblock %}
+
+{% block main %}
+  <h1>{% translate 'Disable two-factor authentication' %}</h1>
+
+  <p><strong>{% translate "Warning" %}:</strong> {% translate "Disabling two-factor authentication will make your account less secure." %}</p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form }}
+
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Disable two-factor authentication') cancel_url=back_url %}
+  </form>
+
+{% endblock %}

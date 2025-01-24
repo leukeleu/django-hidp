@@ -1,3 +1,6 @@
+import factory
+
+from django_otp.plugins.otp_static.models import StaticToken
 from factory.django import DjangoModelFactory
 
 
@@ -17,3 +20,11 @@ class StaticDeviceFactory(DjangoModelFactory):
 
     name = "Recovery codes"
     confirmed = False
+
+
+class StaticTokenFactory(DjangoModelFactory):
+    class Meta:
+        model = StaticToken
+
+    device = factory.SubFactory(StaticDeviceFactory)
+    token = factory.LazyFunction(StaticToken.random_token)
