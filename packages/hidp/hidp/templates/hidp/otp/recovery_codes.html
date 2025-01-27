@@ -1,0 +1,28 @@
+{% extends "hidp/base_post_login.html" %}
+{% load i18n %}
+
+{% block title %}{% translate 'Two-factor authentication' %}{% endblock %}
+
+{% block main %}
+  <h1>{% translate 'Recovery codes' %}</h1>
+
+  <p>
+{% blocktranslate %}These codes can be used to log in if you lose access to your two-factor device.
+You can generate new codes at any time, but you can only have one set of codes at a time.{% endblocktranslate %}
+  </p>
+
+  <p>
+    <strong>{% translate "Warning" %}:</strong> {% blocktranslate %}Keep these codes safe. These codes are the only way to log in
+if you lose access to your two-factor device.{% endblocktranslate %}
+  </p>
+
+  <pre>{% for token in device.token_set.all %}{{ token.token }}
+{% endfor %}
+  </pre>
+
+  <form method="post">
+    {% csrf_token %}
+    {% include "hidp/includes/forms/submit_row.html" with submit_label=_('Generate new codes') cancel_label=_('Back') cancel_url=back_url %}
+  </form>
+
+{% endblock %}

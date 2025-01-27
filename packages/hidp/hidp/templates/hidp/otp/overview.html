@@ -23,6 +23,7 @@
   {% for device in static_devices %}
     <li>
       {% translate device.name context "OTP device name" %}: {% translate "configured" %}
+      <a href="{% url 'hidp_otp_management:recovery-codes' %}">{% translate "view" %}</a>
     </li>
   {% empty %}
     <li>{% translate "Recovery codes" context "OTP device name" %}: {% translate "not configured" %}</li>

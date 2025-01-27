@@ -14,16 +14,28 @@ def get_or_create_devices(user):
     """
     # Note we're using gettext_noop because we want to mark the strings for translation
     # here, but we don't want to translate them before saving them to the database.
-    device, _created = TOTPDevice.objects.get_or_create(
+    totp_device, _created = TOTPDevice.objects.get_or_create(
         user=user,
         defaults={"name": gettext_noop("Authenticator app"), "confirmed": False},
     )
-    backup_device, backup_device_created = StaticDevice.objects.get_or_create(
+    static_device, backup_device_created = StaticDevice.objects.get_or_create(
         user=user,
         defaults={"name": gettext_noop("Recovery codes"), "confirmed": False},
     )
-    if backup_device_created or not backup_device.token_set.exists():
-        for _ in range(10):
-            backup_device.token_set.create(token=StaticToken.random_token())
+    if backup_device_created or not static_device.token_set.exists():
+        reset_static_tokens(static_device)
 
-    return device, backup_device
+    return totp_device, static_device
+
+
+def reset_static_tokens(device, n=10):
+    """
+    Reset the static tokens for a device.
+
+    This function deletes all existing static tokens for a device and creates 10 new
+    ones. This amount should be sufficient for users to log in to disable MFA and
+    during the time they have no access to their device but need to log in.
+    """
+    device.token_set.all().delete()
+    for _ in range(n):
+        device.token_set.create(token=StaticToken.random_token())
