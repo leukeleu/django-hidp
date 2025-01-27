@@ -267,12 +267,29 @@ msgid "You already have an account with this email address. Please sign in to li
 msgstr ""
 
 #: hidp/otp/devices.py
+msgctxt "OTP device name"
 msgid "Authenticator app"
 msgstr ""
 
-#: hidp/otp/devices.py hidp/templates/hidp/otp/overview.html
-#: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/otp/devices.py
+msgctxt "OTP device name"
 msgid "Recovery codes"
+msgstr ""
+
+#: hidp/otp/forms.py
+msgid "Enter a valid one-time password token."
+msgstr ""
+
+#: hidp/otp/forms.py
+msgid "I have stored my backup codes in a safe place"
+msgstr ""
+
+#: hidp/otp/forms.py
+msgid "Verify the code from the app"
+msgstr ""
+
+#: hidp/otp/forms.py
+msgid "You can use these codes to log in if you lose access to your device"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html
@@ -352,6 +369,7 @@ msgstr ""
 #: hidp/templates/hidp/federated/linked_services.html
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/setup_device.html
 msgid "Back"
 msgstr ""
 
@@ -791,12 +809,8 @@ msgid "Warning"
 msgstr ""
 
 #: hidp/templates/hidp/otp/overview.html
-msgctxt "OTP device name"
-msgid "Authenticator app"
-msgstr ""
-
-#: hidp/templates/hidp/otp/overview.html
-msgctxt "OTP device name"
+#: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/setup_device.html
 msgid "Recovery codes"
 msgstr ""
 
@@ -817,6 +831,10 @@ msgid "not configured"
 msgstr ""
 
 #: hidp/templates/hidp/otp/overview.html
+msgid "set up"
+msgstr ""
+
+#: hidp/templates/hidp/otp/overview.html
 msgid "view"
 msgstr ""
 
@@ -834,4 +852,20 @@ msgstr ""
 msgid ""
 "These codes can be used to log in if you lose access to your two-factor device.\n"
 "You can generate new codes at any time, but you can only have one set of codes at a time."
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Scan the QR code"
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Set up two-factor authentication"
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Submit"
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Two-factor Authentication"
 msgstr ""

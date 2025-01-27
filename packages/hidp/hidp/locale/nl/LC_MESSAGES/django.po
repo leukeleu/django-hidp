@@ -268,13 +268,30 @@ msgid "You already have an account with this email address. Please sign in to li
 msgstr "Je hebt al een account met dit e-mailadres. Log in om je account te koppelen."
 
 #: hidp/otp/devices.py
+msgctxt "OTP device name"
 msgid "Authenticator app"
 msgstr "Authenticator-app"
 
-#: hidp/otp/devices.py hidp/templates/hidp/otp/overview.html
-#: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/otp/devices.py
+msgctxt "OTP device name"
 msgid "Recovery codes"
 msgstr "Herstelcodes"
+
+#: hidp/otp/forms.py
+msgid "Enter a valid one-time password token."
+msgstr "Voer een geldige token in."
+
+#: hidp/otp/forms.py
+msgid "I have stored my backup codes in a safe place"
+msgstr "Ik heb mijn herstelcodes op een veilige plek opgeslagen"
+
+#: hidp/otp/forms.py
+msgid "Verify the code from the app"
+msgstr "Verifieer de code van de app"
+
+#: hidp/otp/forms.py
+msgid "You can use these codes to log in if you lose access to your device"
+msgstr "Je kunt deze codes gebruiken om in te loggen als je geen toegang meer hebt tot je apparaat"
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Excessive login attempts have been detected for this account. For your safety, additional security measures are now in place."
@@ -353,6 +370,7 @@ msgstr "Opslaan"
 #: hidp/templates/hidp/federated/linked_services.html
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/setup_device.html
 msgid "Back"
 msgstr "Terug"
 
@@ -792,12 +810,8 @@ msgid "Warning"
 msgstr "Waarschuwing"
 
 #: hidp/templates/hidp/otp/overview.html
-msgctxt "OTP device name"
-msgid "Authenticator app"
-msgstr "Authenticator-app"
-
-#: hidp/templates/hidp/otp/overview.html
-msgctxt "OTP device name"
+#: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/setup_device.html
 msgid "Recovery codes"
 msgstr "Herstelcodes"
 
@@ -816,6 +830,10 @@ msgstr "uitschakelen"
 #: hidp/templates/hidp/otp/overview.html
 msgid "not configured"
 msgstr "niet geconfigureerd"
+
+#: hidp/templates/hidp/otp/overview.html
+msgid "set up"
+msgstr "instellen"
 
 #: hidp/templates/hidp/otp/overview.html
 msgid "view"
@@ -841,3 +859,19 @@ msgid ""
 msgstr ""
 "Deze codes kunnen worden gebruikt om in te loggen als je geen toegang meer hebt tot je twee-factor-apparaat.\n"
 "Je kunt op elk moment nieuwe codes genereren, maar je kunt slechts één set codes tegelijk hebben."
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Scan the QR code"
+msgstr "Scan de QR-code"
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Set up two-factor authentication"
+msgstr "Twee-factor-authenticatie instellen"
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Submit"
+msgstr "Verzenden"
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Two-factor Authentication"
+msgstr "Twee-factor-authenticatie"

@@ -1,7 +1,21 @@
 from django_otp.plugins.otp_static.models import StaticDevice, StaticToken
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
-from django.utils.translation import gettext_noop
+from django.utils.translation import trans_null
+
+# The translation happens in the template, allowing the device names below to be
+# translated to the user's language when they are displayed, but also allowing
+# user-defined 'legacy' device names to be displayed as-is.
+TOTP_DEVICE_NAME = trans_null.pgettext("OTP device name", "Authenticator app")
+STATIC_DEVICE_NAME = trans_null.pgettext("OTP device name", "Recovery codes")
+
+# Warning: changing the names above will result in the old strings from the
+# database not being translated. If you need to change the names, you should
+# add the old names to the list below, wrapped in
+# trans_null.pgettext("OTP device name", ...).
+_LEGACY_DEVICE_NAMES = [
+    # trans_null.pgettext("OTP device name", "Old name"),  # noqa: ERA001
+]
 
 
 def get_or_create_devices(user):
@@ -12,15 +26,13 @@ def get_or_create_devices(user):
     device. If the user already has these devices, they are returned. If not, they are
     created in unconfirmed state.
     """
-    # Note we're using gettext_noop because we want to mark the strings for translation
-    # here, but we don't want to translate them before saving them to the database.
     totp_device, _created = TOTPDevice.objects.get_or_create(
         user=user,
-        defaults={"name": gettext_noop("Authenticator app"), "confirmed": False},
+        defaults={"name": TOTP_DEVICE_NAME, "confirmed": False},
     )
     static_device, backup_device_created = StaticDevice.objects.get_or_create(
         user=user,
-        defaults={"name": gettext_noop("Recovery codes"), "confirmed": False},
+        defaults={"name": STATIC_DEVICE_NAME, "confirmed": False},
     )
     if backup_device_created or not static_device.token_set.exists():
         reset_static_tokens(static_device)
