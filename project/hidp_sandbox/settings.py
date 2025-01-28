@@ -100,6 +100,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
     "hidp.otp.middleware.OTPRequiredIfConfiguredMiddleware",
+    "hidp.otp.middleware.OTPRequiredIfStaffUserMiddleware",
 ]
 
 ROOT_URLCONF = "hidp_sandbox.urls"
