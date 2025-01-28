@@ -102,3 +102,40 @@ class OTPRequiredIfConfiguredMiddleware(OTPMiddlewareBase):
         return (
             user.is_authenticated and not user.is_verified() and user_has_device(user)
         )
+
+
+class OTPRequiredIfStaffUserMiddleware(OTPMiddlewareBase):
+    """
+    Middleware that requires staff users to verify their OTP.
+
+    This middleware should be placed after the authentication middleware and
+    django_otp.middleware.OTPMiddleware. It will redirect staff users to the OTP
+    verification view if they are authenticated and are staff, even if they do not
+    have an OTP device configured. If they don't have an OTP device configured, they
+    will be redirected to the OTP setup view.
+    """
+
+    def user_needs_verification(self, user):  # noqa: PLR6301
+        """
+        Check if a user needs to verify their OTP.
+
+        A user needs to verify their OTP if they are authenticated, are staff, and
+        have not yet verified their OTP.
+        """
+        return user.is_authenticated and user.is_staff and not user.is_verified()
+
+    def get_redirect_url(self, request):  # noqa: PLR6301
+        """
+        Return the URL to redirect to when OTP verification is required.
+
+        If the user has an OTP device, they will be redirected to the OTP verification
+        view. If they do not have an OTP device, they will be redirected to the OTP
+        setup view.
+        """
+        next_url = request.get_full_path()
+        target = (
+            reverse("hidp_otp:verify")
+            if user_has_device(request.user)
+            else reverse("hidp_otp_management:setup")
+        )
+        return target + f"?{urlencode({'next': next_url})}"
