@@ -81,7 +81,7 @@ class OTPMiddlewareBase(ABC):
         return None
 
 
-class OTPRequiredIfConfiguredMiddleware(OTPMiddlewareBase):
+class OTPVerificationRequiredIfConfiguredMiddleware(OTPMiddlewareBase):
     """
     Middleware that requires users to verify their OTP if they have OTP configured.
 
@@ -104,9 +104,9 @@ class OTPRequiredIfConfiguredMiddleware(OTPMiddlewareBase):
         )
 
 
-class OTPRequiredIfStaffUserMiddleware(OTPMiddlewareBase):
+class OTPSetupRequiredIfStaffUserMiddleware(OTPMiddlewareBase):
     """
-    Middleware that requires staff users to verify their OTP.
+    Middleware that requires staff users to configure and verify their OTP.
 
     This middleware should be placed after the authentication middleware and
     django_otp.middleware.OTPMiddleware. It will redirect staff users to the OTP

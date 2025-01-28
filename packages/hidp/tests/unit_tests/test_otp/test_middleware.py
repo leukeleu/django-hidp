@@ -4,8 +4,8 @@ from django.test import RequestFactory, TestCase
 
 from hidp.otp.decorators import otp_exempt
 from hidp.otp.middleware import (
-    OTPRequiredIfConfiguredMiddleware,
-    OTPRequiredIfStaffUserMiddleware,
+    OTPSetupRequiredIfStaffUserMiddleware,
+    OTPVerificationRequiredIfConfiguredMiddleware,
 )
 from hidp.test.factories import otp_factories, user_factories
 
@@ -36,7 +36,9 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
         otp_factories.TOTPDeviceFactory(user=cls.confirmed_user, confirmed=True)
         otp_factories.StaticDeviceFactory(user=cls.confirmed_user, confirmed=True)
 
-        cls.middleware = OTPRequiredIfConfiguredMiddleware(lambda request: None)
+        cls.middleware = OTPVerificationRequiredIfConfiguredMiddleware(
+            lambda request: None
+        )
 
     def setUp(self):
         super().setUp()
@@ -146,7 +148,7 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
 class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
     @classmethod
     def setUpTestData(cls):
-        cls.middleware = OTPRequiredIfStaffUserMiddleware(lambda request: None)
+        cls.middleware = OTPSetupRequiredIfStaffUserMiddleware(lambda request: None)
         cls.unconfirmed_staff_user = user_factories.VerifiedUserFactory(is_staff=True)
         cls.verify_user(cls.unconfirmed_staff_user, verified=False)
 
