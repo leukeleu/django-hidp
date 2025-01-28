@@ -26,6 +26,7 @@ from hidp.otp.devices import (
 from hidp.otp.forms import OTPSetupForm, OTPVerifyForm
 from hidp.rate_limit.decorators import rate_limit_strict
 
+from .decorators import otp_exempt
 from .forms import OTPTokenForm
 
 
@@ -176,6 +177,7 @@ class OTPSetupDeviceView(FormView):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(login_required, name="dispatch")
+@method_decorator(otp_exempt, name="dispatch")
 class VerifyOTPView(RedirectURLMixin, FormView):
     template_name = "hidp/otp/verify.html"
     form_class = OTPVerifyForm
