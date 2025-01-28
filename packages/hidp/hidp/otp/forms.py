@@ -1,10 +1,21 @@
 from django_otp import verify_token
-from django_otp.forms import OTPAuthenticationFormMixin
+from django_otp.forms import (
+    OTPAuthenticationFormMixin as DjangoOTPAuthenticationFormMixin,
+)
 from django_otp.forms import OTPTokenForm as DjangoOTPTokenForm
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
+
+class OTPAuthenticationFormMixin(DjangoOTPAuthenticationFormMixin):
+    # Override/copy the error messages to be able to translate them in HIdP
+    otp_error_messages = DjangoOTPAuthenticationFormMixin.otp_error_messages | {
+        "invalid_token": _(
+            "Invalid token. Please make sure you have entered it correctly."
+        ),
+    }
 
 
 class OTPTokenForm(DjangoOTPTokenForm):
@@ -38,7 +49,8 @@ class OTPSetupForm(forms.Form):
         token = self.cleaned_data["otp_token"]
         if not verify_token(self.user, self.device.persistent_id, token):
             raise ValidationError(
-                _("Enter a valid one-time password token."), code="token_invalid"
+                OTPAuthenticationFormMixin.otp_error_messages["invalid_token"],
+                code="invalid_token",
             )
         return token
 

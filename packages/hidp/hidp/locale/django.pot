@@ -203,6 +203,7 @@ msgstr ""
 #: hidp/accounts/views.py hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/verify.html
 msgid "Two-factor authentication"
 msgstr ""
 
@@ -277,11 +278,11 @@ msgid "Recovery codes"
 msgstr ""
 
 #: hidp/otp/forms.py
-msgid "Enter a valid one-time password token."
+msgid "I have stored my backup codes in a safe place"
 msgstr ""
 
 #: hidp/otp/forms.py
-msgid "I have stored my backup codes in a safe place"
+msgid "Invalid token. Please make sure you have entered it correctly."
 msgstr ""
 
 #: hidp/otp/forms.py

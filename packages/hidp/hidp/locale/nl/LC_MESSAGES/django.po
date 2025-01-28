@@ -279,12 +279,12 @@ msgid "Recovery codes"
 msgstr "Herstelcodes"
 
 #: hidp/otp/forms.py
-msgid "Enter a valid one-time password token."
-msgstr "Voer een geldige token in."
-
-#: hidp/otp/forms.py
 msgid "I have stored my backup codes in a safe place"
 msgstr "Ik heb mijn herstelcodes op een veilige plek opgeslagen"
+
+#: hidp/otp/forms.py
+msgid "Invalid token. Please make sure you have entered it correctly."
+msgstr "Ongeldig token. Controleer of je het correct hebt ingevoerd."
 
 #: hidp/otp/forms.py
 msgid "Verify the code from the app"

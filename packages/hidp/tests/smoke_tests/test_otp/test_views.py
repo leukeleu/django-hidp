@@ -173,7 +173,7 @@ class TestOTPSetupView(TestCase):
         # Check that the error is on the token field
         self.assertIn("otp_token", form.errors)
         errors = form.errors.as_data()
-        self.assertEqual(errors["otp_token"][0].code, "token_invalid")
+        self.assertEqual(errors["otp_token"][0].code, "invalid_token")
 
         totp_device = TOTPDevice.objects.get(user=self.user)
         self.assertFalse(
