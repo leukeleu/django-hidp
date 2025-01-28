@@ -16,6 +16,7 @@ if "hidp.otp" in settings.INSTALLED_APPS:
 
     urlpatterns += [
         path("manage/otp/", include(otp_management_urls)),
+        path("otp/", include("hidp.otp.otp_urls")),
     ]
 
 if "hidp.oidc_provider" in settings.INSTALLED_APPS:

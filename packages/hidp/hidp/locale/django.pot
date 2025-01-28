@@ -869,3 +869,7 @@ msgstr ""
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Two-factor Authentication"
 msgstr ""
+
+#: hidp/templates/hidp/otp/verify.html
+msgid "Verify"
+msgstr ""
