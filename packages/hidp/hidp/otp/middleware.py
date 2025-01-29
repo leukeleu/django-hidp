@@ -100,5 +100,5 @@ class OTPRequiredIfConfiguredMiddleware(OTPMiddlewareBase):
         device, and have not yet verified their OTP.
         """
         return (
-            user.is_authenticated and user_has_device(user) and not user.is_verified()
+            user.is_authenticated and not user.is_verified() and user_has_device(user)
         )

@@ -35,6 +35,7 @@ class TestOTPRequiredIfConfiguredMiddleware(TestCase):
 
         # The middleware expects the OTPMiddleware to have already run, so we need to
         # manually set the user's verified property.
+        self.verify_user(self.user, verified=False)
         self.verify_user(self.confirmed_user, verified=False)
 
     def test_anonymous_user(self):
