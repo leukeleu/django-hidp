@@ -18,6 +18,19 @@ class OTPMiddlewareTestBase(TestCase):
     def verify_user(user, *, verified):
         user.is_verified = lambda: verified
 
+    def assertMiddlewareRedirects(self, response, expected_url, message=None):  # noqa: N802
+        """
+        Replacement for self.assertRedirects that works without the test client.
+
+        The result of a middleware process_view call is a redirect response, but we
+        cannot use the test client to check the response. This method checks the
+        response manually. Additionally, the result of process_view may be None if
+        the middleware does not redirect, so we need to check for that as well.
+        """
+        self.assertIsNotNone(response, "Expected a redirect response.")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, expected_url, message)
+
 
 def basic_view(request):
     return HttpResponse("Hello, world!")
@@ -118,10 +131,8 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
         request.user = self.confirmed_user
 
         response = self.middleware.process_view(request, basic_view, [], {})
-
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            response.url,
+        self.assertMiddlewareRedirects(
+            response,
             "/otp/verify/?next=%2Fsome-path%2F",
             "Expected redirect to OTP verification view.",
         )
@@ -162,7 +173,8 @@ class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
         request.user = AnonymousUser()
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected anonymous users to not need to verify OTP.",
         )
 
     def test_non_staff_user(self):
@@ -171,7 +183,8 @@ class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
         request.user = user_factories.VerifiedUserFactory(is_staff=False)
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected non-staff users to not need to verify OTP.",
         )
 
     def test_staff_user(self):
@@ -179,7 +192,10 @@ class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
         request = self.request_factory.get("/")
         request.user = self.unconfirmed_staff_user
 
-        self.assertTrue(self.middleware.request_needs_verification(request, basic_view))
+        self.assertTrue(
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected staff users to need to verify OTP.",
+        )
 
     def test_verified_staff_user(self):
         """Staff users who have already verified their OTP should not need to verify."""
@@ -188,7 +204,9 @@ class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
         self.verify_user(request.user, verified=True)
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected staff users who have already verified their OTP to not need "
+            "to verify again.",
         )
 
     def test_staff_user_exempt_view(self):
@@ -197,7 +215,8 @@ class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
         request.user = self.unconfirmed_staff_user
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, exempt_view)
+            self.middleware.request_needs_verification(request, exempt_view),
+            msg="Expected staff users to not need to verify OTP for exempt views.",
         )
 
     def test_redirects_to_otp_verify(self):
@@ -207,10 +226,8 @@ class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
 
         response = self.middleware.process_view(request, basic_view, [], {})
 
-        self.assertIsNotNone(response, "Expected a redirect response.")
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            response.url,
+        self.assertMiddlewareRedirects(
+            response,
             "/otp/verify/?next=%2Fsome-path%2F",
             "Expected redirect to OTP verification view.",
         )
@@ -218,15 +235,12 @@ class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
     def test_redirects_to_setup_view(self):
         """Middleware should redirect to the OTP setup view if the user has no OTP."""
         request = self.request_factory.get("/some-path/")
-        request.user = user_factories.VerifiedUserFactory(is_staff=True)
-        self.verify_user(request.user, verified=False)
+        request.user = self.unconfirmed_staff_user
 
         response = self.middleware.process_view(request, basic_view, [], {})
 
-        self.assertIsNotNone(response, "Expected a redirect response.")
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(
-            response.url,
+        self.assertMiddlewareRedirects(
+            response,
             "/manage/otp/setup/?next=%2Fsome-path%2F",
             "Expected redirect to OTP setup view.",
         )
