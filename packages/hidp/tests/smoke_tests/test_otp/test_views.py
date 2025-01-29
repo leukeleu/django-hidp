@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from unittest import mock
 
+from django.core import mail
 from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
@@ -226,6 +227,9 @@ class TestOTPSetupView(TestCase):
         with (
             mock.patch.object(device, "verify_token", return_value=True, autospec=True),
             mock.patch("hidp.otp.forms.OTPSetupForm.get_device", return_value=device),
+            self.assertTemplateUsed("hidp/otp/email/configured_subject.txt"),
+            self.assertTemplateUsed("hidp/otp/email/configured_body.txt"),
+            self.assertTemplateUsed("hidp/otp/email/configured_body.html"),
         ):
             response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
@@ -237,6 +241,10 @@ class TestOTPSetupView(TestCase):
         self.assertTrue(
             static_device.confirmed, "Expected static device to be confirmed"
         )
+
+        self.assertEqual(len(mail.outbox), 1, "Expected an email to be sent")
+        self.assertEqual(mail.outbox[0].subject, "Two-factor authentication configured")
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
     def test_invalid_form_does_not_confirm_devices(self):
         """An invalid form should not confirm the TOTP and static devices."""
