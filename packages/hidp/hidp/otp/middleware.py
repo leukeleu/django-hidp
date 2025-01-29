@@ -43,9 +43,20 @@ class OTPMiddlewareBase(ABC):
         return getattr(view_func, "otp_exempt", False)
 
     def get_redirect_url(self, request):  # noqa: PLR6301
-        """Return the URL to redirect to when OTP verification is required."""
+        """
+        Return the URL to redirect to when OTP verification is required.
+
+        If the user has an OTP device, they will be redirected to the OTP verification
+        view. If they do not have an OTP device, they will be redirected to the OTP
+        setup view.
+        """
+        target = reverse(
+            "hidp_otp:verify"
+            if user_has_device(request.user)
+            else "hidp_otp_management:setup"
+        )
         params = {"next": request.get_full_path()}
-        return f"{reverse('hidp_otp:verify')}?{urlencode(params)}"
+        return f"{target}?{urlencode(params)}"
 
     @abstractmethod
     def user_needs_verification(self, user):
@@ -123,19 +134,3 @@ class OTPSetupRequiredIfStaffUserMiddleware(OTPMiddlewareBase):
         have not yet verified their OTP.
         """
         return user.is_authenticated and user.is_staff and not user.is_verified()
-
-    def get_redirect_url(self, request):  # noqa: PLR6301
-        """
-        Return the URL to redirect to when OTP verification is required.
-
-        If the user has an OTP device, they will be redirected to the OTP verification
-        view. If they do not have an OTP device, they will be redirected to the OTP
-        setup view.
-        """
-        next_url = request.get_full_path()
-        target = (
-            reverse("hidp_otp:verify")
-            if user_has_device(request.user)
-            else reverse("hidp_otp_management:setup")
-        )
-        return target + f"?{urlencode({'next': next_url})}"
