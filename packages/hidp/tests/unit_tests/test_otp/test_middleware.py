@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse
 from django.test import RequestFactory, TestCase
@@ -58,7 +60,8 @@ class TestOTPRequiredMiddleware(OTPMiddlewareTestBase):
         request.user = AnonymousUser()
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected anonymous users to not need to verify OTP.",
         )
 
     def test_unverified_user(self):
@@ -66,7 +69,10 @@ class TestOTPRequiredMiddleware(OTPMiddlewareTestBase):
         request = self.request_factory.get("/")
         request.user = self.user
 
-        self.assertTrue(self.middleware.request_needs_verification(request, basic_view))
+        self.assertTrue(
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected unverified users to need to verify OTP.",
+        )
 
     def test_verified_user(self):
         """Verified users should not need to verify OTP."""
@@ -75,7 +81,8 @@ class TestOTPRequiredMiddleware(OTPMiddlewareTestBase):
         self.verify_user(request.user, verified=True)
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected verified users to not need to verify OTP.",
         )
 
     def test_exempt_view(self):
@@ -84,7 +91,8 @@ class TestOTPRequiredMiddleware(OTPMiddlewareTestBase):
         request.user = self.user
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, exempt_view)
+            self.middleware.request_needs_verification(request, exempt_view),
+            msg="Expected exempt views to not require OTP verification.",
         )
 
     def test_process_view_redirects_unconfirmed_to_setup(self):
@@ -121,15 +129,6 @@ class TestOTPRequiredMiddleware(OTPMiddlewareTestBase):
 
         self.assertIsNone(response)
 
-    def test_best_case_requires_no_queries(self):
-        """The middleware should require no queries in the best case."""
-        request = self.request_factory.get("/")
-        request.user = self.user
-        self.verify_user(request.user, verified=True)
-
-        with self.assertNumQueries(0):
-            self.middleware.process_view(request, basic_view, [], {})
-
 
 class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
     @classmethod
@@ -151,7 +150,8 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
         self.verify_user(self.user, verified=False)
         self.verify_user(self.confirmed_user, verified=False)
 
-    def test_anonymous_user(self):
+    @mock.patch("hidp.otp.middleware.user_has_device")
+    def test_anonymous_user(self, mock_user_has_device):
         """Anonymous users should not need to verify OTP."""
         request = self.request_factory.get("/")
         request.user = AnonymousUser()
@@ -160,6 +160,7 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
             self.middleware.request_needs_verification(request, basic_view),
             msg="Expected anonymous users to not need to verify OTP.",
         )
+        mock_user_has_device.assert_not_called()
 
     def test_user_without_otp(self):
         """Users without OTP devices should not need to verify OTP."""
@@ -193,7 +194,8 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
             msg="Expected users with confirmed OTP devices to need to verify OTP.",
         )
 
-    def test_verified_user(self):
+    @mock.patch("hidp.otp.middleware.user_has_device")
+    def test_verified_user(self, mock_user_has_device):
         """Users who have already verified their OTP should not need to verify again."""
         request = self.request_factory.get("/")
         request.user = self.confirmed_user
@@ -204,8 +206,10 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
             msg="Expected users who have already verified their OTP to not need to "
             "verify again.",
         )
+        mock_user_has_device.assert_not_called()
 
-    def test_exempt_view(self):
+    @mock.patch("hidp.otp.middleware.user_has_device")
+    def test_exempt_view(self, mock_user_has_device):
         """Views marked as exempt should not require verification."""
         request = self.request_factory.get("/")
         request.user = self.confirmed_user
@@ -214,6 +218,7 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
             self.middleware.request_needs_verification(request, exempt_view),
             msg="Expected exempt views to not require OTP verification.",
         )
+        mock_user_has_device.assert_not_called()
 
     def test_process_view_redirects(self):
         """The middleware should redirect to the OTP verification view if required."""
@@ -235,15 +240,6 @@ class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):
         response = self.middleware.process_view(request, basic_view, [], {})
 
         self.assertIsNone(response)
-
-    def test_best_case_requires_no_queries(self):
-        """The middleware should require no queries in the best case."""
-        request = self.request_factory.get("/")
-        request.user = self.confirmed_user
-        self.verify_user(request.user, verified=True)
-
-        with self.assertNumQueries(0):
-            self.middleware.process_view(request, basic_view, [], {})
 
 
 class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):

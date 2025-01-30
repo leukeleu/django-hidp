@@ -92,9 +92,9 @@ class OTPMiddlewareBase:
         authenticated or already verified.
         """
         return (
-            request.user.is_authenticated
+            self.view_func_needs_verification(view_func)
+            and request.user.is_authenticated
             and not request.user.is_verified()
-            and self.view_func_needs_verification(view_func)
             and self.user_needs_verification(request.user)
         )
 
