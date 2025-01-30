@@ -4,6 +4,7 @@ from django.test import RequestFactory, TestCase
 
 from hidp.otp.decorators import otp_exempt
 from hidp.otp.middleware import (
+    OTPRequiredMiddleware,
     OTPSetupRequiredIfStaffUserMiddleware,
     OTPVerificationRequiredIfConfiguredMiddleware,
 )
@@ -39,6 +40,95 @@ def basic_view(request):
 @otp_exempt
 def exempt_view(request):
     return HttpResponse("I'm exempt from OTP verification.")
+
+
+class TestOTPRequiredMiddleware(OTPMiddlewareTestBase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.middleware = OTPRequiredMiddleware(lambda request: None)
+        cls.user = user_factories.VerifiedUserFactory()
+
+    def setUp(self):
+        super().setUp()
+        self.verify_user(self.user, verified=False)
+
+    def test_anonymous_user(self):
+        """Anonymous users should not need to verify OTP."""
+        request = self.request_factory.get("/")
+        request.user = AnonymousUser()
+
+        self.assertFalse(
+            self.middleware.request_needs_verification(request, basic_view)
+        )
+
+    def test_unverified_user(self):
+        """Unverified users should need to verify OTP."""
+        request = self.request_factory.get("/")
+        request.user = self.user
+
+        self.assertTrue(self.middleware.request_needs_verification(request, basic_view))
+
+    def test_verified_user(self):
+        """Verified users should not need to verify OTP."""
+        request = self.request_factory.get("/")
+        request.user = self.user
+        self.verify_user(request.user, verified=True)
+
+        self.assertFalse(
+            self.middleware.request_needs_verification(request, basic_view)
+        )
+
+    def test_exempt_view(self):
+        """Views marked as exempt should not require verification."""
+        request = self.request_factory.get("/")
+        request.user = self.user
+
+        self.assertFalse(
+            self.middleware.request_needs_verification(request, exempt_view)
+        )
+
+    def test_process_view_redirects_unconfirmed_to_setup(self):
+        """The middleware should redirect unconfirmed users to the OTP setup view."""
+        request = self.request_factory.get("/some-path/")
+        request.user = self.user
+
+        response = self.middleware.process_view(request, basic_view, [], {})
+        self.assertMiddlewareRedirects(
+            response,
+            "/manage/otp/setup/?next=%2Fsome-path%2F",
+            "Expected redirect to OTP setup view.",
+        )
+
+    def test_process_view_redirects_confirmed_to_verify(self):
+        """The middleware should redirect confirmed users to the verification view."""
+        request = self.request_factory.get("/some-path/")
+        request.user = self.user
+        otp_factories.TOTPDeviceFactory(user=request.user, confirmed=True)
+
+        response = self.middleware.process_view(request, basic_view, [], {})
+        self.assertMiddlewareRedirects(
+            response,
+            "/otp/verify/?next=%2Fsome-path%2F",
+            "Expected redirect to OTP verification view.",
+        )
+
+    def test_process_view_does_not_redirect(self):
+        """The middleware should not redirect if verification is not required."""
+        request = self.request_factory.get("/")
+        request.user = AnonymousUser()
+
+        response = self.middleware.process_view(request, basic_view, [], {})
+
+        self.assertIsNone(response)
+
+    def test_best_case_requires_no_queries(self):
+        """The middleware should require no queries in the best case."""
+        request = self.request_factory.get("/")
+        request.user = self.user
+        self.verify_user(request.user, verified=True)
+
+        with self.assertNumQueries(0):
+            self.middleware.process_view(request, basic_view, [], {})
 
 
 class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):

@@ -92,6 +92,26 @@ class OTPMiddlewareBase(ABC):
         return None
 
 
+class OTPRequiredMiddleware(OTPMiddlewareBase):
+    """
+    Middleware that requires users to verify their OTP.
+
+    This middleware should be placed after the authentication middleware and
+    django_otp.middleware.OTPMiddleware. It will redirect users to the OTP
+    verification view if they are authenticated and have not yet verified their OTP,
+    or to the OTP setup view if they have not yet configured an OTP device.
+    """
+
+    def user_needs_verification(self, user):  # noqa: PLR6301
+        """
+        Check if a user needs to verify their OTP.
+
+        A user needs to verify their OTP if they are authenticated and have not yet
+        verified their OTP.
+        """
+        return user.is_authenticated and not user.is_verified()
+
+
 class OTPVerificationRequiredIfConfiguredMiddleware(OTPMiddlewareBase):
     """
     Middleware that requires users to verify their OTP if they have OTP configured.
