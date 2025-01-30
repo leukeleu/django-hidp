@@ -44,7 +44,8 @@ class TestOTPRequiredIfConfiguredMiddleware(TestCase):
         request.user = AnonymousUser()
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected anonymous users to not need to verify OTP.",
         )
 
     def test_user_without_otp(self):
@@ -53,7 +54,8 @@ class TestOTPRequiredIfConfiguredMiddleware(TestCase):
         request.user = self.user
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected users without OTP devices to not need to verify OTP.",
         )
 
     def test_user_with_unconfirmed_otp(self):
@@ -63,7 +65,9 @@ class TestOTPRequiredIfConfiguredMiddleware(TestCase):
         otp_factories.TOTPDeviceFactory(user=self.user, confirmed=False)
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected users with unconfirmed OTP devices to not need to verify"
+            " OTP.",
         )
 
     def test_user_with_confirmed_otp(self):
@@ -71,7 +75,10 @@ class TestOTPRequiredIfConfiguredMiddleware(TestCase):
         request = self.request_factory.get("/")
         request.user = self.confirmed_user
 
-        self.assertTrue(self.middleware.request_needs_verification(request, basic_view))
+        self.assertTrue(
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected users with confirmed OTP devices to need to verify OTP.",
+        )
 
     def test_verified_user(self):
         """Users who have already verified their OTP should not need to verify again."""
@@ -80,7 +87,9 @@ class TestOTPRequiredIfConfiguredMiddleware(TestCase):
         self.verify_user(request.user, verified=True)
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, basic_view)
+            self.middleware.request_needs_verification(request, basic_view),
+            msg="Expected users who have already verified their OTP to not need to "
+            "verify again.",
         )
 
     def test_exempt_view(self):
@@ -89,7 +98,8 @@ class TestOTPRequiredIfConfiguredMiddleware(TestCase):
         request.user = self.confirmed_user
 
         self.assertFalse(
-            self.middleware.request_needs_verification(request, exempt_view)
+            self.middleware.request_needs_verification(request, exempt_view),
+            msg="Expected exempt views to not require OTP verification.",
         )
 
     def test_process_view_redirects(self):

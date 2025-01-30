@@ -76,8 +76,14 @@ class TestOTPDisable(TestCase):
         }
         response = self.client.post(reverse("hidp_otp_management:disable"), form_data)
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
-        self.assertFalse(self.user.totpdevice_set.exists())
-        self.assertFalse(self.user.staticdevice_set.exists())
+        self.assertFalse(
+            self.user.totpdevice_set.exists(),
+            msg="Expected the user to have no TOTP devices",
+        )
+        self.assertFalse(
+            self.user.staticdevice_set.exists(),
+            msg="Expected the user to have no static devices",
+        )
 
 
 class TestOTPRecoveryCodesView(TestCase):
@@ -169,7 +175,7 @@ class TestOTPSetupView(TestCase):
         }
         response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
         form = response.context["form"]
-        self.assertFalse(form.is_valid())
+        self.assertFalse(form.is_valid(), msg="Expected form to be invalid")
         # Check that the error is on the token field
         self.assertIn("otp_token", form.errors)
         errors = form.errors.as_data()
@@ -237,7 +243,7 @@ class TestOTPVerifyView(TestCase):
         form_data = {"otp_token": "invalid"}
         response = self.client.post(reverse("hidp_otp:verify"), form_data)
         form = response.context["form"]
-        self.assertFalse(form.is_valid())
+        self.assertFalse(form.is_valid(), msg="Expected form to be invalid")
         # Check that the error is on the token field
         errors = form.errors.as_data()
         self.assertEqual(errors["__all__"][0].code, "invalid_token")

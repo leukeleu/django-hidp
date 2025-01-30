@@ -12,5 +12,11 @@ def no_otp_required_for_this_view(request):
 
 class TestOTPExemptDecorator(TestCase):
     def test_otp_exempt_decorator(self):
-        self.assertTrue(hasattr(no_otp_required_for_this_view, "otp_exempt"))
-        self.assertTrue(no_otp_required_for_this_view.otp_exempt)
+        self.assertTrue(
+            hasattr(no_otp_required_for_this_view, "otp_exempt"),
+            msg="Expected the view to have an `otp_exempt` attribute.",
+        )
+        self.assertTrue(
+            no_otp_required_for_this_view.otp_exempt,
+            msg="Expected the view to be exempt from OTP verification.",
+        )
