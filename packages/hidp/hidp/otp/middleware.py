@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from urllib.parse import urlencode
 
 from django_otp import user_has_device
@@ -7,16 +6,17 @@ from django.shortcuts import redirect
 from django.urls import reverse
 
 
-class OTPMiddlewareBase(ABC):
+class OTPMiddlewareBase:
     """
     Base class for OTP middleware.
 
     This class provides a base implementation for OTP middleware. It provides a
     `process_view` method that checks whether a request needs to verify OTP and
-    redirects to the OTP verification view if necessary. The conditions on when
-    to require verification must be implemented in the `user_needs_verification`
-    method in a subclass. For more complex verification logic, you can override
-    the `request_needs_verification` and `view_func_needs_verification` methods.
+    redirects to the OTP verification view if necessary. The conditions on when to
+    require verification can be implemented by overriding the
+    `user_needs_verification` method in a subclass. For more complex verification
+    logic, you can override the `request_needs_verification` and
+    `view_func_needs_verification` methods.
 
     Views can be marked as exempt from OTP verification by using the `otp_exempt`
     decorator.
@@ -58,13 +58,14 @@ class OTPMiddlewareBase(ABC):
         params = {"next": request.get_full_path()}
         return f"{target}?{urlencode(params)}"
 
-    @abstractmethod
-    def user_needs_verification(self, user):
+    def user_needs_verification(self, user):  # noqa: PLR6301
         """
         Check if a user needs to verify their OTP.
 
-        Override this method to implement the verification logic.
+        By default, this will require all (authenticated and not verified) users to
+        verify. Override this method to customize the verification logic.
         """
+        return True
 
     def view_func_needs_verification(self, view_func):
         """
@@ -78,12 +79,16 @@ class OTPMiddlewareBase(ABC):
         """
         Check whether a request needs to verify OTP.
 
-        The request needs to verify OTP if the user needs verification and the
-        view function needs verification.
+        The request needs to verify OTP if the user needs verification and the view
+        function needs verification. The user never needs to verify if they are not
+        authenticated or already verified.
         """
-        return self.view_func_needs_verification(
-            view_func
-        ) and self.user_needs_verification(request.user)
+        return (
+            request.user.is_authenticated
+            and not request.user.is_verified()
+            and self.view_func_needs_verification(view_func)
+            and self.user_needs_verification(request.user)
+        )
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         if self.request_needs_verification(request, view_func):
@@ -94,22 +99,13 @@ class OTPMiddlewareBase(ABC):
 
 class OTPRequiredMiddleware(OTPMiddlewareBase):
     """
-    Middleware that requires users to verify their OTP.
+    Middleware that requires all users to verify their OTP.
 
     This middleware should be placed after the authentication middleware and
     django_otp.middleware.OTPMiddleware. It will redirect users to the OTP
     verification view if they are authenticated and have not yet verified their OTP,
     or to the OTP setup view if they have not yet configured an OTP device.
     """
-
-    def user_needs_verification(self, user):  # noqa: PLR6301
-        """
-        Check if a user needs to verify their OTP.
-
-        A user needs to verify their OTP if they are authenticated and have not yet
-        verified their OTP.
-        """
-        return user.is_authenticated and not user.is_verified()
 
 
 class OTPVerificationRequiredIfConfiguredMiddleware(OTPMiddlewareBase):
@@ -130,9 +126,7 @@ class OTPVerificationRequiredIfConfiguredMiddleware(OTPMiddlewareBase):
         A user needs to verify their OTP if they are authenticated, have an OTP
         device, and have not yet verified their OTP.
         """
-        return (
-            user.is_authenticated and not user.is_verified() and user_has_device(user)
-        )
+        return user_has_device(user)
 
 
 class OTPSetupRequiredIfStaffUserMiddleware(OTPMiddlewareBase):
@@ -153,4 +147,4 @@ class OTPSetupRequiredIfStaffUserMiddleware(OTPMiddlewareBase):
         A user needs to verify their OTP if they are authenticated, are staff, and
         have not yet verified their OTP.
         """
-        return user.is_authenticated and user.is_staff and not user.is_verified()
+        return user.is_staff

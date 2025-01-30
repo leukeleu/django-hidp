@@ -271,6 +271,7 @@ class TestOTPRequiredIfStaffUser(OTPMiddlewareTestBase):
         """Non-staff users should not need to verify OTP."""
         request = self.request_factory.get("/")
         request.user = user_factories.VerifiedUserFactory(is_staff=False)
+        self.verify_user(request.user, verified=False)
 
         self.assertFalse(
             self.middleware.request_needs_verification(request, basic_view),
