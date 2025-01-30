@@ -1,13 +1,14 @@
+import django_otp
 import segno
 
-from django_otp import devices_for_user
-from django_otp import login as otp_login
 from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.generics import get_object_or_404
 from rest_framework.reverse import reverse_lazy
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import RedirectURLMixin
 from django.db import transaction
 from django.forms import Form
 from django.http import HttpResponseRedirect
@@ -22,9 +23,10 @@ from hidp.otp.devices import (
     get_or_create_devices,
     reset_static_tokens,
 )
-from hidp.otp.forms import OTPSetupForm
+from hidp.otp.forms import OTPSetupForm, OTPVerifyForm
 from hidp.rate_limit.decorators import rate_limit_strict
 
+from .decorators import otp_exempt
 from .forms import OTPTokenForm
 
 
@@ -77,7 +79,7 @@ class OTPDisableView(FormView):
 
     @transaction.atomic
     def form_valid(self, form):
-        for device in devices_for_user(self.request.user):
+        for device in django_otp.devices_for_user(self.request.user):
             device.delete()
         return super().form_valid(form)
 
@@ -169,5 +171,24 @@ class OTPSetupDeviceView(FormView):
 
     def form_valid(self, form):
         form.save()
-        otp_login(self.request, self.device)
+        django_otp.login(self.request, self.device)
+        return super().form_valid(form)
+
+
+@method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(login_required, name="dispatch")
+@method_decorator(otp_exempt, name="dispatch")
+class VerifyOTPView(RedirectURLMixin, FormView):
+    template_name = "hidp/otp/verify.html"
+    form_class = OTPVerifyForm
+    next_page = settings.LOGIN_REDIRECT_URL
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
+
+    def form_valid(self, form):
+        # Persist the OTP device in the session
+        django_otp.login(self.request, self.request.user.otp_device)
         return super().form_valid(form)

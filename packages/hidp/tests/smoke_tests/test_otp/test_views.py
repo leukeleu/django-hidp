@@ -76,8 +76,14 @@ class TestOTPDisable(TestCase):
         }
         response = self.client.post(reverse("hidp_otp_management:disable"), form_data)
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
-        self.assertFalse(self.user.totpdevice_set.exists())
-        self.assertFalse(self.user.staticdevice_set.exists())
+        self.assertFalse(
+            self.user.totpdevice_set.exists(),
+            msg="Expected the user to have no TOTP devices",
+        )
+        self.assertFalse(
+            self.user.staticdevice_set.exists(),
+            msg="Expected the user to have no static devices",
+        )
 
 
 class TestOTPRecoveryCodesView(TestCase):
@@ -169,11 +175,11 @@ class TestOTPSetupView(TestCase):
         }
         response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
         form = response.context["form"]
-        self.assertFalse(form.is_valid())
+        self.assertFalse(form.is_valid(), msg="Expected form to be invalid")
         # Check that the error is on the token field
         self.assertIn("otp_token", form.errors)
         errors = form.errors.as_data()
-        self.assertEqual(errors["otp_token"][0].code, "token_invalid")
+        self.assertEqual(errors["otp_token"][0].code, "invalid_token")
 
         totp_device = TOTPDevice.objects.get(user=self.user)
         self.assertFalse(
@@ -201,4 +207,46 @@ class TestOTPSetupView(TestCase):
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
         self.assertTrue(
             response.wsgi_request.user.is_verified(), "Expected user to be verified"
+        )
+
+
+class TestOTPVerifyView(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.VerifiedUserFactory()
+
+    def test_requires_login(self):
+        response = self.client.get(reverse("hidp_otp:verify"))
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_accounts:login')}?next={reverse('hidp_otp:verify')}",
+        )
+
+    def test_valid_form_verifies_user(self):
+        otp_factories.StaticTokenFactory(
+            device__user=self.user, device__confirmed=True, token="123456"
+        )
+        self.client.force_login(self.user)
+        form_data = {"otp_token": "123456"}
+        manage_url = reverse("hidp_account_management:manage_account")
+        response = self.client.post(
+            f"{reverse('hidp_otp:verify')}?next={manage_url}", form_data
+        )
+        self.assertRedirects(response, manage_url)
+        self.assertTrue(
+            response.wsgi_request.user.is_verified(), "Expected user to be verified"
+        )
+
+    def test_invalid_form_does_not_verify_user(self):
+        otp_factories.StaticTokenFactory(device__user=self.user, device__confirmed=True)
+        self.client.force_login(self.user)
+        form_data = {"otp_token": "invalid"}
+        response = self.client.post(reverse("hidp_otp:verify"), form_data)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid(), msg="Expected form to be invalid")
+        # Check that the error is on the token field
+        errors = form.errors.as_data()
+        self.assertEqual(errors["__all__"][0].code, "invalid_token")
+        self.assertFalse(
+            response.wsgi_request.user.is_verified(), "Expected user to be unverified"
         )

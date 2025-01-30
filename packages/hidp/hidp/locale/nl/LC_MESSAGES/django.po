@@ -204,6 +204,7 @@ msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een 
 #: hidp/accounts/views.py hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/verify.html
 msgid "Two-factor authentication"
 msgstr "Twee-factor-authenticatie"
 
@@ -278,12 +279,12 @@ msgid "Recovery codes"
 msgstr "Herstelcodes"
 
 #: hidp/otp/forms.py
-msgid "Enter a valid one-time password token."
-msgstr "Voer een geldige token in."
-
-#: hidp/otp/forms.py
 msgid "I have stored my backup codes in a safe place"
 msgstr "Ik heb mijn herstelcodes op een veilige plek opgeslagen"
+
+#: hidp/otp/forms.py
+msgid "Invalid token. Please make sure you have entered it correctly."
+msgstr "Ongeldig token. Controleer of je het correct hebt ingevoerd."
 
 #: hidp/otp/forms.py
 msgid "Verify the code from the app"
@@ -844,7 +845,6 @@ msgid "Generate new codes"
 msgstr "Genereer nieuwe codes"
 
 #: hidp/templates/hidp/otp/recovery_codes.html
-#, fuzzy
 msgid ""
 "Keep these codes safe. These codes are the only way to log in\n"
 "if you lose access to your two-factor device."
@@ -875,3 +875,7 @@ msgstr "Verzenden"
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Two-factor Authentication"
 msgstr "Twee-factor-authenticatie"
+
+#: hidp/templates/hidp/otp/verify.html
+msgid "Verify"
+msgstr "Verifiëren"
