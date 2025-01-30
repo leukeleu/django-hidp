@@ -27,6 +27,14 @@ class OTPMiddlewareBase:
     device, or else to the OTP setup view.
     """
 
+    def __new__(cls, *args, **kwargs):
+        if cls is OTPMiddlewareBase:
+            raise TypeError(
+                f"{cls.__name__} cannot be used directly, use one of the "
+                "subclasses instead"
+            )
+        return super().__new__(cls)
+
     def __init__(self, get_response):
         self.get_response = get_response
 
