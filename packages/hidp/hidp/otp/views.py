@@ -23,11 +23,10 @@ from hidp.otp.devices import (
     get_or_create_devices,
     reset_static_tokens,
 )
-from hidp.otp.forms import OTPSetupForm, OTPVerifyForm
+from hidp.otp.forms import OTPSetupForm, VerifyStaticTokenForm, VerifyTOTPForm
 from hidp.rate_limit.decorators import rate_limit_strict
 
 from .decorators import otp_exempt
-from .forms import OTPTokenForm
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -62,7 +61,7 @@ class OTPDisableView(FormView):
     """
 
     template_name = "hidp/otp/disable.html"
-    form_class = OTPTokenForm
+    form_class = VerifyTOTPForm
     success_url = reverse_lazy("hidp_otp_management:manage")
 
     def get_context_data(self, **kwargs):
@@ -179,9 +178,7 @@ class OTPSetupDeviceView(FormView):
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 @method_decorator(otp_exempt, name="dispatch")
-class VerifyOTPView(RedirectURLMixin, FormView):
-    template_name = "hidp/otp/verify.html"
-    form_class = OTPVerifyForm
+class VerifyOTPBase(RedirectURLMixin, FormView):
     next_page = settings.LOGIN_REDIRECT_URL
 
     def get_form_kwargs(self):
@@ -193,3 +190,13 @@ class VerifyOTPView(RedirectURLMixin, FormView):
         # Persist the OTP device in the session
         django_otp.login(self.request, self.request.user.otp_device)
         return super().form_valid(form)
+
+
+class VerifyTOTPView(VerifyOTPBase):
+    template_name = "hidp/otp/verify.html"
+    form_class = VerifyTOTPForm
+
+
+class VerifyRecoveryCodeView(VerifyOTPBase):
+    template_name = "hidp/otp/verify_recovery_code.html"
+    form_class = VerifyStaticTokenForm

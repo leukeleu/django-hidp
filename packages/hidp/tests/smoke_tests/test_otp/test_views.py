@@ -8,6 +8,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from hidp.otp.devices import reset_static_tokens
+from hidp.otp.forms import VerifyTOTPForm
 from hidp.test.factories import otp_factories, user_factories
 
 
@@ -61,18 +62,17 @@ class TestOTPDisable(TestCase):
         response = self.client.get(reverse("hidp_otp_management:disable"))
         self.assertTemplateUsed(response, "hidp/otp/disable.html")
 
-    def test_post_otp_disable(self):
+    @mock.patch.object(VerifyTOTPForm, "clean_otp", return_value=None, autospec=True)
+    def test_post_otp_disable(self, mock_chosen_device):
         otp_factories.TOTPDeviceFactory(user=self.user, confirmed=True)
         static_device = otp_factories.StaticDeviceFactory(
             user=self.user, confirmed=True
         )
-        otp_factories.StaticTokenFactory.create_batch(9, device=static_device)
-        otp_factories.StaticTokenFactory(device=static_device, token="static-token")
+        otp_factories.StaticTokenFactory.create_batch(10, device=static_device)
         self.client.force_login(self.user)
 
         form_data = {
-            "otp_device": static_device.persistent_id,
-            "otp_token": "static-token",
+            "otp_token": "123456",
         }
         response = self.client.post(reverse("hidp_otp_management:disable"), form_data)
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
@@ -83,6 +83,33 @@ class TestOTPDisable(TestCase):
         self.assertFalse(
             self.user.staticdevice_set.exists(),
             msg="Expected the user to have no static devices",
+        )
+
+    def test_static_token_not_accepted(self):
+        otp_factories.TOTPDeviceFactory(user=self.user, confirmed=True)
+        static_device = otp_factories.StaticDeviceFactory(
+            user=self.user, confirmed=True
+        )
+        otp_factories.StaticTokenFactory.create_batch(9, device=static_device)
+        otp_factories.StaticTokenFactory(token="static-token", device=static_device)
+        self.client.force_login(self.user)
+
+        form_data = {
+            "otp_token": "static-token",
+        }
+        response = self.client.post(reverse("hidp_otp_management:disable"), form_data)
+        form = response.context["form"]
+        self.assertFalse(form.is_valid(), msg="Expected form to be invalid")
+        # Check that the error is on the token field
+        errors = form.errors.as_data()
+        self.assertEqual(errors["__all__"][0].code, "invalid_token")
+        self.assertTrue(
+            self.user.totpdevice_set.exists(),
+            msg="Expected the user to have TOTP devices",
+        )
+        self.assertTrue(
+            self.user.staticdevice_set.exists(),
+            msg="Expected the user to have static devices",
         )
 
 

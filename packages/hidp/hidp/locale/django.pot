@@ -204,6 +204,7 @@ msgstr ""
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Two-factor authentication"
 msgstr ""
 
@@ -278,15 +279,19 @@ msgid "Recovery codes"
 msgstr ""
 
 #: hidp/otp/forms.py
+msgid "Enter a recovery code"
+msgstr ""
+
+#: hidp/otp/forms.py
+msgid "Enter the code from the app"
+msgstr ""
+
+#: hidp/otp/forms.py
 msgid "I have stored my backup codes in a safe place"
 msgstr ""
 
 #: hidp/otp/forms.py
 msgid "Invalid token. Please make sure you have entered it correctly."
-msgstr ""
-
-#: hidp/otp/forms.py
-msgid "Verify the code from the app"
 msgstr ""
 
 #: hidp/otp/forms.py
@@ -872,5 +877,14 @@ msgid "Two-factor Authentication"
 msgstr ""
 
 #: hidp/templates/hidp/otp/verify.html
+msgid "If you have lost your device, you can use a recovery code to log in."
+msgstr ""
+
+#: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Verify"
+msgstr ""
+
+#: hidp/templates/hidp/otp/verify.html
+msgid "use recovery code"
 msgstr ""

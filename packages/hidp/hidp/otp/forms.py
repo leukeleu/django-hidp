@@ -2,7 +2,8 @@ from django_otp import verify_token
 from django_otp.forms import (
     OTPAuthenticationFormMixin as DjangoOTPAuthenticationFormMixin,
 )
-from django_otp.forms import OTPTokenForm as DjangoOTPTokenForm
+from django_otp.plugins.otp_static.models import StaticDevice
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -16,10 +17,6 @@ class OTPAuthenticationFormMixin(DjangoOTPAuthenticationFormMixin):
             "Invalid token. Please make sure you have entered it correctly."
         ),
     }
-
-
-class OTPTokenForm(DjangoOTPTokenForm):
-    otp_challenge = None  # don't require OTP challenge for OTP token form
 
 
 class OTPSetupForm(forms.Form):
@@ -62,22 +59,22 @@ class OTPSetupForm(forms.Form):
         self.backup_device.save(update_fields=["confirmed"])
 
 
-class OTPVerifyForm(OTPAuthenticationFormMixin, forms.Form):
-    """
-    A form used to verify an OTP token.
-
-    This form is used to verify an OTP token entered by the user. It will verify the
-    token against any confirmed OTP devices the user has.
-    """
+class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
+    device_class = None
+    label = None
 
     otp_token = forms.CharField(
         widget=forms.TextInput(attrs={"autocomplete": "one-time-code"})
     )
 
-    def __init__(self, user, request=None, *args, **kwargs):
+    def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.user = user
+        self.fields["otp_token"].label = self.label
+
+    def _chosen_device(self, user):
+        return self.device_class.objects.devices_for_user(user, confirmed=True).first()
 
     def clean(self):
         super().clean()
@@ -85,3 +82,27 @@ class OTPVerifyForm(OTPAuthenticationFormMixin, forms.Form):
         self.clean_otp(self.user)
 
         return self.cleaned_data
+
+
+class VerifyTOTPForm(OTPVerifyFormBase):
+    """
+    A form used to verify a TOTP token from an Authenticator App.
+
+    This form is used to verify a TOTP token entered by the user. It will verify the
+    token against the user's confirmed TOTP device.
+    """
+
+    device_class = TOTPDevice
+    label = _("Enter the code from the app")
+
+
+class VerifyStaticTokenForm(OTPVerifyFormBase):
+    """
+    A form used to verify a static token from a list of recovery codes.
+
+    This form is used to verify a static token entered by the user. It will verify
+    the token against the user's confirmed Static device.
+    """
+
+    device_class = StaticDevice
+    label = _("Enter a recovery code")

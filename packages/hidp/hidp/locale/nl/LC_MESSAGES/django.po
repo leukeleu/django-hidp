@@ -205,6 +205,7 @@ msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een 
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Two-factor authentication"
 msgstr "Twee-factor-authenticatie"
 
@@ -279,16 +280,20 @@ msgid "Recovery codes"
 msgstr "Herstelcodes"
 
 #: hidp/otp/forms.py
+msgid "Enter a recovery code"
+msgstr "Gebruik een herstelcode"
+
+#: hidp/otp/forms.py
+msgid "Enter the code from the app"
+msgstr "Voer de code van de app in"
+
+#: hidp/otp/forms.py
 msgid "I have stored my backup codes in a safe place"
 msgstr "Ik heb mijn herstelcodes op een veilige plek opgeslagen"
 
 #: hidp/otp/forms.py
 msgid "Invalid token. Please make sure you have entered it correctly."
 msgstr "Ongeldig token. Controleer of je het correct hebt ingevoerd."
-
-#: hidp/otp/forms.py
-msgid "Verify the code from the app"
-msgstr "Verifieer de code van de app"
 
 #: hidp/otp/forms.py
 msgid "You can use these codes to log in if you lose access to your device"
@@ -877,5 +882,14 @@ msgid "Two-factor Authentication"
 msgstr "Twee-factor-authenticatie"
 
 #: hidp/templates/hidp/otp/verify.html
+msgid "If you have lost your device, you can use a recovery code to log in."
+msgstr "Als je je apparaat bent kwijtgeraakt, kun je een herstelcode gebruiken om in te loggen."
+
+#: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Verify"
 msgstr "Verifiëren"
+
+#: hidp/templates/hidp/otp/verify.html
+msgid "use recovery code"
+msgstr "gebruik herstelcode"
