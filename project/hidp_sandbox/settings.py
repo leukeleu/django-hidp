@@ -99,7 +99,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
-    "hidp.otp.middleware.OTPRequiredIfConfiguredMiddleware",
+    "hidp.otp.middleware.OTPVerificationRequiredIfConfiguredMiddleware",
+    "hidp.otp.middleware.OTPSetupRequiredIfStaffUserMiddleware",
 ]
 
 ROOT_URLCONF = "hidp_sandbox.urls"

@@ -117,6 +117,7 @@ class OTPRecoveryCodes(DetailView, FormView):
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 @method_decorator(login_required, name="dispatch")
+@method_decorator(otp_exempt, name="dispatch")
 class OTPSetupDeviceView(FormView):
     """
     View for setting up a new OTP device.
