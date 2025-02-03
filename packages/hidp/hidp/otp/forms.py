@@ -22,7 +22,7 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
     device_class = None
 
     # The label to use for the OTP token field.
-    label = None
+    otp_token_field_label = None
 
     otp_token = forms.CharField(
         widget=forms.TextInput(attrs={"autocomplete": "one-time-code"})
@@ -32,7 +32,7 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
         super().__init__(*args, **kwargs)
 
         self.user = user
-        self.fields["otp_token"].label = self.label
+        self.fields["otp_token"].label = self.otp_token_field_label
 
     def _chosen_device(self, user):
         device = self.get_device(user)
@@ -63,7 +63,7 @@ class VerifyTOTPForm(OTPVerifyFormBase):
     """
 
     device_class = TOTPDevice
-    label = _("Enter the code from the app")
+    otp_token_field_label = _("Enter the code from the app")
 
 
 class VerifyStaticTokenForm(OTPVerifyFormBase):
@@ -75,11 +75,11 @@ class VerifyStaticTokenForm(OTPVerifyFormBase):
     """
 
     device_class = StaticDevice
-    label = _("Enter a recovery code")
+    otp_token_field_label = _("Enter a recovery code")
 
 
 class OTPSetupForm(OTPVerifyFormBase):
-    label = _("Enter the code from the app")
+    otp_token_field_label = _("Enter the code from the app")
     confirm_stored_backup_tokens = forms.BooleanField(
         required=True,
         label=_("I have stored my backup codes in a safe place"),
