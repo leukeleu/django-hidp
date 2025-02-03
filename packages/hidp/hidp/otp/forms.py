@@ -35,7 +35,13 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
         self.fields["otp_token"].label = self.label
 
     def _chosen_device(self, user):
-        return self.get_device(user)
+        device = self.get_device(user)
+        if device is None:
+            # We cannot allow the user to verify a token if they don't have a device
+            raise RuntimeError(
+                "No device found for user. Ensure get_device() returns a device."
+            )
+        return device
 
     def get_device(self, user):
         return self.device_class.objects.devices_for_user(user, confirmed=True).first()
