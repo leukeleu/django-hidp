@@ -6,6 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "hidp"
 authors = [
   { name = "Jaap Roes", email = "jroes@leukeleu.nl" },
+  { name = "Dennis Bunskoek", email = "dbunskoek@leukeleu.nl" },
+  { name = "Thomas Kalverda", email = "tkalverda@leukeleu.nl" },
+  { name = "Wouter de Vries", email = "wdevries@leukeleu.nl" },
 ]
 requires-python = ">=3.11"
 dynamic = [
