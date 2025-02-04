@@ -113,6 +113,48 @@ class TestOTPDisable(TestCase):
         )
 
 
+class TestOTPDisableWithRecoveryCode(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.VerifiedUserFactory()
+
+    def test_requires_login(self):
+        response = self.client.get(reverse("hidp_otp_management:disable-recovery-code"))
+        self.assertRedirects(
+            response,
+            f"/login/?next={reverse('hidp_otp_management:disable-recovery-code')}",
+        )
+
+    def test_get_otp_disable_with_recovery_code(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("hidp_otp_management:disable-recovery-code"))
+        self.assertTemplateUsed(response, "hidp/otp/disable_recovery_code.html")
+
+    def test_post_otp_disable_with_recovery_code(self):
+        static_device = otp_factories.StaticDeviceFactory(
+            user=self.user, confirmed=True
+        )
+        otp_factories.StaticTokenFactory.create_batch(9, device=static_device)
+        otp_factories.StaticTokenFactory(device=static_device, token="static-token")
+        self.client.force_login(self.user)
+
+        form_data = {
+            "otp_token": "static-token",
+        }
+        response = self.client.post(
+            reverse("hidp_otp_management:disable-recovery-code"), form_data
+        )
+        self.assertRedirects(response, reverse("hidp_otp_management:manage"))
+        self.assertFalse(
+            self.user.totpdevice_set.exists(),
+            msg="Expected the user to have no TOTP devices",
+        )
+        self.assertFalse(
+            self.user.staticdevice_set.exists(),
+            msg="Expected the user to have no static devices",
+        )
+
+
 class TestOTPRecoveryCodesView(TestCase):
     @classmethod
     def setUpTestData(cls):

@@ -202,6 +202,7 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
 #: hidp/accounts/views.py hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/verify.html
@@ -803,17 +804,28 @@ msgstr[0] "Je account is momenteel aan de volgende dienst gekoppeld:"
 msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"
 
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disable two-factor authentication"
 msgstr "Twee-factor-authenticatie uitschakelen"
 
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disabling two-factor authentication will make your account less secure."
 msgstr "Het uitschakelen van twee-factor-authenticatie maakt je account minder veilig."
 
+#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
+msgid "If you have lost your device, you can use a recovery code instead."
+msgstr "Als je je apparaat bent kwijtgeraakt, kun je in plaats daarvan een herstelcode gebruiken."
+
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Warning"
 msgstr "Waarschuwing"
+
+#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
+msgid "use recovery code"
+msgstr "gebruik herstelcode"
 
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
@@ -882,14 +894,6 @@ msgid "Two-factor Authentication"
 msgstr "Twee-factor-authenticatie"
 
 #: hidp/templates/hidp/otp/verify.html
-msgid "If you have lost your device, you can use a recovery code to log in."
-msgstr "Als je je apparaat bent kwijtgeraakt, kun je een herstelcode gebruiken om in te loggen."
-
-#: hidp/templates/hidp/otp/verify.html
 #: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Verify"
 msgstr "Verifiëren"
-
-#: hidp/templates/hidp/otp/verify.html
-msgid "use recovery code"
-msgstr "gebruik herstelcode"

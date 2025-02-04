@@ -13,7 +13,7 @@
   {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Verify') %}
   </form>
 
-  <p>{% translate 'If you have lost your device, you can use a recovery code to log in.' %}</p>
+  <p>{% translate 'If you have lost your device, you can use a recovery code instead.' %}</p>
   <p><a href="{% url 'hidp_otp:verify-recovery-code' %}">{% translate "use recovery code" %}</a></p>
 
 {% endblock %}

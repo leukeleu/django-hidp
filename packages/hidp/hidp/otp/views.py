@@ -85,6 +85,21 @@ class OTPDisableView(FormView):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(login_required, name="dispatch")
+class OTPDisableViewRecoveryCode(OTPDisableView):
+    """
+    View to disable OTP for a user using a recovery code.
+
+    This view will delete all OTP devices for a user, effectively disabling OTP for
+    that user. Disabling requires the user to be logged in and to provide a valid
+    recovery code.
+    """
+
+    template_name = "hidp/otp/disable_recovery_code.html"
+    form_class = VerifyStaticTokenForm
+
+
+@method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(login_required, name="dispatch")
 class OTPRecoveryCodes(DetailView, FormView):
     """
     View for managing recovery codes.

@@ -201,6 +201,7 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr ""
 
 #: hidp/accounts/views.py hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/verify.html
@@ -802,16 +803,27 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disable two-factor authentication"
 msgstr ""
 
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disabling two-factor authentication will make your account less secure."
 msgstr ""
 
+#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
+msgid "If you have lost your device, you can use a recovery code instead."
+msgstr ""
+
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Warning"
+msgstr ""
+
+#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
+msgid "use recovery code"
 msgstr ""
 
 #: hidp/templates/hidp/otp/overview.html
@@ -877,14 +889,6 @@ msgid "Two-factor Authentication"
 msgstr ""
 
 #: hidp/templates/hidp/otp/verify.html
-msgid "If you have lost your device, you can use a recovery code to log in."
-msgstr ""
-
-#: hidp/templates/hidp/otp/verify.html
 #: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Verify"
-msgstr ""
-
-#: hidp/templates/hidp/otp/verify.html
-msgid "use recovery code"
 msgstr ""

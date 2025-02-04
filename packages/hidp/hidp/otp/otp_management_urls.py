@@ -16,6 +16,11 @@ urlpatterns = [
         name="disable",
     ),
     path(
+        "disable/recovery-code/",
+        views.OTPDisableViewRecoveryCode.as_view(),
+        name="disable-recovery-code",
+    ),
+    path(
         "recovery-codes/",
         views.OTPRecoveryCodes.as_view(),
         name="recovery-codes",
