@@ -21,18 +21,22 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
     # The device class to use for verification, e.g. TOTPDevice or StaticDevice.
     device_class = None
 
-    # The label to use for the OTP token field.
-    otp_token_field_label = None
+    @staticmethod
+    def create_otp_token_field(label):
+        """
+        Create a form field for the OTP token.
 
-    otp_token = forms.CharField(
-        widget=forms.TextInput(attrs={"autocomplete": "one-time-code"})
-    )
+        Subclasses should use this method to create the form field for the OTP token.
+        """
+        return forms.CharField(
+            widget=forms.TextInput(attrs={"autocomplete": "one-time-code"}),
+            label=label,
+        )
 
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.user = user
-        self.fields["otp_token"].label = self.otp_token_field_label
 
     def _chosen_device(self, user):
         device = self.get_device(user)
@@ -63,7 +67,9 @@ class VerifyTOTPForm(OTPVerifyFormBase):
     """
 
     device_class = TOTPDevice
-    otp_token_field_label = _("Enter the code from the app")
+    otp_token = OTPVerifyFormBase.create_otp_token_field(
+        _("Enter the code from the app")
+    )
 
 
 class VerifyStaticTokenForm(OTPVerifyFormBase):
@@ -75,11 +81,13 @@ class VerifyStaticTokenForm(OTPVerifyFormBase):
     """
 
     device_class = StaticDevice
-    otp_token_field_label = _("Enter a recovery code")
+    otp_token = OTPVerifyFormBase.create_otp_token_field(_("Enter a recovery code"))
 
 
 class OTPSetupForm(OTPVerifyFormBase):
-    otp_token_field_label = _("Enter the code from the app")
+    otp_token = OTPVerifyFormBase.create_otp_token_field(
+        _("Enter the code from the app")
+    )
     confirm_stored_backup_tokens = forms.BooleanField(
         required=True,
         label=_("I have stored my backup codes in a safe place"),
