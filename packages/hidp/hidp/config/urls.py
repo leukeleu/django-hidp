@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 from django.urls import include, path
 
@@ -11,7 +12,14 @@ urlpatterns = [
     path("manage/oidc/", include(oidc_management_urls)),
 ]
 
-if "hidp.otp" in settings.INSTALLED_APPS:
+if all(
+    apps.is_installed(app)
+    for app in (
+        "hidp.otp",
+        "django_otp.plugins.otp_totp",
+        "django_otp.plugins.otp_static",
+    )
+):
     from ..otp import otp_management_urls
 
     urlpatterns += [
