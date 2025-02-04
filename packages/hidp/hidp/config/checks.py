@@ -38,9 +38,7 @@ REQUIRED_MIDDLEWARE = [
     "hidp.rate_limit.middleware.RateLimitMiddleware",
 ]
 
-OTP_REQUIRED_MIDDLEWARE = [
-    "django_otp.middleware.OTPMiddleware",
-]
+OTP_REQUIRED_MIDDLEWARE = "django_otp.middleware.OTPMiddleware"
 
 
 class Tags:
@@ -197,11 +195,11 @@ def check_otp_installed_apps(**kwargs):
     return []
 
 
-# Make sure the required middlewares for OTP are included
+# Make sure the required middleware for OTP is included
 E010 = checks.Error(
     "MIDDLEWARE does not include the required middleware for OTP to work.",
-    hint="MIDDLEWARE should include the following middleware: {}.".format(
-        ", ".join(f"{middleware!r}" for middleware in OTP_REQUIRED_MIDDLEWARE)
+    hint=(
+        f'Add "{OTP_REQUIRED_MIDDLEWARE}" middleware after "AuthenticationMiddleware".'
     ),
     id="hidp.E010",
 )
@@ -209,10 +207,11 @@ E010 = checks.Error(
 
 @checks.register(Tags.middleware)
 def check_otp_middleware(**kwargs):
-    if "hidp.otp" in settings.INSTALLED_APPS:
-        for middleware in OTP_REQUIRED_MIDDLEWARE:
-            if middleware not in settings.MIDDLEWARE:
-                return [E010]
+    if (
+        "hidp.otp" in settings.INSTALLED_APPS
+        and OTP_REQUIRED_MIDDLEWARE not in settings.MIDDLEWARE
+    ):
+        return [E010]
     return []
 
 
