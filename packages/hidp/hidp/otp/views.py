@@ -24,7 +24,7 @@ from hidp.otp.devices import (
     reset_static_tokens,
 )
 from hidp.otp.forms import OTPSetupForm, VerifyStaticTokenForm, VerifyTOTPForm
-from hidp.rate_limit.decorators import rate_limit_strict
+from hidp.rate_limit.decorators import rate_limit_default
 
 from .decorators import otp_exempt
 
@@ -50,6 +50,7 @@ class OTPOverviewView(TemplateView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 class OTPDisableView(FormView):
     """
@@ -129,7 +130,7 @@ class OTPRecoveryCodes(DetailView, FormView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
-@method_decorator(rate_limit_strict, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 @method_decorator(otp_exempt, name="dispatch")
 class OTPSetupDeviceView(FormView):
@@ -191,6 +192,7 @@ class OTPSetupDeviceView(FormView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 @method_decorator(otp_exempt, name="dispatch")
 class VerifyOTPBase(RedirectURLMixin, FormView):
