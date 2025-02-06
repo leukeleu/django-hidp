@@ -24,3 +24,17 @@ class OTPConfiguredMailer(BaseOTPUserMailer):
             }
             | (extra_context or {})
         )
+
+
+class OTPDisabledMailer(BaseOTPUserMailer):
+    subject_template_name = "hidp/otp/email/disabled_subject.txt"
+    email_template_name = "hidp/otp/email/disabled_body.txt"
+    html_email_template_name = "hidp/otp/email/disabled_body.html"
+
+    def get_context(self, extra_context=None):
+        return super().get_context(
+            {
+                "otp_management_url": self.base_url + reverse("hidp_otp_management:manage"),
+            }
+            | (extra_context or {})
+        )

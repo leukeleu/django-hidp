@@ -1,0 +1,14 @@
+{% extends "hidp/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+<p>
+  {% blocktranslate trimmed %}
+  Your two-factor-authentication configuration on your account has been removed.
+
+  Your recovery codes have been invalidated, and you will need to generate
+  new ones if you wish to use two-factor-authentication again.
+  {% endblocktranslate %}
+</p>
+<p><a href="{{ otp_management_url }}">{{ otp_management_url }}</a></p>
+{% endblock %}

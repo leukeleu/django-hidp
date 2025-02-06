@@ -142,9 +142,14 @@ class TestOTPDisableWithRecoveryCode(TestCase):
         form_data = {
             "otp_token": "static-token",
         }
-        response = self.client.post(
-            reverse("hidp_otp_management:disable-recovery-code"), form_data
-        )
+        with (
+            self.assertTemplateUsed("hidp/otp/email/disabled_subject.txt"),
+            self.assertTemplateUsed("hidp/otp/email/disabled_body.txt"),
+            self.assertTemplateUsed("hidp/otp/email/disabled_body.html")
+        ):  # fmt: skip
+            response = self.client.post(
+                reverse("hidp_otp_management:disable-recovery-code"), form_data
+            )
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
         self.assertFalse(
             self.user.totpdevice_set.exists(),
@@ -154,6 +159,10 @@ class TestOTPDisableWithRecoveryCode(TestCase):
             self.user.staticdevice_set.exists(),
             msg="Expected the user to have no static devices",
         )
+
+        self.assertEqual(len(mail.outbox), 1, "Expected an email to be sent")
+        self.assertEqual(mail.outbox[0].subject, "Two-factor authentication disabled")
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
 
 class TestOTPRecoveryCodesView(TestCase):

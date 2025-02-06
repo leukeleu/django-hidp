@@ -27,7 +27,7 @@ from hidp.otp.forms import OTPSetupForm, VerifyStaticTokenForm, VerifyTOTPForm
 from hidp.rate_limit.decorators import rate_limit_default
 
 from .decorators import otp_exempt
-from .mailers import OTPConfiguredMailer
+from .mailers import OTPConfiguredMailer, OTPDisabledMailer
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -82,7 +82,15 @@ class OTPDisableView(FormView):
     def form_valid(self, form):
         for device in django_otp.devices_for_user(self.request.user):
             device.delete()
+
+        self.send_mail()
+
         return super().form_valid(form)
+
+    def send_mail(self):
+        base_url = self.request.build_absolute_uri("/")
+
+        OTPDisabledMailer(self.request.user, base_url=base_url).send()
 
 
 class OTPDisableViewRecoveryCode(OTPDisableView):
