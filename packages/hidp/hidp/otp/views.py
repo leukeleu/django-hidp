@@ -84,8 +84,6 @@ class OTPDisableView(FormView):
         return super().form_valid(form)
 
 
-@method_decorator(hidp_csp_protection, name="dispatch")
-@method_decorator(login_required, name="dispatch")
 class OTPDisableViewRecoveryCode(OTPDisableView):
     """
     View to disable OTP for a user using a recovery code.
