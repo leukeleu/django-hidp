@@ -832,6 +832,8 @@ msgid "You've successfully configured two-factor authentication. Please make sur
 msgstr "Je hebt twee-factor-authenticatie succesvol geconfigureerd. Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de twee-factor-authenticatie-instellingenpagina te bezoeken:"
 
 #: hidp/templates/hidp/otp/email/configured_body.txt
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.html
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.txt
 msgid "Please make sure you have stored your recovery codes in a safe place. You can use these codes to access your account if you lose access to your device. You can view your recovery codes by visiting the two-factor authentication settings page:"
 msgstr "Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de twee-factor-authenticatie-instellingenpagina te bezoeken:"
 

@@ -198,11 +198,20 @@ class TestOTPRecoveryCodesView(TestCase):
         reset_static_tokens(device)
         current_tokens = set(device.token_set.values_list("token", flat=True))
         self.client.force_login(self.user)
-        response = self.client.post(reverse("hidp_otp_management:recovery-codes"))
+        with (
+            self.assertTemplateUsed("hidp/otp/email/recovery_codes_regenerated_subject.txt"),
+            self.assertTemplateUsed("hidp/otp/email/recovery_codes_regenerated_body.txt"),
+            self.assertTemplateUsed("hidp/otp/email/recovery_codes_regenerated_body.html")
+        ):  # fmt: skip
+            response = self.client.post(reverse("hidp_otp_management:recovery-codes"))
         self.assertRedirects(response, reverse("hidp_otp_management:recovery-codes"))
         new_tokens = set(device.token_set.values_list("token", flat=True))
         self.assertEqual(new_tokens & current_tokens, set())
         self.assertEqual(len(new_tokens), 10)
+
+        self.assertEqual(len(mail.outbox), 1, "Expected an email to be sent")
+        self.assertEqual(mail.outbox[0].subject, "Recovery codes were regenerated")
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
 
 class TestOTPSetupView(TestCase):

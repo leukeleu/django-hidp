@@ -61,3 +61,18 @@ class RecoveryCodeUsedMailer(BaseOTPUserMailer):
             }
             | (extra_context or {})
         )
+
+
+class RecoveryCodesRegeneratedMailer(BaseOTPUserMailer):
+    subject_template_name = "hidp/otp/email/recovery_codes_regenerated_subject.txt"
+    email_template_name = "hidp/otp/email/recovery_codes_regenerated_body.txt"
+    html_email_template_name = "hidp/otp/email/recovery_codes_regenerated_body.html"
+
+    def get_context(self, extra_context=None):
+        return super().get_context(
+            {
+                "otp_management_url": self.base_url
+                + reverse("hidp_otp_management:manage")
+            }
+            | (extra_context or {})
+        )
