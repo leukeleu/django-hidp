@@ -1,10 +1,10 @@
 from http import HTTPStatus
 from unittest import mock
 
-from django.core import mail
 from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
@@ -367,14 +367,23 @@ class TestOTPVerifyWithRecoveryCodeView(TestCase):
         self.client.force_login(self.user)
         form_data = {"otp_token": "123456"}
         manage_url = reverse("hidp_account_management:manage_account")
-        response = self.client.post(
-            f"{reverse('hidp_otp:verify-recovery-code')}?next={manage_url}",
-            form_data,
-        )
+        with (
+            self.assertTemplateUsed("hidp/otp/email/recovery_code_used_subject.txt"),
+            self.assertTemplateUsed("hidp/otp/email/recovery_code_used_body.txt"),
+            self.assertTemplateUsed("hidp/otp/email/recovery_code_used_body.html"),
+        ):
+            response = self.client.post(
+                f"{reverse('hidp_otp:verify-recovery-code')}?next={manage_url}",
+                form_data,
+            )
         self.assertRedirects(response, manage_url)
         self.assertTrue(
             response.wsgi_request.user.is_verified(), "Expected user to be verified"
         )
+
+        self.assertEqual(len(mail.outbox), 1, "Expected an email to be sent")
+        self.assertEqual(mail.outbox[0].subject, "Recovery code used")
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
     def test_invalid_form_does_not_verify_user(self):
         device = otp_factories.StaticDeviceFactory(user=self.user, confirmed=True)
@@ -390,3 +399,5 @@ class TestOTPVerifyWithRecoveryCodeView(TestCase):
         self.assertFalse(
             response.wsgi_request.user.is_verified(), "Expected user to be unverified"
         )
+
+        self.assertEqual(len(mail.outbox), 0, "Expected no email to be sent")

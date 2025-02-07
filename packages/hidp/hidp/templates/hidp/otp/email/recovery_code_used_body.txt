@@ -1,0 +1,19 @@
+{% load i18n %}{% autoescape off %}
+{% blocktranslate trimmed %}
+A recovery code was used to log in to your account.
+
+If you did not attempt to log in, please reset your password immediately.
+{% endblocktranslate %}
+
+{% blocktranslate trimmed count tokens=recovery_codes_count %}
+You have {{ tokens }} recovery code left.
+{% plural %}
+You have {{ tokens }} recovery codes left.
+{% endblocktranslate %}
+
+{% blocktranslate trimmed %}
+You can generate new recovery codes by visiting the two-factor authentication settings page:
+{% endblocktranslate %}
+
+{{ otp_management_url }}
+{% endautoescape %}

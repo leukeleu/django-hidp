@@ -27,7 +27,7 @@ from hidp.otp.forms import OTPSetupForm, VerifyStaticTokenForm, VerifyTOTPForm
 from hidp.rate_limit.decorators import rate_limit_default
 
 from .decorators import otp_exempt
-from .mailers import OTPConfiguredMailer, OTPDisabledMailer
+from .mailers import OTPConfiguredMailer, OTPDisabledMailer, RecoveryCodeUsedMailer
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -232,3 +232,15 @@ class VerifyTOTPView(VerifyOTPBase):
 class VerifyRecoveryCodeView(VerifyOTPBase):
     template_name = "hidp/otp/verify_recovery_code.html"
     form_class = VerifyStaticTokenForm
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+
+        self.send_mail()
+
+        return result
+
+    def send_mail(self):
+        """Notify the user that a recovery code was used."""
+        base_url = self.request.build_absolute_uri("/")
+        RecoveryCodeUsedMailer(self.request.user, base_url=base_url).send()

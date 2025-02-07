@@ -1,6 +1,9 @@
+from django_otp.plugins.otp_static.models import StaticDevice
+
 from django.urls import reverse
 
 from hidp.accounts.mailers import BaseMailer
+from hidp.otp.devices import get_device_for_user
 
 
 class BaseOTPUserMailer(BaseMailer):
@@ -20,7 +23,8 @@ class OTPConfiguredMailer(BaseOTPUserMailer):
     def get_context(self, extra_context=None):
         return super().get_context(
             {
-                "otp_management_url": self.base_url + reverse("hidp_otp_management:manage"),
+                "otp_management_url": self.base_url
+                + reverse("hidp_otp_management:manage"),
             }
             | (extra_context or {})
         )
@@ -34,7 +38,26 @@ class OTPDisabledMailer(BaseOTPUserMailer):
     def get_context(self, extra_context=None):
         return super().get_context(
             {
-                "otp_management_url": self.base_url + reverse("hidp_otp_management:manage"),
+                "otp_management_url": self.base_url
+                + reverse("hidp_otp_management:manage"),
+            }
+            | (extra_context or {})
+        )
+
+
+class RecoveryCodeUsedMailer(BaseOTPUserMailer):
+    subject_template_name = "hidp/otp/email/recovery_code_used_subject.txt"
+    email_template_name = "hidp/otp/email/recovery_code_used_body.txt"
+    html_email_template_name = "hidp/otp/email/recovery_code_used_body.html"
+
+    def get_context(self, extra_context=None):
+        device = get_device_for_user(self.user, StaticDevice)
+
+        return super().get_context(
+            {
+                "otp_management_url": self.base_url
+                + reverse("hidp_otp_management:manage"),
+                "recovery_codes_count": device.token_set.count(),
             }
             | (extra_context or {})
         )

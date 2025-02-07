@@ -7,7 +7,7 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 from django import forms
 from django.utils.translation import gettext_lazy as _
 
-from hidp.otp.exceptions import MultipleOtpDevicesError, NoOtpDeviceError
+from hidp.otp.devices import get_device_for_user
 
 
 class OTPAuthenticationFormMixin(DjangoOTPAuthenticationFormMixin):
@@ -44,16 +44,7 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
         return self.get_device(user)
 
     def get_device(self, user):
-        try:
-            device = self.device_class.objects.devices_for_user(
-                user, confirmed=True
-            ).get()
-        except self.device_class.DoesNotExist as exc:
-            raise NoOtpDeviceError from exc
-        except self.device_class.MultipleObjectsReturned as exc:
-            raise MultipleOtpDevicesError from exc
-        else:
-            return device
+        return get_device_for_user(user, self.device_class)
 
     def clean(self):
         super().clean()
