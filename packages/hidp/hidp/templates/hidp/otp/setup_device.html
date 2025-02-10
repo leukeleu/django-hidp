@@ -12,6 +12,8 @@
     <h2>{% translate 'Scan the QR code' %}</h2>
     <div><img src="{{ qrcode.svg_data_uri|safe }}" width="200" height="200" alt="" /></div>
 
+    {{ form.non_field_errors }}
+
     {{ form.otp_token.errors }}
     {{ form.otp_token.label_tag }}
     {{ form.otp_token }}

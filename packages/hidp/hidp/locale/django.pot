@@ -201,9 +201,11 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr ""
 
 #: hidp/accounts/views.py hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Two-factor authentication"
 msgstr ""
 
@@ -278,15 +280,19 @@ msgid "Recovery codes"
 msgstr ""
 
 #: hidp/otp/forms.py
+msgid "Enter a recovery code"
+msgstr ""
+
+#: hidp/otp/forms.py
+msgid "Enter the code from the app"
+msgstr ""
+
+#: hidp/otp/forms.py
 msgid "I have stored my backup codes in a safe place"
 msgstr ""
 
 #: hidp/otp/forms.py
 msgid "Invalid token. Please make sure you have entered it correctly."
-msgstr ""
-
-#: hidp/otp/forms.py
-msgid "Verify the code from the app"
 msgstr ""
 
 #: hidp/otp/forms.py
@@ -797,16 +803,27 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disable two-factor authentication"
 msgstr ""
 
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disabling two-factor authentication will make your account less secure."
 msgstr ""
 
+#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
+msgid "If you have lost your device, you can use a recovery code instead."
+msgstr ""
+
 #: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Warning"
+msgstr ""
+
+#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
+msgid "use recovery code"
 msgstr ""
 
 #: hidp/templates/hidp/otp/overview.html
@@ -872,5 +889,6 @@ msgid "Two-factor Authentication"
 msgstr ""
 
 #: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Verify"
 msgstr ""

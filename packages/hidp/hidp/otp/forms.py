@@ -1,12 +1,13 @@
-from django_otp import verify_token
 from django_otp.forms import (
     OTPAuthenticationFormMixin as DjangoOTPAuthenticationFormMixin,
 )
-from django_otp.forms import OTPTokenForm as DjangoOTPTokenForm
+from django_otp.plugins.otp_static.models import StaticDevice
+from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from django import forms
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
+from hidp.otp.exceptions import MultipleOtpDevicesError, NoOtpDeviceError
 
 
 class OTPAuthenticationFormMixin(DjangoOTPAuthenticationFormMixin):
@@ -18,18 +19,79 @@ class OTPAuthenticationFormMixin(DjangoOTPAuthenticationFormMixin):
     }
 
 
-class OTPTokenForm(DjangoOTPTokenForm):
-    otp_challenge = None  # don't require OTP challenge for OTP token form
+class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
+    # The device class to use for verification, e.g. TOTPDevice or StaticDevice.
+    device_class = None
+
+    @staticmethod
+    def create_otp_token_field(label):
+        """
+        Create a form field for the OTP token.
+
+        Subclasses should use this method to create the form field for the OTP token.
+        """
+        return forms.CharField(
+            widget=forms.TextInput(attrs={"autocomplete": "one-time-code"}),
+            label=label,
+        )
+
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.user = user
+
+    def _chosen_device(self, user):
+        return self.get_device(user)
+
+    def get_device(self, user):
+        try:
+            device = self.device_class.objects.devices_for_user(
+                user, confirmed=True
+            ).get()
+        except self.device_class.DoesNotExist as exc:
+            raise NoOtpDeviceError from exc
+        except self.device_class.MultipleObjectsReturned as exc:
+            raise MultipleOtpDevicesError from exc
+        else:
+            return device
+
+    def clean(self):
+        super().clean()
+
+        self.clean_otp(self.user)
+
+        return self.cleaned_data
 
 
-class OTPSetupForm(forms.Form):
-    otp_token = forms.CharField(
-        label=_("Verify the code from the app"),
-        widget=forms.TextInput(
-            attrs={
-                "autocomplete": "one-time-code",
-            }
-        ),
+class VerifyTOTPForm(OTPVerifyFormBase):
+    """
+    A form used to verify a TOTP token from an Authenticator App.
+
+    This form is used to verify a TOTP token entered by the user. It will verify the
+    token against the user's confirmed TOTP device.
+    """
+
+    device_class = TOTPDevice
+    otp_token = OTPVerifyFormBase.create_otp_token_field(
+        _("Enter the code from the app")
+    )
+
+
+class VerifyStaticTokenForm(OTPVerifyFormBase):
+    """
+    A form used to verify a static token from a list of recovery codes.
+
+    This form is used to verify a static token entered by the user. It will verify
+    the token against the user's confirmed Static device.
+    """
+
+    device_class = StaticDevice
+    otp_token = OTPVerifyFormBase.create_otp_token_field(_("Enter a recovery code"))
+
+
+class OTPSetupForm(OTPVerifyFormBase):
+    otp_token = OTPVerifyFormBase.create_otp_token_field(
+        _("Enter the code from the app")
     )
     confirm_stored_backup_tokens = forms.BooleanField(
         required=True,
@@ -39,20 +101,14 @@ class OTPSetupForm(forms.Form):
         ),
     )
 
+    def get_device(self, user):
+        """Hard-wire the unconfirmed device to verify against."""
+        return self.device
+
     def __init__(self, *args, user, device, backup_device, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.user = user
+        super().__init__(user, *args, **kwargs)
         self.device = device
         self.backup_device = backup_device
-
-    def clean_otp_token(self):
-        token = self.cleaned_data["otp_token"]
-        if not verify_token(self.user, self.device.persistent_id, token):
-            raise ValidationError(
-                OTPAuthenticationFormMixin.otp_error_messages["invalid_token"],
-                code="invalid_token",
-            )
-        return token
 
     def save(self):
         # Mark the devices as confirmed
@@ -60,28 +116,3 @@ class OTPSetupForm(forms.Form):
         self.device.save(update_fields=["confirmed"])
         self.backup_device.confirmed = True
         self.backup_device.save(update_fields=["confirmed"])
-
-
-class OTPVerifyForm(OTPAuthenticationFormMixin, forms.Form):
-    """
-    A form used to verify an OTP token.
-
-    This form is used to verify an OTP token entered by the user. It will verify the
-    token against any confirmed OTP devices the user has.
-    """
-
-    otp_token = forms.CharField(
-        widget=forms.TextInput(attrs={"autocomplete": "one-time-code"})
-    )
-
-    def __init__(self, user, request=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.user = user
-
-    def clean(self):
-        super().clean()
-
-        self.clean_otp(self.user)
-
-        return self.cleaned_data
