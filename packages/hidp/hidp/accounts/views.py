@@ -24,6 +24,7 @@ from django.views.decorators.cache import never_cache
 from ..config import oidc_clients
 from ..csp.decorators import hidp_csp_protection
 from ..federated.views import OIDCContextMixin
+from ..otp.decorators import otp_exempt
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
 from . import email_verification, forms, mailers, tokens
@@ -532,6 +533,7 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
         )
 
 
+@method_decorator(otp_exempt, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
 class LogoutView(auth_views.LogoutView):
     """
