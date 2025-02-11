@@ -827,6 +827,64 @@ msgstr "Waarschuwing"
 msgid "use recovery code"
 msgstr "gebruik herstelcode"
 
+#: hidp/templates/hidp/otp/email/configured_body.html
+msgid "You've successfully configured two-factor authentication. Please make sure you have stored your recovery codes in a safe place. You can use these codes to access your account if you lose access to your device. You can view your recovery codes by visiting the two-factor authentication settings page:"
+msgstr "Je hebt twee-factor-authenticatie succesvol geconfigureerd. Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de twee-factor-authenticatie-instellingenpagina te bezoeken:"
+
+#: hidp/templates/hidp/otp/email/configured_body.txt
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.html
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.txt
+msgid "Please make sure you have stored your recovery codes in a safe place. You can use these codes to access your account if you lose access to your device. You can view your recovery codes by visiting the two-factor authentication settings page:"
+msgstr "Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de twee-factor-authenticatie-instellingenpagina te bezoeken:"
+
+#: hidp/templates/hidp/otp/email/configured_body.txt
+msgid "You've successfully configured two-factor authentication."
+msgstr "Je hebt twee-factor-authenticatie succesvol geconfigureerd."
+
+#: hidp/templates/hidp/otp/email/configured_subject.txt
+msgid "Two-factor authentication configured"
+msgstr "Twee-factor-authenticatie is geconfigureerd"
+
+#: hidp/templates/hidp/otp/email/disabled_body.html
+#: hidp/templates/hidp/otp/email/disabled_body.txt
+msgid "Your two-factor-authentication configuration on your account has been removed. Your recovery codes have been invalidated, and you will need to generate new ones if you wish to use two-factor-authentication again. You can re-enable two-factor-authentication by visiting the two-factor authentication settings page:"
+msgstr "Je twee-factor-authenticatieconfiguratie op je account is verwijderd. Je herstelcodes zijn ongeldig gemaakt en je moet nieuwe genereren als je twee-factor-authenticatie opnieuw wilt gebruiken. Je kunt twee-factor-authenticatie opnieuw inschakelen door de twee-factor-authenticatie-instellingenpagina te bezoeken:"
+
+#: hidp/templates/hidp/otp/email/disabled_subject.txt
+msgid "Two-factor authentication disabled"
+msgstr "Twee-factor-authenticatie uitgeschakeld"
+
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.html
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
+msgid "A recovery code was used to log in to your account. If you did not attempt to log in, please reset your password immediately."
+msgstr "Een herstelcode is gebruikt om in te loggen op je account. Als je niet hebt geprobeerd in te loggen, stel dan onmiddellijk je wachtwoord opnieuw in."
+
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.html
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
+msgid "You can generate new recovery codes by visiting the two-factor authentication settings page:"
+msgstr "Je kunt nieuwe herstelcodes genereren door de twee-factor-authenticatie-instellingenpagina te bezoeken:"
+
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.html
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
+#, python-format
+msgid "You have %(tokens)s recovery code left."
+msgid_plural "You have %(tokens)s recovery codes left."
+msgstr[0] "Je hebt nog %(tokens)s herstelcode."
+msgstr[1] "Je hebt nog %(tokens)s herstelcodes."
+
+#: hidp/templates/hidp/otp/email/recovery_code_used_subject.txt
+msgid "Recovery code used"
+msgstr "Herstelcode gebruikt"
+
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.html
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.txt
+msgid "Recovery codes have been regenerated for your account."
+msgstr "Herstelcodes zijn opnieuw gegenereerd voor je account."
+
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_subject.txt
+msgid "Recovery codes were regenerated"
+msgstr "Herstelcode zijn opnieuw gegenereerd"
+
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/setup_device.html

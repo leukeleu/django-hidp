@@ -4,6 +4,7 @@ from unittest import mock
 from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 
@@ -141,9 +142,14 @@ class TestOTPDisableWithRecoveryCode(TestCase):
         form_data = {
             "otp_token": "static-token",
         }
-        response = self.client.post(
-            reverse("hidp_otp_management:disable-recovery-code"), form_data
-        )
+        with (
+            self.assertTemplateUsed("hidp/otp/email/disabled_subject.txt"),
+            self.assertTemplateUsed("hidp/otp/email/disabled_body.txt"),
+            self.assertTemplateUsed("hidp/otp/email/disabled_body.html")
+        ):  # fmt: skip
+            response = self.client.post(
+                reverse("hidp_otp_management:disable-recovery-code"), form_data
+            )
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
         self.assertFalse(
             self.user.totpdevice_set.exists(),
@@ -153,6 +159,10 @@ class TestOTPDisableWithRecoveryCode(TestCase):
             self.user.staticdevice_set.exists(),
             msg="Expected the user to have no static devices",
         )
+
+        self.assertEqual(len(mail.outbox), 1, "Expected an email to be sent")
+        self.assertEqual(mail.outbox[0].subject, "Two-factor authentication disabled")
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
 
 class TestOTPRecoveryCodesView(TestCase):
@@ -188,11 +198,20 @@ class TestOTPRecoveryCodesView(TestCase):
         reset_static_tokens(device)
         current_tokens = set(device.token_set.values_list("token", flat=True))
         self.client.force_login(self.user)
-        response = self.client.post(reverse("hidp_otp_management:recovery-codes"))
+        with (
+            self.assertTemplateUsed("hidp/otp/email/recovery_codes_regenerated_subject.txt"),
+            self.assertTemplateUsed("hidp/otp/email/recovery_codes_regenerated_body.txt"),
+            self.assertTemplateUsed("hidp/otp/email/recovery_codes_regenerated_body.html")
+        ):  # fmt: skip
+            response = self.client.post(reverse("hidp_otp_management:recovery-codes"))
         self.assertRedirects(response, reverse("hidp_otp_management:recovery-codes"))
         new_tokens = set(device.token_set.values_list("token", flat=True))
         self.assertEqual(new_tokens & current_tokens, set())
         self.assertEqual(len(new_tokens), 10)
+
+        self.assertEqual(len(mail.outbox), 1, "Expected an email to be sent")
+        self.assertEqual(mail.outbox[0].subject, "Recovery codes were regenerated")
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
 
 class TestOTPSetupView(TestCase):
@@ -226,6 +245,9 @@ class TestOTPSetupView(TestCase):
         with (
             mock.patch.object(device, "verify_token", return_value=True, autospec=True),
             mock.patch("hidp.otp.forms.OTPSetupForm.get_device", return_value=device),
+            self.assertTemplateUsed("hidp/otp/email/configured_subject.txt"),
+            self.assertTemplateUsed("hidp/otp/email/configured_body.txt"),
+            self.assertTemplateUsed("hidp/otp/email/configured_body.html"),
         ):
             response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
@@ -237,6 +259,10 @@ class TestOTPSetupView(TestCase):
         self.assertTrue(
             static_device.confirmed, "Expected static device to be confirmed"
         )
+
+        self.assertEqual(len(mail.outbox), 1, "Expected an email to be sent")
+        self.assertEqual(mail.outbox[0].subject, "Two-factor authentication configured")
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
     def test_invalid_form_does_not_confirm_devices(self):
         """An invalid form should not confirm the TOTP and static devices."""
@@ -350,14 +376,23 @@ class TestOTPVerifyWithRecoveryCodeView(TestCase):
         self.client.force_login(self.user)
         form_data = {"otp_token": "123456"}
         manage_url = reverse("hidp_account_management:manage_account")
-        response = self.client.post(
-            f"{reverse('hidp_otp:verify-recovery-code')}?next={manage_url}",
-            form_data,
-        )
+        with (
+            self.assertTemplateUsed("hidp/otp/email/recovery_code_used_subject.txt"),
+            self.assertTemplateUsed("hidp/otp/email/recovery_code_used_body.txt"),
+            self.assertTemplateUsed("hidp/otp/email/recovery_code_used_body.html"),
+        ):
+            response = self.client.post(
+                f"{reverse('hidp_otp:verify-recovery-code')}?next={manage_url}",
+                form_data,
+            )
         self.assertRedirects(response, manage_url)
         self.assertTrue(
             response.wsgi_request.user.is_verified(), "Expected user to be verified"
         )
+
+        self.assertEqual(len(mail.outbox), 1, "Expected an email to be sent")
+        self.assertEqual(mail.outbox[0].subject, "Recovery code used")
+        self.assertEqual(mail.outbox[0].to, [self.user.email])
 
     def test_invalid_form_does_not_verify_user(self):
         device = otp_factories.StaticDeviceFactory(user=self.user, confirmed=True)
@@ -373,3 +408,5 @@ class TestOTPVerifyWithRecoveryCodeView(TestCase):
         self.assertFalse(
             response.wsgi_request.user.is_verified(), "Expected user to be unverified"
         )
+
+        self.assertEqual(len(mail.outbox), 0, "Expected no email to be sent")

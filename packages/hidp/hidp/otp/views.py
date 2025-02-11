@@ -27,6 +27,12 @@ from hidp.otp.forms import OTPSetupForm, VerifyStaticTokenForm, VerifyTOTPForm
 from hidp.rate_limit.decorators import rate_limit_default
 
 from .decorators import otp_exempt
+from .mailers import (
+    OTPConfiguredMailer,
+    OTPDisabledMailer,
+    RecoveryCodesRegeneratedMailer,
+    RecoveryCodeUsedMailer,
+)
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -81,7 +87,15 @@ class OTPDisableView(FormView):
     def form_valid(self, form):
         for device in django_otp.devices_for_user(self.request.user):
             device.delete()
+
+        self.send_mail()
+
         return super().form_valid(form)
+
+    def send_mail(self):
+        base_url = self.request.build_absolute_uri("/")
+
+        OTPDisabledMailer(self.request.user, base_url=base_url).send()
 
 
 class OTPDisableViewRecoveryCode(OTPDisableView):
@@ -124,7 +138,15 @@ class OTPRecoveryCodes(DetailView, FormView):
 
     def form_valid(self, form):
         reset_static_tokens(self.get_object())
+
+        self.send_mail()
+
         return super().form_valid(form)
+
+    def send_mail(self):
+        base_url = self.request.build_absolute_uri("/")
+
+        RecoveryCodesRegeneratedMailer(self.request.user, base_url=base_url).send()
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -186,7 +208,15 @@ class OTPSetupDeviceView(FormView):
     def form_valid(self, form):
         form.save()
         django_otp.login(self.request, self.device)
+
+        self.send_mail()
+
         return super().form_valid(form)
+
+    def send_mail(self):
+        base_url = self.request.build_absolute_uri("/")
+
+        OTPConfiguredMailer(self.user, base_url=base_url).send()
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -215,3 +245,15 @@ class VerifyTOTPView(VerifyOTPBase):
 class VerifyRecoveryCodeView(VerifyOTPBase):
     template_name = "hidp/otp/verify_recovery_code.html"
     form_class = VerifyStaticTokenForm
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+
+        self.send_mail()
+
+        return result
+
+    def send_mail(self):
+        """Notify the user that a recovery code was used."""
+        base_url = self.request.build_absolute_uri("/")
+        RecoveryCodeUsedMailer(self.request.user, base_url=base_url).send()

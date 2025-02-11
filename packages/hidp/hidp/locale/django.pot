@@ -826,6 +826,64 @@ msgstr ""
 msgid "use recovery code"
 msgstr ""
 
+#: hidp/templates/hidp/otp/email/configured_body.html
+msgid "You've successfully configured two-factor authentication. Please make sure you have stored your recovery codes in a safe place. You can use these codes to access your account if you lose access to your device. You can view your recovery codes by visiting the two-factor authentication settings page:"
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/configured_body.txt
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.html
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.txt
+msgid "Please make sure you have stored your recovery codes in a safe place. You can use these codes to access your account if you lose access to your device. You can view your recovery codes by visiting the two-factor authentication settings page:"
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/configured_body.txt
+msgid "You've successfully configured two-factor authentication."
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/configured_subject.txt
+msgid "Two-factor authentication configured"
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/disabled_body.html
+#: hidp/templates/hidp/otp/email/disabled_body.txt
+msgid "Your two-factor-authentication configuration on your account has been removed. Your recovery codes have been invalidated, and you will need to generate new ones if you wish to use two-factor-authentication again. You can re-enable two-factor-authentication by visiting the two-factor authentication settings page:"
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/disabled_subject.txt
+msgid "Two-factor authentication disabled"
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.html
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
+msgid "A recovery code was used to log in to your account. If you did not attempt to log in, please reset your password immediately."
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.html
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
+msgid "You can generate new recovery codes by visiting the two-factor authentication settings page:"
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.html
+#: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
+#, python-format
+msgid "You have %(tokens)s recovery code left."
+msgid_plural "You have %(tokens)s recovery codes left."
+msgstr[0] ""
+msgstr[1] ""
+
+#: hidp/templates/hidp/otp/email/recovery_code_used_subject.txt
+msgid "Recovery code used"
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.html
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.txt
+msgid "Recovery codes have been regenerated for your account."
+msgstr ""
+
+#: hidp/templates/hidp/otp/email/recovery_codes_regenerated_subject.txt
+msgid "Recovery codes were regenerated"
+msgstr ""
+
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/setup_device.html

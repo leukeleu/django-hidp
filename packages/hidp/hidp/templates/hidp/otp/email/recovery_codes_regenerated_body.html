@@ -1,0 +1,18 @@
+{% extends "hidp/base_email.html" %}
+{% load i18n %}
+
+{% block content %}
+<p>
+  {% blocktranslate trimmed %}
+  Recovery codes have been regenerated for your account.
+  {% endblocktranslate %}
+
+  {% blocktranslate trimmed %}
+  Please make sure you have stored your recovery codes in a safe place. You can use these
+  codes to access your account if you lose access to your device. You can view your recovery
+  codes by visiting the two-factor authentication settings page:
+  {% endblocktranslate %}
+</p>
+
+<p><a href="{{ otp_management_url }}">{{ otp_management_url }}</a></p>
+{% endblock %}
