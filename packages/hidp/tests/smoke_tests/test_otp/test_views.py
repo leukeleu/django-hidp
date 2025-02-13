@@ -234,6 +234,18 @@ class TestOTPSetupView(TestCase):
         response = self.client.get(reverse("hidp_otp_management:setup"))
         self.assertRedirects(response, reverse("hidp_otp_management:manage"))
 
+    def test_redirects_to_next_page_when_already_setup(self):
+        """The user should be redirected to the next page after setup."""
+        otp_factories.TOTPDeviceFactory(user=self.user, confirmed=True)
+        otp_factories.StaticDeviceFactory(user=self.user, confirmed=True)
+        self.client.force_login(self.user)
+        response = self.client.get(
+            f"{reverse('hidp_otp_management:setup')}?next=/my-special-page/"
+        )
+        self.assertRedirects(
+            response, "/my-special-page/", fetch_redirect_response=False
+        )
+
     def test_valid_form_confirms_devices(self):
         """A valid form should confirm the TOTP and static devices."""
         self.client.force_login(self.user)
@@ -288,13 +300,17 @@ class TestOTPSetupView(TestCase):
             static_device.confirmed, "Expected static device to be unconfirmed"
         )
 
-    def test_setting_up_otp_verifies_user(self):
-        """Setting up OTP successfully should verify the user."""
+    def _setup_up_otp(self, *, next_page=None):
         self.client.force_login(self.user)
         self.assertFalse(
             TOTPDevice.objects.devices_for_user(self.user, confirmed=None).exists()
         )
-        response = self.client.get(reverse("hidp_otp_management:setup"))
+
+        setup_url = reverse("hidp_otp_management:setup")
+        if next_page:
+            setup_url += f"?next={next_page}"
+
+        response = self.client.get(setup_url)
         device = TOTPDevice.objects.devices_for_user(self.user, confirmed=None).get()
         self.assertFalse(
             response.wsgi_request.user.is_verified(), "Expected user to be unverified"
@@ -307,11 +323,22 @@ class TestOTPSetupView(TestCase):
             mock.patch.object(device, "verify_token", return_value=True, autospec=True),
             mock.patch("hidp.otp.forms.OTPSetupForm.get_device", return_value=device),
         ):
-            response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
-            self.assertRedirects(response, reverse("hidp_otp_management:manage"))
-            self.assertTrue(
-                response.wsgi_request.user.is_verified(), "Expected user to be verified"
-            )
+            return self.client.post(setup_url, form_data)
+
+    def test_setting_up_otp_verifies_user(self):
+        """Setting up OTP successfully should verify the user."""
+        response = self._setup_up_otp()
+        self.assertRedirects(response, reverse("hidp_otp_management:manage"))
+        self.assertTrue(
+            response.wsgi_request.user.is_verified(), "Expected user to be verified"
+        )
+
+    def test_setting_up_otp_redirects_to_next_page(self):
+        """Setting up OTP successfully should redirect to the next page."""
+        response = self._setup_up_otp(next_page="/my-special-page/")
+        self.assertRedirects(
+            response, "/my-special-page/", fetch_redirect_response=False
+        )
 
 
 class TestOTPVerifyView(TestCase):
