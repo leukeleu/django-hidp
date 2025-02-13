@@ -153,7 +153,7 @@ class OTPRecoveryCodes(DetailView, FormView):
 @method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 @method_decorator(otp_exempt, name="dispatch")
-class OTPSetupDeviceView(FormView):
+class OTPSetupDeviceView(RedirectURLMixin, FormView):
     """
     View for setting up a new OTP device.
 
@@ -164,7 +164,7 @@ class OTPSetupDeviceView(FormView):
     """
 
     form_class = OTPSetupForm
-    success_url = reverse_lazy("hidp_otp_management:manage")
+    next_page = reverse_lazy("hidp_otp_management:manage")
     template_name = "hidp/otp/setup_device.html"
 
     def __init__(self, **kwargs):
@@ -177,7 +177,7 @@ class OTPSetupDeviceView(FormView):
 
         # If the user already has a confirmed TOTP device, redirect to the manage page
         if TOTPDevice.objects.devices_for_user(self.user, confirmed=True).exists():
-            return HttpResponseRedirect(self.success_url)
+            return HttpResponseRedirect(self.get_success_url())
 
         self.device, self.backup_device = get_or_create_devices(self.user)
 
