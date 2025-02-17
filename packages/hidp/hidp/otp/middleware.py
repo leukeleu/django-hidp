@@ -11,18 +11,18 @@ class OTPMiddlewareBase:
     Base class for OTP middleware.
 
     This class provides a base implementation for OTP middleware. It provides a
-    `process_view` method that checks whether a request needs to verify OTP and
+    ``process_view`` method that checks whether a request needs to verify OTP and
     redirects to the OTP verification view if necessary. The conditions on when to
     require verification can be implemented by overriding the
-    `user_needs_verification` method in a subclass. For more complex verification
-    logic, you can override the `request_needs_verification` and
-    `view_func_needs_verification` methods.
+    ``user_needs_verification`` method in a subclass. For more complex verification
+    logic, you can override the ``request_needs_verification`` and
+    ``view_func_needs_verification`` methods.
 
-    Views can be marked as exempt from OTP verification by using the `otp_exempt`
+    Views can be marked as exempt from OTP verification by using the ``otp_exempt``
     decorator.
 
     Middleware implementations should be placed after the authentication middleware
-    and django_otp.middleware.OTPMiddleware. If `request_needs_verification`,
+    and ``django_otp.middleware.OTPMiddleware``. If ``request_needs_verification``,
     it will redirect users to the OTP verification view if they have a configured OTP
     device, or else to the OTP setup view.
     """
@@ -57,6 +57,12 @@ class OTPMiddlewareBase:
         If the user has an OTP device, they will be redirected to the OTP verification
         view. If they do not have an OTP device, they will be redirected to the OTP
         setup view.
+
+        Args:
+            request (``HttpRequest``): The request object.
+
+        Returns:
+            str: The URL to redirect to.
         """
         target = reverse(
             "hidp_otp:verify"
@@ -72,6 +78,12 @@ class OTPMiddlewareBase:
 
         By default, this will require all (authenticated and not verified) users to
         verify. Override this method to customize the verification logic.
+
+        Args:
+            user (``User``): The user to check.
+
+        Returns:
+            bool: Whether the user needs to verify their OTP.
         """
         return True
 
@@ -80,6 +92,12 @@ class OTPMiddlewareBase:
         Check whether a view function needs to verify OTP.
 
         Override this method if you need to customize the verification logic.
+
+        Args:
+            view_func (callable): The view function to check.
+
+        Returns:
+            bool: Whether the view function needs to verify OTP.
         """
         return not self._view_is_exempt(view_func)
 
@@ -90,6 +108,13 @@ class OTPMiddlewareBase:
         The request needs to verify OTP if the user needs verification and the view
         function needs verification. The user never needs to verify if they are not
         authenticated or already verified.
+
+        Args:
+            request (``HttpRequest``): The request object.
+            view_func (callable): The view function that will be called.
+
+        Returns:
+            bool: Whether the request requires the user to verify OTP.
         """
         return (
             self.view_func_needs_verification(view_func)
@@ -99,6 +124,23 @@ class OTPMiddlewareBase:
         )
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+        """
+        Process a view and check if OTP verification is required.
+
+        This method is called by the middleware to check if the user needs to verify
+        their OTP. If verification is required, the user will be redirected to the OTP
+        verification view, or to the OTP setup view if they do not have an OTP device.
+
+        Args:
+            request (``HttpRequest``): The request object.
+            view_func (callable): The view function that will be called.
+            view_args (list): The positional arguments passed to the view function.
+            view_kwargs (dict): The keyword arguments passed to the view function.
+
+        Returns:
+            ``None`` or ``HttpResponseRedirect``: HttpResponseRedirect if this policy
+            requires the user to verify OTP, None otherwise.
+        """
         if self.request_needs_verification(request, view_func):
             return redirect(self.get_redirect_url(request))
 
