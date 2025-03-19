@@ -10,13 +10,17 @@
   <ul>
   {% for device in totp_devices %}
     <li>
-      {% translate device.name context "OTP device name" %}: {% translate "configured" %}
-      <a href="{% url 'hidp_otp_management:disable' %}">{% translate "disable" %}</a>
+      <p>
+        {% translate device.name context "OTP device name" %}: {% translate "configured" %} &mdash;
+        <a href="{% url 'hidp_otp_management:disable' %}">{% translate "disable" %}</a>
+      </p>
     </li>
   {% empty %}
     <li>
-      {% translate TOTP_DEVICE_NAME context "OTP device name" %}: {% translate "not configured" %}
-      <a href="{% url 'hidp_otp_management:setup' %}">{% translate "set up" %}</a>
+      <p>
+        {% translate TOTP_DEVICE_NAME context "OTP device name" %}: {% translate "not configured" %} &mdash;
+        <a href="{% url 'hidp_otp_management:setup' %}">{% translate "set up" %}</a>
+      </p>
     </li>
   {% endfor %}
   </ul>
@@ -25,11 +29,17 @@
   <ul>
   {% for device in static_devices %}
     <li>
-      {% translate device.name context "OTP device name" %}: {% translate "configured" %}
-      <a href="{% url 'hidp_otp_management:recovery-codes' %}">{% translate "view" %}</a>
+      <p>
+        {% translate device.name context "OTP device name" %}: {% translate "configured" %} &mdash;
+        <a href="{% url 'hidp_otp_management:recovery-codes' %}">{% translate "view" %}</a>
+      </p>
     </li>
   {% empty %}
-    <li>{% translate STATIC_DEVICE_NAME context "OTP device name" %}: {% translate "not configured" %}</li>
+    <li>
+      <p>
+        {% translate STATIC_DEVICE_NAME context "OTP device name" %}: {% translate "not configured" %}
+      </p>
+    </li>
   {% endfor %}
   </ul>
 
