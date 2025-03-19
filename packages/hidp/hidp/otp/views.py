@@ -23,11 +23,16 @@ from hidp.otp.devices import (
     get_or_create_devices,
     reset_static_tokens,
 )
-from hidp.otp.forms import OTPSetupForm, OTPVerifyForm
-from hidp.rate_limit.decorators import rate_limit_strict
+from hidp.otp.forms import OTPSetupForm, VerifyStaticTokenForm, VerifyTOTPForm
+from hidp.rate_limit.decorators import rate_limit_default
 
 from .decorators import otp_exempt
-from .forms import OTPTokenForm
+from .mailers import (
+    OTPConfiguredMailer,
+    OTPDisabledMailer,
+    RecoveryCodesRegeneratedMailer,
+    RecoveryCodeUsedMailer,
+)
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -51,6 +56,7 @@ class OTPOverviewView(TemplateView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 class OTPDisableView(FormView):
     """
@@ -62,7 +68,7 @@ class OTPDisableView(FormView):
     """
 
     template_name = "hidp/otp/disable.html"
-    form_class = OTPTokenForm
+    form_class = VerifyTOTPForm
     success_url = reverse_lazy("hidp_otp_management:manage")
 
     def get_context_data(self, **kwargs):
@@ -81,7 +87,28 @@ class OTPDisableView(FormView):
     def form_valid(self, form):
         for device in django_otp.devices_for_user(self.request.user):
             device.delete()
+
+        self.send_mail()
+
         return super().form_valid(form)
+
+    def send_mail(self):
+        base_url = self.request.build_absolute_uri("/")
+
+        OTPDisabledMailer(self.request.user, base_url=base_url).send()
+
+
+class OTPDisableViewRecoveryCode(OTPDisableView):
+    """
+    View to disable OTP for a user using a recovery code.
+
+    This view will delete all OTP devices for a user, effectively disabling OTP for
+    that user. Disabling requires the user to be logged in and to provide a valid
+    recovery code.
+    """
+
+    template_name = "hidp/otp/disable_recovery_code.html"
+    form_class = VerifyStaticTokenForm
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -111,14 +138,22 @@ class OTPRecoveryCodes(DetailView, FormView):
 
     def form_valid(self, form):
         reset_static_tokens(self.get_object())
+
+        self.send_mail()
+
         return super().form_valid(form)
+
+    def send_mail(self):
+        base_url = self.request.build_absolute_uri("/")
+
+        RecoveryCodesRegeneratedMailer(self.request.user, base_url=base_url).send()
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
-@method_decorator(rate_limit_strict, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 @method_decorator(otp_exempt, name="dispatch")
-class OTPSetupDeviceView(FormView):
+class OTPSetupDeviceView(RedirectURLMixin, FormView):
     """
     View for setting up a new OTP device.
 
@@ -129,7 +164,7 @@ class OTPSetupDeviceView(FormView):
     """
 
     form_class = OTPSetupForm
-    success_url = reverse_lazy("hidp_otp_management:manage")
+    next_page = reverse_lazy("hidp_otp_management:manage")
     template_name = "hidp/otp/setup_device.html"
 
     def __init__(self, **kwargs):
@@ -142,7 +177,7 @@ class OTPSetupDeviceView(FormView):
 
         # If the user already has a confirmed TOTP device, redirect to the manage page
         if TOTPDevice.objects.devices_for_user(self.user, confirmed=True).exists():
-            return HttpResponseRedirect(self.success_url)
+            return HttpResponseRedirect(self.get_success_url())
 
         self.device, self.backup_device = get_or_create_devices(self.user)
 
@@ -173,15 +208,22 @@ class OTPSetupDeviceView(FormView):
     def form_valid(self, form):
         form.save()
         django_otp.login(self.request, self.device)
+
+        self.send_mail()
+
         return super().form_valid(form)
+
+    def send_mail(self):
+        base_url = self.request.build_absolute_uri("/")
+
+        OTPConfiguredMailer(self.user, base_url=base_url).send()
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 @method_decorator(login_required, name="dispatch")
 @method_decorator(otp_exempt, name="dispatch")
-class VerifyOTPView(RedirectURLMixin, FormView):
-    template_name = "hidp/otp/verify.html"
-    form_class = OTPVerifyForm
+class VerifyOTPBase(RedirectURLMixin, FormView):
     next_page = settings.LOGIN_REDIRECT_URL
 
     def get_form_kwargs(self):
@@ -193,3 +235,25 @@ class VerifyOTPView(RedirectURLMixin, FormView):
         # Persist the OTP device in the session
         django_otp.login(self.request, self.request.user.otp_device)
         return super().form_valid(form)
+
+
+class VerifyTOTPView(VerifyOTPBase):
+    template_name = "hidp/otp/verify.html"
+    form_class = VerifyTOTPForm
+
+
+class VerifyRecoveryCodeView(VerifyOTPBase):
+    template_name = "hidp/otp/verify_recovery_code.html"
+    form_class = VerifyStaticTokenForm
+
+    def form_valid(self, form):
+        result = super().form_valid(form)
+
+        self.send_mail()
+
+        return result
+
+    def send_mail(self):
+        """Notify the user that a recovery code was used."""
+        base_url = self.request.build_absolute_uri("/")
+        RecoveryCodeUsedMailer(self.request.user, base_url=base_url).send()

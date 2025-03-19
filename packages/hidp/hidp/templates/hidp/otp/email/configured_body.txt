@@ -1,0 +1,13 @@
+{% load i18n %}{% autoescape off %}
+{% blocktranslate trimmed %}
+You've successfully configured two-factor authentication.
+{% endblocktranslate %}
+
+{% blocktranslate trimmed %}
+Please make sure you have stored your recovery codes in a safe place. You can use these
+codes to access your account if you lose access to your device. You can view your recovery
+codes by visiting the two-factor authentication settings page:
+{% endblocktranslate %}
+
+{{ otp_management_url }}
+{% endautoescape %}

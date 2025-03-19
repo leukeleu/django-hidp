@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Hello, ID Please"
-project_copyright = "2024, Jaap Roes, Dennis Bunskoek, Thomas Kalverda"
-author = "Jaap Roes, Dennis Bunskoek, Thomas Kalverda"
+project_copyright = "2024, Jaap Roes, Dennis Bunskoek, Thomas Kalverda, Wouter de Vries"
+author = "Jaap Roes, Dennis Bunskoek, Thomas Kalverda, Wouter de Vries"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

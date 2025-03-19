@@ -15,7 +15,4 @@
     {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Disable two-factor authentication') cancel_url=back_url %}
   </form>
 
-  <p>{% translate 'If you have lost your device, you can use a recovery code instead.' %}</p>
-  <p><a href="{% url 'hidp_otp_management:disable-recovery-code' %}">{% translate "use recovery code" %}</a></p>
-
 {% endblock %}

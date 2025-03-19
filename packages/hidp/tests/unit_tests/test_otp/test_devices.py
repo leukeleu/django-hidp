@@ -1,6 +1,9 @@
+from django_otp.plugins.otp_totp.models import TOTPDevice
+
 from django.test import TestCase
 
-from hidp.otp.devices import get_or_create_devices
+from hidp.otp.devices import get_device_for_user, get_or_create_devices
+from hidp.otp.exceptions import MultipleOtpDevicesError, NoOtpDeviceError
 from hidp.test.factories import otp_factories, user_factories
 
 
@@ -49,3 +52,28 @@ class TestGetOrCreateDevices(TestCase):
         _totp_device, static_device = get_or_create_devices(user)
         self.assertEqual(static_device.token_set.count(), 1)
         self.assertEqual(static_device.token_set.first().token, "old token")
+
+
+class TestGetDeviceForUser(TestCase):
+    def test_get_device_for_user(self):
+        user = user_factories.UserFactory()
+        totp_device = otp_factories.TOTPDeviceFactory(user=user, confirmed=True)
+        self.assertEqual(totp_device, get_device_for_user(user, TOTPDevice))
+
+    def test_get_device_for_user_no_device(self):
+        user = user_factories.UserFactory()
+        with self.assertRaises(NoOtpDeviceError):
+            get_device_for_user(user, TOTPDevice)
+
+    def test_get_device_for_user_multiple_devices(self):
+        user = user_factories.UserFactory()
+        otp_factories.TOTPDeviceFactory(user=user, confirmed=True)
+        otp_factories.TOTPDeviceFactory(user=user, confirmed=True)
+        with self.assertRaises(MultipleOtpDevicesError):
+            get_device_for_user(user, TOTPDevice)
+
+    def test_get_device_for_user_with_only_unconfirmed_devices(self):
+        user = user_factories.UserFactory()
+        otp_factories.TOTPDeviceFactory(user=user, confirmed=False)
+        with self.assertRaises(NoOtpDeviceError):
+            get_device_for_user(user, TOTPDevice)

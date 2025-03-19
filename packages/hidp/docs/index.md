@@ -19,6 +19,7 @@ configure-as-oidc-provider
 content-security-policy
 user-model
 password-validation
+one-time-passwords
 templates
 translations
 management-commands

@@ -3,6 +3,8 @@ from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from django.utils.translation import trans_null
 
+from hidp.otp.exceptions import MultipleOtpDevicesError, NoOtpDeviceError
+
 # The translation happens in the template, allowing the device names below to be
 # translated to the user's language when they are displayed, but also allowing
 # user-defined 'legacy' device names to be displayed as-is.
@@ -51,3 +53,18 @@ def reset_static_tokens(device, n=10):
     device.token_set.all().delete()
     for _ in range(n):
         device.token_set.create(token=StaticToken.random_token())
+
+
+def get_device_for_user(user, device_class):
+    """
+    Get the confirmed device of a specific class for a user.
+
+    It is expected that there is exactly one confirmed device of the specified class
+    for the user. If there are none or more than one, an exception is raised.
+    """
+    try:
+        return device_class.objects.devices_for_user(user, confirmed=True).get()
+    except device_class.DoesNotExist as exc:
+        raise NoOtpDeviceError from exc
+    except device_class.MultipleObjectsReturned as exc:
+        raise MultipleOtpDevicesError from exc

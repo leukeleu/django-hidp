@@ -1,0 +1,13 @@
+{% load i18n %}{% autoescape off %}
+{% blocktranslate trimmed %}
+Your two-factor-authentication configuration on your account has been removed.
+
+Your recovery codes have been invalidated, and you will need to generate
+new ones if you wish to use two-factor-authentication again.
+
+You can re-enable two-factor-authentication by visiting the two-factor
+authentication settings page:
+{% endblocktranslate %}
+
+{{ otp_management_url }}
+{% endautoescape %}
