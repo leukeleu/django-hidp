@@ -208,7 +208,7 @@ msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een 
 #: hidp/templates/hidp/otp/verify.html
 #: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Two-factor authentication"
-msgstr "Twee-factor-authenticatie"
+msgstr "Tweefactorauthenticatie"
 
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
@@ -893,7 +893,7 @@ msgstr "Herstelcodes"
 
 #: hidp/templates/hidp/otp/overview.html
 msgid "Two-factor methods"
-msgstr "Twee-factor-methoden"
+msgstr "Tweefactormethoden"
 
 #: hidp/templates/hidp/otp/overview.html
 msgid "configured"
@@ -941,7 +941,7 @@ msgstr "Scan de QR-code"
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Set up two-factor authentication"
-msgstr "Twee-factor-authenticatie instellen"
+msgstr "Tweefactorauthenticatie instellen"
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Submit"
@@ -949,7 +949,7 @@ msgstr "Verzenden"
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Two-factor Authentication"
-msgstr "Twee-factor-authenticatie"
+msgstr "Tweefactorauthenticatie"
 
 #: hidp/templates/hidp/otp/verify.html
 #: hidp/templates/hidp/otp/verify_recovery_code.html
