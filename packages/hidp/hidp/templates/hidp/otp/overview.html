@@ -6,7 +6,7 @@
 {% block main %}
   <h1>{% translate 'Two-factor authentication' %}</h1>
 
-  <p>{% translate "Two-factor methods" %}</p>
+  <h2>{% translate "Two-factor methods" %}</h2>
   <ul>
   {% for device in totp_devices %}
     <li>
@@ -21,7 +21,7 @@
   {% endfor %}
   </ul>
 
-  <p>{% translate "Recovery codes" %}</p>
+  <h2>{% translate "Recovery codes" %}</h2>
   <ul>
   {% for device in static_devices %}
     <li>
