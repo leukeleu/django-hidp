@@ -133,6 +133,9 @@ class OTPRecoveryCodes(DetailView, FormView):
     def get_context_data(self, **kwargs):
         context = {
             "back_url": reverse("hidp_otp_management:manage"),
+            "recovery_codes": "\n".join(
+                self.get_object().token_set.values_list("token", flat=True)
+            ),
         }
         return super().get_context_data() | context | kwargs
 
