@@ -1,4 +1,4 @@
-# Headless Identity Provider development using Docker Compose
+# Hello, ID Please development using Docker Compose
 
 > Note that this is for **development only**, the containers spawned for
 this project are configured for development ease, not security.
