@@ -920,20 +920,12 @@ msgid "Generate new codes"
 msgstr "Genereer nieuwe codes"
 
 #: hidp/templates/hidp/otp/recovery_codes.html
-msgid ""
-"Keep these codes safe. These codes are the only way to log in\n"
-"if you lose access to your two-factor device."
-msgstr ""
-"Bewaar deze codes veilig. Deze codes zijn de enige manier om in te loggen\n"
-"als je geen toegang meer hebt tot je twee-factor-apparaat."
+msgid "Keep these codes safe. These codes are the only way to log in if you lose access to your two-factor device."
+msgstr "Bewaar deze codes veilig. Deze codes zijn de enige manier om in te loggen als je geen toegang meer hebt tot je twee-factor-apparaat."
 
 #: hidp/templates/hidp/otp/recovery_codes.html
-msgid ""
-"These codes can be used to log in if you lose access to your two-factor device.\n"
-"You can generate new codes at any time, but you can only have one set of codes at a time."
-msgstr ""
-"Deze codes kunnen worden gebruikt om in te loggen als je geen toegang meer hebt tot je twee-factor-apparaat.\n"
-"Je kunt op elk moment nieuwe codes genereren, maar je kunt slechts één set codes tegelijk hebben."
+msgid "These codes can be used to log in if you lose access to your two-factor device. You can generate new codes at any time, but you can only have one set of codes at a time."
+msgstr "Deze codes kunnen worden gebruikt om in te loggen als je geen toegang meer hebt tot je twee-factor-apparaat. Je kunt op elk moment nieuwe codes genereren, maar je kunt slechts één set codes tegelijk hebben."
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Scan the QR code"
