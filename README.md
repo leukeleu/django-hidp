@@ -1,6 +1,6 @@
-# Headless Identity Provider
+# Hello, ID Please (HIdP)
 
-Leukeleu's Headless Identity Provider (HIdP).
+Leukeleu's headless identity provider.
 
 ## Development
 
