@@ -14,16 +14,20 @@
 
     {{ form.non_field_errors }}
 
-    {{ form.otp_token.errors }}
-    {{ form.otp_token.label_tag }}
-    {{ form.otp_token }}
+    <p>
+      {{ form.otp_token.errors }}
+      {{ form.otp_token.label_tag }}
+      {{ form.otp_token }}
+    </p>
 
     <h2>{% translate 'Recovery codes' %}</h2>
     <pre>{{ recovery_codes }}</pre>
 
-    {{ form.confirm_stored_backup_tokens.errors }}
-    {{ form.confirm_stored_backup_tokens.label_tag }}
-    {{ form.confirm_stored_backup_tokens }}
+    <p>
+      {{ form.confirm_stored_backup_tokens.errors }}
+      {{ form.confirm_stored_backup_tokens.label_tag }}
+      {{ form.confirm_stored_backup_tokens }}
+    </p>
 
     {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Submit') cancel_label=_('Back') cancel_url=back_url %}
   </form>
