@@ -25,3 +25,8 @@ documentation:
       - '.github/actions/build-hidp-docs/action.yml'
       - '.github/workflows/deploy-docs.yml'
       - 'packages/**/docs/**'
+
+templates:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'packages/**/templates/**'
