@@ -378,6 +378,7 @@ msgstr "Opslaan"
 #: hidp/templates/hidp/otp/overview.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/setup_device.html
+#: hidp/templates/hidp/otp/setup_device_done.html
 msgid "Back"
 msgstr "Terug"
 
@@ -838,6 +839,7 @@ msgid "Please make sure you have stored your recovery codes in a safe place. You
 msgstr "Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de twee-factor-authenticatie-instellingenpagina te bezoeken:"
 
 #: hidp/templates/hidp/otp/email/configured_body.txt
+#: hidp/templates/hidp/otp/setup_device_done.html
 msgid "You've successfully configured two-factor authentication."
 msgstr "Je hebt twee-factor-authenticatie succesvol geconfigureerd."
 
@@ -932,6 +934,7 @@ msgid "Scan the QR code"
 msgstr "Scan de QR-code"
 
 #: hidp/templates/hidp/otp/setup_device.html
+#: hidp/templates/hidp/otp/setup_device_done.html
 msgid "Set up two-factor authentication"
 msgstr "Tweefactorauthenticatie instellen"
 
@@ -940,6 +943,7 @@ msgid "Submit"
 msgstr "Verzenden"
 
 #: hidp/templates/hidp/otp/setup_device.html
+#: hidp/templates/hidp/otp/setup_device_done.html
 msgid "Two-factor Authentication"
 msgstr "Tweefactorauthenticatie"
 

@@ -26,6 +26,11 @@ urlpatterns = [
         name="recovery-codes",
     ),
     path(
+        "setup/done/",
+        views.OTPSetupDeviceDoneView.as_view(),
+        name="setup-device-done",
+    ),
+    path(
         "setup/",
         views.OTPSetupDeviceView.as_view(),
         name="setup",

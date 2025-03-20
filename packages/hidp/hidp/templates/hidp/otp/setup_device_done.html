@@ -1,0 +1,12 @@
+{% extends 'hidp/base_post_login.html' %}
+{% load i18n %}
+
+{% block title %}{% translate 'Two-factor Authentication' %}{% endblock %}
+
+{% block main %}
+  <h1>{% translate 'Set up two-factor authentication' %}</h1>
+
+  <p>{% translate "You've successfully configured two-factor authentication." %}</p>
+
+  {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
+{% endblock %}
