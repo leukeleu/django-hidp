@@ -134,7 +134,7 @@ class OTPRecoveryCodes(DetailView, FormView):
         context = {
             "back_url": reverse("hidp_otp_management:manage"),
             "recovery_codes": "\n".join(
-                self.get_object().token_set.values_list("token", flat=True)
+                self.object.token_set.values_list("token", flat=True)
             ),
         }
         return super().get_context_data() | context | kwargs
@@ -204,7 +204,7 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
             "title": "Set up Two-Factor Authentication",
             "device": self.device,
             "backup_device": self.backup_device,
-            "qrcode": segno.make(self.device.config_url),
+            "qrcode": segno.make(self.device.config_url).svg_data_uri(border=0),
             "recovery_codes": "\n".join(
                 self.backup_device.token_set.values_list("token", flat=True)
             ),
