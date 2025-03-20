@@ -167,7 +167,7 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
     """
 
     form_class = OTPSetupForm
-    next_page = reverse_lazy("hidp_otp_management:manage")
+    next_page = reverse_lazy("hidp_otp_management:setup-device-done")
     template_name = "hidp/otp/setup_device.html"
 
     def __init__(self, **kwargs):
@@ -220,6 +220,19 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
         base_url = self.request.build_absolute_uri("/")
 
         OTPConfiguredMailer(self.user, base_url=base_url).send()
+
+
+@method_decorator(hidp_csp_protection, name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
+@method_decorator(login_required, name="dispatch")
+class OTPSetupDeviceDoneView(TemplateView):
+    template_name = "hidp/otp/setup_device_done.html"
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "back_url": reverse("hidp_otp_management:manage"),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")

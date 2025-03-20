@@ -232,7 +232,7 @@ class TestOTPSetupView(TestCase):
         otp_factories.StaticDeviceFactory(user=self.user, confirmed=True)
         self.client.force_login(self.user)
         response = self.client.get(reverse("hidp_otp_management:setup"))
-        self.assertRedirects(response, reverse("hidp_otp_management:manage"))
+        self.assertRedirects(response, reverse("hidp_otp_management:setup-device-done"))
 
     def test_redirects_to_next_page_when_already_setup(self):
         """The user should be redirected to the next page after setup."""
@@ -262,7 +262,7 @@ class TestOTPSetupView(TestCase):
             self.assertTemplateUsed("hidp/otp/email/configured_body.html"),
         ):
             response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
-        self.assertRedirects(response, reverse("hidp_otp_management:manage"))
+        self.assertRedirects(response, reverse("hidp_otp_management:setup-device-done"))
 
         totp_device = TOTPDevice.objects.get(user=self.user)
         self.assertTrue(totp_device.confirmed, "Expected TOTP device to be confirmed")
@@ -328,7 +328,7 @@ class TestOTPSetupView(TestCase):
     def test_setting_up_otp_verifies_user(self):
         """Setting up OTP successfully should verify the user."""
         response = self._setup_up_otp()
-        self.assertRedirects(response, reverse("hidp_otp_management:manage"))
+        self.assertRedirects(response, reverse("hidp_otp_management:setup-device-done"))
         self.assertTrue(
             response.wsgi_request.user.is_verified(), "Expected user to be verified"
         )
