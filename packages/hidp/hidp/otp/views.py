@@ -205,6 +205,9 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
             "device": self.device,
             "backup_device": self.backup_device,
             "qrcode": segno.make(self.device.config_url),
+            "recovery_codes": "\n".join(
+                self.backup_device.token_set.values_list("token", flat=True)
+            ),
             "back_url": reverse("hidp_otp_management:manage"),
         }
 

@@ -19,9 +19,7 @@
     {{ form.otp_token }}
 
     <h2>{% translate 'Recovery codes' %}</h2>
-    <pre>{% for token in backup_device.token_set.all %}{{ token.token }}
-{% endfor %}
-    </pre>
+    <pre>{{ recovery_codes }}</pre>
 
     {{ form.confirm_stored_backup_tokens.errors }}
     {{ form.confirm_stored_backup_tokens.label_tag }}
