@@ -16,6 +16,8 @@ version-resolver:
   default: minor
 
 categories:
+  - title: ':label: Template Changes'
+    label: templates
   - title: ':arrow_up: Dependencies'
     label: dependencies
 
