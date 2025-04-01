@@ -14,7 +14,7 @@ from django.db import IntegrityError
 from django.db.models.functions import MD5
 from django.http import HttpResponseRedirect
 from django.shortcuts import resolve_url
-from django.urls import reverse, reverse_lazy
+from django.urls import NoReverseMatch, reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
@@ -459,11 +459,15 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
           The name of the current site (host name if `RequestSite` is used)
         * Any additional data present is `self.extra_context`
         """
-        register_url = reverse("hidp_accounts:register") + (
-            f"?{urlencode({'next': redirect_url})}"
-            if (redirect_url := self.get_redirect_url())
-            else ""
-        )
+        try:
+            register_url = reverse("hidp_accounts_registration:register") + (
+                f"?{urlencode({'next': redirect_url})}"
+                if (redirect_url := self.get_redirect_url())
+                else ""
+            )
+        except NoReverseMatch:
+            register_url = None
+
         context = {
             "password_reset_url": reverse("hidp_accounts:password_reset_request"),
             "register_url": register_url,

@@ -116,6 +116,26 @@ HIdP comes with a set of extra password validators that can be added to
 for more information.
 
 :::
+
+### Registration
+
+To enable customer-facing registration, the following path will need to be added to the project's url config:
+
+```python
+from hidp.accounts import account_registration_urls
+
+urlpatterns = [
+    ...
+    path("", include(account_registration_urls))
+    ...
+]
+
+```
+
+This will show a link to the registration page on the login page and add the following urls to your project:
+- `/signup/` - Registration page
+- `/terms-of-service/` - Terms of Service page
+
 ### OpenID Connect based login (social accounts)
 
 To enable users to log in using an existing Google, Microsoft or any other provider that

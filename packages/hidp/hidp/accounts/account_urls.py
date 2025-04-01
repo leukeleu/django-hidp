@@ -24,10 +24,6 @@ from . import views
 
 app_name = "hidp_accounts"
 
-register_urls = [
-    path("signup/", views.RegistrationView.as_view(), name="register"),
-    path("terms-of-service/", views.TermsOfServiceView.as_view(), name="tos"),
-]
 
 verifications_urls = [
     path(
@@ -82,4 +78,4 @@ recover_urls = [
     )
 ]
 
-urlpatterns = register_urls + verifications_urls + auth_urls + recover_urls
+urlpatterns = verifications_urls + auth_urls + recover_urls

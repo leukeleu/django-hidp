@@ -304,7 +304,7 @@ class OIDCRegistrationView(
     template_name = "hidp/federated/registration.html"
     next_page = "/"
     verification_mailer = mailers.EmailVerificationMailer
-    invalid_token_redirect_url = reverse_lazy("hidp_accounts:register")
+    invalid_token_redirect_url = reverse_lazy("hidp_accounts_registration:register")
 
     def get_form_kwargs(self):
         return super().get_form_kwargs() | {

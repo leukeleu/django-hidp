@@ -16,7 +16,7 @@ def _has_prompt_create(request):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 class AuthorizationView(oauth2_views.AuthorizationView):
-    registration_url = "hidp_accounts:register"
+    registration_url = "hidp_accounts_registration:register"
 
     def get(self, request, *args, **kwargs):
         if _has_prompt_create(request):

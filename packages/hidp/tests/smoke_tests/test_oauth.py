@@ -244,7 +244,7 @@ class TestOAuthFlow(TestCase):
             self.assertRedirects(
                 response,
                 (
-                    f"{reverse('hidp_accounts:register')}"
+                    f"{reverse('hidp_accounts_registration:register')}"
                     f"?{urlencode({'next': next_url})}"
                 ),
             )
@@ -258,7 +258,7 @@ class TestOAuthFlow(TestCase):
             self.assertRedirects(
                 response,
                 (
-                    f"{reverse('hidp_accounts:register')}"
+                    f"{reverse('hidp_accounts_registration:register')}"
                     f"?{urlencode({'next': next_url})}"
                 ),
             )

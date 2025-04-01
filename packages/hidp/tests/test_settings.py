@@ -127,7 +127,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
-ROOT_URLCONF = "hidp.config.urls"
+ROOT_URLCONF = "hidp.config.test_urls"
 
 # Help Django find and update HIdP's message catalogs
 LOCALE_PATHS = [

@@ -21,7 +21,7 @@ class TermsOfServiceMixin:
         label = mark_safe(  # noqa: S308 (safe string, no user input)
             format_lazy(
                 _('I have read and accept the <a href="{url}">Terms of Service</a>'),
-                url=reverse_lazy("hidp_accounts:tos"),
+                url=reverse_lazy("hidp_accounts_registration:tos"),
             )
         )
         return forms.BooleanField(label=label, required=True)
