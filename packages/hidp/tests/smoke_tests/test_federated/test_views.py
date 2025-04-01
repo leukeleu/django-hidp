@@ -6,7 +6,7 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.http import HttpRequest
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from hidp.config import configure_oidc_clients
@@ -151,6 +151,9 @@ _VALID_AUTH_CALLBACK = (
 )
 
 
+@override_settings(
+    REGISTRATION_ENABLED=True,
+)
 class TestOIDCAuthenticationCallbackView(TestCase):
     def setUp(self):
         configure_oidc_clients(ExampleOIDCClient(client_id="test"))
@@ -386,6 +389,9 @@ class OIDCTokenDataTestMixin:
         self._assert_invalid_token(token=token)
 
 
+@override_settings(
+    REGISTRATION_ENABLED=True,
+)
 class TestOIDCRegistrationView(OIDCTokenDataTestMixin, TestCase):
     view_class = views.OIDCRegistrationView
     view_name = "hidp_oidc_client:register"

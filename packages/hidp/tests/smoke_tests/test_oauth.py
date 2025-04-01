@@ -10,7 +10,7 @@ from oauth2_provider.models import get_access_token_model, get_application_model
 
 from django.conf import settings
 from django.core.signing import b64_encode
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.timezone import now as tz_now
 
@@ -20,6 +20,9 @@ Application = get_application_model()
 AccessToken = get_access_token_model()
 
 
+@override_settings(
+    REGISTRATION_ENABLED=True,
+)
 class TestOAuthFlow(TestCase):
     @classmethod
     def setUpTestData(cls):
