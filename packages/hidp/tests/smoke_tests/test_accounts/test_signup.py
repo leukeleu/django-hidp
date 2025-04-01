@@ -15,6 +15,7 @@ User = get_user_model()
 
 @override_settings(
     LANGUAGE_CODE="en",
+    REGISTRATION_ENABLED=True,
 )
 class TestRegistrationView(TransactionTestCase):
     def setUp(self):
@@ -336,3 +337,40 @@ class TestRegistrationView(TransactionTestCase):
             )
         self.assertIn("Failed to send verification email.", cm.records[0].msg)
         self.assertEqual(0, len(mail.outbox))
+
+
+@override_settings(
+    REGISTRATION_ENABLED=False,
+)
+class TestRegistrationViewNotEnabled(TransactionTestCase):
+    def setUp(self):
+        self.signup_url = reverse("hidp_accounts:register")
+        self.tos_url = reverse("hidp_accounts:tos")
+
+    def test_get_signup_disabled(self):
+        """The view should turn a 404 when registration is disabled."""
+        response = self.client.get(self.signup_url)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_post_signup_disabled(self):
+        """The view should not process POST requests when registration is disabled."""
+        response = self.client.post(
+            self.signup_url,
+            {
+                "email": "test@example.com",
+                "password1": "P@ssw0rd!",
+                "password2": "P@ssw0rd!",
+                "agreed_to_tos": "on",
+            },
+        )
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_get_tos_disabled(self):
+        """The TOS should not be displayed when registration is disabled."""
+        response = self.client.get(self.tos_url)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_post_tos_disabled(self):
+        """The TOS should not process POST requests when registration is disabled."""
+        response = self.client.post(self.tos_url)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

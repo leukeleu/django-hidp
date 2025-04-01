@@ -28,6 +28,7 @@ from ..otp.decorators import otp_exempt
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from . import auth as hidp_auth
 from . import email_verification, forms, mailers, tokens
+from .decorators import registration_enabled
 from .email_change import Recipient
 from .models import EmailChangeRequest
 
@@ -35,6 +36,7 @@ logger = logging.getLogger(__name__)
 UserModel = get_user_model()
 
 
+@method_decorator(registration_enabled, name="dispatch")
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(ratelimit(key="ip", rate="2/s", method="POST"), name="post")
 @method_decorator(ratelimit(key="ip", rate="5/m", method="POST"), name="post")
@@ -131,6 +133,7 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
         )
 
 
+@method_decorator(registration_enabled, name="dispatch")
 @method_decorator(hidp_csp_protection, name="dispatch")
 class TermsOfServiceView(generic.TemplateView):
     """Display the terms of service."""
@@ -459,11 +462,15 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
           The name of the current site (host name if `RequestSite` is used)
         * Any additional data present is `self.extra_context`
         """
-        register_url = reverse("hidp_accounts:register") + (
-            f"?{urlencode({'next': redirect_url})}"
-            if (redirect_url := self.get_redirect_url())
-            else ""
-        )
+        if getattr(settings, "REGISTRATION_ENABLED", False):
+            register_url = reverse("hidp_accounts:register") + (
+                f"?{urlencode({'next': redirect_url})}"
+                if (redirect_url := self.get_redirect_url())
+                else ""
+            )
+        else:
+            register_url = None
+
         context = {
             "password_reset_url": reverse("hidp_accounts:password_reset_request"),
             "register_url": register_url,
