@@ -13,6 +13,7 @@ registering and authenticating users in Django projects.
 :::{toctree}
 :maxdepth: 2
 installation
+configuration
 installation-extras
 configure-oidc-clients
 configure-as-oidc-provider
