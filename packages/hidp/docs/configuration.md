@@ -9,3 +9,4 @@ user in the Django or Wagtail admin interface.
 
 The issuer name to use in the TOTP URI. When not set, it will default to the domain
 part of the user's email address (without TLD), i.e. `example` if your emailaddress is `username@example.org`. For more information see the [django-otp docs](https://django-otp-official.readthedocs.io/en/stable/overview.html#std-setting-OTP_TOTP_ISSUER).
+
