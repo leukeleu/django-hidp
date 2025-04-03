@@ -4,13 +4,35 @@
 {% block title %}{% translate 'Two-factor Authentication' %}{% endblock %}
 
 {% block main %}
+  <style>
+    .qr-code-container {
+      padding: 1rem;
+      background-color: white;
+      border-radius: 0.5rem;
+      display: inline-block;
+    }
+
+    .qr-code-image {
+      max-width: 100%;
+      height: auto;
+      width: 200px;
+      aspect-ratio: 1/1;
+    }
+  </style>
+
   <h1>{% translate 'Set up two-factor authentication' %}</h1>
 
   <form method="post">
     {% csrf_token %}
 
     <h2>{% translate 'Scan the QR code' %}</h2>
-    <div><img src="{{ qrcode|safe }}" width="200" height="200" alt="" /></div>
+    <div class="qr-code-container">
+      <img
+        class="qr-code-image"
+        src="{{ qrcode|safe }}"
+        alt="{% translate 'QR code for setting up two-factor authentication. Scan with your authenticator app.' %}"
+      />
+    </div>
 
     {{ form.non_field_errors }}
 
