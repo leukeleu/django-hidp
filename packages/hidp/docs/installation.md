@@ -224,6 +224,21 @@ HIdP comes with a set of templates that can be overridden in your project.
 
 See [Customizing Templates](project:templates.md) for more information.
 
+### Admin specific styling
+
+#### Wagtail
+To enable Wagtail specific styling, add the following Django templates to the project and extend from the Wagtail base template:
+
+```
+# frontend/templates/hidp/base.html
+{% extends 'hidp/wagtail/base.html' %}
+```
+
+```
+# frontend/templates/hidp/base_post_login.html
+{% extends 'hidp/wagtail/base_post_login.html' %}
+```
+
 ## Translations
 
 HIdP can be translated into different languages, and ships with Dutch translations out of the box.

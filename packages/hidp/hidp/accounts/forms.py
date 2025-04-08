@@ -24,7 +24,7 @@ class TermsOfServiceMixin:
                 url=reverse_lazy("hidp_accounts:tos"),
             )
         )
-        return forms.BooleanField(label=label, required=True)
+        return forms.BooleanField(label=label, required=True, label_suffix="")
 
     def set_agreed_to_tos(self, user):
         """Populate the `agreed_to_tos` field, if the user agreed."""

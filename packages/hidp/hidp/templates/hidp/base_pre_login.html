@@ -14,3 +14,9 @@ This includes the following pages (non-exhaustive list):
 
 It extends the base.html template and is an entrypoint for customizing the layout of the pre-login pages.
 {% endcomment %}
+
+{% block body %}
+  <main>
+    {% block main %}{% endblock %}
+  </main>
+{% endblock %}

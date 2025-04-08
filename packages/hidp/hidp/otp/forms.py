@@ -90,6 +90,7 @@ class OTPSetupForm(OTPVerifyFormBase):
         help_text=_(
             "You can use these codes to log in if you lose access to your device"
         ),
+        label_suffix="",
     )
 
     def get_device(self, user):
