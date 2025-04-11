@@ -18,6 +18,11 @@
       width: 200px;
       aspect-ratio: 1/1;
     }
+
+    .otp-config-url {
+      white-space: pre-line;
+      word-break: break-all;
+    }
   </style>
 
   <h1>{% translate 'Set up two-factor authentication' %}</h1>
@@ -33,6 +38,14 @@
         alt="{% translate 'QR code for setting up two-factor authentication. Scan with your authenticator app.' %}"
       />
     </div>
+
+    <p>
+      If you cannot scan the QR code, you can enter the following URL into your authenticator app:
+
+      <pre class="otp-config-url">{{ config_url }}</pre>
+    </p>
+
+
 
     {{ form.non_field_errors }}
 
