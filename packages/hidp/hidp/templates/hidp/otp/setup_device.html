@@ -39,13 +39,15 @@
       />
     </div>
 
-    <p>
-      If you cannot scan the QR code, you can enter the following URL into your authenticator app:
-
-      <pre class="otp-config-url">{{ config_url }}</pre>
-    </p>
-
-
+    <details>
+      <summary>
+        {% translate 'Click here if you are unable to scan the QR-code.' %}
+      </summary>
+      <p>
+        {% translate 'Enter the following URL in your authenticator app:' %}
+        <pre class="otp-config-url">{{ config_url}}</pre>
+      </p>
+    </details>
 
     {{ form.non_field_errors }}
 
