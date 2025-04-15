@@ -205,7 +205,7 @@ class OIDCAuthenticationCallbackView(OIDCMixin, generic.View):
                 # Display a message instructing the user to log in to link the accounts.
                 return (
                     reverse("hidp_accounts:login")
-                    + f"?oidc_error={OIDCError.ACCOUNT_EXISTS}"
+                    + f"?oidc_error={OIDCError.ACCOUNT_EXISTS}&next={redirect_url}"
                 )
 
         # Prepare the URL parameters for the next view. Drop any None values.
