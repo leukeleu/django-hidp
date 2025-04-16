@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.db.models.functions import MD5
-from django.http import HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
@@ -20,6 +20,8 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
+
+from hidp.utils import is_registration_enabled
 
 from ..config import oidc_clients
 from ..csp.decorators import hidp_csp_protection
@@ -84,6 +86,13 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
             "can_register": not self.request.user.is_authenticated,
         }
         return super().get_context_data() | context | kwargs
+
+    def dispatch(self, request, *args, **kwargs):
+        if not is_registration_enabled():
+            raise Http404(
+                "Registration is disabled. Please contact your administrator."
+            )
+        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -459,11 +468,14 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
           The name of the current site (host name if `RequestSite` is used)
         * Any additional data present is `self.extra_context`
         """
-        register_url = reverse("hidp_accounts:register") + (
-            f"?{urlencode({'next': redirect_url})}"
-            if (redirect_url := self.get_redirect_url())
-            else ""
-        )
+        register_url = None
+
+        if is_registration_enabled():
+            register_url = reverse("hidp_accounts:register") + (
+                f"?{urlencode({'next': redirect_url})}"
+                if (redirect_url := self.get_redirect_url())
+                else ""
+            )
         context = {
             "password_reset_url": reverse("hidp_accounts:password_reset_request"),
             "register_url": register_url,

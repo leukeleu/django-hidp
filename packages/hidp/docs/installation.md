@@ -100,6 +100,13 @@ Configure your custom user model in your Django settings, e.g.:
 AUTH_USER_MODEL = "accounts.User"
 ```
 
+### `REGISTRATION_ENABLED`
+Enable or disable registration in your Django settings (default is `False`):
+
+```python
+REGISTRATION_ENABLED = False
+```
+
 ### Login settings
 
 Configure the login url and redirect urls in your Django settings:
