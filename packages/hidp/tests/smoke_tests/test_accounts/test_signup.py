@@ -19,7 +19,7 @@ User = get_user_model()
 class TestRegistrationView(TransactionTestCase):
     def setUp(self):
         self.test_user = user_factories.UserFactory(email="user@example.com")
-        self.signup_url = reverse("hidp_accounts_registration:register")
+        self.signup_url = "/signup/"
 
     def test_get(self):
         """The registration form should be displayed."""
@@ -31,7 +31,7 @@ class TestRegistrationView(TransactionTestCase):
 
     def test_get_tos(self):
         """The terms of service should be displayed."""
-        response = self.client.get(reverse("hidp_accounts_registration:tos"))
+        response = self.client.get("/terms-of-service/")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "hidp/accounts/tos.html")
 

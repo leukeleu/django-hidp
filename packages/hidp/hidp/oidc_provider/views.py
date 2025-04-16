@@ -1,7 +1,10 @@
 from oauth2_provider import views as oauth2_views
 
 from django.contrib.auth.models import AnonymousUser
+from django.urls import NoReverseMatch
 from django.utils.decorators import method_decorator
+
+from hidp.utils import get_registration_url
 
 from ..csp.decorators import hidp_csp_protection
 
@@ -16,7 +19,9 @@ def _has_prompt_create(request):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 class AuthorizationView(oauth2_views.AuthorizationView):
-    registration_url = "hidp_accounts_registration:register"
+    @property
+    def registration_url(self):
+        return get_registration_url()
 
     def get(self, request, *args, **kwargs):
         if _has_prompt_create(request):
@@ -28,7 +33,7 @@ class AuthorizationView(oauth2_views.AuthorizationView):
         return super().get(request, *args, **kwargs)
 
     def get_login_url(self):
-        if _has_prompt_create(self.request):
+        if _has_prompt_create(self.request) and self.registration_url:
             # The current URL is used as the redirect URL after registration.
             # Drop the prompt=create parameter to return to the authorization flow,
             # without ending up in a redirect loop.

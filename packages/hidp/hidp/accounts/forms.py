@@ -3,11 +3,12 @@ from django.contrib.auth import forms as auth_forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth import password_validation as django_password_validation
 from django.db import transaction
-from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
+
+from hidp.utils import get_tos_url
 
 from .email_change import Recipient
 from .models import EmailChangeRequest
@@ -21,7 +22,7 @@ class TermsOfServiceMixin:
         label = mark_safe(  # noqa: S308 (safe string, no user input)
             format_lazy(
                 _('I have read and accept the <a href="{url}">Terms of Service</a>'),
-                url=reverse_lazy("hidp_accounts_registration:tos"),
+                url=get_tos_url(),
             )
         )
         return forms.BooleanField(label=label, required=True)
