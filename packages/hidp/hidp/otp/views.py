@@ -3,8 +3,6 @@ import segno
 
 from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_totp.models import TOTPDevice
-from rest_framework.generics import get_object_or_404
-from rest_framework.reverse import reverse_lazy
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -12,7 +10,8 @@ from django.contrib.auth.views import RedirectURLMixin
 from django.db import transaction
 from django.forms import Form
 from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import get_object_or_404
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, FormView, TemplateView
 
