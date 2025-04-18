@@ -6,14 +6,15 @@
 {% block main %}
   <h1>{% translate 'Manage your account information' %}</h1>
 
+  <p>
+    {% blocktranslate trimmed %}
+      You are currently logged in as {{ user }}.
+    {% endblocktranslate %}
+  </p>
+
   <form action="{{ logout_url }}" method="post">
     {% csrf_token %}
-    <p>
-      {% blocktranslate trimmed %}
-        You are currently logged in as {{ user }}.
-      {% endblocktranslate %}
-      <button type="submit">{% translate 'Sign out' %}</button>
-    </p>
+    <button type="submit">{% translate 'Sign out' %}</button>
   </form>
 
   <hr>
