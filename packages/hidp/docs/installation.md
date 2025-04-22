@@ -100,6 +100,23 @@ Configure your custom user model in your Django settings, e.g.:
 AUTH_USER_MODEL = "accounts.User"
 ```
 
+### `OTP_TOTP_ISSUER`
+
+Specifies the issuer name to be used in the Time-based One-Time Password (TOTP) URI.
+This setting is used to identify the service or organization that issues the TOTP tokens.
+
+Set this value to a string that represents your application or organization name
+to provide a consistent issuer name in the TOTP URIs generated for your users.
+
+Example:
+
+```python
+# settings.py
+OTP_TOTP_ISSUER = "YourOrganizationName"
+```
+
+For more information, see the [django-otp docs](https://django-otp-official.readthedocs.io/en/stable/overview.html#std-setting-OTP_TOTP_ISSUER).
+
 ### Login settings
 
 Configure the login url and redirect urls in your Django settings:
