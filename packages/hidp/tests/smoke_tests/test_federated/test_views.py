@@ -151,9 +151,7 @@ _VALID_AUTH_CALLBACK = (
 )
 
 
-@override_settings(
-    REGISTRATION_ENABLED=True,
-)
+@override_settings(REGISTRATION_ENABLED=True)
 class TestOIDCAuthenticationCallbackView(TestCase):
     def setUp(self):
         configure_oidc_clients(ExampleOIDCClient(client_id="test"))
@@ -389,9 +387,7 @@ class OIDCTokenDataTestMixin:
         self._assert_invalid_token(token=token)
 
 
-@override_settings(
-    REGISTRATION_ENABLED=True,
-)
+@override_settings(REGISTRATION_ENABLED=True)
 class TestOIDCRegistrationView(OIDCTokenDataTestMixin, TestCase):
     view_class = views.OIDCRegistrationView
     view_name = "hidp_oidc_client:register"

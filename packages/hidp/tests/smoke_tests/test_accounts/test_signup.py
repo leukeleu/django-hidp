@@ -13,10 +13,7 @@ from hidp.test.factories import user_factories
 User = get_user_model()
 
 
-@override_settings(
-    LANGUAGE_CODE="en",
-    REGISTRATION_ENABLED=True,
-)
+@override_settings(LANGUAGE_CODE="en", REGISTRATION_ENABLED=True)
 class TestRegistrationView(TransactionTestCase):
     def setUp(self):
         self.test_user = user_factories.UserFactory(email="user@example.com")
@@ -339,9 +336,7 @@ class TestRegistrationView(TransactionTestCase):
         self.assertEqual(0, len(mail.outbox))
 
 
-@override_settings(
-    REGISTRATION_ENABLED=False,
-)
+@override_settings(REGISTRATION_ENABLED=False)
 class TestRegistrationViewNotEnabled(TransactionTestCase):
     def setUp(self):
         self.signup_url = reverse("hidp_accounts:register")

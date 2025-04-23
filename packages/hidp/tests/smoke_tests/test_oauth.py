@@ -20,9 +20,7 @@ Application = get_application_model()
 AccessToken = get_access_token_model()
 
 
-@override_settings(
-    REGISTRATION_ENABLED=True,
-)
+@override_settings(REGISTRATION_ENABLED=True)
 class TestOAuthFlow(TestCase):
     @classmethod
     def setUpTestData(cls):
