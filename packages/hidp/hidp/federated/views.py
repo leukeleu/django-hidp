@@ -69,9 +69,7 @@ class OIDCContextMixin:
         ),
         OIDCError.INVALID_TOKEN: _("Expired or invalid token. Please try again."),
         OIDCError.INVALID_CREDENTIALS: _("Login failed. Invalid credentials."),
-        OIDCError.REGISTRATION_DISABLED: _(
-            "Registration is disabled."
-        ),
+        OIDCError.REGISTRATION_DISABLED: _("Registration is disabled."),
     }
 
     @staticmethod
