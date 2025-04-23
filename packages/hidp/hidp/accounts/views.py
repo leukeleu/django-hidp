@@ -89,9 +89,7 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
 
     def dispatch(self, request, *args, **kwargs):
         if not is_registration_enabled():
-            raise Http404(
-                "Registration is disabled. Please contact your administrator."
-            )
+            raise Http404("Registration is disabled.")
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
