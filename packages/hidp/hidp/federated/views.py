@@ -16,6 +16,8 @@ from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
+from hidp.utils import is_registration_enabled
+
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailers
 from ..config import oidc_clients
@@ -67,6 +69,7 @@ class OIDCContextMixin:
         ),
         OIDCError.INVALID_TOKEN: _("Expired or invalid token. Please try again."),
         OIDCError.INVALID_CREDENTIALS: _("Login failed. Invalid credentials."),
+        OIDCError.REGISTRATION_DISABLED: _("Registration is disabled."),
     }
 
     @staticmethod
@@ -305,6 +308,15 @@ class OIDCRegistrationView(
     next_page = "/"
     verification_mailer = mailers.EmailVerificationMailer
     invalid_token_redirect_url = reverse_lazy("hidp_accounts:register")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not is_registration_enabled():
+            # Registration is disabled. Redirect to the login page.
+            return HttpResponseRedirect(
+                reverse("hidp_accounts:login")
+                + f"?oidc_error={OIDCError.REGISTRATION_DISABLED}"
+            )
+        return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         return super().get_form_kwargs() | {

@@ -253,6 +253,10 @@ msgid "Login failed. Invalid credentials."
 msgstr "Inloggen mislukt. Ongeldige inloggegevens."
 
 #: hidp/federated/views.py
+msgid "Registration is disabled."
+msgstr "Registratie is uitgeschakeld."
+
+#: hidp/federated/views.py
 #, python-brace-format
 msgid "Sign in with {provider}"
 msgstr "Log in met {provider}"

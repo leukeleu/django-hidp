@@ -100,6 +100,13 @@ Configure your custom user model in your Django settings, e.g.:
 AUTH_USER_MODEL = "accounts.User"
 ```
 
+### `REGISTRATION_ENABLED`
+Enable or disable registration in your Django settings (default is `False`):
+
+```python
+REGISTRATION_ENABLED = False
+```
+
 ### `OTP_TOTP_ISSUER`
 
 Specifies the issuer name to be used in the Time-based One-Time Password (TOTP) URI.

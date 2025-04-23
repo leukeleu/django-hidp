@@ -46,10 +46,11 @@
 
   {% endif %}
 
-  <hr>
-
-  <p>
-    {% translate 'No account yet?' %}
-    <a href="{{ register_url }}">{% translate 'Sign up' %}</a>
-  </p>
+  {% if register_url %}
+    <hr>
+    <p>
+      {% translate 'No account yet?' %}
+      <a href="{{ register_url }}">{% translate 'Sign up' %}</a>
+    </p>
+  {% endif %}
 {% endblock %}

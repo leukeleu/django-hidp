@@ -8,10 +8,7 @@ from hidp.accounts import auth as hidp_auth
 from hidp.test.factories import user_factories
 
 
-@override_settings(
-    LOGIN_REDIRECT_URL="/",
-    LANGUAGE_CODE="en",
-)
+@override_settings(LOGIN_REDIRECT_URL="/", LANGUAGE_CODE="en")
 class TestLogout(TestCase):
     @classmethod
     def setUpTestData(cls):

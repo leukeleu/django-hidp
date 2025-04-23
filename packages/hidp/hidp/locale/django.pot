@@ -252,6 +252,10 @@ msgid "Login failed. Invalid credentials."
 msgstr ""
 
 #: hidp/federated/views.py
+msgid "Registration is disabled."
+msgstr ""
+
+#: hidp/federated/views.py
 #, python-brace-format
 msgid "Sign in with {provider}"
 msgstr ""
