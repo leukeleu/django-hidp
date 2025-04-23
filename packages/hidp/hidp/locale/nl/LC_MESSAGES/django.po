@@ -930,6 +930,14 @@ msgid "These codes can be used to log in if you lose access to your two-factor d
 msgstr "Deze codes kunnen worden gebruikt om in te loggen als je geen toegang meer hebt tot je tweefactorapparaat. Je kunt op elk moment nieuwe codes genereren, maar je kunt slechts één set codes tegelijk hebben."
 
 #: hidp/templates/hidp/otp/setup_device.html
+msgid "Enter the following URL in your authenticator app:"
+msgstr "Voer de volgende URL in bij je authenticator-app:"
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Having trouble scanning the QR code?"
+msgstr "Problemen met het scannen van de QR-code?"
+
+#: hidp/templates/hidp/otp/setup_device.html
 msgid "QR code for setting up two-factor authentication. Scan with your authenticator app."
 msgstr "QR-code voor het instellen van tweefactorauthenticatie. Scan met je authenticator-app."
 

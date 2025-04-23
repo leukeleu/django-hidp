@@ -929,6 +929,14 @@ msgid "These codes can be used to log in if you lose access to your two-factor d
 msgstr ""
 
 #: hidp/templates/hidp/otp/setup_device.html
+msgid "Enter the following URL in your authenticator app:"
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Having trouble scanning the QR code?"
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
 msgid "QR code for setting up two-factor authentication. Scan with your authenticator app."
 msgstr ""
 
