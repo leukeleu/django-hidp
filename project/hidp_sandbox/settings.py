@@ -271,9 +271,7 @@ else:
     if EMAIL_BANDIT:
         EMAIL_BACKEND = "bandit.backends.smtp.HijackSMTPBackend"
         BANDIT_EMAIL = config.getliteral("app", "bandit_email")
-        BANDIT_WHITELIST = config.getliteral(
-            "app", "bandit_whitelist", fallback=["leukeleu.nl"]
-        )
+        BANDIT_WHITELIST = config.getliteral("app", "bandit_whitelist", fallback=[])
 
 DEFAULT_FROM_EMAIL = config.getliteral("app", "default_from_email")
 
