@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-hidp"
+description = "Full-featured authentication system for Django projects"
 authors = [
   { name = "Jaap Roes", email = "jroes@leukeleu.nl" },
   { name = "Dennis Bunskoek", email = "dbunskoek@leukeleu.nl" },
