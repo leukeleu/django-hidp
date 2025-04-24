@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hidp"
+name = "django-hidp"
 authors = [
   { name = "Jaap Roes", email = "jroes@leukeleu.nl" },
   { name = "Dennis Bunskoek", email = "dbunskoek@leukeleu.nl" },
