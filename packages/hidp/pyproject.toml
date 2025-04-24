@@ -18,6 +18,19 @@ dynamic = [
   "optional-dependencies",
 ]
 readme = "README.md"
+license = "BSD-3-Clause"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Framework :: Django",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Documentation = "https://leukeleu.github.io/django-hidp/"
+Repository = "https://github.com/leukeleu/django-hidp/"
+Issues = "https://github.com/leukeleu/django-hidp/issues"
+Releasenotes = "https://github.com/leukeleu/django-hidp/releases"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
