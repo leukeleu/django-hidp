@@ -16,6 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    environment: pypi
+    permissions:
+      # IMPORTANT: this permission is mandatory for Trusted Publishing
+      id-token: write
+
     services:
       postgres:
         image: postgres:14-alpine
@@ -41,10 +46,7 @@ jobs:
           >> $GITHUB_OUTPUT
         id: is_prerelease
 
-      - name: Release to DevPI
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: ${{ secrets.DEVPI_USERNAME }}
-          password: ${{ secrets.DEVPI_PASSWORD }}
-          repository-url: https://${{ secrets.DEVPI_USERNAME }}:${{ secrets.DEVPI_PASSWORD }}@devpi.leukeleu.nl/leukeleu/${{ fromJson(steps.is_prerelease.outputs.is_prerelease) && 'dev' || 'prod' }}/
           packages-dir: ./var/dist
