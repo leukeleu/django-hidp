@@ -13,7 +13,7 @@ OTP support in HIdP is included in the `recommended` extra. To install the `reco
 command:
 
 ```shell
-pip install hidp[recommended]
+pip install django-hidp[recommended]
 ```
 
 See [Installation Extras](installation-extras.md) for more information on available extras.
