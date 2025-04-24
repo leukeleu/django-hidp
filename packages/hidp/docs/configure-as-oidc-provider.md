@@ -12,7 +12,7 @@ The OIDC Provider part of HIdP is based on [Django OAuth Toolkit](https://django
 Install with pip
 
 ```
-pip install hidp[recommended,oidc_provider]
+pip install django-hidp[recommended,oidc_provider]
 ```
 
 This will install HIdP with the recommended dependencies and the OIDC provider functionality. See 

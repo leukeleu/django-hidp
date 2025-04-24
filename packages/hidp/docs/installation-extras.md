@@ -24,13 +24,13 @@ In most cases the recommended set of extras should be used.
 To add OIDC provider support you can select the `oidc_provider` extra:
 
 ```
-pip install hidp[recommended,oidc_provider]
+pip install django-hidp[recommended,oidc_provider]
 ```
 
 It's also possible to only install the `oidc_provider` extra, and omit the recommended extras:
 
 ```
-pip install hidp[oidc_provider]
+pip install django-hidp[oidc_provider]
 ```
 
 ## Base Installation
@@ -38,7 +38,7 @@ pip install hidp[oidc_provider]
 Installing `hidp` without any extras is also possible:
 
 ```
-pip install hidp
+pip install django-hidp
 ```
 
 This will result in a bare-bones installation, without support for one-time passwords (OTP).
