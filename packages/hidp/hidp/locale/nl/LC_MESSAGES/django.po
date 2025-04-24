@@ -208,7 +208,7 @@ msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een 
 #: hidp/templates/hidp/otp/verify.html
 #: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Two-factor authentication"
-msgstr "Tweefactorauthenticatie"
+msgstr "Tweefactor­authenticatie"
 
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
@@ -811,12 +811,12 @@ msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"
 #: hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disable two-factor authentication"
-msgstr "Tweefactorauthenticatie uitschakelen"
+msgstr "Tweefactor­authenticatie uitschakelen"
 
 #: hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disabling two-factor authentication will make your account less secure."
-msgstr "Het uitschakelen van tweefactorauthenticatie maakt je account minder veilig."
+msgstr "Het uitschakelen van tweefactor­authenticatie maakt je account minder veilig."
 
 #: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
 msgid "If you have lost your device, you can use a recovery code instead."
@@ -834,31 +834,31 @@ msgstr "gebruik herstelcode"
 
 #: hidp/templates/hidp/otp/email/configured_body.html
 msgid "You've successfully configured two-factor authentication. Please make sure you have stored your recovery codes in a safe place. You can use these codes to access your account if you lose access to your device. You can view your recovery codes by visiting the two-factor authentication settings page:"
-msgstr "Je hebt tweefactorauthenticatie succesvol geconfigureerd. Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de tweefactorauthenticatie-instellingenpagina te bezoeken:"
+msgstr "Je hebt tweefactor­authenticatie succesvol geconfigureerd. Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de tweefactor­authenticatie-instellingenpagina te bezoeken:"
 
 #: hidp/templates/hidp/otp/email/configured_body.txt
 #: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.html
 #: hidp/templates/hidp/otp/email/recovery_codes_regenerated_body.txt
 msgid "Please make sure you have stored your recovery codes in a safe place. You can use these codes to access your account if you lose access to your device. You can view your recovery codes by visiting the two-factor authentication settings page:"
-msgstr "Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de tweefactorauthenticatie-instellingenpagina te bezoeken:"
+msgstr "Zorg ervoor dat je je herstelcodes op een veilige plek hebt opgeslagen. Je kunt deze codes gebruiken om toegang te krijgen tot je account als je geen toegang meer hebt tot je apparaat. Je kunt je herstelcodes bekijken door de tweefactor­authenticatie-instellingenpagina te bezoeken:"
 
 #: hidp/templates/hidp/otp/email/configured_body.txt
 #: hidp/templates/hidp/otp/setup_device_done.html
 msgid "You've successfully configured two-factor authentication."
-msgstr "Je hebt tweefactorauthenticatie succesvol geconfigureerd."
+msgstr "Je hebt tweefactor­authenticatie succesvol geconfigureerd."
 
 #: hidp/templates/hidp/otp/email/configured_subject.txt
 msgid "Two-factor authentication configured"
-msgstr "Tweefactorauthenticatie is geconfigureerd"
+msgstr "Tweefactor­authenticatie is geconfigureerd"
 
 #: hidp/templates/hidp/otp/email/disabled_body.html
 #: hidp/templates/hidp/otp/email/disabled_body.txt
 msgid "Your two-factor-authentication configuration on your account has been removed. Your recovery codes have been invalidated, and you will need to generate new ones if you wish to use two-factor-authentication again. You can re-enable two-factor-authentication by visiting the two-factor authentication settings page:"
-msgstr "Je tweefactorauthenticatie-configuratie op je account is verwijderd. Je herstelcodes zijn ongeldig gemaakt en je moet nieuwe genereren als je tweefactorauthenticatie opnieuw wilt gebruiken. Je kunt tweefactorauthenticatie opnieuw inschakelen door de tweefactorauthenticatie-instellingenpagina te bezoeken:"
+msgstr "Je tweefactor­authenticatie-configuratie op je account is verwijderd. Je herstelcodes zijn ongeldig gemaakt en je moet nieuwe genereren als je tweefactor­authenticatie opnieuw wilt gebruiken. Je kunt tweefactor­authenticatie opnieuw inschakelen door de tweefactor­authenticatie-instellingenpagina te bezoeken:"
 
 #: hidp/templates/hidp/otp/email/disabled_subject.txt
 msgid "Two-factor authentication disabled"
-msgstr "Tweefactorauthenticatie uitgeschakeld"
+msgstr "Tweefactor­authenticatie uitgeschakeld"
 
 #: hidp/templates/hidp/otp/email/recovery_code_used_body.html
 #: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
@@ -868,7 +868,7 @@ msgstr "Een herstelcode is gebruikt om in te loggen op je account. Als je niet h
 #: hidp/templates/hidp/otp/email/recovery_code_used_body.html
 #: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
 msgid "You can generate new recovery codes by visiting the two-factor authentication settings page:"
-msgstr "Je kunt nieuwe herstelcodes genereren door de tweefactorauthenticatie-instellingenpagina te bezoeken:"
+msgstr "Je kunt nieuwe herstelcodes genereren door de tweefactor­authenticatie-instellingenpagina te bezoeken:"
 
 #: hidp/templates/hidp/otp/email/recovery_code_used_body.html
 #: hidp/templates/hidp/otp/email/recovery_code_used_body.txt
@@ -927,11 +927,11 @@ msgstr "Genereer nieuwe codes"
 
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Keep these codes safe. These codes are the only way to log in if you lose access to your two-factor device."
-msgstr "Bewaar deze codes veilig. Deze codes zijn de enige manier om in te loggen als je geen toegang meer hebt tot je tweefactorapparaat."
+msgstr "Bewaar deze codes veilig. Deze codes zijn de enige manier om in te loggen als je geen toegang meer hebt tot je tweefactor­apparaat."
 
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "These codes can be used to log in if you lose access to your two-factor device. You can generate new codes at any time, but you can only have one set of codes at a time."
-msgstr "Deze codes kunnen worden gebruikt om in te loggen als je geen toegang meer hebt tot je tweefactorapparaat. Je kunt op elk moment nieuwe codes genereren, maar je kunt slechts één set codes tegelijk hebben."
+msgstr "Deze codes kunnen worden gebruikt om in te loggen als je geen toegang meer hebt tot je tweefactor­apparaat. Je kunt op elk moment nieuwe codes genereren, maar je kunt slechts één set codes tegelijk hebben."
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Enter the following URL in your authenticator app:"
@@ -943,7 +943,7 @@ msgstr "Problemen met het scannen van de QR-code?"
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "QR code for setting up two-factor authentication. Scan with your authenticator app."
-msgstr "QR-code voor het instellen van tweefactorauthenticatie. Scan met je authenticator-app."
+msgstr "QR-code voor het instellen van tweefactor­authenticatie. Scan met je authenticator-app."
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Scan the QR code"
@@ -952,7 +952,7 @@ msgstr "Scan de QR-code"
 #: hidp/templates/hidp/otp/setup_device.html
 #: hidp/templates/hidp/otp/setup_device_done.html
 msgid "Set up two-factor authentication"
-msgstr "Tweefactorauthenticatie instellen"
+msgstr "Tweefactor­authenticatie instellen"
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Submit"
@@ -961,7 +961,7 @@ msgstr "Verzenden"
 #: hidp/templates/hidp/otp/setup_device.html
 #: hidp/templates/hidp/otp/setup_device_done.html
 msgid "Two-factor Authentication"
-msgstr "Tweefactorauthenticatie"
+msgstr "Tweefactor­authenticatie"
 
 #: hidp/templates/hidp/otp/verify.html
 #: hidp/templates/hidp/otp/verify_recovery_code.html
