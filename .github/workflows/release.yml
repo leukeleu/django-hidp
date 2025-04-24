@@ -41,10 +41,9 @@ jobs:
           >> $GITHUB_OUTPUT
         id: is_prerelease
 
-      - name: Release to DevPI
+      - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: ${{ secrets.DEVPI_USERNAME }}
-          password: ${{ secrets.DEVPI_PASSWORD }}
-          repository-url: https://${{ secrets.DEVPI_USERNAME }}:${{ secrets.DEVPI_PASSWORD }}@devpi.leukeleu.nl/leukeleu/${{ fromJson(steps.is_prerelease.outputs.is_prerelease) && 'dev' || 'prod' }}/
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
           packages-dir: ./var/dist
