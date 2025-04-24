@@ -7,6 +7,7 @@ name = "django-hidp"
 authors = [
   { name = "Jaap Roes", email = "jroes@leukeleu.nl" },
   { name = "Dennis Bunskoek", email = "dbunskoek@leukeleu.nl" },
+  { name = "Ramon de Jezus", email = "rdejezus@leukeleu.nl" },
   { name = "Thomas Kalverda", email = "tkalverda@leukeleu.nl" },
   { name = "Wouter de Vries", email = "wdevries@leukeleu.nl" },
 ]
