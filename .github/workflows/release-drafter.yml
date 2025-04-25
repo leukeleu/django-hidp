@@ -13,12 +13,6 @@ permissions:
 
 jobs:
   update_release_draft:
-    strategy:
-      matrix:
-        prerelease:
-          - true
-          - false
-
     permissions:
       # write permission is required to create a GitHub release
       contents: write
@@ -30,8 +24,6 @@ jobs:
         uses: leukeleu/release-drafter@filter-draft-releases
         with:
           config-name: release-drafter/config.yml
-          prerelease: ${{ matrix.prerelease }}
-          prerelease-identifier: ${{ matrix.prerelease && 'rc' || '' }}
           disable-autolabeler: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

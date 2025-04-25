@@ -40,13 +40,6 @@ jobs:
         with:
           working-directory: './packages/hidp'
 
-      - name: Determine release type
-        run: |
-          echo "is_prerelease=$(echo ${{ github.ref }} \
-          | grep -qE '[.-](dev|rc)[.-]?[0-9]+$' && echo true || echo false)" \
-          >> $GITHUB_OUTPUT
-        id: is_prerelease
-
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
