@@ -819,18 +819,15 @@ msgid "Disabling two-factor authentication will make your account less secure."
 msgstr "Het uitschakelen van tweefactor­authenticatie maakt je account minder veilig."
 
 #: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
-msgid "If you have lost your device, you can use a recovery code instead."
-msgstr "Als je je apparaat bent kwijtgeraakt, kun je in plaats daarvan een herstelcode gebruiken."
+#, python-format
+msgid "If you have lost your device, you can <a href=\"%(recovery_code_url)s\">use a recovery code</a> instead."
+msgstr "Als je je apparaat bent kwijtgeraakt, kun je in plaats daarvan <a href=\"%(recovery_code_url)s\">een herstelcode gebruiken</a>."
 
 #: hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Warning"
 msgstr "Waarschuwing"
-
-#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
-msgid "use recovery code"
-msgstr "gebruik herstelcode"
 
 #: hidp/templates/hidp/otp/email/configured_body.html
 msgid "You've successfully configured two-factor authentication. Please make sure you have stored your recovery codes in a safe place. You can use these codes to access your account if you lose access to your device. You can view your recovery codes by visiting the two-factor authentication settings page:"

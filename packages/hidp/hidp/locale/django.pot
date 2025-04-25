@@ -818,17 +818,14 @@ msgid "Disabling two-factor authentication will make your account less secure."
 msgstr ""
 
 #: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
-msgid "If you have lost your device, you can use a recovery code instead."
+#, python-format
+msgid "If you have lost your device, you can <a href=\"%(recovery_code_url)s\">use a recovery code</a> instead."
 msgstr ""
 
 #: hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Warning"
-msgstr ""
-
-#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
-msgid "use recovery code"
 msgstr ""
 
 #: hidp/templates/hidp/otp/email/configured_body.html
