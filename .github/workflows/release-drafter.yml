@@ -19,9 +19,8 @@ jobs:
       pull-requests: read
     runs-on: ubuntu-latest
     steps:
-      # Using a fork, see https://github.com/release-drafter/release-drafter/pull/1385
       - name: Draft release
-        uses: leukeleu/release-drafter@filter-draft-releases
+        uses: release-drafter/release-drafter@v6
         with:
           config-name: release-drafter/config.yml
           disable-autolabeler: true
