@@ -190,10 +190,16 @@ urlpatterns = [
 
 ### Cache
 
-HIdP requires a caching implementation, in order for the rate limits to properly work
-and to store OIDC Provider signing keys. See [Django's cache framework](https://docs.djangoproject.com/en/stable/topics/cache/#django-s-cache-framework).
+HIdP requires a working Django cache backend to support rate limiting and to store
+OIDC Provider signing keys. A persistent and reliable cache is necessary for correct
+operation, especially for features like rate limiting and session management.
 
-For example a Redis cache:
+For production deployments, it is strongly recommended to use a robust cache backend
+such as Redis or Memcached. For more details on cache requirements for rate limiting,
+see the [django-ratelimit documentation](https://django-ratelimit.readthedocs.io/en/stable/installation.html#create-or-use-a-compatible-cache)
+and [Django's cache framework](https://docs.djangoproject.com/en/stable/topics/cache/#django-s-cache-framework).
+
+#### Redis Cache Configuration:
 
 ```python
 CACHES = {
