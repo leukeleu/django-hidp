@@ -97,7 +97,7 @@ class OTPDisableView(FormView):
         OTPDisabledMailer(self.request.user, base_url=base_url).send()
 
 
-class OTPDisableViewRecoveryCode(OTPDisableView):
+class OTPDisableRecoveryCodesView(OTPDisableView):
     """
     View to disable OTP for a user using a recovery code.
 
@@ -112,7 +112,7 @@ class OTPDisableViewRecoveryCode(OTPDisableView):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(login_required, name="dispatch")
-class OTPRecoveryCodes(DetailView, FormView):
+class OTPRecoveryCodesView(DetailView, FormView):
     """
     View for managing recovery codes.
 
