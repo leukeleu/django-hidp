@@ -143,7 +143,7 @@ Rendered by the `LoginView`.
 
 **Base template**: `base_pre_login.html`
 
-**Form template**: 
+**Form template**:
 
 * `accounts/forms/authentication_form.html`
 * `accounts/forms/rate_limited_authentication_form.html` (if rate limited)
@@ -325,7 +325,7 @@ Redirects to `PasswordChangeDoneView` after successfully changing the password.
 **Context variables**
 
 `form`
-: A form that allows users to change their password. 
+: A form that allows users to change their password.
   The user also needs to enter their old password to verify the user's identity.
 
 `cancel_url`
@@ -412,7 +412,7 @@ Rendered by the `EmailChangeRequestView`.
 : URL to the set password page.
 
 `form`
-: The email change request form, where users need to fill in a new email 
+: The email change request form, where users need to fill in a new email
   address and password.
 
 `cancel_url`
@@ -478,7 +478,7 @@ Rendered by the `EmailChangeCompleteView`.
   but not yet through current email.
 
 `proposed_email_confirmation_required`
-: boolean that indicates that the change is confirmed through current email, 
+: boolean that indicates that the change is confirmed through current email,
   but not yet through proposed email.
 
 `email_change_request_completed`
@@ -671,7 +671,7 @@ Rendered by the `PasswordResetCompleteView`.
 
 ## accounts/recovery/email/
 
-Templates for to password recovery emails can be found
+Templates related to password recovery emails can be found
 in `templates/hidp/accounts/recovery/email`.
 
 ### password_reset_body.txt (and .html)
@@ -788,7 +788,7 @@ The subject of the email is set with this template: `account_exists_subject.txt`
 ## federated/
 
 All templates related to the OIDC authentication and registration can be found
-in: `templates/hidp/federated`.
+in `templates/hidp/federated`.
 
 ### linked_services.html
 
@@ -914,3 +914,204 @@ Rendered by the `OIDCRegistrationView`.
 
 `form`
 : The OIDC registration form.
+
+---
+
+## otp/
+
+Templates related to one-time passwords can be found in `templates/hidp/otp`.
+
+### overview.html
+
+Rendered by `OTPOverviewView`.
+
+**Base template**: `base_post_login.htm`.
+
+**Context variables**
+
+`totp_devices`
+: Queryset of all configured TOTP devices of the user.
+
+`static_devices`
+: Queryset of all configured static devices of the user.
+
+`TOTP_DEVICE_NAME`
+: Text to use as the label for TOTP device.
+
+`STATIC_DEVICE_NAME`
+: Text to use as the label for the static device.
+
+`back_url`
+: Link back to the account management page.
+
+### setup_device.html
+
+Rendered by the `OTPSetupDeviceView`.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`form`
+: A form that allows the user to setup an OTP device.
+
+`device`
+: The unconfirmed TOTP device that is created when visiting the page.
+
+`backup_device`
+: The unconfirmed static device that is created when visiting the page.
+
+`config_url`
+: The `otpauth` url to confirm the TOTP device.
+
+`qrcode`
+: QR code of the `config_url`.
+
+`recovery_codes`
+: Recovery codes of the unconfirmed static device.
+
+`back_url`
+: Link back to the account management page.
+
+### setup_device_done.html
+
+Shows a message letting the user know that they have successfully configured two-factor authentication.
+
+Rendered by `OTPSetupDeviceDoneView`.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`back_url`
+: Link back to the account management page.
+
+### disable.html
+
+Rendered by the `OTPDisableView`.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`form`
+: A form that allows the user to disable their TOTP device using their one-time password.
+
+`user`
+: The current user instance.
+
+`back_url`
+: Link back to the account management page.
+
+### disable_recovery_code.html
+
+Rendered by the `OTPDisableRecoveryCodesView`.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`form`
+: A form that allows the user to disable their TOTP device using their recovery codes.
+
+`user`
+: The current user instance.
+
+`back_url`
+: Link back to the account management page.
+
+### recovery_codes.html
+
+Rendered by the `OTPRecoveryCodesView`.
+
+Allows the user to see and to reset their recovery codes.
+
+**Base template**: `base_post_login.html`
+
+**Context variables**
+
+`back_url`
+: Link back to the account management page.
+
+`recovery_codes`
+: The recovery codes from the static device of the user.
+
+### verify.html
+Rendered by the `VerifyTOTPView`.
+
+**Base template**: `base_pre_login.html`
+
+**Context variables**
+
+`form`
+: A form used to verify a TOTP token from an authenticator app.
+
+### verify_recovery_code.html
+
+Rendered by the `VerifyRecoveryCodeView`.
+
+**Base template**: `base_pre_login.html`
+
+**Context variables**
+
+`form`
+: A form used to verify a static token from a list of recovery codes.
+
+## otp/email/
+
+Users receive email notifications upon setting up a new TOTP device, disabling an existing one, using recovery codes, or requesting new recovery codes. The templates for these emails are found in `templates/hidp/otp/email`.
+
+### configured_body.txt (and .html)
+
+Sent by `OTPSetupDeviceView` when a user has set up a new TOTP device.
+
+**Context variables**
+
+`otp_management_url`
+: URL to the account management page.
+
+### configured_subject.txt
+
+The subject of the email is set with this template: `configured_subject.txt`.
+
+### disabled_body.txt (and .html)
+
+Sent by `OTPDisableView` when a user has removed their TOTP device.
+
+**Context variables**
+
+`otp_management_url`
+: URL to the account management page.
+
+### disabled_subject.txt
+
+The subject of the email is set with this template: `disabled_subject.txt`.
+
+### recovery_code_used_body.txt (and .html)
+
+Sent by `VerifyRecoveryCodeView` when a user has used a recovery code.
+
+**Context variables**
+
+`otp_management_url`
+: URL to the account management page.
+
+`recovery_codes_count`
+: Number of recovery codes left for the registered static device.
+
+### recovery_code_used_subject.txt
+
+The subject of the email is set with this template: `recovery_code_used_subject.txt`.
+
+### recovery_codes_regenerated_body.txt (and .html)
+
+Sent by `OTPRecoveryCodesView` when a user has generated new recovery codes.
+
+**Context variables**
+
+`otp_management_url`
+: URL to the account management page.
+
+### recovery_codes_regenerated_subject.txt
+
+The subject of the email is set with this template: `recovery_codes_regenerated_subject.txt`.
