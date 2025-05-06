@@ -7,10 +7,12 @@
   <h1>{% translate 'Two-factor authentication' %}</h1>
 
   <form method="post">
-  {% csrf_token %}
-  {{ form }}
+    {% csrf_token %}
+    {{ form }}
 
-  {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Verify') %}
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Verify') %}
   </form>
+
+  {% include 'hidp/includes/forms/logout_form.html' with logout_label=_('Back') %}
 
 {% endblock %}
