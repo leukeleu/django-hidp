@@ -227,7 +227,7 @@ Rendered by the `RegistrationView`.
 : URL to redirect to after successful registration.
 
 `logout_url`
-: URL to the logout page.
+: URL to post the logout action to. Used to terminate the session.
 
 `logout_next_url`
 : URL to same page, redirecting to login page if necessary.
@@ -973,6 +973,9 @@ Rendered by the `OTPSetupDeviceView`.
 `back_url`
 : Link back to the account management page.
 
+`logout_url`
+: URL to post the logout action to. Used to terminate the session if the user cannot verify.
+
 ### setup_device_done.html
 
 Shows a message letting the user know that they have successfully configured two-factor authentication.
@@ -1046,6 +1049,9 @@ Rendered by the `VerifyTOTPView`.
 `form`
 : A form used to verify a TOTP token from an authenticator app.
 
+`logout_url`
+: URL to post the logout action to. Used to terminate the session if the user cannot verify.
+
 ### verify_recovery_code.html
 
 Rendered by the `VerifyRecoveryCodeView`.
@@ -1056,6 +1062,9 @@ Rendered by the `VerifyRecoveryCodeView`.
 
 `form`
 : A form used to verify a static token from a list of recovery codes.
+
+`logout_url`
+: URL to post the logout action to. Used to terminate the session if the user cannot verify.
 
 ## otp/email/
 
