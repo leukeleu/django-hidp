@@ -13,6 +13,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, TemplateView
 
 from hidp.csp.decorators import hidp_csp_protection
@@ -200,7 +201,7 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
         context = super().get_context_data(**kwargs)
 
         return context | {
-            "title": "Set up Two-Factor Authentication",
+            "title": _("Set up two-factor authentication"),
             "device": self.device,
             "backup_device": self.backup_device,
             "qrcode": segno.make(self.device.config_url).svg_data_uri(border=0),

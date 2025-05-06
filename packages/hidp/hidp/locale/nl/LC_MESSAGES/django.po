@@ -304,6 +304,11 @@ msgstr "Ongeldig token. Controleer of je het correct hebt ingevoerd."
 msgid "You can use these codes to log in if you lose access to your device"
 msgstr "Je kunt deze codes gebruiken om in te loggen als je geen toegang meer hebt tot je apparaat"
 
+#: hidp/otp/views.py hidp/templates/hidp/otp/setup_device.html
+#: hidp/templates/hidp/otp/setup_device_done.html
+msgid "Set up two-factor authentication"
+msgstr "Tweefactor­authenticatie instellen"
+
 #: hidp/templates/hidp/accounts/login.html
 msgid "Excessive login attempts have been detected for this account. For your safety, additional security measures are now in place."
 msgstr "Er zijn te veel inlogpogingen gedetecteerd voor dit account. Voor jouw veiligheid zijn er nu extra beveiligingsmaatregelen ingeschakeld."
@@ -945,11 +950,6 @@ msgstr "QR-code voor het instellen van tweefactor­authenticatie. Scan met je au
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Scan the QR code"
 msgstr "Scan de QR-code"
-
-#: hidp/templates/hidp/otp/setup_device.html
-#: hidp/templates/hidp/otp/setup_device_done.html
-msgid "Set up two-factor authentication"
-msgstr "Tweefactor­authenticatie instellen"
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Submit"

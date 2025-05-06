@@ -303,6 +303,11 @@ msgstr ""
 msgid "You can use these codes to log in if you lose access to your device"
 msgstr ""
 
+#: hidp/otp/views.py hidp/templates/hidp/otp/setup_device.html
+#: hidp/templates/hidp/otp/setup_device_done.html
+msgid "Set up two-factor authentication"
+msgstr ""
+
 #: hidp/templates/hidp/accounts/login.html
 msgid "Excessive login attempts have been detected for this account. For your safety, additional security measures are now in place."
 msgstr ""
@@ -943,11 +948,6 @@ msgstr ""
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Scan the QR code"
-msgstr ""
-
-#: hidp/templates/hidp/otp/setup_device.html
-#: hidp/templates/hidp/otp/setup_device_done.html
-msgid "Set up two-factor authentication"
 msgstr ""
 
 #: hidp/templates/hidp/otp/setup_device.html
