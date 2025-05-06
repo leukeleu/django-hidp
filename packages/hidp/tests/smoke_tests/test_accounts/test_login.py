@@ -16,10 +16,7 @@ class RateLimitedHandler(ClientHandler):
         return super().get_response(request)
 
 
-@override_settings(
-    LOGIN_REDIRECT_URL="/",
-    LANGUAGE_CODE="en",
-)
+@override_settings(LOGIN_REDIRECT_URL="/", LANGUAGE_CODE="en")
 class TestLogin(TestCase):
     @classmethod
     def setUpTestData(cls):

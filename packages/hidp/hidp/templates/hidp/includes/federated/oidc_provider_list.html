@@ -1,8 +1,10 @@
 {% load i18n %}
-{% for item in providers %}
+{% if providers %}
   <ul>
-    <li>
-      {% include 'hidp/includes/federated/oidc_provider_list_option.html' %}
-    </li>
+    {% for item in providers %}
+      <li>
+        {% include 'hidp/includes/federated/oidc_provider_list_option.html' %}
+      </li>
+    {% endfor %}
   </ul>
-{% endfor %}
+{% endif %}

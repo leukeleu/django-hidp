@@ -14,4 +14,4 @@ contain all the PRs merged since the previous release of the same type.
 
 Publishing a release is done by editing the draft release, double checking the PRs and then clicking the
 "Publish release" button. This will create a new release and tag the commit with the version number.
-This tag will trigger the `release` workflow which will build and push the Python package to DevPI.
+This tag will trigger the `release` workflow which will build and push the Python package to PyPI.

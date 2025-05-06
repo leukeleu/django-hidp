@@ -9,3 +9,4 @@ class OIDCError(StrEnum):
     UNEXPECTED_ERROR = auto()
     INVALID_TOKEN = auto()
     INVALID_CREDENTIALS = auto()
+    REGISTRATION_DISABLED = auto()

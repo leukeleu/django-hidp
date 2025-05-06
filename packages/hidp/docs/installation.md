@@ -14,7 +14,7 @@ HIdP provides all the default Django authentication functionalities and more:
 
 ## Install with pip
 ```
-pip install hidp[recommended]
+pip install django-hidp[recommended]
 ```
 
 This will install HIdP with the recommended dependencies. See [Installation Extras](project:installation-extras.md) for
@@ -99,6 +99,30 @@ Configure your custom user model in your Django settings, e.g.:
 ```python
 AUTH_USER_MODEL = "accounts.User"
 ```
+
+### `REGISTRATION_ENABLED`
+Enable or disable registration in your Django settings (default is `False`):
+
+```python
+REGISTRATION_ENABLED = False
+```
+
+### `OTP_TOTP_ISSUER`
+
+Specifies the issuer name to be used in the Time-based One-Time Password (TOTP) URI.
+This setting is used to identify the service or organization that issues the TOTP tokens.
+
+Set this value to a string that represents your application or organization name
+to provide a consistent issuer name in the TOTP URIs generated for your users.
+
+Example:
+
+```python
+# settings.py
+OTP_TOTP_ISSUER = "YourOrganizationName"
+```
+
+For more information, see the [django-otp docs](https://django-otp-official.readthedocs.io/en/stable/overview.html#std-setting-OTP_TOTP_ISSUER).
 
 ### Login settings
 

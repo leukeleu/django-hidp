@@ -7,9 +7,7 @@ from django.test import TestCase, override_settings
 from hidp.test.factories import user_factories
 
 
-@override_settings(
-    DEFAULT_FROM_EMAIL="test@example.com",
-)
+@override_settings(DEFAULT_FROM_EMAIL="test@example.com")
 class TestUserModel(TestCase):
     @classmethod
     def setUpTestData(cls):

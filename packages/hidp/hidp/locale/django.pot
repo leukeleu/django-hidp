@@ -252,6 +252,10 @@ msgid "Login failed. Invalid credentials."
 msgstr ""
 
 #: hidp/federated/views.py
+msgid "Registration is disabled."
+msgstr ""
+
+#: hidp/federated/views.py
 #, python-brace-format
 msgid "Sign in with {provider}"
 msgstr ""
@@ -814,17 +818,14 @@ msgid "Disabling two-factor authentication will make your account less secure."
 msgstr ""
 
 #: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
-msgid "If you have lost your device, you can use a recovery code instead."
+#, python-format
+msgid "If you have lost your device, you can <a href=\"%(recovery_code_url)s\">use a recovery code</a> instead."
 msgstr ""
 
 #: hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/disable_recovery_code.html
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "Warning"
-msgstr ""
-
-#: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
-msgid "use recovery code"
 msgstr ""
 
 #: hidp/templates/hidp/otp/email/configured_body.html
@@ -926,6 +927,14 @@ msgstr ""
 
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "These codes can be used to log in if you lose access to your two-factor device. You can generate new codes at any time, but you can only have one set of codes at a time."
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Enter the following URL in your authenticator app:"
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
+msgid "Having trouble scanning the QR code?"
 msgstr ""
 
 #: hidp/templates/hidp/otp/setup_device.html

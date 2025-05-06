@@ -11,13 +11,10 @@
   {% endif %}
 
   {% if cancel_url or cancel_label %}
-    {% if cancel_url %}<a href="{{ cancel_url }}">{% endif %}
-    <button
-      {% if cancel_url %}type="button"
-      {% else %}type="submit"{% endif %}
-    >
-      {{ cancel_label|default:_("Cancel") }}
-    </button>
-    {% if cancel_url %}</a>{% endif %}
+    {% if cancel_url %}
+      <a href="{{ cancel_url }}">{{ cancel_label|default:_("Cancel") }}</a>
+    {% else %}
+      <button type="submit">{{ cancel_label|default:_("Cancel") }}</button>
+    {% endif %}
   {% endif %}
 </div>
