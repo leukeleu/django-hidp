@@ -208,7 +208,7 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
             "recovery_codes": "\n".join(
                 self.backup_device.token_set.values_list("token", flat=True)
             ),
-            "back_url": reverse("hidp_otp_management:manage"),
+            "logout_url": reverse("hidp_accounts:logout"),
         }
 
     def form_valid(self, form):
@@ -260,6 +260,12 @@ class VerifyTOTPView(VerifyOTPBase):
     template_name = "hidp/otp/verify.html"
     form_class = VerifyTOTPForm
 
+    def get_context_data(self, **kwargs):
+        context = {
+            "logout_url": reverse("hidp_accounts:logout")
+        }
+        return super().get_context_data() | context | kwargs
+
 
 class VerifyRecoveryCodeView(VerifyOTPBase):
     template_name = "hidp/otp/verify_recovery_code.html"
@@ -271,6 +277,12 @@ class VerifyRecoveryCodeView(VerifyOTPBase):
         self.send_mail()
 
         return result
+
+    def get_context_data(self, **kwargs):
+        context = {
+            "logout_url": reverse("hidp_accounts:logout")
+        }
+        return super().get_context_data() | context | kwargs
 
     def send_mail(self):
         """Notify the user that a recovery code was used."""
