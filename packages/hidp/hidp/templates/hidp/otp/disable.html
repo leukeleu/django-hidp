@@ -17,6 +17,8 @@
 
   <p>
     {% url 'hidp_otp_management:disable-recovery-code' as recovery_code_url %}
-    {% blocktranslate  %}If you have lost your device, you can <a href="{{ recovery_code_url }}">use a recovery code</a> instead.{% endblocktranslate %}
+    {% blocktranslate trimmed %}
+      If you have lost your device, you can <a href="{{ recovery_code_url }}">use a recovery code</a> instead.
+    {% endblocktranslate %}
   </p>
 {% endblock %}
