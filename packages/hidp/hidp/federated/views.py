@@ -11,6 +11,7 @@ from django.http import (
     HttpResponseRedirect,
 )
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
@@ -179,6 +180,10 @@ class OIDCAuthenticationCallbackView(OIDCMixin, generic.View):
                 user_info=user_info,
             )
             view_name = "hidp_oidc_client:login"
+
+            # Update the last used date of the connection.
+            connection.last_usage = timezone.now()
+            connection.save()
         elif request.user.is_authenticated:
             # `sub` claim does not match an existing user:
             # Display a form allowing the user to link the OIDC account.

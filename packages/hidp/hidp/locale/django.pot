@@ -234,6 +234,10 @@ msgstr ""
 msgid "Unknown provider: {provider_key}"
 msgstr ""
 
+#: hidp/federated/models.py
+msgid "last usage of this connection"
+msgstr ""
+
 #: hidp/federated/views.py
 msgid "An unexpected error occurred during authentication. Please try again."
 msgstr ""
