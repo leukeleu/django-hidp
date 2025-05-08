@@ -43,6 +43,7 @@ services:
     restart: unless-stopped
     volumes:
       - '.:/code'
+      - '../django-hidp-django-admin:/code/django-hidp-django-admin'
     environment:
       # Note: Also update the nginx config, and port mapping below, if you change this port.
       - 'DJANGO_RUNSERVER_PORT=8000'

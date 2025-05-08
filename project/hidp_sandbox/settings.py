@@ -64,8 +64,10 @@ INSTALLED_APPS = [
     "bandit",
     "leukeleu_django_checks",
     # Django
+    "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.messages",
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     # Django REST Framework
@@ -78,6 +80,7 @@ INSTALLED_APPS = [
     "django_otp.plugins.otp_static",
     "django_otp.plugins.otp_totp",
     # Headless Identity Provider
+    "hidp_django_admin",
     "hidp",
     "hidp.accounts",
     "hidp.api",
@@ -115,6 +118,10 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -271,7 +278,9 @@ else:
     if EMAIL_BANDIT:
         EMAIL_BACKEND = "bandit.backends.smtp.HijackSMTPBackend"
         BANDIT_EMAIL = config.getliteral("app", "bandit_email")
-        BANDIT_WHITELIST = config.getliteral("app", "bandit_whitelist", fallback=[])
+        BANDIT_WHITELIST = config.getliteral(
+            "app", "bandit_whitelist", fallback=["leukeleu.nl"]
+        )
 
 DEFAULT_FROM_EMAIL = config.getliteral("app", "default_from_email")
 
