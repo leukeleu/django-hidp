@@ -17,20 +17,20 @@ jobs:
 
     strategy:
       matrix:
-        django-version: ['4.2.0', '5.2.0']
+        django-version: ['4.2', '5.2']
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13']
         working-directory: ['./packages/hidp']
         exclude:
-          - django-version: '4.2.0'
+          - django-version: '4.2'
             python-version: '3.13'
-          - django-version: '5.2.0'
+          - django-version: '5.2'
             python-version: '3.8'
-          - django-version: '5.2.0'
+          - django-version: '5.2'
             python-version: '3.9'
         include:
           - working-directory: './project'
             python-version: '3.12'
-            django-version: '4.2.0'
+            django-version: '4.2'
 
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -56,7 +56,7 @@ jobs:
 
       - name: Build documentation
         uses: ./.github/actions/build-hidp-docs
-        if: ${{ matrix.working-directory == './packages/hidp' && matrix.django-version == '4.2.0' && matrix.python-version == '3.12' }}
+        if: ${{ matrix.working-directory == './packages/hidp' && matrix.django-version == '4.2' && matrix.python-version == '3.12' }}
 
   # Report success/failure
   success:
