@@ -17,12 +17,12 @@ urlpatterns = [
     ),
     path(
         "disable/recovery-code/",
-        views.OTPDisableViewRecoveryCode.as_view(),
+        views.OTPDisableRecoveryCodesView.as_view(),
         name="disable-recovery-code",
     ),
     path(
         "recovery-codes/",
-        views.OTPRecoveryCodes.as_view(),
+        views.OTPRecoveryCodesView.as_view(),
         name="recovery-codes",
     ),
     path(

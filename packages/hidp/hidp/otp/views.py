@@ -13,6 +13,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, TemplateView
 
 from hidp.csp.decorators import hidp_csp_protection
@@ -97,7 +98,7 @@ class OTPDisableView(FormView):
         OTPDisabledMailer(self.request.user, base_url=base_url).send()
 
 
-class OTPDisableViewRecoveryCode(OTPDisableView):
+class OTPDisableRecoveryCodesView(OTPDisableView):
     """
     View to disable OTP for a user using a recovery code.
 
@@ -112,7 +113,7 @@ class OTPDisableViewRecoveryCode(OTPDisableView):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(login_required, name="dispatch")
-class OTPRecoveryCodes(DetailView, FormView):
+class OTPRecoveryCodesView(DetailView, FormView):
     """
     View for managing recovery codes.
 
@@ -200,7 +201,7 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
         context = super().get_context_data(**kwargs)
 
         return context | {
-            "title": "Set up Two-Factor Authentication",
+            "title": _("Set up two-factor authentication"),
             "device": self.device,
             "backup_device": self.backup_device,
             "qrcode": segno.make(self.device.config_url).svg_data_uri(border=0),
