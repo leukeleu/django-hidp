@@ -69,5 +69,9 @@
     {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Submit') %}
   </form>
 
-  {% include 'hidp/includes/forms/logout_form.html' with logout_label=_('Back') %}
+  {% if logout_url %}
+    {% include 'hidp/includes/forms/logout_form.html' with logout_label=_('Back') %}
+  {% elif back_url %}
+    <a href="{{ back_url }}">{% translate 'Back' %}</a>
+  {% endif %}
 {% endblock %}
