@@ -352,6 +352,7 @@ msgstr ""
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/register.html
+#: hidp/templates/hidp/includes/forms/logout_form.html
 msgid "Sign out"
 msgstr ""
 
@@ -382,6 +383,8 @@ msgstr ""
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/setup_device.html
 #: hidp/templates/hidp/otp/setup_device_done.html
+#: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Back"
 msgstr ""
 
