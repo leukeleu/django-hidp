@@ -126,6 +126,12 @@ class AuthenticationForm(auth_forms.AuthenticationForm):
     to change the username field to a different one, such as an email address.
     """
 
+    username = forms.EmailField(
+        label=_("Email"),
+        max_length=254,
+        widget=forms.EmailInput(attrs={"autocomplete": "email", "autofocus": True}),
+        required=True,
+    )
     template_name = "hidp/accounts/forms/authentication_form.html"
 
     def __init__(self, request=None, *args, **kwargs):
