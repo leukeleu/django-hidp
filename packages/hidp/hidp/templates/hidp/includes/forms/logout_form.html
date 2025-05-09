@@ -7,10 +7,10 @@ submit to the current URL, which may not be the intended behavior.
 {% if logout_url %}
   <form action="{{ logout_url }}" method="post">
     {% csrf_token %}
-    <input
+    <button
       class="submit-link"
-      type="submit"
-      value="{{ logout_label|default:_("Sign out") }}"
-    />
+      type="submit">
+      {{ logout_label|default:_("Sign out") }}
+    </button>
   </form>
 {% endif %}
