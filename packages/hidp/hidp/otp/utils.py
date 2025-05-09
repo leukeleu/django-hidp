@@ -10,9 +10,7 @@ def user_needs_to_verify_otp(user):
     Default returns True, to maintain the current behavior as specified in the
     otp middleware.
     """
-    if (
-        "hidp.otp.middleware.OTPRequiredMiddleware"
-    ) in settings.MIDDLEWARE:
+    if ("hidp.otp.middleware.OTPRequiredMiddleware") in settings.MIDDLEWARE:
         return True
 
     if (

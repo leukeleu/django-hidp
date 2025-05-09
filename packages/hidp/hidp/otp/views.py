@@ -211,7 +211,8 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
             ),
             "back_url": reverse("hidp_otp_management:manage"),
             "logout_url": reverse("hidp_accounts:logout")
-                if user_needs_to_verify_otp(self.request.user) else None,
+            if user_needs_to_verify_otp(self.request.user)
+            else None,
         }
 
     def form_valid(self, form):
@@ -264,9 +265,7 @@ class VerifyTOTPView(VerifyOTPBase):
     form_class = VerifyTOTPForm
 
     def get_context_data(self, **kwargs):
-        context = {
-            "logout_url": reverse("hidp_accounts:logout")
-        }
+        context = {"logout_url": reverse("hidp_accounts:logout")}
         return super().get_context_data() | context | kwargs
 
 
@@ -282,9 +281,7 @@ class VerifyRecoveryCodeView(VerifyOTPBase):
         return result
 
     def get_context_data(self, **kwargs):
-        context = {
-            "logout_url": reverse("hidp_accounts:logout")
-        }
+        context = {"logout_url": reverse("hidp_accounts:logout")}
         return super().get_context_data() | context | kwargs
 
     def send_mail(self):
