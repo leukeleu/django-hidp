@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
@@ -53,6 +54,10 @@ class OpenIdConnection(models.Model):
     # Unique identifier for the user at the identity provider (i.e. the "sub" claim)
     # Guaranteed to be unique together with the issuer_claim.
     subject_claim = models.CharField(max_length=255)
+    # The last time the user used this OpenID connection.
+    last_usage = models.DateTimeField(
+        _("last usage of this connection"), default=timezone.now
+    )
 
     # Manager
     objects = OpenIdConnectionQuerySet.as_manager()
