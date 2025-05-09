@@ -536,7 +536,7 @@ class TestOIDCLinkedServicesView(TestCase):
         response = self.client.get(self.oidc_linked_services_url)
 
         # No services linked
-        self.assertNotInHTML("Linked services", response.content.decode("utf-8"))
+        self.assertInHTML("Linked services", response.content.decode("utf-8"), count=0)
 
         # List of available services should be displayed
         self.assertInHTML(
@@ -620,7 +620,9 @@ class TestOIDCLinkedServicesView(TestCase):
             )
 
         # No additional services should be available
-        self.assertNotInHTML("Available services", response.content.decode("utf-8"))
+        self.assertInHTML(
+            "Available services", response.content.decode("utf-8"), count=0
+        )
 
     def test_linked_one_service_with_password_set(self):
         self.user.set_password("P@ssw0rd!")

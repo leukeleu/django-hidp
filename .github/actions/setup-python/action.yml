@@ -4,6 +4,10 @@ description: Setup Python and install dependencies
 inputs:
   working-directory:
     description: The working directory to run the commands in
+  python-version:
+    description: The Python version to use
+  django-version:
+    description: The Django version to use as dependency
 
 runs:
   using: composite
@@ -12,7 +16,7 @@ runs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.12"
+        python-version: ${{ inputs.python-version }}
 
     - name: Install system packages (gettext)
       run: |
@@ -28,6 +32,13 @@ runs:
         python -m pip install --root-user-action=ignore -U uv
         echo ::endgroup::
       working-directory: ${{ inputs.working-directory }}
+      shell: bash
+
+    - name: Set Django version
+      run: |
+        echo ::group::Set Django version environment variable
+        echo "DJANGO_VERSION=${{ inputs.django-version }}" >> $GITHUB_ENV
+        echo ::endgroup::
       shell: bash
 
     - name: Install dependencies
