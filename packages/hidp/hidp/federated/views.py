@@ -206,9 +206,16 @@ class OIDCAuthenticationCallbackView(OIDCMixin, generic.View):
             else:
                 # `sub` claim does not match an existing user, but `email` claim does:
                 # Display a message instructing the user to log in to link the accounts.
+
+                # Respect the `next` parameter if it is present in the request.
+                next_url = ""
+
+                if redirect_url:
+                    next_url = f"&{urlencode({'next': redirect_url})}"
+
                 return (
                     reverse("hidp_accounts:login")
-                    + f"?oidc_error={OIDCError.ACCOUNT_EXISTS}"
+                    + f"?oidc_error={OIDCError.ACCOUNT_EXISTS}{next_url}"
                 )
 
         # Prepare the URL parameters for the next view. Drop any None values.
