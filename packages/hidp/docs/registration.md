@@ -7,7 +7,7 @@ HIdP includes an optional custom user registration route that enables users to d
 User registration is managed by the `RegistrationView` at the `signup/` route.
 
 :::{note}
-The availability of the `signup/` route can be controlled using the `REGISTRATION_ENABLED` setting.
+The availability of the `signup/` route can be controlled using the `REGISTRATION_ENABLED` setting. If not defined, it defaults to `True`. In a future version of HIdP, registration will be disabled if `REGISTRATION_ENABLED` is not defined. It is recommended to explicitly set `REGISTRATION_ENABLED` to `True` or `False` in your settings.
 :::
 
 ## Email and password registration
