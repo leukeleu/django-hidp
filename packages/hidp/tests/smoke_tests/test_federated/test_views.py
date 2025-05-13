@@ -271,12 +271,16 @@ class TestOIDCAuthenticationCallbackView(TestCase):
     )
     def test_redirect_to_login(self, mock_handle_authentication_callback):
         user = user_factories.VerifiedUserFactory()
-        models.OpenIdConnection.objects.create(
+        connection = models.OpenIdConnection.objects.create(
             user=user,
             provider_key="example",
             issuer_claim="example",
             subject_claim="test_subject",
         )
+
+        # Save original timestamp for comparison
+        original_last_usage = connection.last_usage
+
         response = self.client.get(
             reverse("hidp_oidc_client:callback", kwargs={"provider_key": "example"}),
             secure=True,
@@ -288,6 +292,14 @@ class TestOIDCAuthenticationCallbackView(TestCase):
         self.assertIn("token", query)
         token = query["token"][0]
         self.assertIn(token, self.client.session)
+
+        # Refresh from DB and assert last_usage was updated
+        connection.refresh_from_db()
+        self.assertIsNotNone(connection.last_usage)
+        self.assertGreater(
+            connection.last_usage,
+            original_last_usage,
+        )
 
     @mock.patch(
         "hidp.federated.views.authorization_code_flow.handle_authentication_callback",
