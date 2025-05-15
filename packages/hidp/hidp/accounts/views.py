@@ -21,7 +21,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
 
-from hidp.utils import is_registration_enabled
+from hidp.utils import get_account_management_links, is_registration_enabled
 
 from ..config import oidc_clients
 from ..csp.decorators import hidp_csp_protection
@@ -827,56 +827,11 @@ class ManageAccountView(LoginRequiredMixin, OIDCContextMixin, generic.TemplateVi
 
     template_name = "hidp/accounts/management/manage_account.html"
 
-    def get_account_management_links(self):
-        links = [
-            {
-                "url": reverse("hidp_account_management:edit_account"),
-                "text": _("Edit account"),
-            },
-            {
-                "url": reverse("hidp_account_management:email_change_request"),
-                "text": _("Change email address"),
-            },
-        ]
-
-        if self.request.user.has_usable_password():
-            links.append(
-                {
-                    "url": reverse("hidp_account_management:change_password"),
-                    "text": _("Change password"),
-                },
-            )
-        else:
-            links.append(
-                {
-                    "url": reverse("hidp_account_management:set_password"),
-                    "text": _("Set a password"),
-                },
-            )
-
-        if oidc_clients.get_registered_oidc_clients():
-            links.append(
-                {
-                    "url": reverse("hidp_oidc_management:linked_services"),
-                    "text": _("Linked services"),
-                },
-            )
-
-        if "hidp.otp" in settings.INSTALLED_APPS:
-            links.append(
-                {
-                    "url": reverse("hidp_otp_management:manage"),
-                    "text": _("Two-factor authentication"),
-                },
-            )
-
-        return links
-
     def get_context_data(self, **kwargs):
         context = {
             "user": self.request.user,
             "logout_url": reverse("hidp_accounts:logout"),
-            "account_management_links": self.get_account_management_links(),
+            "account_management_links": get_account_management_links(self.request.user),
         }
         return super().get_context_data() | context | kwargs
 

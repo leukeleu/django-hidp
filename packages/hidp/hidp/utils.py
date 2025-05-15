@@ -1,6 +1,10 @@
 import warnings
 
 from django.conf import settings
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+
+from .config import oidc_clients
 
 
 def is_registration_enabled():
@@ -21,3 +25,64 @@ def is_registration_enabled():
             stacklevel=2,
         )
         return True
+
+
+def get_account_management_links(user):
+    """
+    Get a list of account management links for the given user.
+
+    This function returns a list of dictionaries representing navigation
+    links for common account-related actions. These include editing
+    account details, changing or setting a password, managing linked
+    OpenID Connect (OIDC) services, and configuring two-factor authentication (2FA),
+    depending on the user's capabilities and the enabled features in the application.
+
+    Args:
+        user: The currently authenticated user.
+
+    Returns:
+        list[dict]: A list of link dictionaries with 'url' and 'text' keys.
+    """
+    links = [
+        {
+            "url": reverse("hidp_account_management:edit_account"),
+            "text": _("Edit account"),
+        },
+        {
+            "url": reverse("hidp_account_management:email_change_request"),
+            "text": _("Change email address"),
+        },
+    ]
+
+    if user.has_usable_password():
+        links.append(
+            {
+                "url": reverse("hidp_account_management:change_password"),
+                "text": _("Change password"),
+            },
+        )
+    else:
+        links.append(
+            {
+                "url": reverse("hidp_account_management:set_password"),
+                "text": _("Set a password"),
+            },
+        )
+
+    if oidc_clients.get_registered_oidc_clients():
+        links.append(
+            {
+                "url": reverse("hidp_oidc_management:linked_services"),
+                "text": _("Linked services"),
+            },
+        )
+
+    if "hidp.otp" in settings.INSTALLED_APPS:
+        links.append(
+            {
+                "url": reverse("hidp_otp_management:manage"),
+                "text": _("Two-factor authentication"),
+            },
+        )
+
+    return links
