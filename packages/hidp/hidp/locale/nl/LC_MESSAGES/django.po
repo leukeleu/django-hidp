@@ -159,40 +159,6 @@ msgid "Authenticate with {provider}"
 msgstr "Opnieuw inloggen met {provider}"
 
 #: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/email_change_complete.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-msgid "Change email address"
-msgstr "Wijzig e-mailadres"
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/password_change.html
-#: hidp/templates/hidp/accounts/management/password_change_done.html
-#: hidp/templates/hidp/accounts/recovery/password_reset.html
-msgid "Change password"
-msgstr "Wachtwoord wijzigen"
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/edit_account_done.html
-msgid "Edit account"
-msgstr "Account bewerken"
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/set_password.html
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Linked services"
-msgstr "Gekoppelde diensten"
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/set_password.html
-#: hidp/templates/hidp/accounts/management/set_password_done.html
-#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
-msgid "Set a password"
-msgstr "Wachtwoord instellen"
-
-#: hidp/accounts/views.py
 #, python-brace-format
 msgid "Sign up using {provider}"
 msgstr "Registreer met {provider}"
@@ -200,15 +166,6 @@ msgstr "Registreer met {provider}"
 #: hidp/accounts/views.py
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
-
-#: hidp/accounts/views.py hidp/templates/hidp/otp/disable.html
-#: hidp/templates/hidp/otp/disable_recovery_code.html
-#: hidp/templates/hidp/otp/overview.html
-#: hidp/templates/hidp/otp/recovery_codes.html
-#: hidp/templates/hidp/otp/verify.html
-#: hidp/templates/hidp/otp/verify_recovery_code.html
-msgid "Two-factor authentication"
-msgstr "Tweefactor­authenticatie"
 
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
@@ -362,6 +319,11 @@ msgid "Sign out"
 msgstr "Uitloggen"
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/edit_account_done.html hidp/utils.py
+msgid "Edit account"
+msgstr "Account bewerken"
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
 #: hidp/templates/hidp/accounts/management/edit_account_done.html
 msgid "Edit your account information"
 msgstr "Bewerk je accountinformatie"
@@ -478,6 +440,13 @@ msgid "The request to change your account email address has been successfully ca
 msgstr "Het verzoek om het e-mailadres van je account te wijzigen is succesvol geannuleerd."
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+#: hidp/utils.py
+msgid "Change email address"
+msgstr "Wijzig e-mailadres"
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
 msgid "Please also confirm the change from your current email address."
 msgstr "Bevestig ook de wijziging vanaf je huidige e-mailadres."
 
@@ -527,6 +496,14 @@ msgid "Enter the email address you would like to use for your account."
 msgstr "Voer het e-mailadres in dat je voor je account wilt gebruiken."
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
+#: hidp/utils.py
+msgid "Set a password"
+msgstr "Wachtwoord instellen"
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "To change your account email address, please set a password first."
 msgstr "Stel eerst een wachtwoord in om het e-mailadres van je account te kunnen wijzigen."
 
@@ -566,6 +543,12 @@ msgstr "Beheer je accountinformatie"
 msgid "You are currently logged in as %(user)s."
 msgstr "Je bent momenteel ingelogd als %(user)s."
 
+#: hidp/templates/hidp/accounts/management/password_change.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
+#: hidp/templates/hidp/accounts/recovery/password_reset.html hidp/utils.py
+msgid "Change password"
+msgstr "Wachtwoord wijzigen"
+
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Add a password to your account. This will allow you to sign in using your email address and password as well as any linked services."
 msgstr "Stel een wachtwoord in voor je account. Hiermee kun je inloggen met je e-mailadres en wachtwoord, evenals met eventuele gekoppelde diensten."
@@ -577,6 +560,11 @@ msgstr "Voor je veiligheid moet je opnieuw inloggen via een gekoppelde dienst vo
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "However, your account is not currently linked to any service, so you cannot set a password at this time."
 msgstr "Er is echter geen enkele dienst aan je account gekoppeld, waardoor je op dit moment geen wachtwoord kunt instellen."
+
+#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/federated/linked_services.html hidp/utils.py
+msgid "Linked services"
+msgstr "Gekoppelde diensten"
 
 #: hidp/templates/hidp/accounts/management/set_password_done.html
 msgid "Your password has been set."
@@ -827,6 +815,15 @@ msgstr "Het uitschakelen van tweefactor­authenticatie maakt je account minder v
 #, python-format
 msgid "If you have lost your device, you can <a href=\"%(recovery_code_url)s\">use a recovery code</a> instead."
 msgstr "Als je je apparaat bent kwijtgeraakt, kun je in plaats daarvan <a href=\"%(recovery_code_url)s\">een herstelcode gebruiken</a>."
+
+#: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
+#: hidp/templates/hidp/otp/overview.html
+#: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html hidp/utils.py
+msgid "Two-factor authentication"
+msgstr "Tweefactor­authenticatie"
 
 #: hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/disable_recovery_code.html

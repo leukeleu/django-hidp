@@ -158,55 +158,12 @@ msgid "Authenticate with {provider}"
 msgstr ""
 
 #: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/email_change_complete.html
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
-msgid "Change email address"
-msgstr ""
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/password_change.html
-#: hidp/templates/hidp/accounts/management/password_change_done.html
-#: hidp/templates/hidp/accounts/recovery/password_reset.html
-msgid "Change password"
-msgstr ""
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/edit_account.html
-#: hidp/templates/hidp/accounts/management/edit_account_done.html
-msgid "Edit account"
-msgstr ""
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/set_password.html
-#: hidp/templates/hidp/federated/linked_services.html
-msgid "Linked services"
-msgstr ""
-
-#: hidp/accounts/views.py
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-#: hidp/templates/hidp/accounts/management/set_password.html
-#: hidp/templates/hidp/accounts/management/set_password_done.html
-#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
-msgid "Set a password"
-msgstr ""
-
-#: hidp/accounts/views.py
 #, python-brace-format
 msgid "Sign up using {provider}"
 msgstr ""
 
 #: hidp/accounts/views.py
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
-msgstr ""
-
-#: hidp/accounts/views.py hidp/templates/hidp/otp/disable.html
-#: hidp/templates/hidp/otp/disable_recovery_code.html
-#: hidp/templates/hidp/otp/overview.html
-#: hidp/templates/hidp/otp/recovery_codes.html
-#: hidp/templates/hidp/otp/verify.html
-#: hidp/templates/hidp/otp/verify_recovery_code.html
-msgid "Two-factor authentication"
 msgstr ""
 
 #: hidp/federated/forms.py
@@ -361,6 +318,11 @@ msgid "Sign out"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/edit_account.html
+#: hidp/templates/hidp/accounts/management/edit_account_done.html hidp/utils.py
+msgid "Edit account"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/edit_account.html
 #: hidp/templates/hidp/accounts/management/edit_account_done.html
 msgid "Edit your account information"
 msgstr ""
@@ -477,6 +439,13 @@ msgid "The request to change your account email address has been successfully ca
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_complete.html
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/email_change_request_sent.html
+#: hidp/utils.py
+msgid "Change email address"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_complete.html
 msgid "Please also confirm the change from your current email address."
 msgstr ""
 
@@ -526,6 +495,14 @@ msgid "Enter the email address you would like to use for your account."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/email_change_request.html
+#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/accounts/management/set_password_done.html
+#: hidp/templates/hidp/accounts/recovery/email/set_password_subject.txt
+#: hidp/utils.py
+msgid "Set a password"
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/email_change_request.html
 msgid "To change your account email address, please set a password first."
 msgstr ""
 
@@ -565,6 +542,12 @@ msgstr ""
 msgid "You are currently logged in as %(user)s."
 msgstr ""
 
+#: hidp/templates/hidp/accounts/management/password_change.html
+#: hidp/templates/hidp/accounts/management/password_change_done.html
+#: hidp/templates/hidp/accounts/recovery/password_reset.html hidp/utils.py
+msgid "Change password"
+msgstr ""
+
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Add a password to your account. This will allow you to sign in using your email address and password as well as any linked services."
 msgstr ""
@@ -575,6 +558,11 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "However, your account is not currently linked to any service, so you cannot set a password at this time."
+msgstr ""
+
+#: hidp/templates/hidp/accounts/management/set_password.html
+#: hidp/templates/hidp/federated/linked_services.html hidp/utils.py
+msgid "Linked services"
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/set_password_done.html
@@ -825,6 +813,15 @@ msgstr ""
 #: hidp/templates/hidp/otp/disable.html hidp/templates/hidp/otp/verify.html
 #, python-format
 msgid "If you have lost your device, you can <a href=\"%(recovery_code_url)s\">use a recovery code</a> instead."
+msgstr ""
+
+#: hidp/templates/hidp/otp/disable.html
+#: hidp/templates/hidp/otp/disable_recovery_code.html
+#: hidp/templates/hidp/otp/overview.html
+#: hidp/templates/hidp/otp/recovery_codes.html
+#: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html hidp/utils.py
+msgid "Two-factor authentication"
 msgstr ""
 
 #: hidp/templates/hidp/otp/disable.html
