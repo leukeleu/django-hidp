@@ -28,9 +28,6 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
         """
         Create a form field for the OTP token.
 
-        Subclasses should use this method to create the form field for the
-        OTP token.
-
         Args:
             label: Field label
 
@@ -39,7 +36,6 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
         """
         attrs = {
             "autocomplete": "one-time-code",
-            "maxlength": "6",
             "inputmode": "numeric",
             "pattern": "[0-9]*",
         }
@@ -55,9 +51,6 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
         """
         Create a form field for the recovery code.
 
-        Subclasses should use this method to create the form field for the
-        recovery code.
-
         Args:
             label: Field label
 
@@ -65,8 +58,7 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
             Configured CharField
         """
         attrs = {
-            "autocomplete": "one-time-code",
-            "maxlength": "8",
+            "autocomplete": "off",
         }
 
         return forms.CharField(
