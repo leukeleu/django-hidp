@@ -87,16 +87,17 @@ class TestOTPDisable(TestCase):
         )
 
     def test_static_token_not_accepted(self):
+        """The *static_token* should not be accepted in the *otp_token* disable form."""
         otp_factories.TOTPDeviceFactory(user=self.user, confirmed=True)
         static_device = otp_factories.StaticDeviceFactory(
             user=self.user, confirmed=True
         )
         otp_factories.StaticTokenFactory.create_batch(9, device=static_device)
-        otp_factories.StaticTokenFactory(token="static-token", device=static_device)
+        otp_factories.StaticTokenFactory(token="a1b2c3", device=static_device)
         self.client.force_login(self.user)
 
         form_data = {
-            "otp_token": "static-token",
+            "otp_token": "a1b2c3",
         }
         response = self.client.post(reverse("hidp_otp_management:disable"), form_data)
         form = response.context["form"]
@@ -136,11 +137,11 @@ class TestOTPDisableWithRecoveryCode(TestCase):
             user=self.user, confirmed=True
         )
         otp_factories.StaticTokenFactory.create_batch(9, device=static_device)
-        otp_factories.StaticTokenFactory(device=static_device, token="static-token")
+        otp_factories.StaticTokenFactory(device=static_device, token="a1b2c3d4")
         self.client.force_login(self.user)
 
         form_data = {
-            "otp_token": "static-token",
+            "otp_token": "a1b2c3d4",
         }
         with (
             self.assertTemplateUsed("hidp/otp/email/disabled_subject.txt"),
@@ -280,7 +281,7 @@ class TestOTPSetupView(TestCase):
         """An invalid form should not confirm the TOTP and static devices."""
         self.client.force_login(self.user)
         form_data = {
-            "otp_token": "invalid",
+            "otp_token": "xxxxxx",  # Invalid token
             "confirm_stored_backup_tokens": True,
         }
         response = self.client.post(reverse("hidp_otp_management:setup"), form_data)
@@ -373,7 +374,7 @@ class TestOTPVerifyView(TestCase):
     def test_invalid_form_does_not_verify_user(self):
         otp_factories.TOTPDeviceFactory(user=self.user, confirmed=True)
         self.client.force_login(self.user)
-        form_data = {"otp_token": "invalid"}
+        form_data = {"otp_token": "xxxxxx"}  # Invalid token
         response = self.client.post(reverse("hidp_otp:verify"), form_data)
         form = response.context["form"]
         self.assertFalse(form.is_valid(), msg="Expected form to be invalid")
@@ -425,7 +426,7 @@ class TestOTPVerifyWithRecoveryCodeView(TestCase):
         device = otp_factories.StaticDeviceFactory(user=self.user, confirmed=True)
         otp_factories.StaticTokenFactory.create_batch(10, device=device)
         self.client.force_login(self.user)
-        form_data = {"otp_token": "invalid"}
+        form_data = {"otp_token": "xxxxxx"}  # Invalid token
         response = self.client.post(reverse("hidp_otp:verify-recovery-code"), form_data)
         form = response.context["form"]
         self.assertFalse(form.is_valid(), msg="Expected form to be invalid")
