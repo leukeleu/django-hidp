@@ -14,6 +14,7 @@ registering and authenticating users in Django projects.
 :maxdepth: 2
 installation
 installation-extras
+registration
 configure-oidc-clients
 configure-as-oidc-provider
 content-security-policy
