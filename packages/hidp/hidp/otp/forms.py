@@ -24,39 +24,55 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
     device_class = None
 
     @staticmethod
-    def create_otp_token_field(label, *, is_numeric=False, max_length=None):
+    def create_otp_token_field(label):
         """
         Create a form field for the OTP token.
 
-        Subclasses should use this method to create the form field for the OTP token.
+        Subclasses should use this method to create the form field for the
+        OTP token.
 
         Args:
             label: Field label
-            is_numeric: If True, adds numeric-friendly input hints (mobile optimization)
-            max_length: Maximum length of the field (default 6 for TOTP, 8 for Static)
 
         Returns:
             Configured CharField
         """
         attrs = {
             "autocomplete": "one-time-code",
+            "maxlength": "6",
+            "inputmode": "numeric",
+            "pattern": "[0-9]*",
         }
-
-        if max_length:
-            attrs["maxlength"] = str(max_length)
-
-        if is_numeric:
-            attrs.update(
-                {
-                    "inputmode": "numeric",  # triggers number pad on mobile
-                    "pattern": "[0-9]*",  # hints at numeric-only (HTML5 pattern)
-                }
-            )
 
         return forms.CharField(
             widget=forms.TextInput(attrs=attrs),
             label=label,
-            max_length=max_length,
+            max_length=6,
+        )
+
+    @staticmethod
+    def create_recovery_code_field(label):
+        """
+        Create a form field for the recovery code.
+
+        Subclasses should use this method to create the form field for the
+        recovery code.
+
+        Args:
+            label: Field label
+
+        Returns:
+            Configured CharField
+        """
+        attrs = {
+            "autocomplete": "one-time-code",
+            "maxlength": "8",
+        }
+
+        return forms.CharField(
+            widget=forms.TextInput(attrs=attrs),
+            label=label,
+            max_length=8,
         )
 
     def __init__(self, user, *args, **kwargs):
@@ -89,8 +105,6 @@ class VerifyTOTPForm(OTPVerifyFormBase):
     device_class = TOTPDevice
     otp_token = OTPVerifyFormBase.create_otp_token_field(
         label=_("Enter the code from the app"),
-        is_numeric=True,
-        max_length=6,
     )
 
 
@@ -103,17 +117,14 @@ class VerifyStaticTokenForm(OTPVerifyFormBase):
     """
 
     device_class = StaticDevice
-    otp_token = OTPVerifyFormBase.create_otp_token_field(
+    otp_token = OTPVerifyFormBase.create_recovery_code_field(
         label=_("Enter a recovery code"),
-        max_length=8,
     )
 
 
 class OTPSetupForm(OTPVerifyFormBase):
     otp_token = OTPVerifyFormBase.create_otp_token_field(
         label=_("Enter the code from the app"),
-        is_numeric=True,
-        max_length=6,
     )
     confirm_stored_backup_tokens = forms.BooleanField(
         required=True,
