@@ -383,8 +383,6 @@ msgstr ""
 #: hidp/templates/hidp/otp/recovery_codes.html
 #: hidp/templates/hidp/otp/setup_device.html
 #: hidp/templates/hidp/otp/setup_device_done.html
-#: hidp/templates/hidp/otp/verify.html
-#: hidp/templates/hidp/otp/verify_recovery_code.html
 msgid "Back"
 msgstr ""
 
@@ -930,6 +928,12 @@ msgstr ""
 
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "These codes can be used to log in if you lose access to your two-factor device. You can generate new codes at any time, but you can only have one set of codes at a time."
+msgstr ""
+
+#: hidp/templates/hidp/otp/setup_device.html
+#: hidp/templates/hidp/otp/verify.html
+#: hidp/templates/hidp/otp/verify_recovery_code.html
+msgid "Cancel and return to login"
 msgstr ""
 
 #: hidp/templates/hidp/otp/setup_device.html
