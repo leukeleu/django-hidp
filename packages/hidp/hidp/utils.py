@@ -43,6 +43,9 @@ def get_account_management_links(user):
     Returns:
         list[dict]: A list of link dictionaries with 'url' and 'text' keys.
     """
+    if not user.is_authenticated:
+        return []
+
     links = [
         {
             "url": reverse("hidp_account_management:edit_account"),
