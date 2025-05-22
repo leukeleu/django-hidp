@@ -25,6 +25,7 @@ templates
 translations
 management-commands
 rate-limiting
+terms-of-service
 :::
 
 # Indices and tables
