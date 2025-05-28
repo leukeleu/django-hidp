@@ -2,6 +2,10 @@
 
 Leukeleu's headless identity provider.
 
+## Documentation
+
+Read the [online documentation](https://leukeleu.github.io/django-hidp/) for usage and installation instructions.
+
 ## Development
 
 See [docker/README.md](docker/README.md)
