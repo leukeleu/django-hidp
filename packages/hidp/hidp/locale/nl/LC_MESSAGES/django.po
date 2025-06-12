@@ -192,6 +192,10 @@ msgstr "OpenID-koppelingen"
 msgid "Unknown provider: {provider_key}"
 msgstr "Onbekende dienst: {provider_key}"
 
+#: hidp/federated/models.py
+msgid "last usage of this connection"
+msgstr "laatste gebruik van deze koppeling"
+
 #: hidp/federated/views.py
 msgid "An unexpected error occurred during authentication. Please try again."
 msgstr "Onverwachte fout tijdens authenticatie. Probeer het opnieuw."
