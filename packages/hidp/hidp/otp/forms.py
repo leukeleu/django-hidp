@@ -20,6 +20,8 @@ class OTPAuthenticationFormMixin(DjangoOTPAuthenticationFormMixin):
 
 
 class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
+    template_name = "hidp/otp/forms/otp_verify_form.html"
+
     # The device class to use for verification, e.g. TOTPDevice or StaticDevice.
     device_class = None
 
