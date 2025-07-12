@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 import django_otp
 import segno
 
@@ -13,6 +15,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, TemplateView
 
@@ -260,6 +263,26 @@ class VerifyOTPBase(RedirectURLMixin, FormView):
 class VerifyTOTPView(VerifyOTPBase):
     template_name = "hidp/otp/verify.html"
     form_class = VerifyTOTPForm
+
+    def get_recovery_code_url(self, request):  # noqa: PLR6301
+        # Returns the URL for the recovery code verification.
+        next_param = request.GET.get("next")
+        base_url = reverse("hidp_otp:verify-recovery-code")
+
+        if next_param and url_has_allowed_host_and_scheme(
+            next_param,
+            allowed_hosts=request.get_host(),
+            require_https=request.is_secure(),
+        ):
+            # If the next parameter is a valid URL, append it to the base URL
+            return f"{base_url}?{urlencode({'next': next_param})}"
+
+        return base_url
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["recovery_code_url"] = self.get_recovery_code_url(self.request)
+        return context
 
 
 class VerifyRecoveryCodeView(VerifyOTPBase):
