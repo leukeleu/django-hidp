@@ -286,7 +286,7 @@ class VerifyTOTPView(VerifyOTPBase):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["recovery_code_url"] = self.get_recovery_code_url(self.request)
-		context["logout_url"] = reverse("hidp_accounts:logout")
+        context["logout_url"] = reverse("hidp_accounts:logout")
         return context
 
 
