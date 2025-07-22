@@ -126,6 +126,12 @@ class AuthenticationForm(auth_forms.AuthenticationForm):
     to change the username field to a different one, such as an email address.
     """
 
+    username = forms.EmailField(
+        label=_("Email"),
+        max_length=254,
+        widget=forms.EmailInput(attrs={"autocomplete": "email", "autofocus": True}),
+        required=True,
+    )
     template_name = "hidp/accounts/forms/authentication_form.html"
 
     def __init__(self, request=None, *args, **kwargs):
@@ -292,16 +298,16 @@ class SetPasswordForm(auth_forms.SetPasswordForm):
     template_name = "hidp/accounts/management/forms/set_password_form.html"
 
     # Fields
-    password1 = forms.CharField(
+    new_password1 = forms.CharField(
         label=_("Password"),
-        required=False,
+        required=True,
         strip=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
         help_text=django_password_validation.password_validators_help_text_html(),
     )
-    password2 = forms.CharField(
+    new_password2 = forms.CharField(
         label=_("Password confirmation"),
-        required=False,
+        required=True,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
         strip=False,
         help_text=_("Enter the same password as before, for verification."),

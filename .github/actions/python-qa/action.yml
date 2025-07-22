@@ -4,6 +4,10 @@ description: Lint, checks & tests
 inputs:
   working-directory:
     description: The working directory to run the commands in
+  python-version:
+    description: The Python version to use
+  django-version:
+    description: The Django version to use as dependency
 
 runs:
   using: composite
@@ -13,10 +17,15 @@ runs:
       uses: ./.github/actions/setup-python
       with:
         working-directory: ${{ inputs.working-directory }}
+        python-version: ${{ inputs.python-version }}
+        django-version: ${{ inputs.django-version }}
 
     - name: Lint, check, test and build (if applicable)
       run: |
         source ~/.venv/bin/activate
+        UV_DJANGO_VERSION=$(uv pip list | sed -nE 's/^django[[:space:]]+([0-9]+\.[0-9]+)\..*/\1/p')
+        echo "Detected uv Django version: $UV_DJANGO_VERSION"
+        echo "Expected Django version: $DJANGO_VERSION"
         make test
       working-directory: ${{ inputs.working-directory }}
       shell: bash

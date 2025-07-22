@@ -4,7 +4,7 @@
 full-featured authentication system for Django projects.
 
 HIdP provides all the default Django authentication functionalities and more:
-- Registration (including email verification)
+- Registration (including email verification) (see [Registration](project:registration.md))
 - OpenID Connect (OIDC) Clients (Google and Microsoft included)
 - One-time passwords (OTP)
 - Rate limiting
@@ -101,11 +101,17 @@ AUTH_USER_MODEL = "accounts.User"
 ```
 
 ### `REGISTRATION_ENABLED`
-Enable or disable registration in your Django settings (default is `False`):
+Enable or disable registration in your Django settings:
 
 ```python
 REGISTRATION_ENABLED = False
 ```
+
+:::{note}
+If `REGISTRATION_ENABLED` is not defined, it defaults to `True`. In a future version of HIdP, registration will be disabled if `REGISTRATION_ENABLED` is not defined. It is recommended to explicitly set `REGISTRATION_ENABLED` to `True` or `False` in your settings.
+:::
+
+See [Registration](project:registration.md) for more information on how HIdP handles account registration.
 
 ### `OTP_TOTP_ISSUER`
 
@@ -138,8 +144,8 @@ LOGOUT_REDIRECT_URL = "/"
 HIdP comes with a set of extra password validators that can be added to
 `settings.AUTH_PASSWORD_VALIDATORS` if desired. See [Password Validators](project:password-validation.md)
 for more information.
-
 :::
+
 ### OpenID Connect based login (social accounts)
 
 To enable users to log in using an existing Google, Microsoft or any other provider that
@@ -184,10 +190,16 @@ urlpatterns = [
 
 ### Cache
 
-HIdP requires a caching implementation, in order for the rate limits to properly work
-and to store OIDC Provider signing keys. See [Django's cache framework](https://docs.djangoproject.com/en/stable/topics/cache/#django-s-cache-framework).
+HIdP requires a working Django cache backend to support rate limiting and to store
+OIDC Provider signing keys. A persistent and reliable cache is necessary for correct
+operation, especially for features like rate limiting and session management.
 
-For example a Redis cache:
+For production deployments, it is strongly recommended to use a robust cache backend
+such as Redis or Memcached. For more details on cache requirements for rate limiting,
+see the [django-ratelimit documentation](https://django-ratelimit.readthedocs.io/en/stable/installation.html#create-or-use-a-compatible-cache)
+and [Django's cache framework](https://docs.djangoproject.com/en/stable/topics/cache/#django-s-cache-framework).
+
+#### Redis Cache Configuration:
 
 ```python
 CACHES = {

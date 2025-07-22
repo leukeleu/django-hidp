@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 import django_otp
 import segno
 
@@ -13,6 +15,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, TemplateView
 
 from hidp.csp.decorators import hidp_csp_protection
@@ -98,7 +102,7 @@ class OTPDisableView(FormView):
         OTPDisabledMailer(self.request.user, base_url=base_url).send()
 
 
-class OTPDisableViewRecoveryCode(OTPDisableView):
+class OTPDisableRecoveryCodesView(OTPDisableView):
     """
     View to disable OTP for a user using a recovery code.
 
@@ -113,7 +117,7 @@ class OTPDisableViewRecoveryCode(OTPDisableView):
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(login_required, name="dispatch")
-class OTPRecoveryCodes(DetailView, FormView):
+class OTPRecoveryCodesView(DetailView, FormView):
     """
     View for managing recovery codes.
 
@@ -201,7 +205,7 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
         context = super().get_context_data(**kwargs)
 
         return context | {
-            "title": "Set up Two-Factor Authentication",
+            "title": _("Set up two-factor authentication"),
             "device": self.device,
             "backup_device": self.backup_device,
             "qrcode": segno.make(self.device.config_url).svg_data_uri(border=0),
@@ -264,9 +268,26 @@ class VerifyTOTPView(VerifyOTPBase):
     template_name = "hidp/otp/verify.html"
     form_class = VerifyTOTPForm
 
+    def get_recovery_code_url(self, request):  # noqa: PLR6301
+        # Returns the URL for the recovery code verification.
+        next_param = request.GET.get("next")
+        base_url = reverse("hidp_otp:verify-recovery-code")
+
+        if next_param and url_has_allowed_host_and_scheme(
+            next_param,
+            allowed_hosts=request.get_host(),
+            require_https=request.is_secure(),
+        ):
+            # If the next parameter is a valid URL, append it to the base URL
+            return f"{base_url}?{urlencode({'next': next_param})}"
+
+        return base_url
+
     def get_context_data(self, **kwargs):
-        context = {"logout_url": reverse("hidp_accounts:logout")}
-        return super().get_context_data() | context | kwargs
+        context = super().get_context_data(**kwargs)
+        context["recovery_code_url"] = self.get_recovery_code_url(self.request)
+		context["logout_url"] = reverse("hidp_accounts:logout")
+        return context
 
 
 class VerifyRecoveryCodeView(VerifyOTPBase):

@@ -6,9 +6,11 @@
 {% block main %}
   <h1>{% translate 'Manage your linked trusted services' %}</h1>
 
-  {% blocktranslate trimmed with provider=provider.name %}
-    Successfully unlinked your {{ provider }} account.
-  {% endblocktranslate %}
+  <p>
+    {% blocktranslate trimmed with provider=provider.name %}
+      Successfully unlinked your {{ provider }} account.
+    {% endblocktranslate %}
+  </p>
 
   {% include 'hidp/includes/forms/submit_row.html' with cancel_label=_('Back') cancel_url=back_url %}
 {% endblock %}

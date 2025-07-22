@@ -20,6 +20,8 @@ class OTPAuthenticationFormMixin(DjangoOTPAuthenticationFormMixin):
 
 
 class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
+    template_name = "hidp/otp/forms/otp_verify_form.html"
+
     # The device class to use for verification, e.g. TOTPDevice or StaticDevice.
     device_class = None
 
@@ -28,11 +30,43 @@ class OTPVerifyFormBase(OTPAuthenticationFormMixin, forms.Form):
         """
         Create a form field for the OTP token.
 
-        Subclasses should use this method to create the form field for the OTP token.
+        Args:
+            label: Field label
+
+        Returns:
+            Configured CharField
         """
+        attrs = {
+            "autocomplete": "one-time-code",
+            "inputmode": "numeric",
+            "pattern": "[0-9]*",
+        }
+
         return forms.CharField(
-            widget=forms.TextInput(attrs={"autocomplete": "one-time-code"}),
+            widget=forms.TextInput(attrs=attrs),
             label=label,
+            max_length=6,
+        )
+
+    @staticmethod
+    def create_recovery_code_field(label):
+        """
+        Create a form field for the recovery code.
+
+        Args:
+            label: Field label
+
+        Returns:
+            Configured CharField
+        """
+        attrs = {
+            "autocomplete": "off",
+        }
+
+        return forms.CharField(
+            widget=forms.TextInput(attrs=attrs),
+            label=label,
+            max_length=8,
         )
 
     def __init__(self, user, *args, **kwargs):
@@ -64,7 +98,7 @@ class VerifyTOTPForm(OTPVerifyFormBase):
 
     device_class = TOTPDevice
     otp_token = OTPVerifyFormBase.create_otp_token_field(
-        _("Enter the code from the app")
+        label=_("Enter the code from the app"),
     )
 
 
@@ -77,12 +111,14 @@ class VerifyStaticTokenForm(OTPVerifyFormBase):
     """
 
     device_class = StaticDevice
-    otp_token = OTPVerifyFormBase.create_otp_token_field(_("Enter a recovery code"))
+    otp_token = OTPVerifyFormBase.create_recovery_code_field(
+        label=_("Enter a recovery code"),
+    )
 
 
 class OTPSetupForm(OTPVerifyFormBase):
     otp_token = OTPVerifyFormBase.create_otp_token_field(
-        _("Enter the code from the app")
+        label=_("Enter the code from the app"),
     )
     confirm_stored_backup_tokens = forms.BooleanField(
         required=True,
