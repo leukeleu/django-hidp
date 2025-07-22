@@ -12,6 +12,7 @@ from django.http import (
 )
 from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
@@ -206,10 +207,19 @@ class OIDCAuthenticationCallbackView(OIDCMixin, generic.View):
             else:
                 # `sub` claim does not match an existing user, but `email` claim does:
                 # Display a message instructing the user to log in to link the accounts.
-                return (
-                    reverse("hidp_accounts:login")
-                    + f"?oidc_error={OIDCError.ACCOUNT_EXISTS}"
-                )
+                params = {
+                    "oidc_error": OIDCError.ACCOUNT_EXISTS,
+                }
+
+                # Respect the `next` parameter if it is present in the request.
+                if redirect_url and url_has_allowed_host_and_scheme(
+                    url=redirect_url,
+                    allowed_hosts=request.get_host(),
+                    require_https=request.is_secure(),
+                ):
+                    params["next"] = redirect_url
+
+                return f"{reverse('hidp_accounts:login')}?{urlencode(params)}"
 
         # Prepare the URL parameters for the next view. Drop any None values.
         params = {
