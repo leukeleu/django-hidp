@@ -8,7 +8,7 @@ submit to the current URL, which may not be the intended behavior.
   <form action="{{ logout_url }}" method="post">
     {% csrf_token %}
     <button type="submit">
-      {{ logout_label|default:_("Sign out") }}
+      {{ logout_label|default:_("Cancel and return to login") }}
     </button>
   </form>
 {% endif %}
