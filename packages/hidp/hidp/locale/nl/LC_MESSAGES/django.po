@@ -315,7 +315,6 @@ msgstr "Uitloggen aangevraagd door %(application)s"
 #: hidp/templates/hidp/accounts/logout_confirm.html
 #: hidp/templates/hidp/accounts/management/manage_account.html
 #: hidp/templates/hidp/accounts/register.html
-#: hidp/templates/hidp/includes/forms/logout_form.html
 msgid "Sign out"
 msgstr "Uitloggen"
 
@@ -802,6 +801,10 @@ msgid_plural "Your account is currently linked with the following services:"
 msgstr[0] "Je account is momenteel aan de volgende dienst gekoppeld:"
 msgstr[1] "Je account is momenteel aan de volgende diensten gekoppeld:"
 
+#: hidp/templates/hidp/includes/forms/logout_form.html
+msgid "Cancel and return to login"
+msgstr "Annuleren en terug naar inloggen"
+
 #: hidp/templates/hidp/otp/disable.html
 #: hidp/templates/hidp/otp/disable_recovery_code.html
 msgid "Disable two-factor authentication"
@@ -932,12 +935,6 @@ msgstr "Bewaar deze codes veilig. Deze codes zijn de enige manier om in te logge
 #: hidp/templates/hidp/otp/recovery_codes.html
 msgid "These codes can be used to log in if you lose access to your two-factor device. You can generate new codes at any time, but you can only have one set of codes at a time."
 msgstr "Deze codes kunnen worden gebruikt om in te loggen als je geen toegang meer hebt tot je tweefactor­apparaat. Je kunt op elk moment nieuwe codes genereren, maar je kunt slechts één set codes tegelijk hebben."
-
-#: hidp/templates/hidp/otp/setup_device.html
-#: hidp/templates/hidp/otp/verify.html
-#: hidp/templates/hidp/otp/verify_recovery_code.html
-msgid "Cancel and return to login"
-msgstr "Annuleren en terug naar inloggen"
 
 #: hidp/templates/hidp/otp/setup_device.html
 msgid "Enter the following URL in your authenticator app:"
