@@ -66,6 +66,9 @@
       {{ form.confirm_stored_backup_tokens }}
     </p>
 
-    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Submit') cancel_label=_('Back') cancel_url=back_url %}
+    {% include 'hidp/includes/forms/submit_row.html' with submit_label=_('Submit') %}
   </form>
+
+  {% include 'hidp/includes/forms/logout_form.html' %}
+  <a href="{{ back_url }}">{% translate 'Back' %}</a>
 {% endblock %}

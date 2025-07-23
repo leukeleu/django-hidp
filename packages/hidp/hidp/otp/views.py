@@ -201,9 +201,7 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
         return kwargs
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        return context | {
+        context = {
             "title": _("Set up two-factor authentication"),
             "device": self.device,
             "backup_device": self.backup_device,
@@ -213,7 +211,9 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
                 self.backup_device.token_set.values_list("token", flat=True)
             ),
             "back_url": reverse("hidp_otp_management:manage"),
+            "logout_url": reverse("hidp_accounts:logout"),
         }
+        return super().get_context_data() | context | kwargs
 
     def form_valid(self, form):
         form.save()
@@ -280,9 +280,11 @@ class VerifyTOTPView(VerifyOTPBase):
         return base_url
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["recovery_code_url"] = self.get_recovery_code_url(self.request)
-        return context
+        context = {
+            "recovery_code_url": self.get_recovery_code_url(self.request),
+            "logout_url": reverse("hidp_accounts:logout"),
+        }
+        return super().get_context_data() | context | kwargs
 
 
 class VerifyRecoveryCodeView(VerifyOTPBase):
@@ -295,6 +297,10 @@ class VerifyRecoveryCodeView(VerifyOTPBase):
         self.send_mail()
 
         return result
+
+    def get_context_data(self, **kwargs):
+        context = {"logout_url": reverse("hidp_accounts:logout")}
+        return super().get_context_data() | context | kwargs
 
     def send_mail(self):
         """Notify the user that a recovery code was used."""
