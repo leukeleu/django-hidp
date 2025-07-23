@@ -1,8 +1,8 @@
 {% load i18n %}
 {% comment %}
 The logout_url is required for the form action. It is passed in from the view
-that renders this template. If the logout_url is not provided, the form will
-submit to the current URL, which may not be the intended behavior.
+that renders this template. If the logout_url is not provided, the form will not
+be rendered.
 {% endcomment %}
 {% if logout_url %}
   <form action="{{ logout_url }}" method="post">
