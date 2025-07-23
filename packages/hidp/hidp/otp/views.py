@@ -27,7 +27,6 @@ from hidp.otp.devices import (
     reset_static_tokens,
 )
 from hidp.otp.forms import OTPSetupForm, VerifyStaticTokenForm, VerifyTOTPForm
-from hidp.otp.utils import user_needs_to_verify_otp
 from hidp.rate_limit.decorators import rate_limit_default
 
 from .decorators import otp_exempt
@@ -214,9 +213,7 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
                 self.backup_device.token_set.values_list("token", flat=True)
             ),
             "back_url": reverse("hidp_otp_management:manage"),
-            "logout_url": reverse("hidp_accounts:logout")
-            if user_needs_to_verify_otp(self.request.user)
-            else None,
+            "logout_url": reverse("hidp_accounts:logout"),
         }
 
     def form_valid(self, form):
