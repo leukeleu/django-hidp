@@ -7,6 +7,8 @@ updates:
       - '/project'
     schedule:
       interval: 'weekly'
+      day: 'monday'
+      time: '08:00'
     versioning-strategy: increase-if-necessary
 
   - package-ecosystem: 'github-actions'
@@ -15,3 +17,5 @@ updates:
       - '/.github/workflows'
     schedule:
       interval: 'weekly'
+      day: 'monday'
+      time: '08:00'
