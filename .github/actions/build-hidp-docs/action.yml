@@ -15,7 +15,6 @@ runs:
     - name: Build documentation
       run: |
         echo ::group::Build documentation
-        source ~/.venv/bin/activate
         make html
         echo ::endgroup::
       working-directory: './packages/hidp/docs'
