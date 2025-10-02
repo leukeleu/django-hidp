@@ -17,12 +17,14 @@ jobs:
 
     strategy:
       matrix:
-        django-version: ['4.2', '5.2']
+        django-version: ['4.2', '5.2', '6.0']
         python-version: ['3.11', '3.12', '3.13']
         working-directory: ['./packages/hidp']
         exclude:
           - django-version: '4.2'
             python-version: '3.13'
+          - django-version: '6.0'  # Django 6.0 supports Python 3.12 and 3.13
+            python-version: '3.11'
         include:
           - working-directory: './project'
             python-version: '3.12'
