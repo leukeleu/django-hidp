@@ -63,11 +63,8 @@ class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
         super().__init__(*args, **kwargs)
 
         # only show helptext for password fields if there are any errors
-        # Errors appear on password2 field for some reason,
-        # so just disable help text on both
         if not self.has_error("password1") and not self.has_error("password2"):
             self.fields["password1"].help_text = ""
-            self.fields["password2"].help_text = ""
 
     def _get_validation_exclusions(self):
         # Exclude email from model validation (unique constraint),
