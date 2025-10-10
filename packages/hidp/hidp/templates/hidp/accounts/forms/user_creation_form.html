@@ -67,14 +67,14 @@ the following is a modified version of /django/forms/templates/django/forms/div.
           const toolTipElement = document.getElementById('info-tooltip')
 
           toolTipElement.addEventListener('mouseenter', () => {
-              if (!toolTipElement.getAttribute('open')) {
-                toolTipElement.setAttribute('open', 'true')
+              if (!toolTipElement.open) {
+                toolTipElement.open = true
                 openedByHover = true
               }
           })
 
           toolTipElement.addEventListener('mouseleave', () => {
-            if (toolTipElement.getAttribute('open') && openedByHover) {
+            if (toolTipElement.open && openedByHover) {
               toolTipElement.removeAttribute('open')
               openedByHover = false
             }
