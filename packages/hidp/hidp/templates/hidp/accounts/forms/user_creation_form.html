@@ -1,1 +1,101 @@
 {% extends 'hidp/includes/forms/base_form.html' %}
+{% comment %}
+the following is a modified version of /django/forms/templates/django/forms/div.html
+{% endcomment %}
+<style>
+  form label {
+    display: inline-block;
+  }
+
+  #info-tooltip,
+  #info-tooltip summary {
+    display: inline;
+  }
+
+  #info-tooltip svg {
+    width: 1rem;
+    height: 1rem;
+    vertical-align: sub;
+    cursor: pointer;
+    user-select: none;
+  }
+</style>
+
+{{ errors }}
+{% if errors and not fields %}
+  <div>{% for field in hidden_fields %}{{ field }}{% endfor %}</div>
+{% endif %}
+{% for field, errors in fields %}
+  <div
+    {% with classes=field.css_classes %}
+      {% if classes %}
+        class="{{ classes }} input-div"
+      {% else %}
+        class="input-div"
+      {% endif %}
+    {% endwith %}
+  >
+    {% if field.use_fieldset %}
+      <fieldset>
+      {% if field.label %}{{ field.legend_tag }}{% endif %}
+    {% else %}
+      {% if field.label %}{{ field.label_tag }}{% endif %}
+    {% endif %}
+
+    {% if field.name == "password1" %}
+        <details id="info-tooltip">
+            <summary>
+                {% comment %} inline svg so stroke can pick up the "currentColor" {% endcomment %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <!-- Icon from IconaMoon by Dariush Habibpour - https://creativecommons.org/licenses/by/4.0/ -->
+                     <g fill="none" stroke="currentColor" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="9" stroke-linecap="round" stroke-width="1.5"/>
+                        <path stroke-width="2.25" d="M12 8h.01v.01H12z"/>
+                        <path stroke-linecap="round" stroke-width="1.5" d="M12 12v4"/>
+                    </g>
+                </svg>
+            </summary>
+            <div class="helptext">{% lorem 12 w %}</div>
+        </details>
+        <script defer>
+          let openedByHover = false
+          const toolTipElement = document.getElementById('info-tooltip')
+
+          toolTipElement.addEventListener('mouseenter', () => {
+              if (!toolTipElement.getAttribute('open')) {
+                toolTipElement.setAttribute('open', 'true')
+                openedByHover = true
+              }
+          })
+
+          toolTipElement.addEventListener('mouseleave', () => {
+            if (toolTipElement.getAttribute('open') && openedByHover) {
+              toolTipElement.removeAttribute('open')
+              openedByHover = false
+            }
+          })
+
+          toolTipElement.addEventListener('click', (event) => {
+            // if opened by hover and click, keep it open and mark it as not opened by hover
+            if (openedByHover) {
+              event.stopPropagation()
+              event.preventDefault()
+              openedByHover = false
+            }
+          })
+        </script>
+    {% elif field.help_text %}
+        <div class="helptext">{{ field.help_text|safe }}</div>
+    {% endif %}
+
+    {{ errors }}
+    {{ field }}
+{% if field.use_fieldset %}</fieldset>{% endif %}
+    {% if forloop.last %}
+      {% for field in hidden_fields %}{{ field }}{% endfor %}
+    {% endif %}
+</div>
+{% endfor %}
+{% if not fields and not errors %}
+  {% for field in hidden_fields %}{{ field }}{% endfor %}
+{% endif %}

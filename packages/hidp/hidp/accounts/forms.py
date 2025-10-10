@@ -59,13 +59,6 @@ class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
         model = UserModel
         fields = (UserModel.USERNAME_FIELD,)
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        # only show helptext for password fields if there are any errors
-        if not self.has_error("password1") and not self.has_error("password2"):
-            self.fields["password1"].help_text = ""
-
     def _get_validation_exclusions(self):
         # Exclude email from model validation (unique constraint),
         # This will make the form valid even if the email is already in use.
