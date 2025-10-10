@@ -1,4 +1,7 @@
 {% extends 'hidp/includes/forms/base_form.html' %}
+
+{% block form %}
+
 {% comment %}
 the following is a modified version of /django/forms/templates/django/forms/div.html
 {% endcomment %}
@@ -55,7 +58,7 @@ the following is a modified version of /django/forms/templates/django/forms/div.
                     </g>
                 </svg>
             </summary>
-            <div class="helptext">{% lorem 12 w %}</div>
+            <div class="helptext">{{ field.help_text|safe }}</div>
         </details>
         <script defer>
           let openedByHover = false
@@ -99,3 +102,4 @@ the following is a modified version of /django/forms/templates/django/forms/div.
 {% if not fields and not errors %}
   {% for field in hidden_fields %}{{ field }}{% endfor %}
 {% endif %}
+{% endblock %}
