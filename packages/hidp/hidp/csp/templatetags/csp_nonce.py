@@ -7,5 +7,5 @@ register = template.Library()
 def csp_nonce(context):
     # if it's not an attribute on the context object,
     # try looking for manually inserted request object
-    request = getattr(context, "request", context["request"])
+    request = getattr(context, "request", None) or context["request"]
     return getattr(request, "hidp_csp_nonce", None)
