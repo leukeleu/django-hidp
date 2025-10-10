@@ -1,5 +1,7 @@
 {% extends 'hidp/includes/forms/base_form.html' %}
 
+{% load csp_nonce  %}
+
 {% block form %}
 
 {% comment %}
@@ -60,7 +62,7 @@ the following is a modified version of /django/forms/templates/django/forms/div.
             </summary>
             <div class="helptext">{{ field.help_text|safe }}</div>
         </details>
-        <script defer>
+        <script nonce="{% csp_nonce %}" defer>
           let openedByHover = false
           const toolTipElement = document.getElementById('info-tooltip')
 
