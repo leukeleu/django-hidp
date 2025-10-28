@@ -15,7 +15,11 @@ Application = get_application_model()
 class TestUserViewSetViaSession(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = user_factories.UserFactory(first_name="Walter", last_name="White")
+        cls.user = user_factories.UserFactory(
+            first_name="Walter",
+            last_name="White",
+            email="walter@example.com",
+        )
         cls.url = reverse("api:user-detail", kwargs={"pk": "me"})
 
     def setUp(self):
@@ -42,6 +46,7 @@ class TestUserViewSetViaSession(APITestCase):
             {
                 "first_name": "Walter",
                 "last_name": "White",
+                "email": "walter@example.com",
             },
             response.json(),
         )
@@ -122,7 +127,9 @@ class TestUserViewSetViaSession(APITestCase):
 class TestUserViewSetViaAccessToken(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = user_factories.UserFactory(first_name="Walter", last_name="White")
+        cls.user = user_factories.UserFactory(
+            first_name="Walter", last_name="White", email="walter@example.com"
+        )
         cls.url = reverse("api:user-detail", kwargs={"pk": "me"})
         cls.trusted_application = Application.objects.create(
             name="Happy App",
@@ -163,6 +170,7 @@ class TestUserViewSetViaAccessToken(APITestCase):
             {
                 "first_name": "Walter",
                 "last_name": "White",
+                "email": "walter@example.com",
             },
             response.json(),
         )
