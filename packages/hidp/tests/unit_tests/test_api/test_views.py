@@ -76,6 +76,16 @@ class TestUserViewSetViaSession(APITestCase):
         )
         self.assertEqual(response.status_code, 404)
 
+    def test_update_user_with_patch_with_read_only_field(self):
+        # Patch with read only field doesn't update the field.
+        response = self.client.patch(
+            self.url,
+            data={"email": "skyler@example.com"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "walter@example.com")
+
     def test_update_user_with_patch_without_all_required_fields(self):
         # Patch without all required fields should partially update.
         response = self.client.patch(
