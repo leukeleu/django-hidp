@@ -16,6 +16,7 @@ help:
 	@echo "  make checkmanifest - Check if all files are included in the sdist"
 	@echo "  make checksetup - Check package metadata"
 	@echo "  make build - Build the package"
+	@echo "  make generate-schema - Generate a new OpenAPI schema file"
 	@echo
 
 GITHUB_ACTIONS ?= false
@@ -135,6 +136,10 @@ clean:
 	$(call group,Cleaning up)
 	rm -rf ../../var/dist/*.whl ../../var/dist/*.tar.gz
 	$(call endgroup)
+
+.PHONY: generate-schema
+generate-schema:
+	DJANGO_SETTINGS_MODULE="hidp.spectacular_settings" python manage.py spectacular --format openapi-json --file ./docs/openapi/schema.json
 
 ##
 # This target is used by GitHub actions
