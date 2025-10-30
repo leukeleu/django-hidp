@@ -17,7 +17,7 @@ INSTALLED_APPS = [
     # Custom user model
     "tests.custom_user",
     # drf spectacular for generating OpenAPI specification
-    'drf_spectacular',
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -33,23 +33,23 @@ AUTH_USER_MODEL = "custom_user.CustomUser"
 
 ROOT_URLCONF = "hidp.config.urls"
 
-SECRET_KEY = "secret-key-only-spectacular"
+SECRET_KEY = "secret-key-only-spectacular"  # noqa: S105
 
 REST_FRAMEWORK = {
     # YOUR SETTINGS
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'HIdP',
-    'DESCRIPTION': 'Hello, ID Please',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "HIdP",
+    "DESCRIPTION": "Hello, ID Please",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
 }
 
 
 SILENCED_SYSTEM_CHECKS = [
     # oauth_provider doesn't need to be configured for generating OpenAPI
     # specification
-    'hidp.E005',
+    "hidp.E005",
 ]
