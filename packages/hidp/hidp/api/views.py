@@ -23,6 +23,7 @@ UserModel = get_user_model()
             OpenApiParameter(
                 name="id",
                 type=OpenApiTypes.STR,
+                enum=["me"],
                 location="path",
                 description="Key identifying user, can only have value `me`.",
             ),
@@ -33,6 +34,7 @@ UserModel = get_user_model()
             OpenApiParameter(
                 name="id",
                 type=OpenApiTypes.STR,
+                enum=["me"],
                 location="path",
                 description="Key identifying user, can only have value `me`.",
             ),

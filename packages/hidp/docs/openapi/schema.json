@@ -14,7 +14,10 @@
                         "in": "path",
                         "name": "id",
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "me"
+                            ]
                         },
                         "description": "Key identifying user, can only have value `me`.",
                         "required": true
@@ -48,7 +51,10 @@
                         "in": "path",
                         "name": "id",
                         "schema": {
-                            "type": "string"
+                            "type": "string",
+                            "enum": [
+                                "me"
+                            ]
                         },
                         "description": "Key identifying user, can only have value `me`.",
                         "required": true
