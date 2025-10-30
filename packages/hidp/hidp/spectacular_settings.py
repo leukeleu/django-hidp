@@ -36,7 +36,6 @@ ROOT_URLCONF = "hidp.config.urls"
 SECRET_KEY = "secret-key-only-spectacular"  # noqa: S105
 
 REST_FRAMEWORK = {
-    # YOUR SETTINGS
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
