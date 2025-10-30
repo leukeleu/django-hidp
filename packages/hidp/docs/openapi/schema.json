@@ -1,9 +1,9 @@
 {
     "openapi": "3.0.3",
     "info": {
-        "title": "Your Project API",
+        "title": "HIdP",
         "version": "1.0.0",
-        "description": "Your project description"
+        "description": "Hello, ID Please"
     },
     "paths": {
         "/api/users/{id}/": {
@@ -14,10 +14,9 @@
                         "in": "path",
                         "name": "id",
                         "schema": {
-                            "type": "string",
-                            "format": "uuid"
+                            "type": "string"
                         },
-                        "description": "A UUID string identifying this user.",
+                        "description": "Key identifying user, can only have value `me`.",
                         "required": true
                     }
                 ],
@@ -49,10 +48,9 @@
                         "in": "path",
                         "name": "id",
                         "schema": {
-                            "type": "string",
-                            "format": "uuid"
+                            "type": "string"
                         },
-                        "description": "A UUID string identifying this user.",
+                        "description": "Key identifying user, can only have value `me`.",
                         "required": true
                     }
                 ],
