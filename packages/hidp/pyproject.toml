@@ -35,6 +35,7 @@ Releasenotes = "https://github.com/leukeleu/django-hidp/releases"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+optional-dependencies.api = { file = "requirements_api.txt" }
 optional-dependencies.oidc_provider = { file = "requirements_oidc_provider.txt" }
 optional-dependencies.otp = { file = "requirements_otp.txt" }
 
@@ -46,6 +47,7 @@ file = [
 [tool.setuptools.dynamic.optional-dependencies.all]
 file = [
   "requirements.txt",
+  "requirements_api.txt",
   "requirements_oidc_provider.txt",
   "requirements_otp.txt",
 ]
