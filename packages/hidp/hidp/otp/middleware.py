@@ -50,6 +50,18 @@ class OTPMiddlewareBase:
         """
         return getattr(view_func, "otp_exempt", False)
 
+    def is_browser_request(self, request):  # noqa: PLR6301
+        """
+        Check if the request is a browser request.
+
+        Args:
+            request (``HttpRequest``): The request object.
+
+        Returns:
+            bool: Whether the request is a browser request.
+        """
+        return not request.path_info.startswith("/api/")
+
     def get_redirect_url(self, request):  # noqa: PLR6301
         """
         Return the URL to redirect to when OTP verification is required.
@@ -128,8 +140,10 @@ class OTPMiddlewareBase:
         Process a view and check if OTP verification is required.
 
         This method is called by the middleware to check if the user needs to verify
-        their OTP. If verification is required, the user will be redirected to the OTP
-        verification view, or to the OTP setup view if they do not have an OTP device.
+        their OTP. If verification is required and the request is a browser request, the
+        user will be redirected to an OTP verification view. If the user hasn't setup
+        a device yet they will be redirected to the OTP setup view. API requests are not
+        redirected and should be handled separately.
 
         Args:
             request (``HttpRequest``): The request object.
@@ -139,9 +153,12 @@ class OTPMiddlewareBase:
 
         Returns:
             ``None`` or ``HttpResponseRedirect``: HttpResponseRedirect if this policy
-            requires the user to verify OTP, None otherwise.
+            requires the user to verify OTP and the request is a browser request, None
+            otherwise.
         """
-        if self.request_needs_verification(request, view_func):
+        if self.request_needs_verification(
+            request, view_func
+        ) and self.is_browser_request(request):
             return redirect(self.get_redirect_url(request))
 
         return None
