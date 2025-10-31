@@ -7,7 +7,7 @@ from django.conf import settings
 from django.core.management import call_command
 
 existing_schema_path = Path(
-    settings.BASE_DIR / "packages" / "hidp" / "docs" / "openapi" / "schema.json"
+    settings.BASE_DIR / "packages/hidp/docs/openapi/schema.json"
 )
 
 
