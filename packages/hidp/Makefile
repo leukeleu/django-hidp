@@ -16,6 +16,7 @@ help:
 	@echo "  make checkmanifest - Check if all files are included in the sdist"
 	@echo "  make checksetup - Check package metadata"
 	@echo "  make build - Build the package"
+	@echo "  make generate-schema - Generate a new OpenAPI schema file"
 	@echo
 
 GITHUB_ACTIONS ?= false
@@ -136,8 +137,12 @@ clean:
 	rm -rf ../../var/dist/*.whl ../../var/dist/*.tar.gz
 	$(call endgroup)
 
+.PHONY: generate-schema
+generate-schema:
+	DJANGO_SETTINGS_MODULE="hidp.spectacular_settings" python manage.py spectacular --format openapi-json --file ./docs/openapi/schema.json
+
 ##
-# This target is used by GitHub actions
+# These targets are used by GitHub actions
 ##
 
 ../../var/requirements_frozen.txt:
@@ -165,3 +170,8 @@ post-install:
 
 .PHONY: install-pipeline
 install-pipeline: install-requirements post-install
+
+.PHONY: build-redoc
+build-redoc:
+	npm install @redocly/cli -g
+	redocly build-docs ./docs/openapi/schema.json -o ./docs/_build/html/redoc-static.html

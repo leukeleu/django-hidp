@@ -1,0 +1,17 @@
+name: Build HIdP Documentation
+description: Build the documentation for the HIdP package
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Node
+      uses: ./.github/actions/setup-node
+
+    - name: Build documentation
+      run: |
+        echo ::group::Build API documentation
+        make build-redoc
+        echo ::endgroup::
+      working-directory: './packages/hidp'
+      shell: bash
