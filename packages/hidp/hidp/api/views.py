@@ -1,3 +1,5 @@
+from importlib import import_module
+
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
@@ -20,29 +22,18 @@ SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 UserModel = get_user_model()
 
 
+user_id_me_parameter = OpenApiParameter(
+    name="id",
+    type=OpenApiTypes.STR,
+    enum=["me"],
+    location="path",
+    description="Key identifying user, can only have value `me`.",
+)
+
+
 @extend_schema_view(
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="id",
-                type=OpenApiTypes.STR,
-                enum=["me"],
-                location="path",
-                description="Key identifying user, can only have value `me`.",
-            ),
-        ]
-    ),
-    update=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="id",
-                type=OpenApiTypes.STR,
-                enum=["me"],
-                location="path",
-                description="Key identifying user, can only have value `me`.",
-            ),
-        ]
-    ),
+    retrieve=extend_schema(parameters=[user_id_me_parameter]),
+    update=extend_schema(parameters=[user_id_me_parameter]),
 )
 class UserViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
