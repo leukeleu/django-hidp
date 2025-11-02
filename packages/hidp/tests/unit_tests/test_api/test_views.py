@@ -208,3 +208,51 @@ class TestUserViewSetViaAccessToken(APITestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, "Skyler")
         self.assertEqual(self.user.last_name, "White")
+
+
+class TestSessionViewSet(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_info_url = reverse("api:user-detail", kwargs={"pk": "me"})
+
+        cls.client2 = cls.client_class()
+
+        cls.user = user_factories.UserFactory(
+            first_name="Walter",
+            last_name="White",
+            email="walter@example.com",
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+        self.session_api_url = reverse(
+            "api:session-detail", kwargs={"pk": self.client.session.session_key}
+        )
+
+        self.client2.force_login(self.user)
+        self.session2_api_url = reverse(
+            "api:session-detail", kwargs={"pk": self.client2.session.session_key}
+        )
+
+    def test_revoking_sessions(self):
+        with self.subTest("User can access protected route via both clients"):
+            self.assertEqual(200, self.client.get(self.user_info_url).status_code)
+            self.assertEqual(200, self.client2.get(self.user_info_url).status_code)
+
+        delete_response = self.client.delete(self.session2_api_url)
+
+        with self.subTest("Client 1 can delete session of client 2"):
+            self.assertEqual(204, delete_response.status_code)
+            # TODO: check "OK" in body response
+
+            self.assertEqual(200, self.client.get(self.user_info_url).status_code)
+            self.assertEqual(403, self.client2.get(self.user_info_url).status_code)
+
+        delete_response = self.client.delete(self.session_api_url)
+
+        with self.subTest("Client 1 can remove their own session"):
+            self.assertEqual(204, delete_response.status_code)
+            # TODO: check "OK" in body response
+
+            self.assertEqual(403, self.client.get(self.user_info_url).status_code)
+            self.assertEqual(403, self.client2.get(self.user_info_url).status_code)
