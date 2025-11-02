@@ -9,10 +9,13 @@ from rest_framework import mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import Http404
 
-from .serializers import UserSerializer
+from .serializers import SessionSerializer, UserSerializer
+
+SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
 
 UserModel = get_user_model()
 
@@ -54,3 +57,30 @@ class UserViewSet(
         if self.kwargs.get(self.lookup_url_kwarg or self.lookup_field) == "me":
             return self.request.user
         raise Http404
+
+
+session_id_parameter = OpenApiParameter(
+    name="id",
+    type=OpenApiTypes.STR,
+    location="path",
+    description="Key identifying session.",
+)
+
+
+@extend_schema_view(destroy=extend_schema(parameters=[session_id_parameter]))
+class SessionViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+    authentication_classes = [SessionAuthentication]
+    serializer_class = SessionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        session_key = self.kwargs[lookup_url_kwarg]
+        session = SessionStore(session_key=session_key)
+
+        if not session.exists(session_key=session_key):
+            raise Http404
+
+        # This returns a SessionStore object (a subclass of
+        # django.contrib.sessions.backends.base.SessionBase)
+        return session

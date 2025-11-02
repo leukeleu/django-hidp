@@ -17,3 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
         ]
         read_only_fields = ["email"]
+
+
+class SessionSerializer(serializers.Serializer):
+    pass
