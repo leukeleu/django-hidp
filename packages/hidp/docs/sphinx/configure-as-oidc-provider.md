@@ -193,7 +193,7 @@ OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
 The settings provided by `get_oauth2_provider_settings` are as follows:
 
 ```{eval-rst}
-.. literalinclude:: ../hidp/config/oauth2_provider.py
+.. literalinclude:: ../../hidp/config/oauth2_provider.py
   :lines: 1-60
 ```
 
