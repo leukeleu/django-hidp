@@ -62,4 +62,3 @@ class LoginView(GenericAPIView):
             return Response({}, status=HTTPStatus.OK)
         elif grant == LoginGrant.BEARER:
             raise NotImplementedError
-            return Response({}, status=HTTPStatus.OK)
