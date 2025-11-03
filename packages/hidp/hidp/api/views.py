@@ -65,7 +65,6 @@ class SessionViewSet(
     mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
     authentication_classes = [SessionAuthentication]
-    queryset = SessionStoreModel.objects.all()
     serializer_class = SessionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -80,6 +79,13 @@ class SessionViewSet(
         # This returns a SessionStore object (a subclass of
         # django.contrib.sessions.backends.base.SessionBase)
         return session
+
+    def get_queryset(self):
+        return [
+            session
+            for session in SessionStoreModel.objects.all()
+            if session.get_decoded().get("_auth_user_id") == str(self.request.user.pk)
+        ]
 
     def list(self, request, *args, **kwargs):
         if not issubclass(SessionStore, DbSessionStore):
