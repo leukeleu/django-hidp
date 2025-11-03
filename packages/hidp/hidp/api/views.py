@@ -47,18 +47,21 @@ class LoginView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
+        # User is authenticated and is allowed to log in.
         user = serializer.validated_data["user"]
         grant = serializer.validated_data["grant"]
 
-        if not user.email_verified:
-            self.verification_mailer(
-                user,
-                base_url=request.build_absolute_uri("/"),
-            ).send()
-            return Response({}, status=HTTPStatus.UNAUTHORIZED)
+        # Only log in the user if their email address has been verified.
+        if user.email_verified:
+            if grant == LoginGrant.SESSION:
+                login(request, user)
+                return Response({}, status=HTTPStatus.OK)
+            elif grant == LoginGrant.BEARER:
+                raise NotImplementedError
 
-        if grant == LoginGrant.SESSION:
-            login(request, user)
-            return Response({}, status=HTTPStatus.OK)
-        elif grant == LoginGrant.BEARER:
-            raise NotImplementedError
+        # If the user's email address is not verified, send a verification email.
+        self.verification_mailer(
+            user,
+            base_url=request.build_absolute_uri("/"),
+        ).send()
+        return Response({}, status=HTTPStatus.UNAUTHORIZED)
