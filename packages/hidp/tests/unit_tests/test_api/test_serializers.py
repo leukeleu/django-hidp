@@ -32,15 +32,30 @@ class TestLoginSerializer(TestCase):
 
     def test_serializer_invalid_credentials(self):
         """Verify that a ValidationError is raised on invalid credentials."""
-        serializer = self.make_serializer(
-            username=self.user.email,
-            password="WrongPassword!",
-            grant=LoginGrant.SESSION,
-        )
+        with self.subTest("User provides invalid password"):
+            serializer = self.make_serializer(
+                username=self.user.email,
+                password="WrongPassword!",
+                grant=LoginGrant.SESSION,
+            )
 
-        with self.assertRaises(rest_framework_exceptions.ValidationError):
-            serializer.is_valid(raise_exception=True)
+            with self.assertRaises(rest_framework_exceptions.ValidationError):
+                serializer.is_valid(raise_exception=True)
 
-        errors = serializer.errors["non_field_errors"]
-        self.assertEqual(len(errors), 1)
-        self.assertEqual(str(errors[0]), "Could not authenticate")
+            errors = serializer.errors["non_field_errors"]
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(str(errors[0]), "Could not authenticate")
+
+        with self.subTest("User provides invalid email"):
+            serializer = self.make_serializer(
+                username="wrong_email@email.com",
+                password="P@ssw0rd!",
+                grant=LoginGrant.SESSION,
+            )
+
+            with self.assertRaises(rest_framework_exceptions.ValidationError):
+                serializer.is_valid(raise_exception=True)
+
+            errors = serializer.errors["non_field_errors"]
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(str(errors[0]), "Could not authenticate")
