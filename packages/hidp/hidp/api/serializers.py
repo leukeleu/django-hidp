@@ -20,4 +20,4 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SessionSerializer(serializers.Serializer):
-    pass
+    session_key = serializers.CharField(read_only=True)

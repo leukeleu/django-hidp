@@ -13,11 +13,13 @@ from rest_framework.permissions import IsAuthenticated
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.sessions.backends.db import SessionStore as DbSessionStore
 from django.http import Http404
 
 from .serializers import SessionSerializer, UserSerializer
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
+SessionStoreModel = SessionStore().model
 
 UserModel = get_user_model()
 
@@ -59,8 +61,11 @@ session_id_parameter = OpenApiParameter(
 
 
 @extend_schema_view(destroy=extend_schema(parameters=[session_id_parameter]))
-class SessionViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
+class SessionViewSet(
+    mixins.ListModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
     authentication_classes = [SessionAuthentication]
+    queryset = SessionStoreModel.objects.all()
     serializer_class = SessionSerializer
     permission_classes = [IsAuthenticated]
 
@@ -75,3 +80,12 @@ class SessionViewSet(mixins.DestroyModelMixin, viewsets.GenericViewSet):
         # This returns a SessionStore object (a subclass of
         # django.contrib.sessions.backends.base.SessionBase)
         return session
+
+    def list(self, request, *args, **kwargs):
+        if not issubclass(SessionStore, DbSessionStore):
+            raise NotImplementedError(
+                "Listing sessions is only supported for "
+                "database-based session backends."
+            )
+
+        return super().list(request, *args, **kwargs)
