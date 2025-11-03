@@ -263,10 +263,10 @@ class TestSessionViewSet(APITestCase):
 
         delete_response = self.client.delete(self.session_api_url)
 
-        with self.subTest("Client 1 can remove their own session"):
-            self.assertEqual(204, delete_response.status_code)
+        with self.subTest("Client 1 can not remove their own session"):
+            self.assertEqual(400, delete_response.status_code)
 
-            self.assertEqual(403, self.client.get(self.user_info_url).status_code)
+            self.assertEqual(200, self.client.get(self.user_info_url).status_code)
             self.assertEqual(403, self.client2.get(self.user_info_url).status_code)
 
     def test_listing_sessions(self):

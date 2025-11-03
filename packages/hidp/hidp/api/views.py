@@ -9,6 +9,7 @@ from drf_spectacular.utils import (
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework import mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 
 from django.conf import settings
@@ -78,6 +79,24 @@ class SessionViewSet(
         # This returns a SessionStore object (a subclass of
         # django.contrib.sessions.backends.base.SessionBase)
         return session
+
+    def destroy(self, request, *args, **kwargs):
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        session_key = self.kwargs[lookup_url_kwarg]
+
+        # Django's session middleware does not allow deleting a session thats
+        # being used by the same request
+        if self.request.session.session_key == session_key:
+            raise ValidationError(
+                {
+                    lookup_url_kwarg: (
+                        "Session key can not be deleted from client using that same "
+                        "session key. Use a logout endpoint instead."
+                    )
+                }
+            )
+
+        return super().destroy(request, *args, **kwargs)
 
     def get_queryset(self):
         session_store_model = SessionStore().model
