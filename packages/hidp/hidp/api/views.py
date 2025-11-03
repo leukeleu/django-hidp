@@ -61,5 +61,5 @@ class LoginView(GenericAPIView):
             login(request, user)
             return Response({}, status=HTTPStatus.OK)
         elif grant == LoginGrant.BEARER:
-            # TODO: Implement token login
+            raise NotImplementedError
             return Response({}, status=HTTPStatus.OK)
