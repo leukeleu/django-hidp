@@ -15,7 +15,11 @@ Application = get_application_model()
 class TestUserViewSetViaSession(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = user_factories.UserFactory(first_name="Walter", last_name="White")
+        cls.user = user_factories.UserFactory(
+            first_name="Walter",
+            last_name="White",
+            email="walter@example.com",
+        )
         cls.url = reverse("api:user-detail", kwargs={"pk": "me"})
 
     def setUp(self):
@@ -42,6 +46,7 @@ class TestUserViewSetViaSession(APITestCase):
             {
                 "first_name": "Walter",
                 "last_name": "White",
+                "email": "walter@example.com",
             },
             response.json(),
         )
@@ -70,6 +75,16 @@ class TestUserViewSetViaSession(APITestCase):
             data={"first_name": "Skyler"},
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_update_user_with_patch_with_read_only_field(self):
+        # Patch with read only field doesn't update the field.
+        response = self.client.patch(
+            self.url,
+            data={"email": "skyler@example.com"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "walter@example.com")
 
     def test_update_user_with_patch_without_all_required_fields(self):
         # Patch without all required fields should partially update.
@@ -122,7 +137,9 @@ class TestUserViewSetViaSession(APITestCase):
 class TestUserViewSetViaAccessToken(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user = user_factories.UserFactory(first_name="Walter", last_name="White")
+        cls.user = user_factories.UserFactory(
+            first_name="Walter", last_name="White", email="walter@example.com"
+        )
         cls.url = reverse("api:user-detail", kwargs={"pk": "me"})
         cls.trusted_application = Application.objects.create(
             name="Happy App",
@@ -163,6 +180,7 @@ class TestUserViewSetViaAccessToken(APITestCase):
             {
                 "first_name": "Walter",
                 "last_name": "White",
+                "email": "walter@example.com",
             },
             response.json(),
         )

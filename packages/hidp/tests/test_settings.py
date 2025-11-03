@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     "tests.custom_user",
     # Custom makemessages command
     "tests.translations",
+    # drf spectacular for generating OpenAPI specification
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -68,6 +70,17 @@ MIDDLEWARE = [
     "hidp.oidc_provider.middleware.UiLocalesMiddleware",
     "django_otp.middleware.OTPMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "HIdP",
+    "DESCRIPTION": "Hello, ID Please",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
 
 USE_TZ = True
 

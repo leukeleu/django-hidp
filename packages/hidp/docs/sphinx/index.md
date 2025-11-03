@@ -21,6 +21,7 @@ content-security-policy
 user-model
 password-validation
 one-time-passwords
+headless
 templates
 translations
 management-commands

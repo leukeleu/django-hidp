@@ -4,9 +4,10 @@ include manage.py
 include requirements.txt
 include requirements_local.txt
 include runtests.py
-include docs/Makefile
-include docs/conf.py
+include docs/sphinx/Makefile
+include docs/sphinx/conf.py
 include docs/requirements.txt
+include docs/openapi/schema.json
 recursive-include docs *.md
 recursive-include hidp/locale *.mo *.po *.pot
 recursive-include hidp/templates *.html *.txt
