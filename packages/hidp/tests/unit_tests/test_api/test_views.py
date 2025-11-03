@@ -213,14 +213,26 @@ class TestUserViewSetViaAccessToken(APITestCase):
 class TestSessionViewSet(APITestCase):
     @classmethod
     def setUpTestData(cls):
+        """
+        Setup urls, clients and users for test.
+
+        Creates two users, one with two clients and one with a single client.
+        """
         cls.user_info_url = reverse("api:user-detail", kwargs={"pk": "me"})
+        cls.list_sessions_url = reverse("api:session-list")
 
         cls.client2 = cls.client_class()
+        cls.client3 = cls.client_class()
 
         cls.user = user_factories.UserFactory(
             first_name="Walter",
             last_name="White",
             email="walter@example.com",
+        )
+        cls.user2 = user_factories.UserFactory(
+            first_name="Skylar",
+            last_name="White",
+            email="skyler@example.com",
         )
 
     def setUp(self):
@@ -233,6 +245,8 @@ class TestSessionViewSet(APITestCase):
         self.session2_api_url = reverse(
             "api:session-detail", kwargs={"pk": self.client2.session.session_key}
         )
+
+        self.client3.force_login(self.user2)
 
     def test_revoking_sessions(self):
         with self.subTest("User can access protected route via both clients"):
@@ -254,3 +268,21 @@ class TestSessionViewSet(APITestCase):
 
             self.assertEqual(403, self.client.get(self.user_info_url).status_code)
             self.assertEqual(403, self.client2.get(self.user_info_url).status_code)
+
+    def test_listing_sessions(self):
+        response = self.client.get(self.list_sessions_url)
+
+        with self.subTest("User can only list their own session keys"):
+            self.assertEqual(200, response.status_code)
+
+            sessions = response.json()
+            returned_session_keys = [session["session_key"] for session in sessions]
+            walters_session_keys = [
+                self.client.session.session_key,
+                self.client2.session.session_key,
+            ]
+
+            self.assertCountEqual(
+                walters_session_keys,
+                returned_session_keys,
+            )
