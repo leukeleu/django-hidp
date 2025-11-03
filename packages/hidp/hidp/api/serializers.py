@@ -22,6 +22,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class SessionSerializer(serializers.Serializer):
     session_key = serializers.CharField(read_only=True)
+    user_agent = serializers.CharField(read_only=True, allow_null=True)
+    ip_address = serializers.IPAddressField(read_only=True, allow_null=True)
+    created_at = serializers.DateTimeField(read_only=True, allow_null=True)
+    last_active = serializers.DateTimeField(read_only=True, allow_null=True)
 
     def to_representation(self, instance):
         """Session data needs to be read from the model and decoded."""
@@ -33,8 +37,6 @@ class SessionSerializer(serializers.Serializer):
             extra_fields = ["user_agent", "ip_address", "created_at", "last_active"]
 
             for field in extra_fields:
-                field_value = session_data.get(field)
-                if field_value:
-                    representation[field] = field_value
+                representation[field] = session_data.get(field)
 
         return representation

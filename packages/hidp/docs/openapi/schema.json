@@ -6,6 +6,34 @@
         "description": "Hello, ID Please"
     },
     "paths": {
+        "/api/sessions/": {
+            "get": {
+                "operationId": "sessions_list",
+                "tags": [
+                    "sessions"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Session"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/sessions/{id}/": {
             "delete": {
                 "operationId": "sessions_destroy",
@@ -204,6 +232,44 @@
                         "title": "Email address"
                     }
                 }
+            },
+            "Session": {
+                "type": "object",
+                "properties": {
+                    "session_key": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "user_agent": {
+                        "type": "string",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "ip_address": {
+                        "type": "string",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "last_active": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "ip_address",
+                    "last_active",
+                    "session_key",
+                    "user_agent"
+                ]
             },
             "User": {
                 "type": "object",
