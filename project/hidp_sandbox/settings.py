@@ -96,6 +96,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django_otp.middleware.OTPMiddleware",
+    "hidp.api.middleware.AugmentSessionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hidp.rate_limit.middleware.RateLimitMiddleware",
