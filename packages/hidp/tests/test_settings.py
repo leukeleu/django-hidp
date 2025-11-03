@@ -69,6 +69,7 @@ MIDDLEWARE = [
     "hidp.rate_limit.middleware.RateLimitMiddleware",
     "hidp.oidc_provider.middleware.UiLocalesMiddleware",
     "django_otp.middleware.OTPMiddleware",
+    "hidp.api.middleware.AugmentSessionMiddleware",
 ]
 
 REST_FRAMEWORK = {

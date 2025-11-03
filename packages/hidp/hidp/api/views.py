@@ -19,7 +19,6 @@ from django.http import Http404
 from .serializers import SessionSerializer, UserSerializer
 
 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
-SessionStoreModel = SessionStore().model
 
 UserModel = get_user_model()
 
@@ -81,9 +80,11 @@ class SessionViewSet(
         return session
 
     def get_queryset(self):
+        session_store_model = SessionStore().model
+
         return [
             session
-            for session in SessionStoreModel.objects.all()
+            for session in session_store_model.objects.all()
             if session.get_decoded().get("_auth_user_id") == str(self.request.user.pk)
         ]
 
