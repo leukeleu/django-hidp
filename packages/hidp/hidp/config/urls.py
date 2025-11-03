@@ -29,5 +29,9 @@ if all(
 if apps.is_installed("hidp.oidc_provider"):
     urlpatterns += [
         path("o/", include("hidp.oidc_provider.urls")),
+    ]
+
+if apps.is_installed("hidp.api"):
+    urlpatterns += [
         path("api/", include("hidp.api.urls")),
     ]
