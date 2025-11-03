@@ -243,7 +243,6 @@ class TestSessionViewSet(APITestCase):
 
         with self.subTest("Client 1 can delete session of client 2"):
             self.assertEqual(204, delete_response.status_code)
-            # TODO: check "OK" in body response
 
             self.assertEqual(200, self.client.get(self.user_info_url).status_code)
             self.assertEqual(403, self.client2.get(self.user_info_url).status_code)
@@ -252,7 +251,6 @@ class TestSessionViewSet(APITestCase):
 
         with self.subTest("Client 1 can remove their own session"):
             self.assertEqual(204, delete_response.status_code)
-            # TODO: check "OK" in body response
 
             self.assertEqual(403, self.client.get(self.user_info_url).status_code)
             self.assertEqual(403, self.client2.get(self.user_info_url).status_code)
