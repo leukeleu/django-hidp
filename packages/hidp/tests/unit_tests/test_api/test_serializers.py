@@ -48,7 +48,7 @@ class TestLoginSerializer(TestCase):
 
         with self.subTest("User provides invalid email"):
             serializer = self.make_serializer(
-                username="wrong_email@email.com",
+                username="WrongEmail@email.com",
                 password="P@ssw0rd!",
                 grant=LoginGrant.SESSION,
             )

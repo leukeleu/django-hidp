@@ -73,3 +73,45 @@ class TestLoginView(APITestCase):
         self.assertEqual(session["_auth_user_id"], str(self.verified_user.id))
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_login_invalid_credentials(self):
+        """
+        Verify behavior when logging in an user with invalid credentials.
+
+        - No session cookies are set
+        - An email verification email is not sent
+        - The response status code is 401 Unauthorized
+        """
+        with self.subTest("User provides invalid password"):
+            response = self.client.post(
+                self.url,
+                data={
+                    "username": self.verified_user.email,
+                    "password": "WrongPassword!",
+                    "grant": LoginGrant.SESSION,
+                },
+            )
+
+            cookies = response.cookies
+            self.assertNotIn("sessionid", cookies)
+            self.assertNotIn("csrftoken", cookies)
+
+            self.assertEqual(len(mail.outbox), 0)
+            self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+
+        with self.subTest("User provides invalid email"):
+            response = self.client.post(
+                self.url,
+                data={
+                    "username": "WrongEmail@email.com",
+                    "password": "P@ssw0rd!",
+                    "grant": LoginGrant.SESSION,
+                },
+            )
+
+            cookies = response.cookies
+            self.assertNotIn("sessionid", cookies)
+            self.assertNotIn("csrftoken", cookies)
+
+            self.assertEqual(len(mail.outbox), 0)
+            self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
