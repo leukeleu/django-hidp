@@ -203,28 +203,18 @@
                 "type": "object",
                 "properties": {
                     "username": {
-                        "type": "string"
+                        "type": "string",
+                        "writeOnly": true
                     },
                     "password": {
-                        "type": "string"
-                    },
-                    "login_type": {
-                        "$ref": "#/components/schemas/LoginTypeEnum"
+                        "type": "string",
+                        "writeOnly": true
                     }
                 },
                 "required": [
-                    "login_type",
                     "password",
                     "username"
                 ]
-            },
-            "LoginTypeEnum": {
-                "enum": [
-                    "session",
-                    "bearer"
-                ],
-                "type": "string",
-                "description": "* `session` - Session\n* `bearer` - Bearer"
             },
             "PatchedUser": {
                 "type": "object",

@@ -4,8 +4,6 @@ from django.contrib.auth import authenticate, get_user_model
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_variables
 
-from .constants import LoginType
-
 UserModel = get_user_model()
 
 
@@ -27,7 +25,6 @@ class UserSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
-    login_type = serializers.ChoiceField(choices=LoginType.choices)
 
     def validate(self, attrs):
         user = authenticate(

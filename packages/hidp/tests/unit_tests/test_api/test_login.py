@@ -6,7 +6,6 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.core import mail
 from django.urls import reverse
 
-from hidp.api.constants import LoginType
 from hidp.test.factories.user_factories import UserFactory, VerifiedUserFactory
 
 
@@ -36,7 +35,6 @@ class TestLoginView(APITestCase):
             data={
                 "username": self.unverified_user.email,
                 "password": "P@ssw0rd!",
-                "login_type": LoginType.SESSION,
             },
         )
 
@@ -61,7 +59,6 @@ class TestLoginView(APITestCase):
             data={
                 "username": self.verified_user.email,
                 "password": "P@ssw0rd!",
-                "login_type": LoginType.SESSION,
             },
         )
 
@@ -88,7 +85,6 @@ class TestLoginView(APITestCase):
                 data={
                     "username": self.verified_user.email,
                     "password": "WrongPassword!",
-                    "login_type": LoginType.SESSION,
                 },
             )
 
@@ -105,7 +101,6 @@ class TestLoginView(APITestCase):
                 data={
                     "username": "WrongEmail@email.com",
                     "password": "P@ssw0rd!",
-                    "login_type": LoginType.SESSION,
                 },
             )
 

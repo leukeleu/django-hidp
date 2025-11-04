@@ -18,9 +18,8 @@ from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 
-from hidp.accounts.auth import login
+from hidp.accounts import auth as hidp_auth
 from hidp.accounts.mailers import EmailVerificationMailer
-from hidp.api.constants import LoginType
 
 from .serializers import LoginSerializer, UserSerializer
 
@@ -79,19 +78,15 @@ class LoginView(GenericAPIView):
 
         # User is authenticated and is allowed to log in.
         user = serializer.validated_data["user"]
-        login_type = serializer.validated_data["login_type"]
 
         # Only log in the user if their email address has been verified.
         if user.email_verified:
-            if login_type == LoginType.SESSION:
-                login(request, user)
-                return Response({}, status=HTTPStatus.OK)
-            elif login_type == LoginType.BEARER:
-                raise NotImplementedError
+            hidp_auth.login(request, user)
+            return Response(status=HTTPStatus.OK)
 
         # If the user's email address is not verified, send a verification email.
         self.verification_mailer(
             user,
             base_url=request.build_absolute_uri("/"),
         ).send()
-        return Response({}, status=HTTPStatus.UNAUTHORIZED)
+        return Response(status=HTTPStatus.UNAUTHORIZED)
