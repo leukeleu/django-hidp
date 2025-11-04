@@ -80,7 +80,7 @@ class TestLoginView(APITestCase):
 
         - No session cookies are set
         - An email verification email is not sent
-        - The response status code is 401 Unauthorized
+        - The response status code is 400 Bad Request
         """
         with self.subTest("User provides invalid password"):
             response = self.client.post(
@@ -97,7 +97,7 @@ class TestLoginView(APITestCase):
             self.assertNotIn("csrftoken", cookies)
 
             self.assertEqual(len(mail.outbox), 0)
-            self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+            self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
         with self.subTest("User provides invalid email"):
             response = self.client.post(
@@ -114,4 +114,4 @@ class TestLoginView(APITestCase):
             self.assertNotIn("csrftoken", cookies)
 
             self.assertEqual(len(mail.outbox), 0)
-            self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+            self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
