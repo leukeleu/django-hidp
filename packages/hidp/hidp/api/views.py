@@ -20,7 +20,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 from hidp.accounts.auth import login
 from hidp.accounts.mailers import EmailVerificationMailer
-from hidp.api.constants import LoginGrant
+from hidp.api.constants import LoginType
 
 from .serializers import LoginSerializer, UserSerializer
 
@@ -79,14 +79,14 @@ class LoginView(GenericAPIView):
 
         # User is authenticated and is allowed to log in.
         user = serializer.validated_data["user"]
-        grant = serializer.validated_data["grant"]
+        login_type = serializer.validated_data["login_type"]
 
         # Only log in the user if their email address has been verified.
         if user.email_verified:
-            if grant == LoginGrant.SESSION:
+            if login_type == LoginType.SESSION:
                 login(request, user)
                 return Response({}, status=HTTPStatus.OK)
-            elif grant == LoginGrant.BEARER:
+            elif login_type == LoginType.BEARER:
                 raise NotImplementedError
 
         # If the user's email address is not verified, send a verification email.
