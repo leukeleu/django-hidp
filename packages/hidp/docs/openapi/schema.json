@@ -6,9 +6,49 @@
         "description": "Hello, ID Please"
     },
     "paths": {
+        "/api/login/": {
+            "post": {
+                "operationId": "login_create",
+                "tags": [
+                    "login"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Login"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/users/{id}/": {
             "get": {
-                "operationId": "api_users_retrieve",
+                "operationId": "users_retrieve",
                 "parameters": [
                     {
                         "in": "path",
@@ -24,7 +64,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "security": [
                     {
@@ -45,7 +85,7 @@
                 }
             },
             "put": {
-                "operationId": "api_users_update",
+                "operationId": "users_update",
                 "parameters": [
                     {
                         "in": "path",
@@ -61,7 +101,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "requestBody": {
                     "content": {
@@ -102,7 +142,7 @@
                 }
             },
             "patch": {
-                "operationId": "api_users_partial_update",
+                "operationId": "users_partial_update",
                 "parameters": [
                     {
                         "in": "path",
@@ -116,7 +156,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "requestBody": {
                     "content": {
@@ -159,6 +199,33 @@
     },
     "components": {
         "schemas": {
+            "Login": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    },
+                    "login_type": {
+                        "$ref": "#/components/schemas/LoginTypeEnum"
+                    }
+                },
+                "required": [
+                    "login_type",
+                    "password",
+                    "username"
+                ]
+            },
+            "LoginTypeEnum": {
+                "enum": [
+                    "session",
+                    "bearer"
+                ],
+                "type": "string",
+                "description": "* `session` - Session\n* `bearer` - Bearer"
+            },
             "PatchedUser": {
                 "type": "object",
                 "properties": {
