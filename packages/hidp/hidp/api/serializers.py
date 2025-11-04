@@ -25,8 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 @method_decorator(sensitive_variables(), name="validate")
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+    username = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
     login_type = serializers.ChoiceField(choices=LoginType.choices)
 
     def validate(self, attrs):
