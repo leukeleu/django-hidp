@@ -20,7 +20,7 @@ New user creation is handled by the `UserCreationForm`, which builds upon Django
 
 - A `TermsOfServiceMixin` is included to ensure users agree to your Terms of Service before they can create an account. See [Terms of Service](project:terms-of-service.md) for instructions on how to disable this.
 
-The password is validated using the validators configured in `settings.AUTH_PASSWORD_VALIDATORS`. See [Password Validators](project:password-validators.md) on custom HIdP password validators.
+The password is validated using the validators configured in `settings.AUTH_PASSWORD_VALIDATORS`. See [Password Validation](project:password-validation.md) on custom HIdP password validators.
 
 ### Verification email
 
@@ -32,7 +32,7 @@ The verification link contains a signed hash of the user's email, with a timesta
 
 If the form contains an email that is already registered, a different email is sent to notify the user that an attempt was made to create an account using their email address.
 
-See [verification email templates](project:templates.md#accounts-verification-email) on which templates are used.
+See [verification email templates](project:templates.md#accountsverificationemail) on which templates are used.
 
 ## Registration via OpenID Connect
 

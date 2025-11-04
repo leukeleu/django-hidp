@@ -1,0 +1,22 @@
+# This compose file can be used to locally build the redoc API documentation
+
+x-logging:
+  &default-logging
+  options:
+    # Keep the logging history short
+    max-size: "1m"
+    max-file: "1"
+
+services:
+
+  redoc-build:
+    # use the image provided by redocly so docker can cache it and
+    # the build is fast to run
+    image: 'redocly/cli'
+    restart: 'no'
+    volumes:
+      - './packages/hidp:/hidp'
+    working_dir: '/hidp'
+    command: 'build-docs ./docs/openapi/schema.json -o ./docs/_build/html/redoc-static.html'
+    stdin_open: true
+    tty: true

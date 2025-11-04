@@ -68,7 +68,7 @@ extend = "../hidp-pycqa/pyproject.toml"
 "hidp/config/*" = [
   "N803", # ALL_UPPERCASE is OK in config code
 ]
-"docs/conf.py" = [
+"docs/sphinx/conf.py" = [
   "INP001", # Not a package
 ]
 

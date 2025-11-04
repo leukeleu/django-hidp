@@ -15,7 +15,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        fields = ["first_name", "last_name"]
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+        ]
+        read_only_fields = ["email"]
 
 
 @method_decorator(sensitive_variables(), name="validate")

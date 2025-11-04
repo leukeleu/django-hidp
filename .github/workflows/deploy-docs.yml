@@ -28,8 +28,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Build documentation
+      - name: Build sphinx documentation
         uses: ./.github/actions/build-hidp-docs
+
+      - name: Build API documentation
+        uses: ./.github/actions/build-api-docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

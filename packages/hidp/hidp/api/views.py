@@ -1,5 +1,11 @@
 from http import HTTPStatus
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    extend_schema,
+    extend_schema_view,
+)
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework import mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
@@ -21,6 +27,30 @@ from .serializers import LoginSerializer, UserSerializer
 UserModel = get_user_model()
 
 
+@extend_schema_view(
+    retrieve=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                type=OpenApiTypes.STR,
+                enum=["me"],
+                location="path",
+                description="Key identifying user, can only have value `me`.",
+            ),
+        ]
+    ),
+    update=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                type=OpenApiTypes.STR,
+                enum=["me"],
+                location="path",
+                description="Key identifying user, can only have value `me`.",
+            ),
+        ]
+    ),
+)
 class UserViewSet(
     mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
 ):
