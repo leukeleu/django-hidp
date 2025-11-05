@@ -33,15 +33,11 @@
                     "required": true
                 },
                 "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Login"
-                                }
-                            }
-                        },
-                        "description": ""
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "401": {
+                        "description": "No response body"
                     }
                 }
             }

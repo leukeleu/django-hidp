@@ -66,6 +66,14 @@ class UserViewSet(
 
 
 @method_decorator(sensitive_post_parameters("username", "password"), name="dispatch")
+@extend_schema_view(
+    post=extend_schema(
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+            HTTPStatus.UNAUTHORIZED: None,
+        },
+    )
+)
 class LoginView(GenericAPIView):
     permission_classes = []
     authentication_classes = []
@@ -82,7 +90,7 @@ class LoginView(GenericAPIView):
         # Only log in the user if their email address has been verified.
         if user.email_verified:
             hidp_auth.login(request, user)
-            return Response(status=HTTPStatus.OK)
+            return Response(status=HTTPStatus.NO_CONTENT)
 
         # If the user's email address is not verified, send a verification email.
         self.verification_mailer(
