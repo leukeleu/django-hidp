@@ -13,7 +13,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path(
         "email-change/",
-        EmailChangeView.as_view({"post": "create"}),
+        EmailChangeView.as_view({"post": "create", "delete": "destroy"}),
         name="email_change",
     ),
 ]

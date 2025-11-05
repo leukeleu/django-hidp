@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
@@ -13,6 +15,10 @@ from rest_framework.response import Response
 
 from django.contrib.auth import get_user_model
 from django.http import Http404
+from django.utils import timezone
+
+from hidp.accounts import tokens
+from hidp.accounts.models import EmailChangeRequest
 
 from .serializers import (
     EmailChangeConfirmSerializer,
@@ -69,10 +75,34 @@ class EmailChangeView(
     permission_classes = [IsAuthenticated]
     serializer_class = EmailChangeSerializer
 
-    def get_object(self, queryset=None):
-        # TODO: for canceling/deleting email change requests implement equivalent of
-        # hidp/accounts/views.py:EmailChangeCancelView.get_object()
-        pass
+    def get_object(self):
+        """
+        Get the email change request to cancel.
+
+        But only if there is a request for the current user that has not been confirmed
+        by both the current and proposed email addresses, and has not expired.
+        """
+        change_request = (
+            EmailChangeRequest.objects.filter(
+                user=self.request.user,
+                created_at__gte=(
+                    timezone.now()
+                    - timedelta(
+                        seconds=tokens.email_change_token_generator.token_timeout
+                    )
+                ),
+            )
+            .exclude(
+                confirmed_by_current_email=True,
+                confirmed_by_proposed_email=True,
+            )
+            .first()
+        )
+
+        if not change_request:
+            raise Http404
+
+        return change_request
 
     def perform_create(self, serializer):
         self.created_instance = serializer.save()
