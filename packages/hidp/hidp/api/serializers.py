@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import get_user_model
+from hidp.accounts import auth as hidp_auth
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_variables
 
@@ -27,7 +28,7 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        user = authenticate(
+        user = hidp_auth.authenticate(
             request=self.context.get("request"),
             username=attrs.get("username"),
             password=attrs.get("password"),
