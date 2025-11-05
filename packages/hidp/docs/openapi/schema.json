@@ -6,9 +6,80 @@
         "description": "Hello, ID Please"
     },
     "paths": {
+        "/api/password-reset/": {
+            "post": {
+                "operationId": "password_reset_create",
+                "tags": [
+                    "password-reset"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/password-reset/confirm/": {
+            "post": {
+                "operationId": "password_reset_confirm_create",
+                "tags": [
+                    "password-reset"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmation"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmation"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmation"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/users/{id}/": {
             "get": {
-                "operationId": "api_users_retrieve",
+                "operationId": "users_retrieve",
                 "parameters": [
                     {
                         "in": "path",
@@ -24,7 +95,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "security": [
                     {
@@ -45,7 +116,7 @@
                 }
             },
             "put": {
-                "operationId": "api_users_update",
+                "operationId": "users_update",
                 "parameters": [
                     {
                         "in": "path",
@@ -61,7 +132,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "requestBody": {
                     "content": {
@@ -102,7 +173,7 @@
                 }
             },
             "patch": {
-                "operationId": "api_users_partial_update",
+                "operationId": "users_partial_update",
                 "parameters": [
                     {
                         "in": "path",
@@ -116,7 +187,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "requestBody": {
                     "content": {
@@ -159,6 +230,33 @@
     },
     "components": {
         "schemas": {
+            "PasswordResetConfirmation": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "new_password": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "new_password",
+                    "token"
+                ]
+            },
+            "PasswordResetRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
             "PatchedUser": {
                 "type": "object",
                 "properties": {
