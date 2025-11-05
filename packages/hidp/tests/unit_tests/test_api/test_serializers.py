@@ -1,0 +1,108 @@
+from rest_framework import exceptions as rest_framework_exceptions
+
+from django.contrib.auth.tokens import default_token_generator
+from django.test import RequestFactory, TestCase, override_settings
+from django.urls import reverse
+
+from hidp.api.serializers import (
+    PasswordResetConfirmationSerializer,
+    PasswordResetRequestSerializer,
+)
+from hidp.test.factories.user_factories import UserFactory
+
+
+class TestPasswordResetRequestSerializer(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.factory = RequestFactory()
+        cls.url = reverse("api:password_reset_request")
+        cls.user = UserFactory()
+
+    def make_serializer(self, email):
+        data = {"email": email}
+        request = self.factory.post(self.url, data=data)
+        return PasswordResetRequestSerializer(
+            data=data, context={"request": request, "user": self.user}
+        )
+
+    def test_serializer_valid_email_active_user(self):
+        """Verify that a valid email from an active user adds the user to validated data."""  # noqa: E501, W505
+        serializer = self.make_serializer(email=self.user.email)
+
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(serializer.validated_data["user"], self.user)
+
+    def test_serializer_valid_email_inactive_user(self):
+        """Verify that a valid email from an inactive user results in user being None in validated data."""  # noqa: E501, W505
+        self.user.is_active = False
+        self.user.save()
+        serializer = self.make_serializer(email=self.user.email)
+
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(serializer.validated_data["user"], None)
+
+    def test_serializer_invalid_email(self):
+        """Tests that an invalid email results in user being None in validated data."""
+        serializer = self.make_serializer(email="invalid@example.com")
+
+        self.assertTrue(serializer.is_valid())
+        self.assertEqual(serializer.validated_data["user"], None)
+
+
+class TestPasswordResetConfirmationSerializer(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.factory = RequestFactory()
+        cls.url = reverse("api:password_reset_confirm")
+        cls.user = UserFactory()
+
+    def make_serializer(self, token, new_password):
+        data = {"token": token, "new_password": new_password}
+        request = self.factory.post(self.url, data=data)
+        # PasswordResetConfirmationSerializer requires a 'request.user' in context
+        request.user = self.user
+        return PasswordResetConfirmationSerializer(
+            data=data, context={"request": request}
+        )
+
+    def test_serializer_valid_data(self):
+        """Tests that valid token and password pass validation."""
+        token = default_token_generator.make_token(self.user)
+        serializer = self.make_serializer(token=token, new_password="NewP@ssw0rd!")
+
+        self.assertTrue(serializer.is_valid())
+
+    def test_serializer_invalid_token(self):
+        """Tests that an invalid token raises a ValidationError."""
+        serializer = self.make_serializer(
+            token="invalid-token", new_password="NewP@ssw0rd!"
+        )
+
+        with self.assertRaises(rest_framework_exceptions.ValidationError):
+            serializer.is_valid(raise_exception=True)
+
+        errors = serializer.errors["token"]
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(str(errors[0]), "Invalid or expired token.")
+
+    @override_settings(
+        AUTH_PASSWORD_VALIDATORS=[
+            {
+                "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",  # noqa: E501
+                "OPTIONS": {
+                    "min_length": 10,
+                },
+            }
+        ]
+    )
+    def test_serializer_invalid_password(self):
+        """Tests that an invalid password raises a ValidationError."""
+        token = default_token_generator.make_token(self.user)
+        serializer = self.make_serializer(token=token, new_password="tooshort")
+
+        with self.assertRaises(rest_framework_exceptions.ValidationError):
+            serializer.is_valid(raise_exception=True)
+
+        errors = serializer.errors["new_password"]
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(str(errors[0]), "Password does not meet requirements.")
