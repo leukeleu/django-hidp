@@ -5,14 +5,20 @@ from drf_spectacular.utils import (
     extend_schema_view,
 )
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from django.contrib.auth import get_user_model
 from django.http import Http404
 
-from .serializers import UserSerializer
+from .serializers import (
+    EmailChangeConfirmSerializer,
+    EmailChangeSerializer,
+    UserSerializer,
+)
 
 UserModel = get_user_model()
 
@@ -54,3 +60,41 @@ class UserViewSet(
         if self.kwargs.get(self.lookup_url_kwarg or self.lookup_field) == "me":
             return self.request.user
         raise Http404
+
+
+class EmailChangeView(
+    mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
+):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = EmailChangeSerializer
+
+    def get_object(self, queryset=None):
+        # TODO: for canceling/deleting email change requests implement equivalent of
+        # hidp/accounts/views.py:EmailChangeCancelView.get_object()
+        pass
+
+    def perform_create(self, serializer):
+        self.created_instance = serializer.save()
+
+    def create(self, request, *args, **kwargs):
+        super().create(request, *args, **kwargs)
+        self.send_mail(self.created_instance)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+    def send_mail(self, email_change_request):
+        # TODO: for requesting email change implement equivalent of
+        # hidp/accounts/views.py:EmailChangeRequestView.send_email()
+        pass
+
+
+class EmailChangeConfirmView(GenericAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = EmailChangeConfirmSerializer
+
+    def post(self, request, *args, **kwargs):
+        # TODO: for confirming email change implement equivalent of
+        # hidp/accounts/views.py:EmailChangeConfirmView.form_valid()
+        pass

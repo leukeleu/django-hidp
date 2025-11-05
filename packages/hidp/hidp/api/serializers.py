@@ -1,6 +1,10 @@
 from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.utils.translation import gettext_lazy as _
+
+from hidp.accounts.models import EmailChangeRequest
 
 UserModel = get_user_model()
 
@@ -17,3 +21,69 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
         ]
         read_only_fields = ["email"]
+
+
+class EmailChangeSerializer(serializers.Serializer):
+    proposed_email = serializers.EmailField(
+        write_only=True, required=True, max_length=254
+    )
+    password = serializers.CharField(write_only=True, required=True)
+
+    def validate_password(self, value):
+        """
+        Validate the password.
+
+        Returns the password if it is correct, otherwise raises a `ValidationError`.
+        """
+        user = self.context.get("request").user
+
+        if not user.check_password(value):
+            raise serializers.ValidationError(
+                _("The password is incorrect."), code="authorization"
+            )
+
+        return value
+
+    def validate_proposed_email(self, value):
+        """
+        Validate the proposed email address.
+
+        Returns the proposed email address if it is different from the current email
+        address of the user, otherwise raises a `ValidationError`.
+        """
+        user = self.context.get("request").user
+
+        if value == user.email:
+            raise serializers.ValidationError(
+                _("The new email address is the same as the current email address.")
+            )
+
+        return value
+
+    def create(self, validated_data):
+        """
+        Create an email change request.
+
+        Replaces any existing email change requests for the user.
+
+        Returns:
+            The email change request.
+        """
+        user = self.context.get("request").user
+
+        instance = EmailChangeRequest(proposed_email=validated_data["proposed_email"])
+        instance.user = user
+        instance.current_email = user.email
+
+        with transaction.atomic():
+            # Remove existing email change requests for the user, if any.
+            EmailChangeRequest.objects.filter(user=user).delete()
+            instance.save()
+
+        return instance
+
+
+class EmailChangeConfirmSerializer(serializers.Serializer):
+    # TODO: for confirming email change implement equivalent of
+    # hidp/accounts/views.py:EmailChangeConfirmForm.save()
+    pass
