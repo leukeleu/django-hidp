@@ -1,10 +1,11 @@
 from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
-from hidp.accounts import auth as hidp_auth
 from django.utils.decorators import method_decorator
-from django.views.decorators.debug import sensitive_variables
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.debug import sensitive_variables
+
+from hidp.accounts import auth as hidp_auth
 
 UserModel = get_user_model()
 
