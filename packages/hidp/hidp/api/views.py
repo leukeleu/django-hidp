@@ -143,6 +143,7 @@ class EmailChangeView(
             mailers.ProposedEmailExistsMailer(
                 **mailer_kwargs,
                 recipient=Recipient.PROPOSED_EMAIL,
+                cancel_url=settings.EMAIL_CHANGE_CANCEL_URL,
             ).send()
 
         mailers.EmailChangeRequestMailer(
