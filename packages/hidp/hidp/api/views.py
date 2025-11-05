@@ -17,7 +17,8 @@ from django.contrib.auth import get_user_model
 from django.http import Http404
 from django.utils import timezone
 
-from hidp.accounts import tokens
+from hidp.accounts import mailers, tokens
+from hidp.accounts.email_change import Recipient
 from hidp.accounts.models import EmailChangeRequest
 
 from .serializers import (
@@ -114,9 +115,37 @@ class EmailChangeView(
         return Response(status=status.HTTP_201_CREATED)
 
     def send_mail(self, email_change_request):
-        # TODO: for requesting email change implement equivalent of
-        # hidp/accounts/views.py:EmailChangeRequestView.send_email()
-        pass
+        """Send the email change confirmation emails."""
+        mailer_kwargs = {
+            "user": self.request.user,
+            "email_change_request": email_change_request,
+            "base_url": self.request.build_absolute_uri("/"),
+        }
+        mailers.EmailChangeRequestMailer(
+            **mailer_kwargs,
+            recipient=Recipient.CURRENT_EMAIL,
+        ).send()
+
+        existing_user = UserModel.objects.filter(
+            email__iexact=email_change_request.proposed_email
+        ).first()
+
+        if existing_user and not existing_user.is_active:
+            # Do nothing if the user exists but is not active.
+            return
+
+        if existing_user:
+            # Send an email to the proposed email address to inform them that
+            # an account with this email address already exists.
+            mailers.ProposedEmailExistsMailer(
+                **mailer_kwargs,
+                recipient=Recipient.PROPOSED_EMAIL,
+            ).send()
+
+        mailers.EmailChangeRequestMailer(
+            **mailer_kwargs,
+            recipient=Recipient.PROPOSED_EMAIL,
+        ).send()
 
 
 class EmailChangeConfirmView(GenericAPIView):
