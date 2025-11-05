@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from hidp.accounts import auth as hidp_auth
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_variables
+from django.utils.translation import gettext_lazy as _
 
 UserModel = get_user_model()
 
@@ -35,7 +36,7 @@ class LoginSerializer(serializers.Serializer):
         )
         if not user:
             raise serializers.ValidationError(
-                "Could not authenticate", code="authorization"
+                _("Could not authenticate"), code="authorization"
             )
         attrs["user"] = user
         return attrs
