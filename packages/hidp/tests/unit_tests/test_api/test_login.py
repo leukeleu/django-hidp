@@ -29,6 +29,7 @@ class TestLoginView(APITestCase):
         - No session cookies are set
         - An email verification email is sent
         - The response status code is 401 Unauthorized
+        - The response is empty
         """
         response = self.client.post(
             self.url,
@@ -45,6 +46,7 @@ class TestLoginView(APITestCase):
         self.assertEqual(len(mail.outbox), 1)
 
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        self.assertIsNone(response.data)
 
     def test_valid_login_verified_email(self):
         """
@@ -52,7 +54,8 @@ class TestLoginView(APITestCase):
 
         - Session cookies are set
         - The session contains the correct user ID
-        - The response status code is 200 OK
+        - The response status code is 204 No Content
+        - The response is empty
         """
         response = self.client.post(
             self.url,
@@ -68,8 +71,8 @@ class TestLoginView(APITestCase):
 
         session = SessionStore(session_key=cookies["sessionid"].value)
         self.assertEqual(session["_auth_user_id"], str(self.verified_user.id))
-
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
+        self.assertIsNone(response.data)
 
     def test_login_invalid_credentials(self):
         """
@@ -78,6 +81,7 @@ class TestLoginView(APITestCase):
         - No session cookies are set
         - An email verification email is not sent
         - The response status code is 400 Bad Request
+        - The response contains the correct error message
         """
         with self.subTest("User provides invalid password"):
             response = self.client.post(
@@ -94,6 +98,9 @@ class TestLoginView(APITestCase):
 
             self.assertEqual(len(mail.outbox), 0)
             self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+            errors = response.data["non_field_errors"]
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(str(errors[0]), "Could not authenticate")
 
         with self.subTest("User provides invalid email"):
             response = self.client.post(
@@ -110,3 +117,6 @@ class TestLoginView(APITestCase):
 
             self.assertEqual(len(mail.outbox), 0)
             self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+            errors = response.data["non_field_errors"]
+            self.assertEqual(len(errors), 1)
+            self.assertEqual(str(errors[0]), "Could not authenticate")
