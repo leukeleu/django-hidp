@@ -252,28 +252,43 @@ class EmailChangeRequestMailer(BaseMailer):
     email_template_name = "hidp/accounts/management/email/email_change_body.txt"
     html_email_template_name = "hidp/accounts/management/email/email_change_body.html"
 
-    def __init__(self, user, *, base_url, email_change_request, recipient):
+    def __init__(
+        self,
+        user,
+        *,
+        base_url,
+        email_change_request,
+        recipient,
+        confirmation_url_template=None,
+        cancel_url=None,
+    ):
         super().__init__(base_url=base_url)
         self.user = user
         self.email_change_request = email_change_request
         self.recipient = recipient
+        self.confirmation_url_template = confirmation_url_template
+        self.cancel_url = cancel_url
 
     def get_confirmation_url(self):
+        token = tokens.email_change_token_generator.make_token(
+            str(self.email_change_request.pk), self.recipient
+        )
+
+        if self.confirmation_url_template:
+            return self.confirmation_url_template.format(token=token)
+
         return urljoin(
             self.base_url,
             reverse(
                 "hidp_account_management:email_change_confirm",
-                kwargs={
-                    "token": (
-                        tokens.email_change_token_generator.make_token(
-                            str(self.email_change_request.pk), self.recipient
-                        )
-                    )
-                },
+                kwargs={"token": token},
             ),
         )
 
     def get_cancel_url(self):
+        if self.cancel_url:
+            return self.cancel_url
+
         return urljoin(
             self.base_url,
             reverse("hidp_account_management:email_change_cancel"),

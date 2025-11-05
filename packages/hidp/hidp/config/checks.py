@@ -1,5 +1,6 @@
 import importlib
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import checks
@@ -39,6 +40,11 @@ REQUIRED_MIDDLEWARE = [
 ]
 
 OTP_REQUIRED_MIDDLEWARE = "django_otp.middleware.OTPMiddleware"
+
+API_REQUIRED_EMAIL_URL_SETTINGS = [
+    "EMAIL_CHANGE_CONFIRMATION_URL",
+    "EMAIL_CHANGE_CANCEL_URL",
+]
 
 
 class Tags:
@@ -213,6 +219,45 @@ def check_otp_middleware(**kwargs):
     ):
         return [E010]
     return []
+
+
+# Ensure required API settings are set if API is installed
+E011 = checks.Error(
+    "API is enabled but email url settings are missing.",
+    hint=(
+        "Add the following settings with the corresponding URL/URL template"
+        f" values: {', '.join(API_REQUIRED_EMAIL_URL_SETTINGS)}"
+    ),
+    id="hidp.E011",
+)
+
+# Ensure urls that should contain a token have a replacement field for it
+E012 = checks.Error(
+    "URLs that should contain a token don't have a replacement field for it.",
+    hint="Add a replacement field (`{token}`) in the URL string.",
+    id="hidp.E012",
+)
+
+
+@checks.register(Tags.settings)
+def check_api_email_url_settings(**kwargs):
+    if not apps.is_installed("hidp.api"):
+        return []
+
+    errors = []
+
+    if not getattr(settings, "EMAIL_CHANGE_CONFIRMATION_URL", None) or not getattr(
+        settings, "EMAIL_CHANGE_CANCEL_URL", None
+    ):
+        errors.append(E011)
+
+    if (
+        getattr(settings, "EMAIL_CHANGE_CONFIRMATION_URL", None)
+        and "{token}" not in settings.EMAIL_CHANGE_CONFIRMATION_URL
+    ):
+        errors.append(E012)
+
+    return errors
 
 
 # If django-otp is installed but hidp.otp is not, show a warning

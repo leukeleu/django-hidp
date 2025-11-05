@@ -13,6 +13,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import Http404
 from django.utils import timezone
@@ -124,6 +125,8 @@ class EmailChangeView(
         mailers.EmailChangeRequestMailer(
             **mailer_kwargs,
             recipient=Recipient.CURRENT_EMAIL,
+            confirmation_url_template=settings.EMAIL_CHANGE_CONFIRMATION_URL,
+            cancel_url=settings.EMAIL_CHANGE_CANCEL_URL,
         ).send()
 
         existing_user = UserModel.objects.filter(
@@ -145,6 +148,8 @@ class EmailChangeView(
         mailers.EmailChangeRequestMailer(
             **mailer_kwargs,
             recipient=Recipient.PROPOSED_EMAIL,
+            confirmation_url_template=settings.EMAIL_CHANGE_CONFIRMATION_URL,
+            cancel_url=settings.EMAIL_CHANGE_CANCEL_URL,
         ).send()
 
 
