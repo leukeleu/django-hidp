@@ -167,6 +167,14 @@ msgstr "Registreer met {provider}"
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
+#: hidp/api/serializers.py
+msgid "Invalid or expired token."
+msgstr ""
+
+#: hidp/api/serializers.py
+msgid "Password does not meet requirements."
+msgstr ""
+
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
 msgstr "Ja, ik wil dit account koppelen"

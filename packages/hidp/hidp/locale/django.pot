@@ -166,6 +166,14 @@ msgstr ""
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr ""
 
+#: hidp/api/serializers.py
+msgid "Invalid or expired token."
+msgstr ""
+
+#: hidp/api/serializers.py
+msgid "Password does not meet requirements."
+msgstr ""
+
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
 msgstr ""
