@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APITestCase
 
 from django.contrib.sessions.backends.db import SessionStore
 from django.core import mail
@@ -13,7 +13,6 @@ class TestLoginView(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.url = reverse("api:login")
-        cls.client = APIClient(enforce_csrf_checks=True)
         cls.unverified_user = UserFactory()
         cls.verified_user = VerifiedUserFactory()
 
