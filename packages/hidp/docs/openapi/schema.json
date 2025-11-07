@@ -6,9 +6,28 @@
         "description": "Hello, ID Please"
     },
     "paths": {
+        "/api/logout/": {
+            "post": {
+                "operationId": "logout_create",
+                "description": "Logs out the user, regardless of whether a user is logged in.\n\nEnforces that a CSRF token is provided.",
+                "tags": [
+                    "logout"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/users/{id}/": {
             "get": {
-                "operationId": "api_users_retrieve",
+                "operationId": "users_retrieve",
                 "parameters": [
                     {
                         "in": "path",
@@ -24,7 +43,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "security": [
                     {
@@ -45,7 +64,7 @@
                 }
             },
             "put": {
-                "operationId": "api_users_update",
+                "operationId": "users_update",
                 "parameters": [
                     {
                         "in": "path",
@@ -61,7 +80,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "requestBody": {
                     "content": {
@@ -102,7 +121,7 @@
                 }
             },
             "patch": {
-                "operationId": "api_users_partial_update",
+                "operationId": "users_partial_update",
                 "parameters": [
                     {
                         "in": "path",
@@ -116,7 +135,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "requestBody": {
                     "content": {

@@ -62,6 +62,14 @@ class UserViewSet(
         raise Http404
 
 
+@extend_schema_view(
+    post=extend_schema(
+        request=None,
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+        },
+    )
+)
 class LogoutView(CSRFProtectedAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = []
