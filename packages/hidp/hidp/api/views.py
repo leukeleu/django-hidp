@@ -5,6 +5,7 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     extend_schema,
     extend_schema_view,
+    inline_serializer,
 )
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework import mixins, viewsets
@@ -13,6 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import BooleanField
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -102,6 +104,18 @@ class LoginView(GenericAPIView):
         return Response(status=HTTPStatus.UNAUTHORIZED)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        responses={
+            HTTPStatus.OK: inline_serializer(
+                name="GetEmailVerifiedResponse",
+                fields={
+                    "email_verified": BooleanField(),
+                },
+            )
+        },
+    )
+)
 class EmailVerifiedView(GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
@@ -112,6 +126,12 @@ class EmailVerifiedView(GenericAPIView):
         )
 
 
+@extend_schema_view(
+    post=extend_schema(
+        request=None,
+        responses={HTTPStatus.NO_CONTENT: None},
+    ),
+)
 class EmailVerificationResendView(GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
