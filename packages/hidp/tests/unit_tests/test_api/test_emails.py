@@ -2,6 +2,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from django.core import mail
 from django.urls import reverse
+from http import HTTPStatus
 
 from hidp.test.factories.user_factories import UserFactory, VerifiedUserFactory
 
@@ -17,14 +18,14 @@ class TestEmailVerifiedView(APITestCase):
     def test_email_verified_requires_authentication(self):
         """Verify that authentication is required to access the email verified endpoint."""  # noqa: E501, W505
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
 
     def test_email_verified_unverified_user(self):
         """Verify that the email verified status is False for an unverified user."""
         self.client.force_login(self.unverified_user)
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response.json(), {"email_verified": False})
 
     def test_email_verified_verified_user(self):
@@ -32,7 +33,7 @@ class TestEmailVerifiedView(APITestCase):
         self.client.force_login(self.verified_user)
         response = self.client.get(self.url)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response.json(), {"email_verified": True})
 
 
@@ -47,7 +48,7 @@ class TestEmailVerificationResendView(APITestCase):
     def test_email_verification_resend_requires_authentication(self):
         """Verify that authentication is required to resend email verification."""
         response = self.client.post(self.url)
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
 
     def test_email_verified_unverified_user(self):
         """Verify that an email is sent to an unverified user."""
@@ -55,12 +56,13 @@ class TestEmailVerificationResendView(APITestCase):
         response = self.client.post(self.url)
 
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
+        self.assertIsNone(response.data)
 
     def test_email_verified_for_already_verified_user(self):
         """Verify that a ValidationError is raised for an already verified user."""
         self.client.force_login(self.verified_user)
         response = self.client.post(self.url)
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
         self.assertIn("Email is already verified.", response.json())
