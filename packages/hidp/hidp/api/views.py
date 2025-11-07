@@ -73,6 +73,11 @@ class UserViewSet(
         raise Http404
 
 
+@extend_schema_view(
+    create=extend_schema(
+        responses={201: OpenApiResponse(None)},
+    ),
+)
 class EmailChangeView(
     mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
 ):
@@ -109,14 +114,15 @@ class EmailChangeView(
 
         return change_request
 
-    def perform_create(self, serializer):
-        self.created_instance = serializer.save()
-
     def create(self, request, *args, **kwargs):
         super().create(request, *args, **kwargs)
         self.send_mail(self.created_instance)
 
         return Response(status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        """Create an email change request and save it on this view instance."""
+        self.created_instance = serializer.save()
 
     def send_mail(self, email_change_request):
         """Send the email change confirmation emails."""

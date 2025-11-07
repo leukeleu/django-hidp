@@ -6,9 +6,109 @@
         "description": "Hello, ID Please"
     },
     "paths": {
+        "/api/email-change/": {
+            "post": {
+                "operationId": "email_change_create",
+                "tags": [
+                    "email-change"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChange"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChange"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChange"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "email_change_destroy",
+                "tags": [
+                    "email-change"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/email-change-confirm/": {
+            "put": {
+                "operationId": "email_change_confirm_update",
+                "description": "Get the existing email change request and update it.",
+                "tags": [
+                    "email-change-confirm"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateChangeEmailRequestResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/users/{id}/": {
             "get": {
-                "operationId": "api_users_retrieve",
+                "operationId": "users_retrieve",
                 "parameters": [
                     {
                         "in": "path",
@@ -24,7 +124,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "security": [
                     {
@@ -45,7 +145,7 @@
                 }
             },
             "put": {
-                "operationId": "api_users_update",
+                "operationId": "users_update",
                 "parameters": [
                     {
                         "in": "path",
@@ -61,7 +161,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "requestBody": {
                     "content": {
@@ -102,7 +202,7 @@
                 }
             },
             "patch": {
-                "operationId": "api_users_partial_update",
+                "operationId": "users_partial_update",
                 "parameters": [
                     {
                         "in": "path",
@@ -116,7 +216,7 @@
                     }
                 ],
                 "tags": [
-                    "api"
+                    "users"
                 ],
                 "requestBody": {
                     "content": {
@@ -159,6 +259,37 @@
     },
     "components": {
         "schemas": {
+            "EmailChange": {
+                "type": "object",
+                "properties": {
+                    "proposed_email": {
+                        "type": "string",
+                        "format": "email",
+                        "writeOnly": true,
+                        "maxLength": 254
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "password",
+                    "proposed_email"
+                ]
+            },
+            "EmailChangeConfirm": {
+                "type": "object",
+                "properties": {
+                    "confirmation_token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "confirmation_token"
+                ]
+            },
             "PatchedUser": {
                 "type": "object",
                 "properties": {
@@ -175,6 +306,21 @@
                         "title": "Email address"
                     }
                 }
+            },
+            "UpdateChangeEmailRequestResponse": {
+                "type": "object",
+                "properties": {
+                    "confirmed_by_current_email": {
+                        "type": "boolean"
+                    },
+                    "confirmed_by_proposed_email": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "confirmed_by_current_email",
+                    "confirmed_by_proposed_email"
+                ]
             },
             "User": {
                 "type": "object",
