@@ -1,11 +1,15 @@
+# ruff: noqa: E501, W505
+
 from datetime import timedelta
 
 from oauth2_provider.models import get_access_token_model, get_application_model
 from rest_framework.test import APITestCase
 
+from django.core import mail
 from django.urls import reverse
 from django.utils.timezone import now as tz_now
 
+from hidp.accounts.models import EmailChangeRequest
 from hidp.test.factories import user_factories
 
 AccessToken = get_access_token_model()
@@ -208,3 +212,107 @@ class TestUserViewSetViaAccessToken(APITestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, "Skyler")
         self.assertEqual(self.user.last_name, "White")
+
+
+class TestEmailChangeViewSet(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory(
+            first_name="Walter", last_name="White", email="walter@example.com"
+        )
+        cls.url = reverse("api:email_change")
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_get_unauthenticated(self):
+        self.client.logout()
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_post_user_without_password_requests_email_change(self):
+        self.user.set_unusable_password()
+        self.user.save()
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.url,
+            {
+                "password": "P@ssw0rd!",
+                "proposed_email": "heisenberg@example.com",
+            },
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertIn("password", response.json())
+
+    def test_post_user_with_wrong_password_requests_email_change(self):
+        self.user.save()
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.url,
+            {
+                "password": "SayMyName",
+                "proposed_email": "heisenberg@example.com",
+            },
+        )
+
+        self.assertEqual(400, response.status_code)
+        self.assertIn("password", response.json())
+
+    def test_create_email_change_request(self):
+        response = self.client.post(
+            self.url,
+            {
+                "proposed_email": "heisenberg@example.com",
+                "password": "P@ssw0rd!",
+            },
+        )
+
+        self.assertEqual(201, response.status_code)
+
+        self.assertTrue(
+            EmailChangeRequest.objects.filter(
+                user=self.user,
+                proposed_email="heisenberg@example.com",
+            ).exists()
+        )
+
+        self.assertEqual(len(mail.outbox), 2)
+
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Confirm your email change request",
+        )
+        self.assertEqual(message.to, [self.user.email])
+        self.assertRegex(
+            message.body,
+            # Matches the email change confirmation URL:
+            # placeholder/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"placeholder/confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
+        self.assertIn(
+            "placeholder/cancel",
+            message.body,
+        )
+
+        # Email should be sent to proposed email
+        message = mail.outbox[1]
+        self.assertEqual(
+            message.subject,
+            "Confirm your email change request",
+        )
+        self.assertEqual(message.to, ["heisenberg@example.com"])
+        self.assertRegex(
+            message.body,
+            # Matches the email change confirmation URL:
+            # placeholder/confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"placeholder/confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
+        self.assertIn(
+            "placeholder/cancel/",
+            message.body,
+        )
