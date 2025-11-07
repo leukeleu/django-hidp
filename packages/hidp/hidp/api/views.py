@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
@@ -8,9 +10,13 @@ from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework import mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from django.contrib.auth import get_user_model
 from django.http import Http404
+
+from hidp.accounts import auth as hidp_auth
+from hidp.api.utils import CSRFProtectedAPIView
 
 from .serializers import UserSerializer
 
@@ -54,3 +60,17 @@ class UserViewSet(
         if self.kwargs.get(self.lookup_url_kwarg or self.lookup_field) == "me":
             return self.request.user
         raise Http404
+
+
+class LogoutView(CSRFProtectedAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):  # noqa: PLR6301
+        """
+        Logs out the user, regardless of whether a user is logged in.
+
+        Enforces that a CSRF token is provided.
+        """
+        hidp_auth.logout(request)
+        return Response(status=HTTPStatus.NO_CONTENT)
