@@ -93,16 +93,22 @@ class EmailVerificationMailer(BaseMailer):
     email_template_name = "hidp/accounts/verification/email/verification_body.txt"
     html_email_template_name = "hidp/accounts/verification/email/verification_body.html"
 
-    def __init__(self, user, *, base_url, post_verification_redirect=None):
+    def __init__(self, user, *, base_url, post_verification_redirect=None, verification_url=None):
         super().__init__(base_url=base_url)
         self.user = user
         self.post_verification_redirect = post_verification_redirect
+        self.verification_url = verification_url
 
     def get_verification_url(self):
+        token = tokens.email_verification_token_generator.make_token(self.user)
+
+        if self.verification_url:
+            return self.verification_url.format(token=token)
+
         return urljoin(
             self.base_url,
             email_verification.get_verify_email_url(
-                self.user,
+                token=token,
                 next_url=self.post_verification_redirect,
             ),
         )
