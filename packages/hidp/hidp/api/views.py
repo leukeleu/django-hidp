@@ -16,6 +16,7 @@ from rest_framework.response import Response
 
 from django.contrib.auth import get_user_model
 from django.http import Http404
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 
@@ -122,5 +123,6 @@ class EmailVerificationResendView(GenericAPIView):
         self.verification_mailer(
             request.user,
             base_url=request.build_absolute_uri("/"),
+            verification_url=settings.EMAIL_VERIFICATION_URL,
         ).send()
-        return Response({}, status=HTTPStatus.OK)
+        return Response(status=HTTPStatus.NO_CONTENT)
