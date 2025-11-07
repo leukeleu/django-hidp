@@ -1,8 +1,9 @@
+from http import HTTPStatus
+
 from rest_framework.test import APIClient, APITestCase
 
 from django.core import mail
 from django.urls import reverse
-from http import HTTPStatus
 
 from hidp.test.factories.user_factories import UserFactory, VerifiedUserFactory
 

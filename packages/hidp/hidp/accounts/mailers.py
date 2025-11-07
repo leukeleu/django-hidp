@@ -93,7 +93,9 @@ class EmailVerificationMailer(BaseMailer):
     email_template_name = "hidp/accounts/verification/email/verification_body.txt"
     html_email_template_name = "hidp/accounts/verification/email/verification_body.html"
 
-    def __init__(self, user, *, base_url, post_verification_redirect=None, verification_url=None):
+    def __init__(
+        self, user, *, base_url, post_verification_redirect=None, verification_url=None
+    ):
         super().__init__(base_url=base_url)
         self.user = user
         self.post_verification_redirect = post_verification_redirect
