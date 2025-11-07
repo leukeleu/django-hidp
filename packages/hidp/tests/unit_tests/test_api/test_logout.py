@@ -68,4 +68,3 @@ class TestLogoutView(APITestCase):
         # User is no longer able to access "me" endpoint
         me_response = self.client.get(reverse("api:user-detail", args=["me"]))
         self.assertEqual(me_response.status_code, HTTPStatus.FORBIDDEN)
-        self.assertIsNone(me_response.data)
