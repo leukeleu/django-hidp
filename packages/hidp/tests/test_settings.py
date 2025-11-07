@@ -82,6 +82,11 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
+
+# URLs/URL templates for urls sent in emails
+EMAIL_CHANGE_CONFIRMATION_URL = "placeholder/{token}"
+EMAIL_CHANGE_CANCEL_URL = "placeholder"
+
 USE_TZ = True
 
 AUTH_USER_MODEL = "custom_user.CustomUser"

@@ -63,7 +63,7 @@
         "/api/email-change-confirm/": {
             "put": {
                 "operationId": "email_change_confirm_update",
-                "description": "Get the existing email change request and update it.",
+                "description": "Get the existing email change request and update it.\n\nIf the request is complete the email of the user is updated and\nan email to inform the user is sent.\n\nReturns a response containing whether the request is confirmed\nby the current and proposed mail. If both have confirmed the request\nthe change can be considered complete.",
                 "tags": [
                     "email-change-confirm"
                 ],
