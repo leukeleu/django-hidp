@@ -88,7 +88,7 @@ class EmailChangeSerializer(serializers.Serializer):
 class EmailChangeConfirmSerializer(serializers.Serializer):
     confirmation_token = serializers.CharField(write_only=True, required=True)
 
-    def validate_confirmation_token(self, value):
+    def validate_confirmation_token(self, value):  # noqa: PLR6301 (no-self-use)
         """
         Validate the confirmation token.
 
