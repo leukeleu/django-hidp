@@ -3,8 +3,10 @@ from datetime import timedelta
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
+    OpenApiResponse,
     extend_schema,
     extend_schema_view,
+    inline_serializer,
 )
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework import mixins, status, viewsets
@@ -12,6 +14,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import BooleanField
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -154,12 +157,87 @@ class EmailChangeView(
         ).send()
 
 
+@extend_schema_view(
+    put=extend_schema(
+        responses={
+            200: inline_serializer(
+                name="UpdateChangeEmailRequestResponse",
+                fields={
+                    "confirmed_by_current_email": BooleanField(),
+                    "confirmed_by_proposed_email": BooleanField(),
+                },
+            )
+        },
+    ),
+)
 class EmailChangeConfirmView(GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = EmailChangeConfirmSerializer
 
-    def post(self, request, *args, **kwargs):
-        # TODO: for confirming email change implement equivalent of
-        # hidp/accounts/views.py:EmailChangeConfirmView.form_valid()
-        pass
+    def get_object(self):
+        """
+        Find the email change request associated with the token in the session.
+
+        Exclude the request if it has already been confirmed for this email address.
+
+        Raises a 404 exception if no request is found.
+        """
+        email_change_request = (
+            EmailChangeRequest.objects.filter(id=self.token_uuid)
+            .exclude(**{f"confirmed_by_{self.token_recipient}": True})
+            .first()
+        )
+
+        if (
+            email_change_request is None
+            or email_change_request.user != self.request.user
+        ):
+            raise Http404
+
+        return email_change_request
+
+    def put(self, request, *args, **kwargs):
+        """
+        Get the existing email change request and update it.
+
+        If the request is complete the email of the user is updated and
+        an email to inform the user is sent.
+
+        Returns a response containing whether the request is confirmed
+        by the current and proposed mail. If both have confirmed the request
+        the change can be considered complete.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # get the token_data from the validated serializer first so it can be used in
+        # `get_object()` to get the instance. Then set the instance on the serializer.
+        token_data = serializer.validated_data["confirmation_token"]
+        self.token_recipient, self.token_uuid = (
+            token_data["recipient"],
+            token_data["uuid"],
+        )
+        email_change_request = self.get_object()
+        serializer.instance = email_change_request
+
+        instance = serializer.save()
+
+        if instance.is_complete():
+            self.send_email(instance)
+
+        return Response(
+            {
+                "confirmed_by_current_email": instance.confirmed_by_current_email,
+                "confirmed_by_proposed_email": instance.confirmed_by_proposed_email,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def send_email(self, email_change_request):
+        """Send the email changed email."""
+        mailers.EmailChangedMailer(
+            self.request.user,
+            email_change_request=email_change_request,
+            base_url=self.request.build_absolute_uri("/"),
+        ).send()

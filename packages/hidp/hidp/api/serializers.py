@@ -4,6 +4,8 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
+from hidp.accounts import tokens
+from hidp.accounts.email_change import Recipient
 from hidp.accounts.models import EmailChangeRequest
 
 UserModel = get_user_model()
@@ -84,6 +86,40 @@ class EmailChangeSerializer(serializers.Serializer):
 
 
 class EmailChangeConfirmSerializer(serializers.Serializer):
-    # TODO: for confirming email change implement equivalent of
-    # hidp/accounts/views.py:EmailChangeConfirmForm.save()
-    pass
+    confirmation_token = serializers.CharField(write_only=True, required=True)
+
+    def validate_confirmation_token(self, value):
+        """
+        Validate the confirmation token.
+
+        Returns a dictionary of the data inside the token if it is
+        valid and not expired, otherwise raises a `ValidationError`.
+        """
+        token_data = tokens.email_change_token_generator.check_token(value)
+
+        if (
+            not token_data
+            or not set(token_data.keys()) == {"recipient", "uuid"}
+            or token_data["recipient"]
+            not in {Recipient.CURRENT_EMAIL, Recipient.PROPOSED_EMAIL}
+        ):
+            raise serializers.ValidationError(_("Invalid or expired token."))
+
+        return token_data
+
+    def update(self, instance, validated_data):  # noqa: PLR6301 (no-self-use)
+        # Update the change object
+        match validated_data["confirmation_token"]["recipient"]:
+            case Recipient.CURRENT_EMAIL:
+                instance.confirmed_by_current_email = True
+            case Recipient.PROPOSED_EMAIL:
+                instance.confirmed_by_proposed_email = True
+
+        # Change email address of user if complete.
+        with transaction.atomic():
+            instance.save()
+            if instance.is_complete():
+                instance.user.email = instance.proposed_email
+                instance.user.save(update_fields=["email"])
+
+        return instance
