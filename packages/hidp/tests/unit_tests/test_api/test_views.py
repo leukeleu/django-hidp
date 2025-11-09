@@ -7,6 +7,7 @@ from rest_framework.test import APITestCase
 
 from django.core import mail
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.timezone import now as tz_now
 
 from hidp.accounts import tokens
@@ -263,7 +264,7 @@ class TestEmailChangeViewSet(APITestCase):
         self.assertEqual(400, response.status_code)
         self.assertIn("password", response.json())
 
-    def test_create_email_change_request(self):
+    def test_post_create_email_change_request(self):
         response = self.client.post(
             self.url,
             {
@@ -318,7 +319,7 @@ class TestEmailChangeViewSet(APITestCase):
             message.body,
         )
 
-    def test_email_change_proposed_email_exists(self):
+    def test_post_email_change_proposed_email_exists(self):
         user_factories.UserFactory(email="existing@example.com")
 
         response = self.client.post(
@@ -376,7 +377,7 @@ class TestEmailChangeViewSet(APITestCase):
             message.body,
         )
 
-    def test_proposed_email_user_inactive(self):
+    def test_post_proposed_email_user_inactive(self):
         inactive_user = user_factories.UserFactory(is_active=False)
 
         response = self.client.post(
@@ -398,6 +399,44 @@ class TestEmailChangeViewSet(APITestCase):
             "Confirm your email change request",
         )
         self.assertEqual(message.to, [self.user.email])
+
+    def test_delete_unauthenticated(self):
+        self.client.logout()
+        response = self.client.delete(self.url)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_no_change_request(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_completed_change_request(self):
+        email_change_request = user_factories.EmailChangeRequestFactory(user=self.user)
+        email_change_request.confirmed_by_current_email = True
+        email_change_request.confirmed_by_proposed_email = True
+        email_change_request.save()
+
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_expired_change_request(self):
+        email_change_request = user_factories.EmailChangeRequestFactory(user=self.user)
+        email_change_request.created_at = timezone.now() - timezone.timedelta(days=8)
+        email_change_request.save()
+
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete(self):
+        user_factories.EmailChangeRequestFactory(user=self.user)
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 204)
+
+        self.assertFalse(
+            EmailChangeRequest.objects.filter(
+                user=self.user,
+            ).exists()
+        )
 
 
 class TestEmailChangeConfirmView(APITestCase):
@@ -553,5 +592,3 @@ class TestEmailChangeConfirmView(APITestCase):
         )
 
         self.assertEqual(404, response.status_code)
-
-# TODO test cancel views
