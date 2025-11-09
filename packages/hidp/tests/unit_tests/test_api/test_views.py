@@ -225,9 +225,9 @@ class TestEmailChangeViewSet(APITestCase):
     def setUp(self):
         self.client.force_login(self.user)
 
-    def test_get_unauthenticated(self):
+    def test_post_unauthenticated(self):
         self.client.logout()
-        response = self.client.get(self.url)
+        response = self.client.post(self.url)
 
         self.assertEqual(response.status_code, 403)
 
@@ -316,3 +316,87 @@ class TestEmailChangeViewSet(APITestCase):
             "placeholder/cancel/",
             message.body,
         )
+
+    def test_email_change_proposed_email_exists(self):
+        user_factories.UserFactory(email="existing@example.com")
+
+        response = self.client.post(
+            self.url,
+            {
+                "password": "P@ssw0rd!",
+                "proposed_email": "existing@example.com",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(201, response.status_code)
+
+        # EmailChangeRequest should be created
+        self.assertTrue(
+            EmailChangeRequest.objects.filter(
+                user=self.user,
+                proposed_email="existing@example.com",
+            ).exists()
+        )
+
+        # Email should be sent to current email
+        self.assertEqual(len(mail.outbox), 2)
+
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Confirm your email change request",
+        )
+        self.assertEqual(message.to, [self.user.email])
+        self.assertRegex(
+            message.body,
+            # Matches the email change confirmation URL:
+            # placeholder/confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"placeholder/confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
+        self.assertIn(
+            "placeholder/cancel/",
+            message.body,
+        )
+
+        # A different email should be sent to proposed email
+        message = mail.outbox[1]
+        self.assertEqual(
+            message.subject,
+            "Email change request",
+        )
+        self.assertEqual(message.to, ["existing@example.com"])
+        self.assertIn(
+            "However, you already have an account that uses existing@example.com",
+            message.body,
+        )
+        self.assertIn(
+            "placeholder/cancel/",
+            message.body,
+        )
+
+    def test_proposed_email_user_inactive(self):
+        inactive_user = user_factories.UserFactory(is_active=False)
+
+        response = self.client.post(
+            self.url,
+            {
+                "password": "P@ssw0rd!",
+                "proposed_email": inactive_user.email,
+            },
+        )
+
+        self.assertEqual(201, response.status_code)
+
+        # Email should be sent to current email, but not to proposed email (inactive)
+        self.assertEqual(len(mail.outbox), 1)
+
+        message = mail.outbox[0]
+        self.assertEqual(
+            message.subject,
+            "Confirm your email change request",
+        )
+        self.assertEqual(message.to, [self.user.email])
+
+
+# TODO test confirm views

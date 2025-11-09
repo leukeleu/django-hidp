@@ -84,8 +84,8 @@ SPECTACULAR_SETTINGS = {
 
 
 # URLs/URL templates for urls sent in emails
-EMAIL_CHANGE_CONFIRMATION_URL = "placeholder/{token}"
-EMAIL_CHANGE_CANCEL_URL = "placeholder"
+EMAIL_CHANGE_CONFIRMATION_URL = "placeholder/confirm/{token}/"
+EMAIL_CHANGE_CANCEL_URL = "placeholder/cancel/"
 
 USE_TZ = True
 
