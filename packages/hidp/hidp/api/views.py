@@ -1,5 +1,5 @@
-from http import HTTPStatus
 from datetime import timedelta
+from http import HTTPStatus
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
@@ -20,22 +20,20 @@ from rest_framework.serializers import BooleanField
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import Http404
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
 
 from hidp.accounts import auth as hidp_auth
-from hidp.accounts.mailers import EmailVerificationMailer
-
-from .serializers import LoginSerializer, UserSerializer
-from django.utils import timezone
-
 from hidp.accounts import mailers, tokens
 from hidp.accounts.email_change import Recipient
+from hidp.accounts.mailers import EmailVerificationMailer
 from hidp.accounts.models import EmailChangeRequest
 
 from .serializers import (
     EmailChangeConfirmSerializer,
     EmailChangeSerializer,
+    LoginSerializer,
     UserSerializer,
 )
 
@@ -114,6 +112,8 @@ class LoginView(GenericAPIView):
             base_url=request.build_absolute_uri("/"),
         ).send()
         return Response(status=HTTPStatus.UNAUTHORIZED)
+
+
 @extend_schema_view(
     create=extend_schema(
         responses={201: OpenApiResponse(None)},

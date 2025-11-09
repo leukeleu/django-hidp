@@ -3,14 +3,13 @@ from rest_framework import exceptions as rest_framework_exceptions
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
-from hidp.api.serializers import LoginSerializer
-from hidp.test.factories.user_factories import UserFactory
-from django.test import RequestFactory, TestCase
-from django.urls import reverse
-
 from hidp.accounts import tokens
 from hidp.accounts.models import EmailChangeRequest
-from hidp.api.serializers import EmailChangeConfirmSerializer, EmailChangeSerializer
+from hidp.api.serializers import (
+    EmailChangeConfirmSerializer,
+    EmailChangeSerializer,
+    LoginSerializer,
+)
 from hidp.test.factories.user_factories import EmailChangeRequestFactory, UserFactory
 
 

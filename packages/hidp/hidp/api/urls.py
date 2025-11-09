@@ -2,8 +2,7 @@ from rest_framework.routers import DefaultRouter
 
 from django.urls import include, path
 
-from .views import EmailChangeConfirmView, EmailChangeView, UserViewSet
-from .views import LoginView, UserViewSet
+from .views import EmailChangeConfirmView, EmailChangeView, LoginView, UserViewSet
 
 router = DefaultRouter()
 router.register("users", UserViewSet, basename="user")

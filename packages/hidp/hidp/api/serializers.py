@@ -1,14 +1,12 @@
 from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.debug import sensitive_variables
 
 from hidp.accounts import auth as hidp_auth
-from django.db import transaction
-from django.utils.translation import gettext_lazy as _
-
 from hidp.accounts import tokens
 from hidp.accounts.email_change import Recipient
 from hidp.accounts.models import EmailChangeRequest
@@ -47,6 +45,8 @@ class LoginSerializer(serializers.Serializer):
             )
         attrs["user"] = user
         return attrs
+
+
 class EmailChangeSerializer(serializers.Serializer):
     proposed_email = serializers.EmailField(
         write_only=True, required=True, max_length=254

@@ -106,6 +106,42 @@
                 }
             }
         },
+        "/api/login/": {
+            "post": {
+                "operationId": "login_create",
+                "tags": [
+                    "login"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "401": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/users/{id}/": {
             "get": {
                 "operationId": "users_retrieve",
@@ -288,6 +324,23 @@
                 },
                 "required": [
                     "confirmation_token"
+                ]
+            },
+            "Login": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "password",
+                    "username"
                 ]
             },
             "PatchedUser": {
