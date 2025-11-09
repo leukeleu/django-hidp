@@ -400,3 +400,4 @@ class TestEmailChangeViewSet(APITestCase):
 
 
 # TODO test confirm views
+# TODO test cancel views
