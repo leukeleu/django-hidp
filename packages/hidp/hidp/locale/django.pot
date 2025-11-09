@@ -47,11 +47,11 @@ msgstr ""
 msgid "Please note that this also changes the username you use to sign in."
 msgstr ""
 
-#: hidp/accounts/forms.py
+#: hidp/accounts/forms.py hidp/api/serializers.py
 msgid "The new email address is the same as the current email address."
 msgstr ""
 
-#: hidp/accounts/forms.py
+#: hidp/accounts/forms.py hidp/api/serializers.py
 msgid "The password is incorrect."
 msgstr ""
 
@@ -167,7 +167,15 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr ""
 
 #: hidp/api/serializers.py
+msgid "An account with this email address already exists."
+msgstr ""
+
+#: hidp/api/serializers.py
 msgid "Could not authenticate"
+msgstr ""
+
+#: hidp/api/serializers.py
+msgid "Invalid or expired token."
 msgstr ""
 
 #: hidp/federated/forms.py
