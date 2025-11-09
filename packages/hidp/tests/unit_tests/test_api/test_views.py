@@ -9,6 +9,7 @@ from django.core import mail
 from django.urls import reverse
 from django.utils.timezone import now as tz_now
 
+from hidp.accounts import tokens
 from hidp.accounts.models import EmailChangeRequest
 from hidp.test.factories import user_factories
 
@@ -399,5 +400,155 @@ class TestEmailChangeViewSet(APITestCase):
         self.assertEqual(message.to, [self.user.email])
 
 
-# TODO test confirm views
+class TestEmailChangeConfirmView(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = user_factories.UserFactory(email="walter@example.com")
+        cls.url = reverse("api:email_change_confirm")
+        cls.email_change_request = user_factories.EmailChangeRequestFactory(
+            user=cls.user, proposed_email="heisenberg@example.com"
+        )
+        cls.current_mail_token = tokens.email_change_token_generator.make_token(
+            str(cls.email_change_request.pk), "current_email"
+        )
+        cls.proposed_mail_token = tokens.email_change_token_generator.make_token(
+            str(cls.email_change_request.pk), "proposed_email"
+        )
+
+    def setUp(self):
+        self.client.force_login(self.user)
+
+    def test_unauthenticated_user(self):
+        self.client.logout()
+        response = self.client.put(
+            self.url, data={"confirmation_token": self.current_mail_token}
+        )
+
+        self.assertEqual(403, response.status_code)
+
+    def test_valid_token_wrong_user(self):
+        self.client.force_login(user_factories.UserFactory())
+        response = self.client.put(
+            self.url, data={"confirmation_token": self.current_mail_token}
+        )
+
+        self.assertEqual(404, response.status_code)
+
+    def test_already_confirmed(self):
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.save()
+        response = self.client.put(
+            self.url, data={"confirmation_token": self.current_mail_token}
+        )
+
+        self.assertEqual(404, response.status_code)
+
+    def test_current_email_valid_token(self):
+        response = self.client.put(
+            self.url, data={"confirmation_token": self.current_mail_token}
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            {
+                "confirmed_by_current_email": True,
+                "confirmed_by_proposed_email": False,
+            },
+            response.json(),
+        )
+
+        self.email_change_request.refresh_from_db()
+        self.assertEqual(self.email_change_request.confirmed_by_current_email, True)
+
+        # Email address should not be changed yet
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "walter@example.com")
+
+        # Email changed mail should not be sent yet
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_proposed_email_valid_token(self):
+        response = self.client.put(
+            self.url, data={"confirmation_token": self.proposed_mail_token}
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            {
+                "confirmed_by_current_email": False,
+                "confirmed_by_proposed_email": True,
+            },
+            response.json(),
+        )
+
+        self.email_change_request.refresh_from_db()
+        self.assertEqual(self.email_change_request.confirmed_by_proposed_email, True)
+
+        # Email address should not be changed yet
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "walter@example.com")
+
+        # Email changed mail should not be sent yet
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_post_second_valid_token(self):
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.save()
+
+        response = self.client.put(
+            self.url, data={"confirmation_token": self.proposed_mail_token}
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            {
+                "confirmed_by_current_email": True,
+                "confirmed_by_proposed_email": True,
+            },
+            response.json(),
+        )
+
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.email, "heisenberg@example.com")
+
+        email_change_request = EmailChangeRequest.objects.filter(
+            user=self.user, proposed_email="heisenberg@example.com"
+        )
+        self.assertTrue(email_change_request.exists())
+        self.assertTrue(email_change_request.first().is_complete())
+
+        # Email changed mail should be sent
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(
+            "Your account email address has been changed",
+            mail.outbox[0].subject,
+        )
+        self.assertEqual(
+            mail.outbox[0].to,
+            ["walter@example.com", "heisenberg@example.com"],
+        )
+
+    def test_post_proposed_email_already_exists(self):
+        # Should only happen if an account was created with the proposed email
+        # address after email change request was made.
+        user_factories.UserFactory(email="heisenberg@example.com")
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.save()
+
+        response = self.client.put(
+            self.url, data={"confirmation_token": self.proposed_mail_token}
+        )
+        self.assertEqual(200, response.status_code)
+
+    def test_post_already_completed_request(self):
+        self.email_change_request.confirmed_by_current_email = True
+        self.email_change_request.confirmed_by_proposed_email = True
+        self.email_change_request.save()
+
+        response = self.client.put(
+            self.url, data={"confirmation_token": self.current_mail_token}
+        )
+
+        self.assertEqual(404, response.status_code)
+
 # TODO test cancel views
