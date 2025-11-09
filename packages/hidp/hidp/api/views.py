@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from datetime import timedelta
 
 from drf_spectacular.types import OpenApiTypes
@@ -19,6 +20,13 @@ from rest_framework.serializers import BooleanField
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import Http404
+from django.utils.decorators import method_decorator
+from django.views.decorators.debug import sensitive_post_parameters
+
+from hidp.accounts import auth as hidp_auth
+from hidp.accounts.mailers import EmailVerificationMailer
+
+from .serializers import LoginSerializer, UserSerializer
 from django.utils import timezone
 
 from hidp.accounts import mailers, tokens
@@ -73,6 +81,39 @@ class UserViewSet(
         raise Http404
 
 
+@method_decorator(sensitive_post_parameters("username", "password"), name="dispatch")
+@extend_schema_view(
+    post=extend_schema(
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+            HTTPStatus.UNAUTHORIZED: None,
+        },
+    )
+)
+class LoginView(GenericAPIView):
+    permission_classes = []
+    authentication_classes = []
+    serializer_class = LoginSerializer
+    verification_mailer = EmailVerificationMailer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # User is authenticated and is allowed to log in.
+        user = serializer.validated_data["user"]
+
+        # Only log in the user if their email address has been verified.
+        if user.email_verified:
+            hidp_auth.login(request, user)
+            return Response(status=HTTPStatus.NO_CONTENT)
+
+        # If the user's email address is not verified, send a verification email.
+        self.verification_mailer(
+            user,
+            base_url=request.build_absolute_uri("/"),
+        ).send()
+        return Response(status=HTTPStatus.UNAUTHORIZED)
 @extend_schema_view(
     create=extend_schema(
         responses={201: OpenApiResponse(None)},

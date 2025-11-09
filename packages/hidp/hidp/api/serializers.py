@@ -1,6 +1,11 @@
 from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
+from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
+from django.views.decorators.debug import sensitive_variables
+
+from hidp.accounts import auth as hidp_auth
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
@@ -25,6 +30,23 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["email"]
 
 
+@method_decorator(sensitive_variables(), name="validate")
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        user = hidp_auth.authenticate(
+            request=self.context.get("request"),
+            username=attrs.get("username"),
+            password=attrs.get("password"),
+        )
+        if not user:
+            raise serializers.ValidationError(
+                _("Could not authenticate"), code="authorization"
+            )
+        attrs["user"] = user
+        return attrs
 class EmailChangeSerializer(serializers.Serializer):
     proposed_email = serializers.EmailField(
         write_only=True, required=True, max_length=254
