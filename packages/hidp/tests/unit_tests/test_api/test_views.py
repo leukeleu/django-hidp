@@ -538,7 +538,10 @@ class TestEmailChangeConfirmView(APITestCase):
         response = self.client.put(
             self.url, data={"confirmation_token": self.proposed_mail_token}
         )
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(400, response.status_code)
+        self.assertIn(
+            "An account with this email address already exists.", response.json()
+        )
 
     def test_post_already_completed_request(self):
         self.email_change_request.confirmed_by_current_email = True

@@ -119,6 +119,17 @@ class EmailChangeConfirmSerializer(serializers.Serializer):
         with transaction.atomic():
             instance.save()
             if instance.is_complete():
+                existing_user = UserModel.objects.filter(
+                    email__iexact=instance.proposed_email
+                ).first()
+
+                if existing_user:
+                    # Should only happen if an account was created with the proposed
+                    # email address after email change request was made.
+                    raise serializers.ValidationError(
+                        _("An account with this email address already exists.")
+                    )
+
                 instance.user.email = instance.proposed_email
                 instance.user.save(update_fields=["email"])
 
