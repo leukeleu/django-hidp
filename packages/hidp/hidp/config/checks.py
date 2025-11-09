@@ -244,20 +244,19 @@ def check_api_email_url_settings(**kwargs):
     if not apps.is_installed("hidp.api"):
         return []
 
-    errors = []
+    errors = set()
 
-    if not getattr(settings, "EMAIL_CHANGE_CONFIRMATION_URL", None) or not getattr(
-        settings, "EMAIL_CHANGE_CANCEL_URL", None
-    ):
-        errors.append(E011)
+    for setting in API_REQUIRED_EMAIL_URL_SETTINGS:
+        if not getattr(settings, setting, None):
+            errors.add(E011)
 
     if (
         getattr(settings, "EMAIL_CHANGE_CONFIRMATION_URL", None)
         and "{token}" not in settings.EMAIL_CHANGE_CONFIRMATION_URL
     ):
-        errors.append(E012)
+        errors.add(E012)
 
-    return errors
+    return list(errors)
 
 
 # If django-otp is installed but hidp.otp is not, show a warning
