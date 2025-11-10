@@ -142,6 +142,25 @@
                 }
             }
         },
+        "/api/logout/": {
+            "post": {
+                "operationId": "logout_create",
+                "description": "Logs out the user, regardless of whether a user is logged in.\n\nEnforces that a CSRF token is provided.",
+                "tags": [
+                    "logout"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/users/{id}/": {
             "get": {
                 "operationId": "users_retrieve",

@@ -29,6 +29,7 @@ from hidp.accounts import mailers, tokens
 from hidp.accounts.email_change import Recipient
 from hidp.accounts.mailers import EmailVerificationMailer
 from hidp.accounts.models import EmailChangeRequest
+from hidp.api.utils import CSRFProtectedAPIView
 
 from .serializers import (
     EmailChangeConfirmSerializer,
@@ -112,6 +113,28 @@ class LoginView(GenericAPIView):
             base_url=request.build_absolute_uri("/"),
         ).send()
         return Response(status=HTTPStatus.UNAUTHORIZED)
+
+
+@extend_schema_view(
+    post=extend_schema(
+        request=None,
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+        },
+    )
+)
+class LogoutView(CSRFProtectedAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):  # noqa: PLR6301
+        """
+        Logs out the user, regardless of whether a user is logged in.
+
+        Enforces that a CSRF token is provided.
+        """
+        hidp_auth.logout(request)
+        return Response(status=HTTPStatus.NO_CONTENT)
 
 
 @extend_schema_view(
