@@ -26,4 +26,4 @@ This approach is compatible with browsers, command-line tools, and scripts that 
 
 ## OpenAPI Specification
 
-For the OpenAPI based documentation of the API endpoints, [see here](./redoc-static.html){.external}
+The documentation for the API endpoints is available in the [OpenAPI Specification](./redoc-static.html){.external}.
