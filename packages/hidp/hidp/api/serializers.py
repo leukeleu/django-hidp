@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from django.contrib.auth import get_user_model
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.debug import sensitive_variables
@@ -141,18 +141,14 @@ class EmailChangeConfirmSerializer(serializers.Serializer):
         with transaction.atomic():
             instance.save()
             if instance.is_complete():
-                existing_user = UserModel.objects.filter(
-                    email__iexact=instance.proposed_email
-                ).first()
-
-                if existing_user:
+                instance.user.email = instance.proposed_email
+                try:
+                    instance.user.save(update_fields=["email"])
+                except IntegrityError:
                     # Should only happen if an account was created with the proposed
                     # email address after email change request was made.
                     raise serializers.ValidationError(
                         _("An account with this email address already exists.")
-                    )
-
-                instance.user.email = instance.proposed_email
-                instance.user.save(update_fields=["email"])
+                    ) from None
 
         return instance
