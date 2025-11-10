@@ -22,7 +22,7 @@ def get_email_verification_required_url(user, *, next_url=""):
     return url
 
 
-def get_verify_email_url(token, next_url=""):
+def get_verify_email_url(token, *, next_url=""):
     url = reverse(
         "hidp_accounts:verify_email",
         kwargs={
