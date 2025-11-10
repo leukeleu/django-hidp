@@ -10,7 +10,7 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -182,7 +182,7 @@ class EmailChangeView(
         super().create(request, *args, **kwargs)
         self.send_mail(self.created_instance)
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response(status=HTTPStatus.CREATED)
 
     def perform_create(self, serializer):
         """Create an email change request and save it on this view instance."""
@@ -302,7 +302,7 @@ class EmailChangeConfirmView(GenericAPIView):
                 "confirmed_by_current_email": instance.confirmed_by_current_email,
                 "confirmed_by_proposed_email": instance.confirmed_by_proposed_email,
             },
-            status=status.HTTP_200_OK,
+            status=HTTPStatus.OK,
         )
 
     def send_email(self, email_change_request):
