@@ -423,6 +423,8 @@ class TestEmailChangeViewSet(APITestCase):
 
     def test_delete_expired_change_request(self):
         email_change_request = user_factories.EmailChangeRequestFactory(user=self.user)
+
+        # by default the EmailChangeTokenGenerator is used which has a timeout of 1 day
         email_change_request.created_at = timezone.now() - timezone.timedelta(days=8)
         email_change_request.save()
 
