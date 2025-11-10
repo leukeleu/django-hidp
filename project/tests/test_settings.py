@@ -23,7 +23,7 @@ LOGGING = {
 }
 
 # URLs/URL templates for urls sent in emails
-EMAIL_VERIFICATION_URL = "email_verification_url/{token}"
+EMAIL_VERIFICATION_URL = "email_verification_url/{token}/"
 
 # Test key
 SECRET_KEY = "secret-key-only-for-testing"

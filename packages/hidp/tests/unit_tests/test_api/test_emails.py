@@ -57,6 +57,16 @@ class TestEmailVerificationResendView(APITestCase):
         response = self.client.post(self.url)
 
         self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(email.subject, "Verify your email address")
+        self.assertEqual(email.to, [self.unverified_user.email])
+        self.assertRegex(
+            email.body,
+            # Matches the email verification URL:
+            # email_verification_url/ImVlNGE2MGEwZTE3ZGIwNjdlNmI4NGRlMjc0ZWIzZmNkIg:1vIPxn:BpBqn3Q8BABLwbkFZK8aiaUjM0Wscb6oQe0Tihj_zTM/  # noqa: E501, W505
+            r"email_verification_url/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
+
         self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
         self.assertIsNone(response.data)
 
