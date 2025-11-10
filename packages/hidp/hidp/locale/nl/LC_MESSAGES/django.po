@@ -168,10 +168,8 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
 #: hidp/api/serializers.py
-#, fuzzy
-#| msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgid "An account with this email address already exists."
-msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
+msgstr "Er bestaat al een account met dit e-mailadres."
 
 #: hidp/api/serializers.py
 msgid "Could not authenticate"
