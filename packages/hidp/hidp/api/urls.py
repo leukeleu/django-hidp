@@ -6,6 +6,7 @@ from .views import (
     EmailVerificationResendView,
     EmailVerifiedView,
     LoginView,
+    LogoutView,
     UserViewSet,
 )
 
@@ -17,6 +18,7 @@ app_name = "api"
 urlpatterns = [
     path("", include(router.urls)),
     path("login/", LoginView.as_view(), name="login"),
+    path("logout/", LogoutView.as_view(), name="logout"),
     path("email-verified/", EmailVerifiedView.as_view(), name="email_verified"),
     path(
         "email-verified/resend/",
