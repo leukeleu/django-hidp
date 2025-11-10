@@ -1,5 +1,6 @@
 import importlib
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import checks
@@ -39,6 +40,10 @@ REQUIRED_MIDDLEWARE = [
 ]
 
 OTP_REQUIRED_MIDDLEWARE = "django_otp.middleware.OTPMiddleware"
+
+# Mapping of required email URL settings and a boolean to indicate if they need a
+# `{token}` placeholder
+REQUIRED_EMAIL_URL_SETTINGS = {"EMAIL_VERIFICATION_URL": True}
 
 
 class Tags:
@@ -203,6 +208,40 @@ E010 = checks.Error(
     ),
     id="hidp.E010",
 )
+
+# Ensure required API settings are set if API is installed
+E011 = checks.Error(
+    "API is enabled but email url settings are missing.",
+    hint=(
+        "Add the following settings with the corresponding URL/URL template"
+        f" values: {', '.join(REQUIRED_EMAIL_URL_SETTINGS.keys())}"
+    ),
+    id="hidp.E011",
+)
+
+# Ensure urls that should contain a token have a replacement field for it
+E012 = checks.Error(
+    "URLs that should contain a token don't have a replacement field for it.",
+    hint="Add a replacement field (`{token}`) in the URL string.",
+    id="hidp.E012",
+)
+
+
+@checks.register(Tags.settings)
+def check_api_email_url_settings(**kwargs):
+    if not apps.is_installed("hidp.api"):
+        return []
+
+    errors = []
+
+    for setting_name, requires_token in REQUIRED_EMAIL_URL_SETTINGS.items():
+        url = getattr(settings, setting_name, None)
+        if not url:
+            errors.append(E011)
+        elif requires_token and "{token}" not in url:
+            errors.append(E012)
+
+    return errors
 
 
 @checks.register(Tags.middleware)

@@ -29,6 +29,11 @@ MIDDLEWARE = [
     "django_otp.middleware.OTPMiddleware",
 ]
 
+USE_TZ = True
+
+# URLs/URL templates for urls sent in emails
+EMAIL_VERIFICATION_URL = "email_verification_url/{token}/"
+
 AUTH_USER_MODEL = "custom_user.CustomUser"
 
 ROOT_URLCONF = "hidp.config.urls"
