@@ -259,14 +259,14 @@ class EmailChangeRequestMailer(BaseMailer):
         base_url,
         email_change_request,
         recipient,
-        confirmation_url_template=None,
+        confirmation_url=None,
         cancel_url=None,
     ):
         super().__init__(base_url=base_url)
         self.user = user
         self.email_change_request = email_change_request
         self.recipient = recipient
-        self.confirmation_url_template = confirmation_url_template
+        self.confirmation_url = confirmation_url
         self.cancel_url = cancel_url
 
     def get_confirmation_url(self):
@@ -274,8 +274,8 @@ class EmailChangeRequestMailer(BaseMailer):
             str(self.email_change_request.pk), self.recipient
         )
 
-        if self.confirmation_url_template:
-            return self.confirmation_url_template.format(token=token)
+        if self.confirmation_url:
+            return self.confirmation_url.format(token=token)
 
         return urljoin(
             self.base_url,

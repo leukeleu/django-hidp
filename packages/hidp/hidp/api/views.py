@@ -175,7 +175,7 @@ class EmailChangeView(
         mailers.EmailChangeRequestMailer(
             **mailer_kwargs,
             recipient=Recipient.CURRENT_EMAIL,
-            confirmation_url_template=settings.EMAIL_CHANGE_CONFIRMATION_URL,
+            confirmation_url=settings.EMAIL_CHANGE_CONFIRMATION_URL,
             cancel_url=settings.EMAIL_CHANGE_CANCEL_URL,
         ).send()
 
@@ -200,7 +200,7 @@ class EmailChangeView(
         mailers.EmailChangeRequestMailer(
             **mailer_kwargs,
             recipient=Recipient.PROPOSED_EMAIL,
-            confirmation_url_template=settings.EMAIL_CHANGE_CONFIRMATION_URL,
+            confirmation_url=settings.EMAIL_CHANGE_CONFIRMATION_URL,
             cancel_url=settings.EMAIL_CHANGE_CANCEL_URL,
         ).send()
 
