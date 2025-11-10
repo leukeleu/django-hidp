@@ -12,11 +12,12 @@ Authentication is handled using [Django sessions](https://docs.djangoproject.com
 
 ### CSRF Protection
 
-All POST, PATCH, PUT, and DELETE requests to authenticated endpoints require a valid [CSRF token](https://docs.djangoproject.com/en/stable/ref/csrf/). After logging in, clients should retrieve the CSRF token (typically available as a cookie named `csrftoken`) and include it in the `X-CSRFToken` header of each request.
+All POST, PATCH, PUT, and DELETE requests to authenticated endpoints require a valid [CSRF token](https://docs.djangoproject.com/en/stable/ref/csrf/).
+Clients should retrieve the CSRF token (typically available as a cookie named `csrftoken`) and include it in the `X-CSRFToken` header of each request.
 
 ### Key Features
 
-- **Login:** Clients POST their credentials to the login endpoint. On success, a session cookie and CSRF token are set.
+- **Login:** Clients POST their credentials to the login endpoint. On success, authentication state is added to the session data.
 - **Session Management:** The session persists across requests until explicitly logged out or expired.
 - **Authenticated Endpoints:** Once authenticated, clients can access protected endpoints using the session cookie and must include the CSRF token for unsafe methods.
 - **CSRF Token Requirement:** All POST, PATCH, PUT, and DELETE requests must include a valid CSRF token.
