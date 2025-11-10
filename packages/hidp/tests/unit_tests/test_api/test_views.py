@@ -279,6 +279,8 @@ class TestEmailChangeViewSet(APITestCase):
             EmailChangeRequest.objects.filter(
                 user=self.user,
                 proposed_email="heisenberg@example.com",
+                confirmed_by_proposed_email=False,
+                confirmed_by_current_email=False,
             ).exists()
         )
 
@@ -530,7 +532,7 @@ class TestEmailChangeConfirmView(APITestCase):
         # Email changed mail should not be sent yet
         self.assertEqual(len(mail.outbox), 0)
 
-    def test_post_second_valid_token(self):
+    def test_put_second_valid_token(self):
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.save()
 
@@ -567,7 +569,7 @@ class TestEmailChangeConfirmView(APITestCase):
             ["walter@example.com", "heisenberg@example.com"],
         )
 
-    def test_post_proposed_email_already_exists(self):
+    def test_put_proposed_email_already_exists(self):
         # Should only happen if an account was created with the proposed email
         # address after email change request was made.
         user_factories.UserFactory(email="heisenberg@example.com")
@@ -582,7 +584,7 @@ class TestEmailChangeConfirmView(APITestCase):
             "An account with this email address already exists.", response.json()
         )
 
-    def test_post_already_completed_request(self):
+    def test_put_already_completed_request(self):
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.confirmed_by_proposed_email = True
         self.email_change_request.save()
