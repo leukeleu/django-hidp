@@ -20,6 +20,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 from hidp.accounts import auth as hidp_auth
 from hidp.accounts.mailers import EmailVerificationMailer
+from hidp.api.utils import CSRFProtectedAPIView
 
 from .serializers import LoginSerializer, UserSerializer
 
@@ -98,3 +99,25 @@ class LoginView(GenericAPIView):
             base_url=request.build_absolute_uri("/"),
         ).send()
         return Response(status=HTTPStatus.UNAUTHORIZED)
+
+
+@extend_schema_view(
+    post=extend_schema(
+        request=None,
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+        },
+    )
+)
+class LogoutView(CSRFProtectedAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):  # noqa: PLR6301
+        """
+        Logs out the user, regardless of whether a user is logged in.
+
+        Enforces that a CSRF token is provided.
+        """
+        hidp_auth.logout(request)
+        return Response(status=HTTPStatus.NO_CONTENT)
