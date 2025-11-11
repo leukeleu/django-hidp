@@ -163,9 +163,10 @@ class PasswordResetRequestMailer(BaseMailer):
     html_email_template_name = "hidp/accounts/recovery/email/password_reset_body.html"
     token_generator = default_token_generator
 
-    def __init__(self, user, *, base_url):
+    def __init__(self, user, *, base_url, password_reset_url=None):
         super().__init__(base_url=base_url)
         self.user = user
+        self.password_reset_url = password_reset_url
 
     def get_password_reset_url(self):
         """
@@ -174,13 +175,19 @@ class PasswordResetRequestMailer(BaseMailer):
         Returns:
             An absolute URL to the password reset page for the given user.
         """
+        uidb64 = urlsafe_base64_encode(force_bytes(self.user.pk))
+        token = self.token_generator.make_token(self.user)
+
+        if self.password_reset_url:
+            return self.password_reset_url.format(uidb64=uidb64, token=token)
+
         return urljoin(
             self.base_url,
             reverse(
                 "hidp_accounts:password_reset",
                 kwargs={
-                    "uidb64": urlsafe_base64_encode(force_bytes(self.user.pk)),
-                    "token": self.token_generator.make_token(self.user),
+                    "uidb64": uidb64,
+                    "token": token,
                 },
             ),
         )
@@ -206,12 +213,15 @@ class SetPasswordMailer(BaseMailer):
     email_template_name = "hidp/accounts/recovery/email/set_password_body.txt"
     html_email_template_name = "hidp/accounts/recovery/email/set_password_body.html"
 
-    def __init__(self, user, *, base_url):
+    def __init__(self, user, *, base_url, set_password_url=None):
         super().__init__(base_url=base_url)
         self.user = user
+        self.set_password_url = set_password_url
 
     def get_set_password_url(self):
-        return urljoin(self.base_url, reverse("hidp_account_management:set_password"))
+        return self.set_password_url or urljoin(
+            self.base_url, reverse("hidp_account_management:set_password")
+        )
 
     def get_context(self, extra_context=None):
         return super().get_context(
@@ -235,12 +245,15 @@ class PasswordChangedMailer(BaseMailer):
         "hidp/accounts/management/email/password_changed_body.html"
     )
 
-    def __init__(self, user, *, base_url):
+    def __init__(self, user, *, base_url, password_reset_url=None):
         super().__init__(base_url=base_url)
         self.user = user
+        self.password_reset_url = password_reset_url
 
     def get_password_reset_url(self):
-        return urljoin(self.base_url, reverse("hidp_accounts:password_reset_request"))
+        return self.password_reset_url or urljoin(
+            self.base_url, reverse("hidp_accounts:password_reset_request")
+        )
 
     def get_context(self, extra_context=None):
         return super().get_context(
