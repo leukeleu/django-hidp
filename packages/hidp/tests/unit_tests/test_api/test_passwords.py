@@ -6,7 +6,10 @@ from rest_framework.test import APIClient, APITestCase, override_settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core import mail
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
+from hidp.compat.uuid7 import uuid7
 from hidp.test.factories.user_factories import VerifiedUserFactory
 
 
@@ -21,6 +24,7 @@ class TestPasswordResetRequestView(APITestCase):
         Verify behaviour when a valid email is provided.
 
         - A password reset mail is sent
+        - The correct password reset mail is sent with the correct URL
         - The response status code is 204 No Content
         - The response is empty
         """
@@ -34,9 +38,19 @@ class TestPasswordResetRequestView(APITestCase):
                 },
             )
 
-            self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
             self.assertEqual(len(mail.outbox), 1)
-            self.assertEqual("Reset your password", mail.outbox[0].subject)
+            email = mail.outbox[0]
+            self.assertEqual("Reset your password", email.subject)
+            self.assertEqual(email.to, [user.email])
+            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+            self.assertRegex(
+                email.body,
+                # Matches the password reset URL:
+                # password_reset_url/MDE5MTkyY2UtODE0Yy03NjNlLTlhMGUtMmM1ODk3MGNkYTFj/cced4c-9a0766ea185039a6d293ff660c04007e/  # noqa: E501, W505
+                rf"password_reset_url/{uidb64}/[0-9a-z]+-[0-9a-f]+/",
+            )
+
+            self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
             self.assertIsNone(response.data)
 
         mail.outbox = []
@@ -51,9 +65,13 @@ class TestPasswordResetRequestView(APITestCase):
                 },
             )
 
-            self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
             self.assertEqual(len(mail.outbox), 1)
-            self.assertEqual("Set a password", mail.outbox[0].subject)
+            email = mail.outbox[0]
+            self.assertEqual("Set a password", email.subject)
+            self.assertEqual(email.to, [user.email])
+            self.assertIn("set_password_url/", email.body)
+
+            self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
             self.assertIsNone(response.data)
 
     def test_password_reset_request_invalid_email(self):
@@ -143,9 +161,10 @@ class TestPasswordResetConfirmationView(APITestCase):
 
     def test_password_reset_confirmation_valid(self):
         """
-        Verify behaviour when a valid token and password are provided.
+        Verify behaviour when a valid token, password and user ID are provided.
 
         - The user's password is updated
+        - A changed password email is sent
         - The session hash of the initiating session has been updated
         - Other sessions are no longer valid and contain the old session hash
         - The response status code is 204 No Content
@@ -166,11 +185,18 @@ class TestPasswordResetConfirmationView(APITestCase):
             data={
                 "token": default_token_generator.make_token(self.verified_user),
                 "new_password": new_password,
+                "uidb64": urlsafe_base64_encode(force_bytes(self.verified_user.pk)),
             },
         )
 
         self.verified_user.refresh_from_db()
         self.assertTrue(self.verified_user.check_password(new_password))
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual("Your password has been changed", email.subject)
+        self.assertEqual(email.to, [self.verified_user.email])
+        self.assertIn("password_changed_url/", email.body)
 
         # Session that initiated the password change no longer has the old session hash
         self.assertNotEqual(
@@ -207,6 +233,7 @@ class TestPasswordResetConfirmationView(APITestCase):
             data={
                 "token": "invalid-token",
                 "new_password": "NewP@ssw0rd!",
+                "uidb64": urlsafe_base64_encode(force_bytes(self.verified_user.pk)),
             },
         )
 
@@ -217,9 +244,41 @@ class TestPasswordResetConfirmationView(APITestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
-        errors = response.json()["token"]
+        errors = response.json()["non_field_errors"]
         self.assertEqual(len(errors), 1)
-        self.assertEqual(str(errors[0]), "Invalid or expired token.")
+        self.assertEqual(str(errors[0]), "Invalid token or user ID.")
+
+    def test_password_reset_confirmation_invalid_user_id(self):
+        """
+        Verify behavior when an invalid user ID is provided.
+
+        - The user's password remains unchanged
+        - Session hash remains unchanged
+        - The response status code is 400 Bad Request
+        - The response contains the appropriate error message
+        """
+        self.client.force_login(self.verified_user)
+        pre_password_change_session_hash = self.verified_user.get_session_auth_hash()
+
+        token = default_token_generator.make_token(self.verified_user)
+        response = self.client.post(
+            self.url,
+            data={
+                "token": token,
+                "new_password": "NewP@ssw0rd!",
+                "uidb64": urlsafe_base64_encode(force_bytes(uuid7())),
+            },
+        )
+
+        self.assertTrue(self.verified_user.check_password("P@ssw0rd!"))
+        self.assertEqual(
+            self.verified_user.get_session_auth_hash(), pre_password_change_session_hash
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        errors = response.json()["non_field_errors"]
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(str(errors[0]), "Invalid token or user ID.")
 
     @override_settings(
         AUTH_PASSWORD_VALIDATORS=[
@@ -233,7 +292,7 @@ class TestPasswordResetConfirmationView(APITestCase):
     )
     def test_password_reset_confirmation_invalid_password(self):
         """
-        Verify behavior when an invalid token is provided.
+        Verify behavior when an invalid password is provided.
 
         - The user's password remains unchanged
         - Session hash remains unchanged
@@ -249,6 +308,7 @@ class TestPasswordResetConfirmationView(APITestCase):
             data={
                 "token": token,
                 "new_password": "tooshort",
+                "uidb64": urlsafe_base64_encode(force_bytes(self.verified_user.pk)),
             },
         )
 
@@ -258,6 +318,6 @@ class TestPasswordResetConfirmationView(APITestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
-        errors = response.json()["new_password"]
+        errors = response.json()["non_field_errors"]
         self.assertEqual(len(errors), 1)
         self.assertEqual(str(errors[0]), "Password does not meet requirements.")

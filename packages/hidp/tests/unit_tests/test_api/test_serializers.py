@@ -3,6 +3,8 @@ from rest_framework import exceptions as rest_framework_exceptions
 from django.contrib.auth.tokens import default_token_generator
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
 from hidp.api.serializers import (
     LoginSerializer,
@@ -108,8 +110,12 @@ class TestPasswordResetConfirmationSerializer(TestCase):
         cls.url = reverse("api:password_reset_confirm")
         cls.user = UserFactory()
 
-    def make_serializer(self, token, new_password):
-        data = {"token": token, "new_password": new_password}
+    def make_serializer(self, token, new_password, uidb64=None):
+        data = {
+            "token": token,
+            "new_password": new_password,
+            "uidb64": uidb64 or urlsafe_base64_encode(force_bytes(self.user.pk)),
+        }
         request = self.factory.post(self.url, data=data)
         # PasswordResetConfirmationSerializer requires a 'request.user' in context
         request.user = self.user
@@ -133,9 +139,23 @@ class TestPasswordResetConfirmationSerializer(TestCase):
         with self.assertRaises(rest_framework_exceptions.ValidationError):
             serializer.is_valid(raise_exception=True)
 
-        errors = serializer.errors["token"]
+        errors = serializer.errors["non_field_errors"]
         self.assertEqual(len(errors), 1)
-        self.assertEqual(str(errors[0]), "Invalid or expired token.")
+        self.assertEqual(str(errors[0]), "Invalid token or user ID.")
+
+    def test_serializer_invalid_user_id(self):
+        """Tests that an invalid token raises a ValidationError."""
+        token = default_token_generator.make_token(self.user)
+        serializer = self.make_serializer(
+            token=token, new_password="NewP@ssw0rd!", uidb64="invalid-uidb64"
+        )
+
+        with self.assertRaises(rest_framework_exceptions.ValidationError):
+            serializer.is_valid(raise_exception=True)
+
+        errors = serializer.errors["non_field_errors"]
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(str(errors[0]), "Invalid token or user ID.")
 
     @override_settings(
         AUTH_PASSWORD_VALIDATORS=[
@@ -155,6 +175,6 @@ class TestPasswordResetConfirmationSerializer(TestCase):
         with self.assertRaises(rest_framework_exceptions.ValidationError):
             serializer.is_valid(raise_exception=True)
 
-        errors = serializer.errors["new_password"]
+        errors = serializer.errors["non_field_errors"]
         self.assertEqual(len(errors), 1)
         self.assertEqual(str(errors[0]), "Password does not meet requirements.")
