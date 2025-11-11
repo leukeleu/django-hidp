@@ -168,7 +168,11 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
 #: hidp/api/serializers.py
-msgid "Invalid or expired token."
+msgid "Could not authenticate"
+msgstr ""
+
+#: hidp/api/serializers.py
+msgid "Invalid token or user ID."
 msgstr ""
 
 #: hidp/api/serializers.py
