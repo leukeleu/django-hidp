@@ -200,6 +200,23 @@ class PasswordResetRequestView(GenericAPIView):
     password_reset_request_mailer = PasswordResetRequestMailer
     set_password_mailer = SetPasswordMailer
 
+    def send_email(self, user):
+        mailer_kwargs = {"user": user, "base_url": self.request.build_absolute_uri("/")}
+
+        if user.has_usable_password():
+            mailer_class = self.password_reset_request_mailer
+            mailer_kwargs["password_reset_url"] = settings.PASSWORD_RESET_URL
+        else:
+            mailer_class = self.set_password_mailer
+            mailer_kwargs["set_password_url"] = settings.SET_PASSWORD_URL
+
+        try:
+            mailer_class(**mailer_kwargs).send()
+        except Exception:
+            # Do not leak the existence of the user. Log the error and
+            # continue as if the email was sent successfully.
+            logger.exception("Failed to send password reset email.")
+
     def post(self, request, *args, **kwargs):
         # Get user from serializer if it exists for given email
         serializer = self.get_serializer(data=request.data)
@@ -209,20 +226,7 @@ class PasswordResetRequestView(GenericAPIView):
 
         # Send an password reset email if the user exists
         if user:
-            mailer_class = (
-                self.password_reset_request_mailer
-                if user.has_usable_password()
-                else self.set_password_mailer
-            )
-            try:
-                mailer_class(
-                    user=user,
-                    base_url=self.request.build_absolute_uri("/"),
-                ).send()
-            except Exception:
-                # Do not leak the existence of the user. Log the error and
-                # continue as if the email was sent successfully.
-                logger.exception("Failed to send password reset email.")
+            self.send_email(user)
 
         return Response(status=HTTPStatus.NO_CONTENT)
 
@@ -238,6 +242,7 @@ class PasswordResetConfirmationView(GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = PasswordResetConfirmationSerializer
+    password_changed_mailer = PasswordChangedMailer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -250,4 +255,9 @@ class PasswordResetConfirmationView(GenericAPIView):
         # Make sure the current sessions remains valid after the password change
         update_session_auth_hash(request, request.user)
 
+        self.password_changed_mailer(
+            request.user,
+            base_url=request.build_absolute_uri("/"),
+            password_reset_url=settings.PASSWORD_CHANGED_URL,
+        ).send()
         return Response(status=HTTPStatus.NO_CONTENT)
