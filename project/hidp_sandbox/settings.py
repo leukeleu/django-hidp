@@ -277,6 +277,7 @@ DEFAULT_FROM_EMAIL = config.getliteral("app", "default_from_email")
 
 # URLs/URL templates for urls sent in emails
 EMAIL_VERIFICATION_URL = config.getliteral("app", "email_verification_url")
+
 # Sentry
 
 SENTRY_DSN = config.getliteral("app", "sentry_dsn", fallback=None)

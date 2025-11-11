@@ -1,0 +1,16 @@
+services:
+  nginx:
+    ports: !reset []
+    networks:
+      default:
+      web:
+        aliases:
+          - 'hidp_sandbox-nginx'
+
+  postgres:
+    ports: !override ['5432']
+
+networks:
+  web:
+    external: true
+    name: shared-network

@@ -6,6 +6,7 @@
         "description": "Hello, ID Please"
     },
     "paths": {
+<<<<<<< HEAD
         "/api/password-reset/": {
             "post": {
                 "operationId": "password_reset_create",
@@ -65,6 +66,95 @@
                     },
                     "required": true
                 },
+||||||| 7a67e26
+=======
+        "/api/email-verified/": {
+            "get": {
+                "operationId": "email_verified_retrieve",
+                "tags": [
+                    "email-verified"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetEmailVerifiedResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/email-verified/resend/": {
+            "post": {
+                "operationId": "email_verified_resend_create",
+                "tags": [
+                    "email-verified"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/login/": {
+            "post": {
+                "operationId": "login_create",
+                "tags": [
+                    "login"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "401": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/logout/": {
+            "post": {
+                "operationId": "logout_create",
+                "description": "Logs out the user, regardless of whether a user is logged in.\n\nEnforces that a CSRF token is provided.",
+                "tags": [
+                    "logout"
+                ],
+>>>>>>> feature/api
                 "security": [
                     {
                         "cookieAuth": []
@@ -230,6 +320,7 @@
     },
     "components": {
         "schemas": {
+<<<<<<< HEAD
             "PasswordResetConfirmation": {
                 "type": "object",
                 "properties": {
@@ -255,6 +346,35 @@
                 },
                 "required": [
                     "email"
+||||||| 7a67e26
+=======
+            "GetEmailVerifiedResponse": {
+                "type": "object",
+                "properties": {
+                    "email_verified": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email_verified"
+                ]
+            },
+            "Login": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "password",
+                    "username"
+>>>>>>> feature/api
                 ]
             },
             "PatchedUser": {
