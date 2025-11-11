@@ -287,7 +287,10 @@ class TestPasswordResetConfirmationView(APITestCase):
                 "OPTIONS": {
                     "min_length": 10,
                 },
-            }
+            },
+            {
+                "NAME": "hidp.accounts.password_validation.DigitValidator",
+            },
         ]
     )
     def test_password_reset_confirmation_invalid_password(self):
@@ -319,5 +322,11 @@ class TestPasswordResetConfirmationView(APITestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
         errors = response.json()["non_field_errors"]
-        self.assertEqual(len(errors), 1)
-        self.assertEqual(str(errors[0]), "Password does not meet requirements.")
+        self.assertEqual(len(errors), 2)
+        self.assertEqual(
+            str(errors[0]),
+            "This password is too short. It must contain at least 10 characters.",
+        )
+        self.assertEqual(
+            str(errors[1]), "This password does not contain any digits (0-9)."
+        )
