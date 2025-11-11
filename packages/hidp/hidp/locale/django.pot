@@ -174,10 +174,6 @@ msgstr ""
 msgid "Invalid token or user ID."
 msgstr ""
 
-#: hidp/api/serializers.py
-msgid "Password does not meet requirements."
-msgstr ""
-
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
 msgstr ""
