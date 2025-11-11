@@ -8,6 +8,7 @@ from django.contrib.auth.password_validation import (
 )
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.decorators import method_decorator
+from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.debug import sensitive_variables
 
@@ -65,22 +66,38 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         return attrs
 
 
-@method_decorator(sensitive_variables("value"), name="validate_token")
-@method_decorator(sensitive_variables("value"), name="validate_new_password")
+@method_decorator(sensitive_variables(), name="_validate_new_password")
+@method_decorator(sensitive_variables(), name="validate")
 class PasswordResetConfirmationSerializer(serializers.Serializer):
     token = serializers.CharField()
+    uidb64 = serializers.CharField()
     new_password = serializers.CharField()
 
-    def validate_token(self, value):
-        if not default_token_generator.check_token(self.context["request"].user, value):
-            raise serializers.ValidationError(_("Invalid or expired token."))
-        return value
-
-    def validate_new_password(self, value):
+    def _validate_new_password(self, user, value):  # noqa: PLR6301
         try:
-            validate_password(password=value, user=self.context["request"].user)
+            validate_password(password=value, user=user)
         except django_exceptions.ValidationError:
             raise serializers.ValidationError(
                 _("Password does not meet requirements.")
             ) from None
-        return value
+
+    def validate(self, attrs):
+        message = _("Invalid token or user ID.")
+        try:
+            # urlsafe_base64_decode() decodes to bytestring
+            uid = urlsafe_base64_decode(attrs["uidb64"]).decode()
+            user = UserModel.objects.get(pk=uid)
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            UserModel.DoesNotExist,
+            django_exceptions.ValidationError,
+        ):
+            user = None
+
+        if not user or not default_token_generator.check_token(user, attrs["token"]):
+            raise serializers.ValidationError(message)
+
+        self._validate_new_password(user, attrs["new_password"])
+        return attrs
