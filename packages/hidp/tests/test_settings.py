@@ -82,6 +82,8 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
+# URLs/URL templates for urls sent in emails
+EMAIL_VERIFICATION_URL = "email_verification_url/{token}/"
 USE_TZ = True
 
 AUTH_USER_MODEL = "custom_user.CustomUser"

@@ -7,23 +7,34 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     extend_schema,
     extend_schema_view,
+    inline_serializer,
 )
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework import mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.serializers import BooleanField
 
+from django.conf import settings
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.http import Http404
+from django.utils.decorators import method_decorator
+from django.views.decorators.debug import sensitive_post_parameters
 
+from hidp.accounts import auth as hidp_auth
 from hidp.accounts.mailers import (
+    EmailVerificationMailer,
+    PasswordChangedMailer,
     PasswordResetRequestMailer,
     SetPasswordMailer,
 )
+from hidp.api.utils import CSRFProtectedAPIView
 
 from .serializers import (
+    LoginSerializer,
     PasswordResetConfirmationSerializer,
     PasswordResetRequestSerializer,
     UserSerializer,
@@ -71,6 +82,108 @@ class UserViewSet(
         if self.kwargs.get(self.lookup_url_kwarg or self.lookup_field) == "me":
             return self.request.user
         raise Http404
+
+
+@method_decorator(sensitive_post_parameters("username", "password"), name="dispatch")
+@extend_schema_view(
+    post=extend_schema(
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+            HTTPStatus.UNAUTHORIZED: None,
+        },
+    )
+)
+class LoginView(GenericAPIView):
+    permission_classes = []
+    authentication_classes = []
+    serializer_class = LoginSerializer
+    verification_mailer = EmailVerificationMailer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # User is authenticated and is allowed to log in.
+        user = serializer.validated_data["user"]
+
+        # Only log in the user if their email address has been verified.
+        if user.email_verified:
+            hidp_auth.login(request, user)
+            return Response(status=HTTPStatus.NO_CONTENT)
+
+        # If the user's email address is not verified, send a verification email.
+        self.verification_mailer(
+            user,
+            base_url=request.build_absolute_uri("/"),
+            verification_url=settings.EMAIL_VERIFICATION_URL,
+        ).send()
+        return Response(status=HTTPStatus.UNAUTHORIZED)
+
+
+@extend_schema_view(
+    post=extend_schema(
+        request=None,
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+        },
+    )
+)
+class LogoutView(CSRFProtectedAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):  # noqa: PLR6301
+        """
+        Logs out the user, regardless of whether a user is logged in.
+
+        Enforces that a CSRF token is provided.
+        """
+        hidp_auth.logout(request)
+        return Response(status=HTTPStatus.NO_CONTENT)
+
+
+@extend_schema_view(
+    get=extend_schema(
+        responses={
+            HTTPStatus.OK: inline_serializer(
+                name="GetEmailVerifiedResponse",
+                fields={
+                    "email_verified": BooleanField(),
+                },
+            )
+        },
+    )
+)
+class EmailVerifiedView(GenericAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):  # noqa: PLR6301
+        return Response(
+            {"email_verified": bool(request.user.email_verified)}, status=HTTPStatus.OK
+        )
+
+
+@extend_schema_view(
+    post=extend_schema(
+        request=None,
+        responses={HTTPStatus.NO_CONTENT: None},
+    ),
+)
+class EmailVerificationResendView(GenericAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    verification_mailer = EmailVerificationMailer
+
+    def post(self, request, *args, **kwargs):
+        if request.user.email_verified:
+            raise ValidationError("Email is already verified.")
+        self.verification_mailer(
+            request.user,
+            base_url=request.build_absolute_uri("/"),
+            verification_url=settings.EMAIL_VERIFICATION_URL,
+        ).send()
+        return Response(status=HTTPStatus.NO_CONTENT)
 
 
 @extend_schema_view(
