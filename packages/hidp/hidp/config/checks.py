@@ -41,10 +41,13 @@ REQUIRED_MIDDLEWARE = [
 
 OTP_REQUIRED_MIDDLEWARE = "django_otp.middleware.OTPMiddleware"
 
-API_REQUIRED_EMAIL_URL_SETTINGS = [
-    "EMAIL_CHANGE_CONFIRMATION_URL",
-    "EMAIL_CHANGE_CANCEL_URL",
-]
+# Mapping of required email URL settings and a boolean to indicate if they need a
+# `{token}` placeholder
+REQUIRED_EMAIL_URL_SETTINGS = {
+    "EMAIL_VERIFICATION_URL": True,
+    "EMAIL_CHANGE_CONFIRMATION_URL": True,
+    "EMAIL_CHANGE_CANCEL_URL": False,
+}
 
 
 class Tags:
@@ -210,23 +213,12 @@ E010 = checks.Error(
     id="hidp.E010",
 )
 
-
-@checks.register(Tags.middleware)
-def check_otp_middleware(**kwargs):
-    if (
-        "hidp.otp" in settings.INSTALLED_APPS
-        and OTP_REQUIRED_MIDDLEWARE not in settings.MIDDLEWARE
-    ):
-        return [E010]
-    return []
-
-
 # Ensure required API settings are set if API is installed
 E011 = checks.Error(
     "API is enabled but email url settings are missing.",
     hint=(
         "Add the following settings with the corresponding URL/URL template"
-        f" values: {', '.join(API_REQUIRED_EMAIL_URL_SETTINGS)}"
+        f" values: {', '.join(REQUIRED_EMAIL_URL_SETTINGS.keys())}"
     ),
     id="hidp.E011",
 )
@@ -246,17 +238,24 @@ def check_api_email_url_settings(**kwargs):
 
     errors = set()
 
-    for setting in API_REQUIRED_EMAIL_URL_SETTINGS:
-        if not getattr(settings, setting, None):
+    for setting_name, requires_token in REQUIRED_EMAIL_URL_SETTINGS.items():
+        url = getattr(settings, setting_name, None)
+        if not url:
             errors.add(E011)
-
-    if (
-        getattr(settings, "EMAIL_CHANGE_CONFIRMATION_URL", None)
-        and "{token}" not in settings.EMAIL_CHANGE_CONFIRMATION_URL
-    ):
-        errors.add(E012)
+        elif requires_token and "{token}" not in url:
+            errors.add(E012)
 
     return list(errors)
+
+
+@checks.register(Tags.middleware)
+def check_otp_middleware(**kwargs):
+    if (
+        "hidp.otp" in settings.INSTALLED_APPS
+        and OTP_REQUIRED_MIDDLEWARE not in settings.MIDDLEWARE
+    ):
+        return [E010]
+    return []
 
 
 # If django-otp is installed but hidp.otp is not, show a warning

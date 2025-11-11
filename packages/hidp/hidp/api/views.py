@@ -12,6 +12,7 @@ from drf_spectacular.utils import (
 from oauth2_provider.contrib.rest_framework import OAuth2Authentication
 from rest_framework import mixins, viewsets
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -134,6 +135,50 @@ class LogoutView(CSRFProtectedAPIView):
         Enforces that a CSRF token is provided.
         """
         hidp_auth.logout(request)
+        return Response(status=HTTPStatus.NO_CONTENT)
+
+
+@extend_schema_view(
+    get=extend_schema(
+        responses={
+            HTTPStatus.OK: inline_serializer(
+                name="GetEmailVerifiedResponse",
+                fields={
+                    "email_verified": BooleanField(),
+                },
+            )
+        },
+    )
+)
+class EmailVerifiedView(GenericAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):  # noqa: PLR6301
+        return Response(
+            {"email_verified": bool(request.user.email_verified)}, status=HTTPStatus.OK
+        )
+
+
+@extend_schema_view(
+    post=extend_schema(
+        request=None,
+        responses={HTTPStatus.NO_CONTENT: None},
+    ),
+)
+class EmailVerificationResendView(GenericAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    verification_mailer = EmailVerificationMailer
+
+    def post(self, request, *args, **kwargs):
+        if request.user.email_verified:
+            raise ValidationError("Email is already verified.")
+        self.verification_mailer(
+            request.user,
+            base_url=request.build_absolute_uri("/"),
+            verification_url=settings.EMAIL_VERIFICATION_URL,
+        ).send()
         return Response(status=HTTPStatus.NO_CONTENT)
 
 

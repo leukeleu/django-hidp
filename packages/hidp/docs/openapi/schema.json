@@ -106,6 +106,49 @@
                 }
             }
         },
+        "/api/email-verified/": {
+            "get": {
+                "operationId": "email_verified_retrieve",
+                "tags": [
+                    "email-verified"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetEmailVerifiedResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/email-verified/resend/": {
+            "post": {
+                "operationId": "email_verified_resend_create",
+                "tags": [
+                    "email-verified"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/login/": {
             "post": {
                 "operationId": "login_create",
@@ -343,6 +386,17 @@
                 },
                 "required": [
                     "confirmation_token"
+                ]
+            },
+            "GetEmailVerifiedResponse": {
+                "type": "object",
+                "properties": {
+                    "email_verified": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email_verified"
                 ]
             },
             "Login": {

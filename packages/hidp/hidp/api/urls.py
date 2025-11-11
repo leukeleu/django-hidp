@@ -5,6 +5,8 @@ from django.urls import include, path
 from .views import (
     EmailChangeConfirmView,
     EmailChangeView,
+    EmailVerificationResendView,
+    EmailVerifiedView,
     LoginView,
     LogoutView,
     UserViewSet,
@@ -19,6 +21,12 @@ urlpatterns = [
     path("", include(router.urls)),
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
+    path("email-verified/", EmailVerifiedView.as_view(), name="email_verified"),
+    path(
+        "email-verified/resend/",
+        EmailVerificationResendView.as_view(),
+        name="email_verified_resend",
+    ),
     path(
         "email-change/",
         EmailChangeView.as_view({"post": "create", "delete": "destroy"}),
