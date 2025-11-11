@@ -277,6 +277,9 @@ DEFAULT_FROM_EMAIL = config.getliteral("app", "default_from_email")
 
 # URLs/URL templates for urls sent in emails
 EMAIL_VERIFICATION_URL = config.getliteral("app", "email_verification_url")
+PASSWORD_CHANGED_URL = config.getliteral("app", "password_changed_url")
+PASSWORD_RESET_URL = config.getliteral("app", "password_reset_url")
+SET_PASSWORD_URL = config.getliteral("app", "set_password_url")
 
 # Sentry
 

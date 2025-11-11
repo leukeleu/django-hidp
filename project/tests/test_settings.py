@@ -24,6 +24,9 @@ LOGGING = {
 
 # URLs/URL templates for urls sent in emails
 EMAIL_VERIFICATION_URL = "email_verification_url/{token}/"
+PASSWORD_CHANGED_URL = "password_changed_url/"
+PASSWORD_RESET_URL = "password_reset_url/{uidb64}/{token}/"  # noqa: S105
+SET_PASSWORD_URL = "set_password_url/"
 
 # Test key
 SECRET_KEY = "secret-key-only-for-testing"
