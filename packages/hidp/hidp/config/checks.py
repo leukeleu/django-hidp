@@ -1,5 +1,7 @@
 import importlib
 
+from typing import Any
+
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -7,6 +9,17 @@ from django.core import checks
 from django.urls import NoReverseMatch, reverse
 
 from ..accounts.models import BaseUser
+
+
+class HashableError(checks.Error):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        if not kwargs.get("id"):
+            raise TypeError("`id` needs to be set for Error to be Hashable")
+        super().__init__(*args, **kwargs)
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
 
 REQUIRED_APPS = [
     "django.contrib.contenttypes",
@@ -214,7 +227,7 @@ E010 = checks.Error(
 )
 
 # Ensure required API settings are set if API is installed
-E011 = checks.Error(
+E011 = HashableError(
     "API is enabled but email url settings are missing.",
     hint=(
         "Add the following settings with the corresponding URL/URL template"
@@ -224,7 +237,7 @@ E011 = checks.Error(
 )
 
 # Ensure urls that should contain a token have a replacement field for it
-E012 = checks.Error(
+E012 = HashableError(
     "URLs that should contain a token don't have a replacement field for it.",
     hint="Add a replacement field (`{token}`) in the URL string.",
     id="hidp.E012",
