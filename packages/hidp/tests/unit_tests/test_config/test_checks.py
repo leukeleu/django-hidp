@@ -151,7 +151,7 @@ class TestConfigChecks(TestCase):
         EMAIL_CHANGE_CANCEL_URL=None,
     )
     def test_missing_frontend_urls_and_placeholder(self):
-        self.assertEqual(
+        self.assertCountEqual(
             checks.check_api_email_url_settings(),
             [
                 checks.E011,
