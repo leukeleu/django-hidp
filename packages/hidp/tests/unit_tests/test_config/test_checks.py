@@ -115,3 +115,46 @@ class TestConfigChecks(TestCase):
                 checks.E010,
             ],
         )
+
+    @override_settings(
+        INSTALLED_APPS=["hidp.api"],
+        EMAIL_VERIFICATION_URL=None,
+        EMAIL_CHANGE_CONFIRMATION_URL=None,
+        EMAIL_CHANGE_CANCEL_URL=None,
+    )
+    def test_missing_frontend_urls(self):
+        self.assertEqual(
+            checks.check_api_email_url_settings(),
+            [
+                checks.E011,
+            ],
+        )
+
+    @override_settings(
+        INSTALLED_APPS=["hidp.api"],
+        EMAIL_VERIFICATION_URL="/test_url/verify",
+        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/",
+        EMAIL_CHANGE_CANCEL_URL="/test_url/change-email/cancel/",
+    )
+    def test_frontend_urls_missing_placeholder(self):
+        self.assertEqual(
+            checks.check_api_email_url_settings(),
+            [
+                checks.E012,
+            ],
+        )
+
+    @override_settings(
+        INSTALLED_APPS=["hidp.api"],
+        EMAIL_VERIFICATION_URL="/test_url/verify",
+        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/",
+        EMAIL_CHANGE_CANCEL_URL=None,
+    )
+    def test_missing_frontend_urls_and_placeholder(self):
+        self.assertEqual(
+            checks.check_api_email_url_settings(),
+            [
+                checks.E011,
+                checks.E012,
+            ],
+        )
