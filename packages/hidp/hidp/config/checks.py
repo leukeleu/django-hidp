@@ -41,12 +41,12 @@ REQUIRED_MIDDLEWARE = [
 
 OTP_REQUIRED_MIDDLEWARE = "django_otp.middleware.OTPMiddleware"
 
-# Mapping of required email URL settings and a boolean to indicate if they need a
-# `{token}` placeholder
+# Mapping of required email URL settings and the URL placeholders that should be
+# included
 REQUIRED_EMAIL_URL_SETTINGS = {
-    "EMAIL_VERIFICATION_URL": True,
-    "EMAIL_CHANGE_CONFIRMATION_URL": True,
-    "EMAIL_CHANGE_CANCEL_URL": False,
+    "EMAIL_VERIFICATION_URL": ["{token}"],
+    "EMAIL_CHANGE_CONFIRMATION_URL": ["{token}"],
+    "EMAIL_CHANGE_CANCEL_URL": [],
 }
 
 
@@ -238,12 +238,17 @@ def check_api_email_url_settings(**kwargs):
 
     errors = set()
 
-    for setting_name, requires_token in REQUIRED_EMAIL_URL_SETTINGS.items():
-        url = getattr(settings, setting_name, None)
+    for email_setting, required_url_placeholders in REQUIRED_EMAIL_URL_SETTINGS.items():
+        url = getattr(settings, email_setting, None)
+        # No URL is set for a required email setting
         if not url:
             errors.add(E011)
-        elif requires_token and "{token}" not in url:
-            errors.add(E012)
+            continue
+
+        # If an URL is set, check if the required placeholders are present
+        for placeholder in required_url_placeholders:
+            if placeholder == "{token}" and "{token}" not in url:
+                errors.add(E012)
 
     return list(errors)
 
