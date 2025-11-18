@@ -3,6 +3,8 @@ from rest_framework.routers import DefaultRouter
 from django.urls import include, path
 
 from .views import (
+    EmailChangeConfirmView,
+    EmailChangeView,
     EmailVerificationResendView,
     EmailVerifiedView,
     LoginView,
@@ -24,5 +26,15 @@ urlpatterns = [
         "email-verified/resend/",
         EmailVerificationResendView.as_view(),
         name="email_verified_resend",
+    ),
+    path(
+        "email-change/",
+        EmailChangeView.as_view({"post": "create", "delete": "destroy"}),
+        name="email_change",
+    ),
+    path(
+        "email-change-confirm/",
+        EmailChangeConfirmView.as_view(),
+        name="email_change_confirm",
     ),
 ]
