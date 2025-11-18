@@ -180,7 +180,7 @@ msgstr ""
 
 #: hidp/api/serializers.py
 msgid "Invalid token or user ID."
-msgstr "
+msgstr ""
 
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
