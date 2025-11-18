@@ -97,7 +97,6 @@ class LoginView(GenericAPIView):
     permission_classes = []
     authentication_classes = []
     serializer_class = LoginSerializer
-    verification_mailer = EmailVerificationMailer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -112,7 +111,7 @@ class LoginView(GenericAPIView):
             return Response(status=HTTPStatus.NO_CONTENT)
 
         # If the user's email address is not verified, send a verification email.
-        self.verification_mailer(
+        EmailVerificationMailer(
             user,
             base_url=request.build_absolute_uri("/"),
             verification_url=settings.EMAIL_VERIFICATION_URL,
@@ -173,12 +172,11 @@ class EmailVerifiedView(GenericAPIView):
 class EmailVerificationResendView(GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
-    verification_mailer = EmailVerificationMailer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # noqa: PLR6301
         if request.user.email_verified:
             raise ValidationError("Email is already verified.")
-        self.verification_mailer(
+        EmailVerificationMailer(
             request.user,
             base_url=request.build_absolute_uri("/"),
             verification_url=settings.EMAIL_VERIFICATION_URL,
@@ -197,17 +195,15 @@ class PasswordResetRequestView(GenericAPIView):
     authentication_classes = []
     permission_classes = []
     serializer_class = PasswordResetRequestSerializer
-    password_reset_request_mailer = PasswordResetRequestMailer
-    set_password_mailer = SetPasswordMailer
 
     def send_email(self, user):
         mailer_kwargs = {"user": user, "base_url": self.request.build_absolute_uri("/")}
 
         if user.has_usable_password():
-            mailer_class = self.password_reset_request_mailer
+            mailer_class = PasswordResetRequestMailer
             mailer_kwargs["password_reset_url"] = settings.PASSWORD_RESET_URL
         else:
-            mailer_class = self.set_password_mailer
+            mailer_class = SetPasswordMailer
             mailer_kwargs["set_password_url"] = settings.SET_PASSWORD_URL
 
         try:
@@ -242,7 +238,6 @@ class PasswordResetConfirmationView(GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = PasswordResetConfirmationSerializer
-    password_changed_mailer = PasswordChangedMailer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -255,7 +250,7 @@ class PasswordResetConfirmationView(GenericAPIView):
         # Make sure the current sessions remains valid after the password change
         update_session_auth_hash(request, request.user)
 
-        self.password_changed_mailer(
+        PasswordChangedMailer(
             request.user,
             base_url=request.build_absolute_uri("/"),
             password_reset_url=settings.PASSWORD_CHANGED_URL,
