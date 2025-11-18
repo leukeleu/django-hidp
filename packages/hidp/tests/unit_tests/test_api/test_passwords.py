@@ -93,8 +93,8 @@ class TestPasswordResetRequestView(APITestCase):
         self.assertEqual(len(mail.outbox), 0)
         self.assertIsNone(response.data)
 
-    @patch("hidp.api.views.PasswordResetRequestView.password_reset_request_mailer")
-    @patch("hidp.api.views.PasswordResetRequestView.set_password_mailer")
+    @patch("hidp.api.views.PasswordResetRequestMailer")
+    @patch("hidp.api.views.SetPasswordMailer")
     @patch("hidp.api.views.logger")
     def test_password_reset_request_mailer_raises_exception(
         self, mock_logger, mock_set_password_mailer, mock_password_reset_mailer
