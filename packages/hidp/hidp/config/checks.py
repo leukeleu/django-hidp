@@ -263,6 +263,7 @@ def check_api_email_url_settings(**kwargs):
 
     for email_setting, required_url_placeholders in REQUIRED_EMAIL_URL_SETTINGS.items():
         url = getattr(settings, email_setting, None)
+
         # No URL is set for a required email setting
         if not url:
             errors.add(E011)
