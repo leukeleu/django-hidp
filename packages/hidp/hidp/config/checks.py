@@ -1,5 +1,7 @@
 import importlib
 
+from typing import Any
+
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -7,6 +9,17 @@ from django.core import checks
 from django.urls import NoReverseMatch, reverse
 
 from ..accounts.models import BaseUser
+
+
+class HashableError(checks.Error):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        if not kwargs.get("id"):
+            raise TypeError("`id` needs to be set for Error to be Hashable")
+        super().__init__(*args, **kwargs)
+
+    def __hash__(self) -> int:
+        return hash(self.id)
+
 
 REQUIRED_APPS = [
     "django.contrib.contenttypes",
@@ -48,6 +61,8 @@ REQUIRED_EMAIL_URL_SETTINGS = {
     "PASSWORD_CHANGED_URL": [],
     "PASSWORD_RESET_URL": ["{token}", "{uidb64}"],
     "SET_PASSWORD_URL": [],
+    "EMAIL_CHANGE_CONFIRMATION_URL": ["{token}"],
+    "EMAIL_CHANGE_CANCEL_URL": [],
 }
 
 
@@ -215,7 +230,7 @@ E010 = checks.Error(
 )
 
 # Ensure required API settings are set if API is installed
-E011 = checks.Error(
+E011 = HashableError(
     "API is enabled but email url settings are missing.",
     hint=(
         "Add the following settings with the corresponding URL/URL template"
@@ -225,14 +240,14 @@ E011 = checks.Error(
 )
 
 # Ensure urls that should contain a token have a replacement field for it
-E012 = checks.Error(
+E012 = HashableError(
     "URLs that should contain a token don't have a replacement field for it.",
     hint="Add a replacement field (`{token}`) in the URL string.",
     id="hidp.E012",
 )
 
 # Ensure urls that should contain a uidb64 have a replacement field for it
-E013 = checks.Error(
+E013 = HashableError(
     "URLs that should contain a uidb64 don't have a replacement field for it.",
     hint="Add a replacement field (`{uidb64}`) in the URL string.",
     id="hidp.E013",
@@ -244,23 +259,23 @@ def check_api_email_url_settings(**kwargs):
     if not apps.is_installed("hidp.api"):
         return []
 
-    errors = []
+    errors = set()
 
     for email_setting, required_url_placeholders in REQUIRED_EMAIL_URL_SETTINGS.items():
         url = getattr(settings, email_setting, None)
         # No URL is set for a required email setting
         if not url:
-            errors.append(E011)
+            errors.add(E011)
             continue
 
         # If an URL is set, check if the required placeholders are present
         for placeholder in required_url_placeholders:
             if placeholder == "{token}" and "{token}" not in url:
-                errors.append(E012)
+                errors.add(E012)
             elif placeholder == "{uidb64}" and "{uidb64}" not in url:
-                errors.append(E013)
+                errors.add(E013)
 
-    return errors
+    return list(errors)
 
 
 @checks.register(Tags.middleware)

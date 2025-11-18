@@ -280,6 +280,10 @@ EMAIL_VERIFICATION_URL = config.getliteral("app", "email_verification_url")
 PASSWORD_CHANGED_URL = config.getliteral("app", "password_changed_url")
 PASSWORD_RESET_URL = config.getliteral("app", "password_reset_url")
 SET_PASSWORD_URL = config.getliteral("app", "set_password_url")
+EMAIL_CHANGE_CONFIRMATION_URL = config.getliteral(
+    "app", "email_change_confirmation_url"
+)
+EMAIL_CHANGE_CANCEL_URL = config.getliteral("app", "email_change_cancel_url")
 
 # Sentry
 

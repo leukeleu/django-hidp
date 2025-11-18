@@ -6,6 +6,106 @@
         "description": "Hello, ID Please"
     },
     "paths": {
+        "/api/email-change/": {
+            "post": {
+                "operationId": "email_change_create",
+                "tags": [
+                    "email-change"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChange"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChange"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChange"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "No response body"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "email_change_destroy",
+                "tags": [
+                    "email-change"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/email-change-confirm/": {
+            "put": {
+                "operationId": "email_change_confirm_update",
+                "description": "Get the existing email change request and update it.\n\nIf the request is complete the email of the user is updated and\nan email to inform the user is sent.\n\nReturns a response containing whether the request is confirmed\nby the current and proposed mail. If both have confirmed the request\nthe change can be considered complete.",
+                "tags": [
+                    "email-change-confirm"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpdateChangeEmailRequestResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/email-verified/": {
             "get": {
                 "operationId": "email_verified_retrieve",
@@ -328,6 +428,37 @@
     },
     "components": {
         "schemas": {
+            "EmailChange": {
+                "type": "object",
+                "properties": {
+                    "proposed_email": {
+                        "type": "string",
+                        "format": "email",
+                        "writeOnly": true,
+                        "maxLength": 254
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "password",
+                    "proposed_email"
+                ]
+            },
+            "EmailChangeConfirm": {
+                "type": "object",
+                "properties": {
+                    "confirmation_token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "confirmation_token"
+                ]
+            },
             "GetEmailVerifiedResponse": {
                 "type": "object",
                 "properties": {
@@ -403,6 +534,21 @@
                         "title": "Email address"
                     }
                 }
+            },
+            "UpdateChangeEmailRequestResponse": {
+                "type": "object",
+                "properties": {
+                    "confirmed_by_current_email": {
+                        "type": "boolean"
+                    },
+                    "confirmed_by_proposed_email": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "confirmed_by_current_email",
+                    "confirmed_by_proposed_email"
+                ]
             },
             "User": {
                 "type": "object",

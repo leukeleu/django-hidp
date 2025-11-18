@@ -48,11 +48,11 @@ msgstr "Bevestig dat je geen robot bent."
 msgid "Please note that this also changes the username you use to sign in."
 msgstr "Let op dat hiermee ook je gebruikersnaam voor het inloggen verandert."
 
-#: hidp/accounts/forms.py
+#: hidp/accounts/forms.py hidp/api/serializers.py
 msgid "The new email address is the same as the current email address."
 msgstr "Het nieuwe e-mailadres is hetzelfde als het huidige e-mailadres."
 
-#: hidp/accounts/forms.py
+#: hidp/accounts/forms.py hidp/api/serializers.py
 msgid "The password is incorrect."
 msgstr "Het wachtwoord is incorrect."
 
@@ -168,7 +168,15 @@ msgid "Sorry, changing your email address is not possible because an account wit
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
 #: hidp/api/serializers.py
+msgid "An account with this email address already exists."
+msgstr "Er bestaat al een account met dit e-mailadres."
+
+#: hidp/api/serializers.py
 msgid "Could not authenticate"
+msgstr ""
+
+#: hidp/api/serializers.py
+msgid "Invalid or expired token."
 msgstr ""
 
 #: hidp/api/serializers.py
