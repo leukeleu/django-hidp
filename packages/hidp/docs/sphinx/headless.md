@@ -28,3 +28,27 @@ This approach is compatible with browsers, command-line tools, and scripts that 
 ## OpenAPI Specification
 
 The documentation for the API endpoints is available in the [OpenAPI Specification](./redoc-static.html){.external}.
+
+## Configuring Frontend URLs for Email Templates
+
+When using HIdP in a frontend app, you must explicitly define the URLs used in email templates. There are **no defaults**: all URLs must be set in your Django settings.
+
+Required settings:
+
+```
+EMAIL_VERIFICATION_URL
+EMAIL_CHANGE_CONFIRMATION_URL
+PASSWORD_CHANGED_URL
+PASSWORD_RESET_URL
+SET_PASSWORD_URL
+EMAIL_CHANGE_CANCEL_URL
+```
+
+Each setting should be a string containing the required placeholders (e.g. `{token}`, `{uidb64}`) for your frontend routes. Example:
+
+```python
+EMAIL_VERIFICATION_URL = "https://your-frontend-app.example.com/verify/{token}/"
+PASSWORD_RESET_URL = "https://your-frontend-app.example.com/reset/{uidb64}/{token}/"
+```
+
+Each setting must be defined and include the correct placeholder(s) for tokens or IDs (e.g. `{token}`, `{uidb64}`) as required by the email flow. If a required setting is missing or a placeholder is incorrect, HIdP will raise a configuration error during startup.
