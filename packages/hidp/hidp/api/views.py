@@ -1,3 +1,5 @@
+import logging
+
 from datetime import timedelta
 from http import HTTPStatus
 
@@ -19,7 +21,7 @@ from rest_framework.response import Response
 from rest_framework.serializers import BooleanField
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.http import Http404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -28,7 +30,12 @@ from django.views.decorators.debug import sensitive_post_parameters
 from hidp.accounts import auth as hidp_auth
 from hidp.accounts import mailers, tokens
 from hidp.accounts.email_change import Recipient
-from hidp.accounts.mailers import EmailVerificationMailer
+from hidp.accounts.mailers import (
+    EmailVerificationMailer,
+    PasswordChangedMailer,
+    PasswordResetRequestMailer,
+    SetPasswordMailer,
+)
 from hidp.accounts.models import EmailChangeRequest
 from hidp.api.utils import CSRFProtectedAPIView
 
@@ -36,10 +43,14 @@ from .serializers import (
     EmailChangeConfirmSerializer,
     EmailChangeSerializer,
     LoginSerializer,
+    PasswordResetConfirmationSerializer,
+    PasswordResetRequestSerializer,
     UserSerializer,
 )
 
 UserModel = get_user_model()
+
+logger = logging.getLogger(__name__)
 
 
 @extend_schema_view(
@@ -94,7 +105,6 @@ class LoginView(GenericAPIView):
     permission_classes = []
     authentication_classes = []
     serializer_class = LoginSerializer
-    verification_mailer = EmailVerificationMailer
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -109,9 +119,10 @@ class LoginView(GenericAPIView):
             return Response(status=HTTPStatus.NO_CONTENT)
 
         # If the user's email address is not verified, send a verification email.
-        self.verification_mailer(
+        EmailVerificationMailer(
             user,
             base_url=request.build_absolute_uri("/"),
+            verification_url=settings.EMAIL_VERIFICATION_URL,
         ).send()
         return Response(status=HTTPStatus.UNAUTHORIZED)
 
@@ -169,15 +180,88 @@ class EmailVerifiedView(GenericAPIView):
 class EmailVerificationResendView(GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = [IsAuthenticated]
-    verification_mailer = EmailVerificationMailer
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):  # noqa: PLR6301
         if request.user.email_verified:
             raise ValidationError("Email is already verified.")
-        self.verification_mailer(
+        EmailVerificationMailer(
             request.user,
             base_url=request.build_absolute_uri("/"),
             verification_url=settings.EMAIL_VERIFICATION_URL,
+        ).send()
+        return Response(status=HTTPStatus.NO_CONTENT)
+
+
+@extend_schema_view(
+    post=extend_schema(
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+        },
+    )
+)
+class PasswordResetRequestView(GenericAPIView):
+    authentication_classes = []
+    permission_classes = []
+    serializer_class = PasswordResetRequestSerializer
+
+    def send_email(self, user):
+        mailer_kwargs = {"user": user, "base_url": self.request.build_absolute_uri("/")}
+
+        if user.has_usable_password():
+            mailer_class = PasswordResetRequestMailer
+            mailer_kwargs["password_reset_url"] = settings.PASSWORD_RESET_URL
+        else:
+            mailer_class = SetPasswordMailer
+            mailer_kwargs["set_password_url"] = settings.SET_PASSWORD_URL
+
+        try:
+            mailer_class(**mailer_kwargs).send()
+        except Exception:
+            # Do not leak the existence of the user. Log the error and
+            # continue as if the email was sent successfully.
+            logger.exception("Failed to send password reset email.")
+
+    def post(self, request, *args, **kwargs):
+        # Get user from serializer if it exists for given email
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.validated_data["user"]
+
+        # Send an password reset email if the user exists
+        if user:
+            self.send_email(user)
+
+        return Response(status=HTTPStatus.NO_CONTENT)
+
+
+@extend_schema_view(
+    post=extend_schema(
+        responses={
+            HTTPStatus.NO_CONTENT: None,
+        },
+    )
+)
+class PasswordResetConfirmationView(GenericAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = PasswordResetConfirmationSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        new_password = serializer.validated_data["new_password"]
+        request.user.set_password(new_password)
+        request.user.save()
+
+        # Make sure the current sessions remains valid after the password change
+        update_session_auth_hash(request, request.user)
+
+        PasswordChangedMailer(
+            request.user,
+            base_url=request.build_absolute_uri("/"),
+            password_reset_url=settings.PASSWORD_CHANGED_URL,
         ).send()
         return Response(status=HTTPStatus.NO_CONTENT)
 

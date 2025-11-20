@@ -178,6 +178,10 @@ msgstr ""
 msgid "Invalid or expired token."
 msgstr ""
 
+#: hidp/api/serializers.py
+msgid "Invalid token or user ID."
+msgstr ""
+
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
 msgstr ""

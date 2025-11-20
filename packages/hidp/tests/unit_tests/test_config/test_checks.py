@@ -118,8 +118,11 @@ class TestConfigChecks(TestCase):
 
     @override_settings(
         INSTALLED_APPS=["hidp.api"],
-        EMAIL_VERIFICATION_URL=None,
-        EMAIL_CHANGE_CONFIRMATION_URL=None,
+        EMAIL_VERIFICATION_URL="/test_url/verify/{token}/",
+        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/{token}/",
+        PASSWORD_CHANGED_URL="/test_url/password_reset/change/",
+        PASSWORD_RESET_URL="/test_url/password_reset/{uidb64}/{token}/",
+        SET_PASSWORD_URL="/test_url/password_change/change/",
         EMAIL_CHANGE_CANCEL_URL=None,
     )
     def test_missing_frontend_urls(self):
@@ -132,8 +135,11 @@ class TestConfigChecks(TestCase):
 
     @override_settings(
         INSTALLED_APPS=["hidp.api"],
-        EMAIL_VERIFICATION_URL="/test_url/verify",
-        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/",
+        EMAIL_VERIFICATION_URL="/test_url/verify/no_placeholder/",
+        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/{token}/",
+        PASSWORD_CHANGED_URL="/test_url/password_reset/change/",
+        PASSWORD_RESET_URL="/test_url/password_reset/{uidb64}/{token}/",
+        SET_PASSWORD_URL="/test_url/password_change/change/",
         EMAIL_CHANGE_CANCEL_URL="/test_url/change-email/cancel/",
     )
     def test_frontend_urls_missing_placeholder(self):
@@ -146,8 +152,11 @@ class TestConfigChecks(TestCase):
 
     @override_settings(
         INSTALLED_APPS=["hidp.api"],
-        EMAIL_VERIFICATION_URL="/test_url/verify",
-        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/",
+        EMAIL_VERIFICATION_URL="/test_url/verify/no_placeholder/",
+        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/{token}/",
+        PASSWORD_CHANGED_URL="/test_url/password_reset/change/",
+        PASSWORD_RESET_URL="/test_url/password_reset/{uidb64}/{token}/",
+        SET_PASSWORD_URL="/test_url/password_change/change/",
         EMAIL_CHANGE_CANCEL_URL=None,
     )
     def test_missing_frontend_urls_and_placeholder(self):
@@ -157,4 +166,19 @@ class TestConfigChecks(TestCase):
                 checks.E011,
                 checks.E012,
             ],
+        )
+
+    @override_settings(
+        INSTALLED_APPS=["hidp.api"],
+        EMAIL_VERIFICATION_URL="/test_url/verify/{token}/",
+        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/{token}/",
+        PASSWORD_CHANGED_URL="/test_url/password_reset/change/",
+        PASSWORD_RESET_URL="/test_url/password_reset/{uidb64}/{token}/",
+        SET_PASSWORD_URL="/test_url/password_change/change/",
+        EMAIL_CHANGE_CANCEL_URL="/test_url/change-email/cancel/",
+    )
+    def test_correct_frontend_urls(self):
+        self.assertCountEqual(
+            checks.check_api_email_url_settings(),
+            [],
         )

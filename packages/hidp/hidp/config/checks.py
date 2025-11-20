@@ -58,6 +58,9 @@ OTP_REQUIRED_MIDDLEWARE = "django_otp.middleware.OTPMiddleware"
 # included
 REQUIRED_EMAIL_URL_SETTINGS = {
     "EMAIL_VERIFICATION_URL": ["{token}"],
+    "PASSWORD_CHANGED_URL": [],
+    "PASSWORD_RESET_URL": ["{token}", "{uidb64}"],
+    "SET_PASSWORD_URL": [],
     "EMAIL_CHANGE_CONFIRMATION_URL": ["{token}"],
     "EMAIL_CHANGE_CANCEL_URL": [],
 }
@@ -243,6 +246,13 @@ E012 = HashableError(
     id="hidp.E012",
 )
 
+# Ensure urls that should contain a uidb64 have a replacement field for it
+E013 = HashableError(
+    "URLs that should contain a uidb64 don't have a replacement field for it.",
+    hint="Add a replacement field (`{uidb64}`) in the URL string.",
+    id="hidp.E013",
+)
+
 
 @checks.register(Tags.settings)
 def check_api_email_url_settings(**kwargs):
@@ -253,6 +263,7 @@ def check_api_email_url_settings(**kwargs):
 
     for email_setting, required_url_placeholders in REQUIRED_EMAIL_URL_SETTINGS.items():
         url = getattr(settings, email_setting, None)
+
         # No URL is set for a required email setting
         if not url:
             errors.add(E011)
@@ -262,6 +273,8 @@ def check_api_email_url_settings(**kwargs):
         for placeholder in required_url_placeholders:
             if placeholder == "{token}" and "{token}" not in url:
                 errors.add(E012)
+            elif placeholder == "{uidb64}" and "{uidb64}" not in url:
+                errors.add(E013)
 
     return list(errors)
 

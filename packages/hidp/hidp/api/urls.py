@@ -9,6 +9,8 @@ from .views import (
     EmailVerifiedView,
     LoginView,
     LogoutView,
+    PasswordResetConfirmationView,
+    PasswordResetRequestView,
     UserViewSet,
 )
 
@@ -26,6 +28,16 @@ urlpatterns = [
         "email-verified/resend/",
         EmailVerificationResendView.as_view(),
         name="email_verified_resend",
+    ),
+    path(
+        "password-reset/",
+        PasswordResetRequestView.as_view(),
+        name="password_reset_request",
+    ),
+    path(
+        "password-reset/confirm/",
+        PasswordResetConfirmationView.as_view(),
+        name="password_reset_confirm",
     ),
     path(
         "email-change/",

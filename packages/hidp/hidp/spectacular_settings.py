@@ -31,6 +31,9 @@ MIDDLEWARE = [
 
 # URLs/URL templates for urls sent in emails
 EMAIL_VERIFICATION_URL = "email_verification_url/{token}/"
+PASSWORD_CHANGED_URL = "password_changed_url/"  # noqa: S105
+PASSWORD_RESET_URL = "password_reset_url/{uidb64}/{token}/"  # noqa: S105
+SET_PASSWORD_URL = "set_password_url/"  # noqa: S105
 EMAIL_CHANGE_CONFIRMATION_URL = "placeholder/{token}"
 EMAIL_CHANGE_CANCEL_URL = "placeholder"
 
