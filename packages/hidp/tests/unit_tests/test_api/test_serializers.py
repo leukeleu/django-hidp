@@ -148,7 +148,7 @@ class TestPasswordResetConfirmationSerializer(TestCase):
         self.assertEqual(str(errors[0]), "Invalid token or user ID.")
 
     def test_serializer_invalid_user_id(self):
-        """Tests that an invalid token raises a ValidationError."""
+        """Tests that an invalid user id raises a ValidationError."""
         token = default_token_generator.make_token(self.user)
         serializer = self.make_serializer(
             token=token, new_password="NewP@ssw0rd!", uidb64="invalid-uidb64"
