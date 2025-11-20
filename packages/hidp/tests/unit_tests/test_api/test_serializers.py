@@ -161,6 +161,23 @@ class TestPasswordResetConfirmationSerializer(TestCase):
         self.assertEqual(len(errors), 1)
         self.assertEqual(str(errors[0]), "Invalid token or user ID.")
 
+    def test_serializer_token_for_different_user(self):
+        """Tests that a valid token for a different user raises a ValidationError for the current user."""  # noqa: E501, W505
+        other_user = UserFactory()
+        other_user_token = default_token_generator.make_token(other_user)
+        # Use the current user's uidb64, but token for other_user
+        serializer = self.make_serializer(
+            token=other_user_token,
+            new_password="NewP@ssw0rd!",
+        )
+
+        with self.assertRaises(rest_framework_exceptions.ValidationError):
+            serializer.is_valid(raise_exception=True)
+
+        errors = serializer.errors["non_field_errors"]
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(str(errors[0]), "Invalid token or user ID.")
+
     @override_settings(
         AUTH_PASSWORD_VALIDATORS=[
             {
