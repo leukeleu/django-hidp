@@ -3,4 +3,4 @@
 -e ../hidp-pycqa
 
 # Develop and test with PostgreSQL
-psycopg2-binary~=2.9.6
+psycopg[binary]~=3.2
