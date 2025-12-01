@@ -59,6 +59,21 @@ class UserCreationForm(TermsOfServiceMixin, auth_forms.BaseUserCreationForm):
         model = UserModel
         fields = (UserModel.USERNAME_FIELD,)
 
+    def __init__(self, *args, request=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request = request
+
+    def get_context(self):
+        context = super().get_context()
+
+        # the request context processor does not add the request into form contexts
+        # manually add request into context for form templates to use
+        # (for example for csp nonce)
+        if self.request:
+            context["request"] = self.request
+
+        return context
+
     def _get_validation_exclusions(self):
         # Exclude email from model validation (unique constraint),
         # This will make the form valid even if the email is already in use.

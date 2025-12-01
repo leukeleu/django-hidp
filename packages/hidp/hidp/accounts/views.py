@@ -71,6 +71,13 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
             label=label or _("Sign up using {provider}"),
         )
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+
+        # provide request object to form so it can be added to template context
+        kwargs["request"] = self.request
+        return kwargs
+
     def get_context_data(self, **kwargs):
         login_url = resolve_url(settings.LOGIN_URL) + (
             f"?{urlencode({'next': redirect_url})}"
