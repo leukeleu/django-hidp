@@ -46,7 +46,6 @@ all = [
 
 [dependency-groups]
 dev = [
-  "django-hidp[all]",
   "hidp-pycqa",
   "psycopg[binary]~=3.2",
 ]
