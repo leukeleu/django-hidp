@@ -127,7 +127,7 @@ clean:
 ../../var/requirements_frozen.txt:
 	# Pin Django directly to LTS version provided by the test matrix
 	echo 'django~=${DJANGO_VERSION}.0' > ../../var/constraints.txt
-	uv pip compile pyproject.toml --extra oidc_provider -q -o "${@}" --no-annotate --no-header --constraints ../../var/constraints.txt
+	uv pip compile pyproject.toml --extra all --group docs --group dev -q -o "${@}" --no-annotate --no-header --constraints ../../var/constraints.txt
 	@echo "### Package dependencies :package:" >> ${GITHUB_STEP_SUMMARY}
 	@echo '```' >> ${GITHUB_STEP_SUMMARY}
 	@cat "${@}" >> ${GITHUB_STEP_SUMMARY}
