@@ -1,9 +1,6 @@
-[build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "django-hidp"
+version = "0.0.0"
 description = "Full-featured authentication system for Django projects"
 authors = [
   { name = "Jaap Roes", email = "jroes@leukeleu.nl" },
@@ -13,11 +10,6 @@ authors = [
   { name = "Wouter de Vries", email = "wdevries@leukeleu.nl" },
 ]
 requires-python = ">=3.11"
-dynamic = [
-  "dependencies",
-  "version",
-  "optional-dependencies",
-]
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
@@ -29,47 +21,68 @@ classifiers = [
   "Programming Language :: Python :: 3",
 ]
 
+dependencies = [
+  "django>=4.2",
+  "django-ratelimit>=4.1.0,<5",
+  "jwcrypto>=1.5,<2",
+  "requests>=2.32,<3",
+]
+
+[project.optional-dependencies]
+oidc_provider = [
+  "django-oauth-toolkit>=3.0.1",
+  "djangorestframework>=3.15.2",
+]
+otp = [
+  "django-otp>=1.5.0",
+  "segno>=1.3.0",
+]
+recommended = [
+  "django-hidp[otp]",
+]
+all = [
+  "django-hidp[oidc_provider,otp]",
+]
+
+[dependency-groups]
+dev = [
+  "django-hidp[all]",
+  "hidp-pycqa",
+  "psycopg[binary]~=3.2",
+]
+docs = [
+  "sphinx~=8.1.3",
+  "sphinx-rtd-theme~=3.0.0",
+  "myst-parser~=4.0.0",
+]
+
+[tool.uv.sources.hidp-pycqa]
+path = "../hidp-pycqa"
+editable = true
+
 [project.urls]
 Documentation = "https://leukeleu.github.io/django-hidp/"
 Repository = "https://github.com/leukeleu/django-hidp/"
 Issues = "https://github.com/leukeleu/django-hidp/issues"
 Releasenotes = "https://github.com/leukeleu/django-hidp/releases"
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
-optional-dependencies.oidc_provider = { file = "requirements_oidc_provider.txt" }
-optional-dependencies.otp = { file = "requirements_otp.txt" }
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
 
-[tool.setuptools.dynamic.optional-dependencies.recommended]
-file = [
-  "requirements.txt",
-  "requirements_otp.txt",
-]
-[tool.setuptools.dynamic.optional-dependencies.all]
-file = [
-  "requirements.txt",
-  "requirements_oidc_provider.txt",
-  "requirements_otp.txt",
-]
-
-[tool.setuptools.packages.find]
-include = [
-  "hidp",
-  "hidp.*",
-]
-
-[tool.setuptools_scm]
-root = "../.."
+[tool.uv.build-backend]
+module-name = "hidp"
+module-root = ""
 
 [tool.ruff]
 extend = "../hidp-pycqa/pyproject.toml"
 
 [tool.ruff.lint.extend-per-file-ignores]
 "hidp/config/*" = [
-  "N803", # ALL_UPPERCASE is OK in config code
+  "N803",  # ALL_UPPERCASE is OK in config code
 ]
 "docs/conf.py" = [
-  "INP001", # Not a package
+  "INP001",  # Not a package
 ]
 
 [tool.coverage.run]
@@ -79,9 +92,7 @@ source = [
   "tests",
 ]
 omit = [
-  "**/[aw]sgi.py",
   "**/migrations/*",
-  "**/settings.py",
   "tests/translations/management/commands/makemessages.py",
 ]
 
