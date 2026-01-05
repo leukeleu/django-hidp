@@ -92,7 +92,7 @@ django-checks:
 ../var/requirements_frozen.txt:
 	# Pin Django directly to LTS version provided by the test matrix
 	echo 'django~=${DJANGO_VERSION}.0' > ../var/constraints.txt
-	uv pip compile requirements.txt -q -o "${@}" --no-annotate --no-header --constraints ../var/constraints.txt
+	uv pip compile pyproject.toml -q -o "${@}" --no-annotate --no-header --constraints ../var/constraints.txt
 	@echo "### Project dependencies :package:" >> ${GITHUB_STEP_SUMMARY}
 	@echo '```' >> ${GITHUB_STEP_SUMMARY}
 	@cat "${@}" >> ${GITHUB_STEP_SUMMARY}
@@ -101,7 +101,7 @@ django-checks:
 .PHONY: install-requirements
 install-requirements: ../var/requirements_frozen.txt
 	$(call group,Installing dependencies)
-	uv pip install -r '../var/requirements_frozen.txt' -r requirements_local.txt
+	uv pip install -r '../var/requirements_frozen.txt'
 	$(call endgroup)
 
 .PHONE: post-install
