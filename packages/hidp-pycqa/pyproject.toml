@@ -9,17 +9,11 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   # Linting
-  "check-manifest == 0.50",
-  "readme-renderer ~= 44.0",
   "ruff==0.14.10",
 
   # Testing
-  "coverage ~= 7.1",
-  "factory-boy ~= 3.3.0",
-
-  # Build / release
-  "build",
-  "twine",
+  "coverage~=7.1.0",
+  "factory-boy~=3.3.0",
 ]
 
 [tool.ruff]
