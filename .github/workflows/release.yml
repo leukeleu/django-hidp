@@ -30,6 +30,9 @@ jobs:
         ports:
           - 5432:5432
 
+    env:
+      UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.venv
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
