@@ -1,4 +1,3 @@
-
 name: "Pull Request Labeler"
 on:
   - pull_request_target
@@ -9,6 +8,7 @@ jobs:
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Label PR
         uses: actions/labeler@v6
