@@ -7,7 +7,7 @@ sudo python -m pip install --root-user-action=ignore -U uv
 uv venv --allow-existing
 
 echo "Installing dependencies..."
-uv pip install -r pyproject.toml
+uv sync
 
 if [ ! -f '../var/oidc.key' ]; then
     echo "Generating OIDC key..."
@@ -33,4 +33,4 @@ echo "Migrating database..."
 uv run manage.py migrate
 
 echo "Starting server..."
-exec uv run manage.py runserver 0:"${DJANGO_RUNSERVER_PORT:-8000}"
+exec uv run python -W module manage.py runserver 0:"${DJANGO_RUNSERVER_PORT:-8000}"
