@@ -1,6 +1,7 @@
 # Note: Use a global .gitignore file to ignore common files and directories
 *.mo
 *.pem
+packages/hidp/uv.lock
 local.ini
 /**/docs/_build
 /var/*
