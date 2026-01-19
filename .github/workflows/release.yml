@@ -30,17 +30,26 @@ jobs:
         ports:
           - 5432:5432
 
+    env:
+      UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.venv
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      # A build is created as part of the QA job
       - name: Linting, checks & tests
         uses: ./.github/actions/python-qa
         with:
           working-directory: './packages/hidp'
           django-version: '5.2'
-          python-version: '3.13'
+          python-version: '3.12'
+
+      - name: Set version
+        run: uv version ${GITHUB_REF#refs/tags/}
+
+      - name: Build
+        run: make build
+        working-directory: ./packages/hidp
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

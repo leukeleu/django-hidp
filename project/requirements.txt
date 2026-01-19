@@ -1,7 +1,0 @@
-django~=5.2
-django-email-bandit~=2.0.0
-django-filter~=24.2
-leukeleu-django-checks~=1.2
-psycopg[binary]~=3.2
-sentry-sdk~=2.0
--e ../packages/hidp[all]

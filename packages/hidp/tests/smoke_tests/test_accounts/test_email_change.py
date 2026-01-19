@@ -678,7 +678,7 @@ class TestRemoveIncompleteEmailChangeRequests(TestCase):
             ).exists(),
             msg=(
                 "Expected incomplete recent request to still exist, created less"
-                " than 7 days ago.",
+                " than 7 days ago."
             ),
         )
 
@@ -703,7 +703,7 @@ class TestRemoveIncompleteEmailChangeRequests(TestCase):
             ).exists(),
             msg=(
                 "Expected incomplete recent request to be removed, created more"
-                " than 2 days ago.",
+                " than 2 days ago."
             ),
         )
 

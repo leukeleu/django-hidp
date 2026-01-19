@@ -1,4 +1,0 @@
-django>=4.2
-django-ratelimit>=4.1.0,<5
-jwcrypto>=1.5,<2
-requests>=2.32,<3

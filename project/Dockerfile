@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.2
-
 ARG PYTHON_VERSION=3.12
 
 # Create the project image
@@ -30,14 +28,14 @@ ENV PIP_REQUIRE_VIRTUALENV true
 
 # "activate" the virtualenv created by entrypoint.sh
 ENV VIRTUAL_ENV /code/var/venv
-ENV PATH $VIRTUAL_ENV/bin:$PATH
+ENV UV_PROJECT_ENVIRONMENT /code/var/venv
+
+# Make the uv cache survive container recreation
+ENV UV_CACHE_DIR /code/var/cache/uv
 
 # Create .pgpass
 RUN echo "*:*:*:postgres:postgres" > ~/.pgpass
 RUN chmod 600 ~/.pgpass
-
-# Make the uv cache survive container recreation
-ENV UV_CACHE_DIR /code/var/cache/uv
 
 # Make git trust the mounted repository, even when the permissions are "suspicious"
 RUN git config --global --add safe.directory /code

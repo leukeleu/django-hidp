@@ -35,21 +35,21 @@ test: lint django-checks migrationtest coveragetest
 lint:
 	# Check syntax and style
 	$(call group,Checking syntax and style)
-	ruff check
-	ruff format --check --diff
+	uv run ruff check
+	uv run ruff format --check --diff
 	$(call endgroup)
 
 .PHONY: lintfix
 lintfix:
 	# Automatically fix syntax and style issues
-	ruff check --fix-only
-	ruff format
+	uv run ruff check --fix-only
+	uv run ruff format
 
 .PHONY: migrationtest
 migrationtest:
 	# Check if there are any model changes without migrations
 	$(call group,Checking for missing migrations)
-	./manage.py makemigrations --dry-run --no-input --check --settings tests.test_settings
+	uv run manage.py makemigrations --dry-run --no-input --check --settings tests.test_settings
 	$(call endgroup)
 
 tests ?= tests
@@ -57,32 +57,32 @@ tests ?= tests
 unittests:
 	$(call group,Running unit tests)
 	# Run unit tests with coverage
-	coverage run runtests.py $(tests) --shuffle
+	uv run coverage run runtests.py $(tests) --shuffle
 	$(call endgroup)
 
 .PHONY: coveragetest
 coveragetest: unittests
 	# Generate coverage report
 ifneq ($(GITHUB_ACTIONS),true)
-	coverage report
+	uv run coverage report
 else
 	@echo "### Project coverage" >> ${GITHUB_STEP_SUMMARY}
 	@echo '```' >> ${GITHUB_STEP_SUMMARY}
-	coverage report >> ${GITHUB_STEP_SUMMARY}
+	uv run coverage report >> ${GITHUB_STEP_SUMMARY}
 	@echo '```' >> ${GITHUB_STEP_SUMMARY}
 endif
 
 .PHONY: coverage
 coverage: unittests
 	# Generate test coverage html report
-	coverage html
+	uv run coverage html
 	@echo "Coverage report is located at ../var/htmlcov/index.html"
 
 .PHONY: django-checks
 django-checks:
 	# Run Django system checks
 	$(call group,Running Django system checks)
-	python manage.py check --fail-level WARNING
+	uv run manage.py check --fail-level WARNING
 	$(call endgroup)
 
 ##
@@ -92,7 +92,7 @@ django-checks:
 ../var/requirements_frozen.txt:
 	# Pin Django directly to LTS version provided by the test matrix
 	echo 'django~=${DJANGO_VERSION}.0' > ../var/constraints.txt
-	uv pip compile requirements.txt -q -o "${@}" --no-annotate --no-header --constraints ../var/constraints.txt
+	uv pip compile pyproject.toml -q -o "${@}" --no-annotate --no-header --constraints ../var/constraints.txt
 	@echo "### Project dependencies :package:" >> ${GITHUB_STEP_SUMMARY}
 	@echo '```' >> ${GITHUB_STEP_SUMMARY}
 	@cat "${@}" >> ${GITHUB_STEP_SUMMARY}
@@ -101,7 +101,7 @@ django-checks:
 .PHONY: install-requirements
 install-requirements: ../var/requirements_frozen.txt
 	$(call group,Installing dependencies)
-	uv pip install -r '../var/requirements_frozen.txt' -r requirements_local.txt
+	uv pip install -r '../var/requirements_frozen.txt'
 	$(call endgroup)
 
 .PHONE: post-install
