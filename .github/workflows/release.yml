@@ -46,8 +46,7 @@ jobs:
 
       - name: Set version
         run: uv version ${GITHUB_REF#refs/tags/}
-        with:
-          working-directory: ./packages/hidp
+        working-directory: ./packages/hidp
 
       - name: Build
         run: make build
