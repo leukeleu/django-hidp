@@ -7,7 +7,7 @@ registering and authenticating users in Django projects.
 
 ## Requirements
 * Python >=3.11
-* Django >=4.2,<6
+* Django >=4.2
 
 # Index
 :::{toctree}
