@@ -12,7 +12,7 @@ dependencies = [
   "ruff==0.14.10",
 
   # Testing
-  "coverage~=7.1.0",
+  "coverage~=7.14.1",
   "factory-boy~=3.3.0",
 ]
 
