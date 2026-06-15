@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   # Linting
-  "ruff==0.14.10",
+  "ruff==0.15.17",
 
   # Testing
   "coverage~=7.1.0",
