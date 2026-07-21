@@ -1,5 +1,0 @@
--r requirements.txt
--e ../packages/hidp-pycqa
-
-# Redis
-redis[hiredis]~=5.2.0

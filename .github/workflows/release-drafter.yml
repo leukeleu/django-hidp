@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Draft release
-        uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5  # 6.1.0
+        uses: release-drafter/release-drafter@693d20e7c1ce1a81d3a41962f85914253b518449  # 7.3.1
         with:
           config-name: release-drafter/config.yml
           disable-autolabeler: true

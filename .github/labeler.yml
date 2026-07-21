@@ -4,7 +4,7 @@ docker-setup:
   - changed-files:
     - any-glob-to-any-file:
       - '.dockerignore'
-      - 'docker-compose.yml'
+      - 'compose.yaml'
       - 'docker/**'
       - '**/.dockerignore'
       - '**/Dockerfile'

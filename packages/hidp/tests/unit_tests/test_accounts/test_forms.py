@@ -29,10 +29,10 @@ class TestAuthenticationForm(TestCase):
         self.assertFormError(
             form,
             None,
-            [
+            (
                 "Please enter a correct email address and password."
                 " Note that both fields may be case-sensitive."
-            ],
+            ),
         )
 
     def test_is_inactive(self):
@@ -49,10 +49,10 @@ class TestAuthenticationForm(TestCase):
             self.assertFormError(
                 form,
                 None,
-                [
+                (
                     "Please enter a correct email address and password."
                     " Note that both fields may be case-sensitive."
-                ],
+                ),
             )
 
         with (

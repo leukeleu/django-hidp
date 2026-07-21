@@ -24,7 +24,7 @@ services:
   postgres:
     image: 'postgres:14-alpine'
     environment:
-      - 'POSTGRES_PASSWORD=postgres'
+      POSTGRES_PASSWORD: 'postgres'
     restart: unless-stopped
     volumes:
       - 'postgres_data:/var/lib/postgresql/data'
@@ -45,7 +45,7 @@ services:
       - '.:/code'
     environment:
       # Note: Also update the nginx config, and port mapping below, if you change this port.
-      - 'DJANGO_RUNSERVER_PORT=8000'
+      DJANGO_RUNSERVER_PORT: 8000
     # Uncomment the next two lines to make Django available on localhost:8000
     # ports:
     #   - '8000:8000'
