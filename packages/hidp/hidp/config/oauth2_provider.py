@@ -56,6 +56,18 @@ OAUTH2_PROVIDER = {
     "DEFAULT_SCOPES": ["openid"],
     # Custom OAuth2Validator that maps OIDC scopes to the correct user attributes
     "OAUTH2_VALIDATOR_CLASS": "hidp.oidc_provider.oauth_validators.OAuth2Validator",
+    # RFC 9700 / OAuth 2.1 posture. HIdP supports the Authorization Code
+    # flow with PKCE only; these gates make the server reject everything
+    # else and keep the discovery documents consistent with that.
+    "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT": True,
+    "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT": True,
+    "COMPLIANT_BCP_RFC9700_PKCE_METHOD": True,
+    "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT": True,
+    "COMPLIANT_BCP_RFC9700_AUTHZ_RESPONSE_ISS": True,
+    "REFRESH_TOKEN_REUSE_PROTECTION": True,
+    "ALLOWED_REDIRECT_URI_SCHEMES": ["https"],
+    # Opt-in: requires REFRESH_TOKEN_GRACE_PERIOD_SECONDS == 0
+    # "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE": True,
 }
 
 # XXX: Everything above this line is included verbatim in the documentation!
