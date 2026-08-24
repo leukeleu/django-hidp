@@ -67,7 +67,7 @@ OAUTH2_PROVIDER = {
     "REFRESH_TOKEN_REUSE_PROTECTION": True,
     "ALLOWED_REDIRECT_URI_SCHEMES": ["https"],
     # Opt-in: requires REFRESH_TOKEN_GRACE_PERIOD_SECONDS == 0
-    # "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE": True,
+    # "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE": True,  # noqa: ERA001, opt-in
 }
 
 # XXX: Everything above this line is included verbatim in the documentation!
