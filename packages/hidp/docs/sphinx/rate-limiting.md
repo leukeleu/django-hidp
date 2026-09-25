@@ -15,6 +15,9 @@ The following rate limit is added for views that need to be more strict:
 
 - 100 requests per 15 minutes
 
+Each view counts its requests separately, so heavy use of one page does not use up
+the limits of another.
+
 The time component of each rate limit also serves as the 'lockout period'. Meaning
 requests from the same IP will be blocked for this duration when they exceed the limit.
 
@@ -40,6 +43,10 @@ to prove they are not a robot before logging in.
 This measure is relatively easy to bypass, so it is recommended to override
 the `hidp.accounts.views.LoginView` and configure a custom `rate_limited_form_class`
 that implements a more robust countermeasure.
+
+The login endpoint of the [headless API](headless.md#login) has no such form. It
+limits the attempts per username for each IP address instead, so no client can lock
+a user out.
 
 ## Adding your own rate limits
 
