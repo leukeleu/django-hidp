@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.urls import path
 
 from . import views
@@ -46,3 +47,28 @@ urlpatterns = [
         name="email_change_confirm",
     ),
 ]
+
+if apps.is_installed("hidp.otp"):
+    from . import otp_views
+
+    urlpatterns += [
+        path("otp/", otp_views.OTPStatusView.as_view(), name="otp"),
+        path("otp/setup/", otp_views.OTPSetupView.as_view(), name="otp_setup"),
+        path("otp/verify/", otp_views.OTPVerifyView.as_view(), name="otp_verify"),
+        path(
+            "otp/verify/recovery-code/",
+            otp_views.OTPVerifyRecoveryCodeView.as_view(),
+            name="otp_verify_recovery_code",
+        ),
+        path("otp/disable/", otp_views.OTPDisableView.as_view(), name="otp_disable"),
+        path(
+            "otp/disable/recovery-code/",
+            otp_views.OTPDisableRecoveryCodeView.as_view(),
+            name="otp_disable_recovery_code",
+        ),
+        path(
+            "otp/recovery-codes/",
+            otp_views.RecoveryCodesView.as_view(),
+            name="otp_recovery_codes",
+        ),
+    ]

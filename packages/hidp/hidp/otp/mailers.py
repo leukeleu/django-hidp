@@ -7,19 +7,22 @@ from hidp.otp.devices import get_device_for_user
 
 
 class BaseOTPUserMailer(BaseMailer):
-    def __init__(self, user, *, base_url):
+    def __init__(self, user, *, base_url, otp_management_url=None):
         super().__init__(base_url=base_url)
         self.user = user
+        self.otp_management_url = otp_management_url
 
     def get_recipients(self):
         return [self.user.email]
 
+    def get_otp_management_url(self):
+        return self.otp_management_url or (
+            self.base_url + reverse("hidp_otp_management:manage")
+        )
+
     def get_context(self, extra_context=None):
         return super().get_context(
-            {
-                "otp_management_url": self.base_url
-                + reverse("hidp_otp_management:manage")
-            }
+            {"otp_management_url": self.get_otp_management_url()}
             | (extra_context or {})
         )
 

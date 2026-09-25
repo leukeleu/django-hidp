@@ -1,9 +1,19 @@
-from urllib.parse import urlencode
+import functools
+
+from http import HTTPStatus
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from django_otp import user_has_device
 
+from django.conf import settings
+from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.cache import add_never_cache_headers
+from django.utils.module_loading import import_string
+
+from hidp.constants import Step
+from hidp.utils import get_frontend_url, has_frontend_url, is_api_view
 
 
 class OTPMiddlewareBase:
@@ -24,7 +34,8 @@ class OTPMiddlewareBase:
     Middleware implementations should be placed after the authentication middleware
     and ``django_otp.middleware.OTPMiddleware``. If ``request_needs_verification``,
     it will redirect users to the OTP verification view if they have a configured OTP
-    device, or else to the OTP setup view.
+    device, or else to the OTP setup view. Django REST framework views get a 401
+    response with the authentication state instead.
     """
 
     def __new__(cls, *args, **kwargs):
@@ -50,13 +61,18 @@ class OTPMiddlewareBase:
         """
         return getattr(view_func, "otp_exempt", False)
 
-    def get_redirect_url(self, request):  # noqa: PLR6301
+    def get_pending_step(self, request):  # noqa: PLR6301
+        """Return `otp_verify` for a user with an OTP device, else `otp_setup`."""
+        return Step.OTP_VERIFY if user_has_device(request.user) else Step.OTP_SETUP
+
+    def get_redirect_url(self, request):
         """
         Return the URL to redirect to when OTP verification is required.
 
         If the user has an OTP device, they will be redirected to the OTP verification
         view. If they do not have an OTP device, they will be redirected to the OTP
-        setup view.
+        setup view. The `otp_verify` and `otp_setup` keys of `HIDP_FRONTEND_URLS`
+        take the place of these views when set.
 
         Args:
             request (``HttpRequest``): The request object.
@@ -64,13 +80,32 @@ class OTPMiddlewareBase:
         Returns:
             str: The URL to redirect to.
         """
-        target = reverse(
-            "hidp_otp:verify"
-            if user_has_device(request.user)
-            else "hidp_otp_management:setup"
+        step = self.get_pending_step(request)
+        if has_frontend_url(step):
+            target = get_frontend_url(step, base_url=request.build_absolute_uri("/"))
+        else:
+            target = reverse(
+                "hidp_otp:verify"
+                if step == Step.OTP_VERIFY
+                else "hidp_otp_management:setup"
+            )
+        scheme, netloc, path, query, fragment = urlsplit(target)
+        query = urlencode(
+            [
+                *parse_qsl(query, keep_blank_values=True),
+                ("next", request.get_full_path()),
+            ]
         )
-        params = {"next": request.get_full_path()}
-        return f"{target}?{urlencode(params)}"
+        return urlunsplit((scheme, netloc, path, query, fragment))
+
+    def get_api_response(self, request):
+        """Return the 401 authentication state for a Django REST framework view."""
+        response = JsonResponse(
+            {"user": None, "pending": [{"step": self.get_pending_step(request)}]},
+            status=HTTPStatus.UNAUTHORIZED,
+        )
+        add_never_cache_headers(response)
+        return response
 
     def user_needs_verification(self, user):  # noqa: PLR6301
         """
@@ -116,10 +151,25 @@ class OTPMiddlewareBase:
         Returns:
             bool: Whether the request requires the user to verify OTP.
         """
+        return self.view_func_needs_verification(
+            view_func
+        ) and self.session_needs_verification(request)
+
+    def session_needs_verification(self, request):
+        """
+        Check whether the user of a request needs to verify OTP, for any view.
+
+        Args:
+            request (``HttpRequest``): The request object.
+
+        Returns:
+            bool: Whether the user is authenticated, not verified and needs to be.
+        """
+        # A user logged in during this request has not been through OTPMiddleware.
+        is_verified = getattr(request.user, "is_verified", None)
         return (
-            self.view_func_needs_verification(view_func)
-            and request.user.is_authenticated
-            and not request.user.is_verified()
+            request.user.is_authenticated
+            and not (is_verified and is_verified())
             and self.user_needs_verification(request.user)
         )
 
@@ -142,6 +192,8 @@ class OTPMiddlewareBase:
             requires the user to verify OTP, None otherwise.
         """
         if self.request_needs_verification(request, view_func):
+            if is_api_view(view_func):
+                return self.get_api_response(request)
             return redirect(self.get_redirect_url(request))
 
         return None
@@ -198,3 +250,18 @@ class OTPSetupRequiredIfStaffUserMiddleware(OTPMiddlewareBase):
         have not yet verified their OTP.
         """
         return user.is_staff
+
+
+@functools.cache
+def _get_otp_middlewares(middleware):
+    return tuple(
+        middleware_class(lambda request: None)
+        for middleware_class in map(import_string, middleware)
+        if isinstance(middleware_class, type)
+        and issubclass(middleware_class, OTPMiddlewareBase)
+    )
+
+
+def get_otp_middlewares():
+    """Return an instance of every OTP middleware in `MIDDLEWARE`, in order."""
+    return _get_otp_middlewares(tuple(settings.MIDDLEWARE))

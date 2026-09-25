@@ -53,6 +53,16 @@ REQUIRED_FRONTEND_URLS = {
     "email_change_cancel": set(),
 }
 
+REQUIRED_OTP_FRONTEND_URLS = {
+    "otp_management": set(),
+}
+
+# Take the place of the HTML OTP views in redirects, when set.
+OPTIONAL_FRONTEND_URLS = {
+    "otp_verify": set(),
+    "otp_setup": set(),
+}
+
 
 class Tags:
     dependencies = "dependencies"
@@ -153,6 +163,7 @@ E006 = checks.Error(
     hint=(
         "Include hidp.config.urls in your ROOT_URLCONF,"
         " or define custom URLs using the 'hidp_accounts' namespace."
+        " A headless project includes hidp.api.urls instead."
     ),
     id="hidp.E006",
 )
@@ -160,11 +171,13 @@ E006 = checks.Error(
 
 @checks.register(Tags.settings)
 def check_login_url(**kwargs):
-    try:
-        reverse("hidp_accounts:login")
-    except NoReverseMatch:
-        return [E006]
-    return []
+    for url_name in ("hidp_accounts:login", "hidp_api:login"):
+        try:
+            reverse(url_name)
+        except NoReverseMatch:
+            continue
+        return []
+    return [E006]
 
 
 E008 = checks.Error(
@@ -234,6 +247,9 @@ def check_api_frontend_urls(**kwargs):
     except NoReverseMatch:
         return []
 
+    required_urls = REQUIRED_FRONTEND_URLS | (
+        REQUIRED_OTP_FRONTEND_URLS if apps.is_installed("hidp.otp") else {}
+    )
     frontend_urls = getattr(settings, "HIDP_FRONTEND_URLS", None)
     if frontend_urls is None:
         return [
@@ -242,7 +258,7 @@ def check_api_frontend_urls(**kwargs):
                 " links in the emails it sends.",
                 hint=(
                     "Add HIDP_FRONTEND_URLS to your settings, with URL templates for:"
-                    f" {', '.join(REQUIRED_FRONTEND_URLS)}."
+                    f" {', '.join(required_urls)}."
                 ),
                 id="hidp.E011",
             )
@@ -253,13 +269,13 @@ def check_api_frontend_urls(**kwargs):
                 "HIDP_FRONTEND_URLS must be a dictionary of URL templates.",
                 hint=(
                     "Map each of these keys to a URL template:"
-                    f" {', '.join(REQUIRED_FRONTEND_URLS)}."
+                    f" {', '.join(required_urls)}."
                 ),
                 id="hidp.E011",
             )
         ]
 
-    missing_keys = [key for key in REQUIRED_FRONTEND_URLS if key not in frontend_urls]
+    missing_keys = [key for key in required_urls if key not in frontend_urls]
     if missing_keys:
         return [
             checks.Error(
@@ -270,7 +286,9 @@ def check_api_frontend_urls(**kwargs):
         ]
 
     errors = []
-    for key, required_placeholders in REQUIRED_FRONTEND_URLS.items():
+    for key, required_placeholders in (required_urls | OPTIONAL_FRONTEND_URLS).items():
+        if key not in frontend_urls:
+            continue
         url_template = frontend_urls[key]
         try:
             placeholders = _frontend_url_placeholders(url_template)

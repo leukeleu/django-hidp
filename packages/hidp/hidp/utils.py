@@ -1,5 +1,7 @@
 import warnings
 
+from urllib.parse import urljoin
+
 from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -25,6 +27,16 @@ def is_registration_enabled():
             stacklevel=2,
         )
         return True
+
+
+def get_frontend_url(key, *, base_url):
+    """Return the `HIDP_FRONTEND_URLS` template for `key`, joined to `base_url`."""
+    return urljoin(base_url, settings.HIDP_FRONTEND_URLS[key])
+
+
+def has_frontend_url(key):
+    """Return whether `HIDP_FRONTEND_URLS` has a URL template for `key`."""
+    return key in getattr(settings, "HIDP_FRONTEND_URLS", {})
 
 
 def is_api_view(view_func):

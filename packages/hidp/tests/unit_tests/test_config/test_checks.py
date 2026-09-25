@@ -71,6 +71,10 @@ class TestConfigChecks(TestCase):
             ],
         )
 
+    @override_settings(ROOT_URLCONF="tests.unit_tests.test_config.headless_urls")
+    def test_urls_not_needed_when_headless(self):
+        self.assertEqual(checks.check_login_url(), [])
+
     def test_oidc_provider_apps_not_installed(self):
         self.assertEqual(
             checks.check_oidc_provider_installed_apps(),
@@ -128,6 +132,7 @@ VALID_FRONTEND_URLS = {
 }
 
 
+@override_settings(INSTALLED_APPS=["hidp.api"])
 class TestFrontendUrlsCheck(TestCase):
     """HIDP_FRONTEND_URLS must hold a valid URL template for every emailed link."""
 
@@ -198,6 +203,39 @@ class TestFrontendUrlsCheck(TestCase):
         }
         with self.settings(HIDP_FRONTEND_URLS=frontend_urls):
             self.assertEqual(self._check_ids(), ["hidp.E012", "hidp.E012"])
+
+
+class TestOTPFrontendUrlsCheck(TestCase):
+    """The OTP keys of HIDP_FRONTEND_URLS are checked when hidp.otp is installed."""
+
+    def _check_ids(self, frontend_urls, installed_apps=("hidp.api", "hidp.otp")):
+        with self.settings(
+            INSTALLED_APPS=list(installed_apps), HIDP_FRONTEND_URLS=frontend_urls
+        ):
+            return [error.id for error in checks.check_api_frontend_urls()]
+
+    def test_otp_management_required_with_otp(self):
+        self.assertEqual(self._check_ids(VALID_FRONTEND_URLS), ["hidp.E011"])
+
+    def test_otp_management_not_required_without_otp(self):
+        self.assertEqual(
+            self._check_ids(VALID_FRONTEND_URLS, installed_apps=["hidp.api"]), []
+        )
+
+    def test_optional_redirect_urls(self):
+        frontend_urls = VALID_FRONTEND_URLS | {
+            "otp_management": "/otp/",
+            "otp_verify": "/otp/verify/",
+            "otp_setup": "/otp/setup/",
+        }
+        self.assertEqual(self._check_ids(frontend_urls), [])
+
+    def test_optional_redirect_url_is_validated(self):
+        frontend_urls = VALID_FRONTEND_URLS | {
+            "otp_management": "/otp/",
+            "otp_verify": "/otp/verify/{token}/",
+        }
+        self.assertEqual(self._check_ids(frontend_urls), ["hidp.E013"])
 
 
 @override_settings(INSTALLED_APPS=["hidp.api"])
