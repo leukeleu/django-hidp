@@ -27,6 +27,18 @@ def is_registration_enabled():
         return True
 
 
+def is_api_view(view_func):
+    """Return whether `view_func` is a Django REST framework view."""
+    view_class = getattr(view_func, "cls", None)
+    if not isinstance(view_class, type):
+        return False
+    try:
+        from rest_framework.views import APIView  # noqa: PLC0415
+    except ImportError:
+        return False
+    return issubclass(view_class, APIView)
+
+
 def get_account_management_links(user):
     """
     Get a list of account management links for the given user.

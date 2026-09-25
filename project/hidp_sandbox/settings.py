@@ -275,15 +275,16 @@ else:
 
 DEFAULT_FROM_EMAIL = config.getliteral("app", "default_from_email")
 
-# URLs/URL templates for urls sent in emails
-EMAIL_VERIFICATION_URL = config.getliteral("app", "email_verification_url")
-PASSWORD_CHANGED_URL = config.getliteral("app", "password_changed_url")
-PASSWORD_RESET_URL = config.getliteral("app", "password_reset_url")
-SET_PASSWORD_URL = config.getliteral("app", "set_password_url")
-EMAIL_CHANGE_CONFIRMATION_URL = config.getliteral(
-    "app", "email_change_confirmation_url"
-)
-EMAIL_CHANGE_CANCEL_URL = config.getliteral("app", "email_change_cancel_url")
+# URL templates for the links in emails sent by the API. The sandbox has no
+# separate frontend, so the links point at the HTML views.
+HIDP_FRONTEND_URLS = {
+    "email_verification": "/verify/{token}/verify/",
+    "password_reset": "/recover/password/{uidb64}/{token}/",
+    "password_reset_request": "/recover/password/",
+    "set_password": "/manage/set-password/",
+    "email_change_confirm": "/manage/change-email-confirm/{token}/",
+    "email_change_cancel": "/manage/change-email-cancel/",
+}
 
 # Sentry
 
