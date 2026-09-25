@@ -1,6 +1,7 @@
 import importlib
 import string
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import checks
@@ -301,6 +302,34 @@ def check_api_frontend_urls(**kwargs):
                 )
             )
     return errors
+
+
+@checks.register(Tags.settings)
+def check_api_user_serializer(**kwargs):
+    """Make sure `HIDP_API_USER_SERIALIZER` names a subclass of `UserSerializer`."""
+    path = getattr(settings, "HIDP_API_USER_SERIALIZER", None)
+    if not path or not apps.is_installed("hidp.api"):
+        return []
+
+    from hidp.api.serializers import import_user_serializer  # noqa: PLC0415
+
+    try:
+        import_user_serializer(path)
+    except (ImportError, TypeError):
+        pass
+    else:
+        return []
+    return [
+        checks.Error(
+            f"HIDP_API_USER_SERIALIZER {path!r} is not an importable subclass of"
+            " hidp.api.serializers.UserSerializer.",
+            hint=(
+                "Point it at a subclass of UserSerializer, or remove the setting."
+                " The API uses UserSerializer until then."
+            ),
+            id="hidp.E014",
+        )
+    ]
 
 
 @checks.register(Tags.middleware)

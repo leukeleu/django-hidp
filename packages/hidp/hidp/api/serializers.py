@@ -1,21 +1,23 @@
+import functools
+import logging
+
 from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail
+from rest_framework.settings import api_settings
 
 import django.core.exceptions as django_exceptions
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.password_validation import (
-    validate_password,
-)
 from django.contrib.auth.tokens import default_token_generator
-from django.db import IntegrityError, transaction
 from django.utils.decorators import method_decorator
 from django.utils.http import urlsafe_base64_decode
+from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.debug import sensitive_variables
 
-from hidp.accounts import auth as hidp_auth
-from hidp.accounts import tokens
-from hidp.accounts.email_change import Recipient
+from hidp.accounts import forms, tokens
+from hidp.accounts.email_change import get_email_change_request_from_token_data
 from hidp.accounts.email_verification import get_unverified_user_from_token
 from hidp.accounts.models import EmailChangeRequest
 
@@ -23,10 +25,21 @@ from .constants import Step
 
 UserModel = get_user_model()
 
+logger = logging.getLogger(__name__)
+
 
 class UserSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(required=True)
-    last_name = serializers.CharField(required=True)
+    """
+    The user in the authentication state, and at `/users/me/`.
+
+    Every field is read-only except those in `writable_fields`.
+    """
+
+    writable_fields = ("first_name", "last_name")
+
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150)
+    has_usable_password = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = UserModel
@@ -35,8 +48,47 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "email",
+            "has_usable_password",
         ]
-        read_only_fields = ["id", "email"]
+
+    def get_fields(self):
+        fields = super().get_fields()
+        for name, field in fields.items():
+            if name not in self.writable_fields:
+                field.read_only = True
+                field.required = False
+        return fields
+
+
+def import_user_serializer(path):
+    """Import the serializer at `path`, or raise ImportError or TypeError."""
+    serializer_class = import_string(path)
+    if not (
+        isinstance(serializer_class, type)
+        and issubclass(serializer_class, UserSerializer)
+    ):
+        msg = f"{path!r} is not a subclass of {UserSerializer.__name__}."
+        raise TypeError(msg)
+    return serializer_class
+
+
+@functools.cache
+def _import_user_serializer(path):
+    try:
+        return import_user_serializer(path)
+    except (ImportError, TypeError):
+        logger.exception(
+            "HIDP_API_USER_SERIALIZER %r is not usable, using %s.",
+            path,
+            UserSerializer.__name__,
+        )
+        return UserSerializer
+
+
+def get_user_serializer_class():
+    """Return the serializer named by `HIDP_API_USER_SERIALIZER`, or the default."""
+    path = getattr(settings, "HIDP_API_USER_SERIALIZER", None)
+    return _import_user_serializer(path) if path else UserSerializer
 
 
 class PendingStepSerializer(serializers.Serializer):
@@ -44,110 +96,98 @@ class PendingStepSerializer(serializers.Serializer):
 
 
 class AuthStateSerializer(serializers.Serializer):
-    user = UserSerializer(allow_null=True)
     pending = PendingStepSerializer(many=True)
 
-
-@method_decorator(sensitive_variables(), name="validate")
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(write_only=True)
-    password = serializers.CharField(write_only=True)
-
-    def validate(self, attrs):
-        user = hidp_auth.authenticate(
-            request=self.context.get("request"),
-            username=attrs.get("username"),
-            password=attrs.get("password"),
+    def get_fields(self):
+        return {"user": get_user_serializer_class()(allow_null=True)} | (
+            super().get_fields()
         )
-        if not user:
-            raise serializers.ValidationError(
-                _("Could not authenticate"), code="authorization"
-            )
-        attrs["user"] = user
-        return attrs
 
 
-@method_decorator(sensitive_variables(), name="validate")
-class PasswordResetRequestSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-
-    def validate(self, attrs):  # noqa: PLR6301
-        """
-        Validates that the email corresponds to an active user.
-
-        Returns the user in the validated data if found, else None.
-        """
-        attrs["user"] = UserModel.objects.filter(
-            email__iexact=attrs["email"], is_active=True
-        ).first()
-        return attrs
+def _form_errors(form, field_names):
+    errors = {}
+    for form_field, form_errors in form.errors.get_json_data().items():
+        if form_field == django_exceptions.NON_FIELD_ERRORS:
+            key = api_settings.NON_FIELD_ERRORS_KEY
+        else:
+            key = field_names.get(form_field, form_field)
+        messages = errors.setdefault(key, [])
+        for error in form_errors:
+            if error["message"] not in messages:
+                messages.append(ErrorDetail(error["message"], code=error["code"]))
+    return errors
 
 
-@method_decorator(sensitive_variables(), name="_validate_new_password")
-@method_decorator(sensitive_variables(), name="validate")
-@method_decorator(sensitive_variables(), name="get_user")
-class PasswordResetConfirmationSerializer(serializers.Serializer):
-    token = serializers.CharField()
-    uidb64 = serializers.CharField()
-    new_password = serializers.CharField()
+class FormSerializer(serializers.Serializer):
+    """
+    Validate the request data with a Django form, after the serializer fields.
 
-    def _validate_new_password(self, user, value):  # noqa: PLR6301
-        """
-        Validate that the password meets all validator requirements.
+    The form's errors become DRF errors, and the valid form is kept as `form`.
+    """
 
-        Raises a ValidationError if the password is invalid.
-        """
-        try:
-            validate_password(password=value, user=user)
-        except django_exceptions.ValidationError as exc:
-            raise serializers.ValidationError(exc.messages) from None
+    form_class = NotImplemented
+    # Serializer field name to the form fields it fills, where they differ.
+    form_fields = {}
 
-    def get_user(self, uidb64):  # noqa: PLR6301
-        """
-        Taken from Django's `PasswordResetConfirmView.get_user`.
+    def get_form_kwargs(self, attrs):  # noqa: PLR6301 (no-self-use)
+        return {}
 
-        This is used so we consistently handle the uidb64 in both the template views and
-        API views when decoding the user ID and retrieving the user from the database.
-        """
-        try:
-            # urlsafe_base64_decode() decodes to bytestring
-            uid = urlsafe_base64_decode(uidb64).decode()
-            user = UserModel.objects.get(pk=uid)
-        except (
-            TypeError,
-            ValueError,
-            OverflowError,
-            UserModel.DoesNotExist,
-            django_exceptions.ValidationError,
-        ):
-            user = None
-        return user
+    def get_form_data(self, attrs):
+        data = {}
+        for name, value in attrs.items():
+            for form_field in self.form_fields.get(name, [name]):
+                data[form_field] = value
+        return data
 
+    @method_decorator(sensitive_variables())
     def validate(self, attrs):
-        """
-        Validates that the token and uidb64 correspond to a valid user.
-
-        If valid, runs password validation on the new password.
-        """
-        user = self.get_user(attrs["uidb64"])
-
-        if not user or not default_token_generator.check_token(user, attrs["token"]):
-            raise serializers.ValidationError(_("Invalid token or user ID."))
-
-        self._validate_new_password(user, attrs["new_password"])
-        attrs["user"] = user
+        self.form = self.form_class(
+            data=self.get_form_data(attrs), **self.get_form_kwargs(attrs)
+        )
+        if not self.form.is_valid():
+            field_names = {
+                form_field: name
+                for name, form_fields in self.form_fields.items()
+                for form_field in form_fields
+            }
+            raise serializers.ValidationError(_form_errors(self.form, field_names))
         return attrs
+
+    @property
+    def request(self):
+        return self.context["request"]
+
+
+class LoginSerializer(FormSerializer):
+    form_class = forms.AuthenticationForm
+
+    username = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def get_form_kwargs(self, attrs):
+        return {"request": self.request}
+
+
+class SignupSerializer(FormSerializer):
+    form_class = forms.UserCreationForm
+    form_fields = {
+        "email": [UserModel.USERNAME_FIELD],
+        "password": ["password1", "password2"],
+    }
+
+    email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+    agreed_to_tos = serializers.BooleanField(write_only=True)
+
+    def get_form_kwargs(self, attrs):
+        return {"request": self.request}
 
 
 class EmailVerificationTokenSerializer(serializers.Serializer):
     token = serializers.CharField(write_only=True)
 
     def validate_token(self, value):  # noqa: PLR6301 (no-self-use)
-        """
-        Validate the email verification token from the verification email.
-
-        Returns the unverified user the token belongs to.
-        """
+        """Return the unverified user the emailed verification token belongs to."""
         user = get_unverified_user_from_token(
             value, token_generator=tokens.email_verification_token_generator
         )
@@ -155,137 +195,129 @@ class EmailVerificationTokenSerializer(serializers.Serializer):
             raise serializers.ValidationError(_("Invalid or expired token."))
         return user
 
-    def validate(self, attrs):  # noqa: PLR6301 (no-self-use)
-        attrs["user"] = attrs.pop("token")
-        return attrs
-
-
-class EmailVerificationConfirmSerializer(EmailVerificationTokenSerializer):
-    first_name = serializers.CharField(required=False, max_length=150)
-    last_name = serializers.CharField(required=False, max_length=150)
-
     def validate(self, attrs):
-        """
-        Require a first and last name unless the user already has both.
-
-        This matches the HTML verification form, which asks for a name only when an
-        OIDC provider did not supply one.
-        """
-        attrs = super().validate(attrs)
-        user = attrs["user"]
-        if not (user.first_name and user.last_name):
-            missing = {
-                field: [self.fields[field].error_messages["required"]]
-                for field in ("first_name", "last_name")
-                if not attrs.get(field)
-            }
-            if missing:
-                raise serializers.ValidationError(missing)
-        return attrs
+        attrs["user"] = attrs.pop("token")
+        return super().validate(attrs)
 
 
-class EmailChangeSerializer(serializers.Serializer):
-    proposed_email = serializers.EmailField(
-        write_only=True, required=True, max_length=254
-    )
-    password = serializers.CharField(write_only=True, required=True)
+class EmailVerificationConfirmSerializer(
+    EmailVerificationTokenSerializer, FormSerializer
+):
+    """Confirm the email address, with a name when the user does not have one yet."""
 
-    def validate_password(self, value):
-        """
-        Validate the password.
+    form_class = forms.EmailVerificationForm
 
-        Returns the password if it is correct, otherwise raises a `ValidationError`.
-        """
-        user = self.context.get("request").user
+    first_name = serializers.CharField(write_only=True, required=False)
+    last_name = serializers.CharField(write_only=True, required=False)
 
-        if not user.check_password(value):
-            raise serializers.ValidationError(
-                _("The password is incorrect."), code="authorization"
-            )
-
-        return value
-
-    def validate_proposed_email(self, value):
-        """
-        Validate the proposed email address.
-
-        Returns the proposed email address if it is different from the current email
-        address of the user, otherwise raises a `ValidationError`.
-        """
-        user = self.context.get("request").user
-
-        if value == user.email:
-            raise serializers.ValidationError(
-                _("The new email address is the same as the current email address.")
-            )
-
-        return value
-
-    def create(self, validated_data):
-        """
-        Create an email change request.
-
-        Replaces any existing email change requests for the user.
-
-        Returns:
-            The email change request.
-        """
-        user = self.context.get("request").user
-
-        instance = EmailChangeRequest(proposed_email=validated_data["proposed_email"])
-        instance.user = user
-        instance.current_email = user.email
-
-        with transaction.atomic():
-            # Remove existing email change requests for the user, if any.
-            EmailChangeRequest.objects.filter(user=user).delete()
-            instance.save()
-
-        return instance
+    def get_form_kwargs(self, attrs):  # noqa: PLR6301 (no-self-use)
+        return {"instance": attrs["user"]}
 
 
-class EmailChangeConfirmSerializer(serializers.Serializer):
-    confirmation_token = serializers.CharField(write_only=True, required=True)
+class PasswordResetRequestSerializer(FormSerializer):
+    form_class = forms.PasswordResetRequestForm
 
-    def validate_confirmation_token(self, value):  # noqa: PLR6301 (no-self-use)
-        """
-        Validate the confirmation token.
+    email = serializers.EmailField(write_only=True)
 
-        Returns a dictionary of the data inside the token if it is
-        valid and not expired, otherwise raises a `ValidationError`.
-        """
-        token_data = tokens.email_change_token_generator.check_token(value)
 
-        if (
-            not token_data
-            or not set(token_data.keys()) == {"recipient", "uuid"}
-            or token_data["recipient"]
-            not in {Recipient.CURRENT_EMAIL, Recipient.PROPOSED_EMAIL}
+class PasswordResetConfirmationSerializer(FormSerializer):
+    form_class = forms.PasswordResetForm
+    form_fields = {"new_password": ["new_password1", "new_password2"]}
+
+    token = serializers.CharField(write_only=True)
+    uidb64 = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    @staticmethod
+    def _get_user(uidb64):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            return UserModel.objects.get(pk=uid)
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+            UserModel.DoesNotExist,
+            django_exceptions.ValidationError,
         ):
+            return None
+
+    @method_decorator(sensitive_variables())
+    def validate(self, attrs):
+        user = self._get_user(attrs["uidb64"])
+        if user is None or not default_token_generator.check_token(
+            user, attrs["token"]
+        ):
+            raise serializers.ValidationError(_("Invalid token or user ID."))
+        self.user = user
+        return super().validate(attrs)
+
+    def get_form_kwargs(self, attrs):
+        return {"user": self.user}
+
+
+class PasswordChangeSerializer(FormSerializer):
+    form_class = forms.PasswordChangeForm
+    form_fields = {"new_password": ["new_password1", "new_password2"]}
+
+    old_password = serializers.CharField(write_only=True, trim_whitespace=False)
+    new_password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def get_form_kwargs(self, attrs):
+        return {"user": self.request.user}
+
+
+class SetPasswordSerializer(FormSerializer):
+    form_class = forms.SetPasswordForm
+    form_fields = {"new_password": ["new_password1", "new_password2"]}
+
+    new_password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def get_form_kwargs(self, attrs):
+        return {"user": self.request.user}
+
+
+class EmailChangeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmailChangeRequest
+        fields = [
+            "current_email",
+            "proposed_email",
+            "confirmed_by_current_email",
+            "confirmed_by_proposed_email",
+        ]
+        read_only_fields = fields
+
+
+class EmailChangeRequestSerializer(FormSerializer):
+    form_class = forms.EmailChangeRequestForm
+
+    proposed_email = serializers.EmailField(write_only=True)
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def get_form_kwargs(self, attrs):
+        return {"user": self.request.user}
+
+
+class EmailChangeConfirmSerializer(FormSerializer):
+    form_class = forms.EmailChangeConfirmForm
+
+    token = serializers.CharField(write_only=True)
+
+    def validate_token(self, value):
+        """Return the email change request of the user that the token confirms."""
+        token_data = tokens.email_change_token_generator.check_token(value)
+        email_change_request = get_email_change_request_from_token_data(
+            self.request.user, token_data
+        )
+        if email_change_request is None:
             raise serializers.ValidationError(_("Invalid or expired token."))
+        self.recipient = token_data["recipient"]
+        return email_change_request
 
-        return token_data
+    def get_form_data(self, attrs):  # noqa: PLR6301 (no-self-use)
+        # Posting the token is the consent the HTML form asks for.
+        return {"allow_change": True}
 
-    def update(self, instance, validated_data):  # noqa: PLR6301 (no-self-use)
-        # Update the change object
-        match validated_data["confirmation_token"]["recipient"]:
-            case Recipient.CURRENT_EMAIL:
-                instance.confirmed_by_current_email = True
-            case Recipient.PROPOSED_EMAIL:
-                instance.confirmed_by_proposed_email = True
-
-        # Change email address of user if complete.
-        with transaction.atomic():
-            instance.save()
-            if instance.is_complete():
-                instance.user.email = instance.proposed_email
-                try:
-                    instance.user.save(update_fields=["email"])
-                except IntegrityError:
-                    # Should only happen if an account was created with the proposed
-                    # email address after email change request was made.
-                    raise serializers.ValidationError(
-                        _("An account with this email address already exists.")
-                    ) from None
-
-        return instance
+    def get_form_kwargs(self, attrs):
+        return {"instance": attrs["token"], "recipient": self.recipient}

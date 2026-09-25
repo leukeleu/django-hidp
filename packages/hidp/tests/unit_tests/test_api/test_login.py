@@ -1,13 +1,19 @@
 from http import HTTPStatus
+from unittest import mock
 
 from rest_framework.test import APIClient, APITestCase
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.signals import user_login_failed
 from django.contrib.sessions.backends.db import SessionStore
 from django.core import mail
+from django.db import connection
 from django.urls import reverse
 
 from hidp.api.auth_state import EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY
 from hidp.test.factories.user_factories import UserFactory, VerifiedUserFactory
+
+UserModel = get_user_model()
 
 
 class TestLoginView(APITestCase):
@@ -84,6 +90,7 @@ class TestLoginView(APITestCase):
                     "first_name": self.verified_user.first_name,
                     "last_name": self.verified_user.last_name,
                     "email": self.verified_user.email,
+                    "has_usable_password": True,
                 },
                 "pending": [],
             },
@@ -140,7 +147,11 @@ class TestLoginView(APITestCase):
             self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
             errors = response.data["non_field_errors"]
             self.assertEqual(len(errors), 1)
-            self.assertEqual(str(errors[0]), "Could not authenticate")
+            self.assertEqual(
+                str(errors[0]),
+                "Please enter a correct email address and password."
+                " Note that both fields may be case-sensitive.",
+            )
 
         with self.subTest("User provides invalid email"):
             response = self.client.post(
@@ -159,4 +170,29 @@ class TestLoginView(APITestCase):
             self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
             errors = response.data["non_field_errors"]
             self.assertEqual(len(errors), 1)
-            self.assertEqual(str(errors[0]), "Could not authenticate")
+            self.assertEqual(
+                str(errors[0]),
+                "Please enter a correct email address and password."
+                " Note that both fields may be case-sensitive.",
+            )
+
+
+class TestLoginUnderAtomicRequests(APITestCase):
+    """A rejected login keeps the writes made while checking it."""
+
+    def test_failed_login_is_not_rolled_back(self):
+        def record_failure(**kwargs):
+            UserFactory(email="failure@example.com")
+
+        user_login_failed.connect(record_failure)
+        self.addCleanup(user_login_failed.disconnect, record_failure)
+
+        with mock.patch.dict(connection.settings_dict, {"ATOMIC_REQUESTS": True}):
+            response = self.client.post(
+                reverse("hidp_api:login"),
+                {"username": "walter@example.com", "password": "wrong"},
+                format="json",
+            )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertTrue(UserModel.objects.filter(email="failure@example.com").exists())

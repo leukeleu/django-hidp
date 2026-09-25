@@ -28,9 +28,16 @@ def get_email_verification_user(request):
 
 
 def get_pending_steps(request):
+    """
+    Return the steps the session must complete before the user is authenticated.
+
+    A pending email verification depends on the signed token alone, so the state
+    after signing up does not reveal whether the account existed.
+    """
     if request.user.is_authenticated:
         return []
-    if get_email_verification_user(request) is not None:
+    token = request.session.get(EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY)
+    if token and tokens.email_verification_request_token_generator.check_token(token):
         return [Step.EMAIL_VERIFY]
     return []
 

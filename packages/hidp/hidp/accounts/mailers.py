@@ -137,12 +137,15 @@ class AccountExistsMailer(BaseMailer):
         "hidp/accounts/verification/email/account_exists_body.html"
     )
 
-    def __init__(self, user, *, base_url):
+    def __init__(self, user, *, base_url, password_reset_url=None):
         super().__init__(base_url=base_url)
         self.user = user
+        self.password_reset_url = password_reset_url
 
     def get_password_reset_url(self):
-        return urljoin(self.base_url, reverse("hidp_accounts:password_reset_request"))
+        return self.password_reset_url or urljoin(
+            self.base_url, reverse("hidp_accounts:password_reset_request")
+        )
 
     def get_context(self, extra_context=None):
         return super().get_context(

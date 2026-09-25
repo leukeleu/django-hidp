@@ -198,3 +198,26 @@ class TestFrontendUrlsCheck(TestCase):
         }
         with self.settings(HIDP_FRONTEND_URLS=frontend_urls):
             self.assertEqual(self._check_ids(), ["hidp.E012", "hidp.E012"])
+
+
+@override_settings(INSTALLED_APPS=["hidp.api"])
+class TestUserSerializerCheck(TestCase):
+    """HIDP_API_USER_SERIALIZER must name a subclass of UserSerializer."""
+
+    def _check_ids(self):
+        return [error.id for error in checks.check_api_user_serializer()]
+
+    def test_setting_absent(self):
+        self.assertEqual(self._check_ids(), [])
+
+    @override_settings(HIDP_API_USER_SERIALIZER="hidp.api.serializers.UserSerializer")
+    def test_user_serializer(self):
+        self.assertEqual(self._check_ids(), [])
+
+    @override_settings(HIDP_API_USER_SERIALIZER="tests.does.not.Exist")
+    def test_not_importable(self):
+        self.assertEqual(self._check_ids(), ["hidp.E014"])
+
+    @override_settings(HIDP_API_USER_SERIALIZER="hidp.api.serializers.LoginSerializer")
+    def test_not_a_user_serializer(self):
+        self.assertEqual(self._check_ids(), ["hidp.E014"])
