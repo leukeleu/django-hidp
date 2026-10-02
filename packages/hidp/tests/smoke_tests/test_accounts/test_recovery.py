@@ -123,7 +123,7 @@ class TestPasswordResetFlow(TestCase):
         # This is a fix for Django's CVE-2024-45231. The email backend
         # might raise an exception when sending an email, which could
         # be used to enumerate valid email addresses.
-        with self.assertLogs("hidp.accounts.views", level="ERROR") as cm:
+        with self.assertLogs("hidp.accounts.flows", level="ERROR") as cm:
             self.client.post(
                 reverse("hidp_accounts:password_reset_request"),
                 {"email": self.user.email},
