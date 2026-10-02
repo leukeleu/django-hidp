@@ -7,8 +7,33 @@
     },
     "paths": {
         "/api/email-change/": {
+            "get": {
+                "operationId": "email_change_retrieve",
+                "description": "The pending email change request of the logged-in user.\n\nStarting a new request replaces the pending one.",
+                "tags": [
+                    "email-change"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailChange"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
             "post": {
                 "operationId": "email_change_create",
+                "description": "The pending email change request of the logged-in user.\n\nStarting a new request replaces the pending one.",
                 "tags": [
                     "email-change"
                 ],
@@ -16,17 +41,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/EmailChange"
+                                "$ref": "#/components/schemas/EmailChangeRequest"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/EmailChange"
+                                "$ref": "#/components/schemas/EmailChangeRequest"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/EmailChange"
+                                "$ref": "#/components/schemas/EmailChangeRequest"
                             }
                         }
                     },
@@ -39,12 +64,30 @@
                 ],
                 "responses": {
                     "201": {
-                        "description": "No response body"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailChange"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
                     }
                 }
             },
             "delete": {
                 "operationId": "email_change_destroy",
+                "description": "The pending email change request of the logged-in user.\n\nStarting a new request replaces the pending one.",
                 "tags": [
                     "email-change"
                 ],
@@ -60,12 +103,12 @@
                 }
             }
         },
-        "/api/email-change-confirm/": {
-            "put": {
-                "operationId": "email_change_confirm_update",
-                "description": "Get the existing email change request and update it.\n\nIf the request is complete the email of the user is updated and\nan email to inform the user is sent.\n\nReturns a response containing whether the request is confirmed\nby the current and proposed mail. If both have confirmed the request\nthe change can be considered complete.",
+        "/api/email-change/confirm/": {
+            "post": {
+                "operationId": "email_change_confirm_create",
+                "description": "Confirm the email change request with the token from one of its emails.\n\nThe email address changes once both the current and proposed address confirm it.",
                 "tags": [
-                    "email-change-confirm"
+                    "email-change"
                 ],
                 "requestBody": {
                     "content": {
@@ -97,7 +140,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/UpdateChangeEmailRequestResponse"
+                                    "$ref": "#/components/schemas/EmailChange"
                                 }
                             }
                         },
@@ -213,7 +256,7 @@
         "/api/login/": {
             "post": {
                 "operationId": "login_create",
-                "description": "Log in with a username and password.\n\nResponds with the authentication state. A user whose email address is not\nverified is not logged in, is sent a verification email, and the response has a\npending `email_verify` step.",
+                "description": "Log in with a username and password.\n\nA user whose email address is not verified is sent a verification email instead,\nand the response has a pending `email_verify` step.",
                 "tags": [
                     "login"
                 ],
@@ -269,7 +312,7 @@
         "/api/logout/": {
             "post": {
                 "operationId": "logout_create",
-                "description": "Logs out the user, regardless of whether a user is logged in.\n\nEnforces that a CSRF token is provided.",
+                "description": "Log out, whether or not a user is logged in.",
                 "tags": [
                     "logout"
                 ],
@@ -370,6 +413,104 @@
                 }
             }
         },
+        "/api/password/change/": {
+            "post": {
+                "operationId": "password_change_create",
+                "description": "Change the password of the logged-in user, who must enter the current one.",
+                "tags": [
+                    "password"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/password/set/": {
+            "post": {
+                "operationId": "password_set_create",
+                "description": "Set a password for a logged-in user who does not have one.\n\nOnly allowed shortly after logging in, to prove the user's identity.",
+                "tags": [
+                    "password"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetPassword"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetPassword"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetPassword"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
         "/api/session/": {
             "get": {
                 "operationId": "session_retrieve",
@@ -406,83 +547,59 @@
                 }
             }
         },
-        "/api/users/{id}/": {
-            "get": {
-                "operationId": "users_retrieve",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "me"
-                            ]
-                        },
-                        "description": "Key identifying user, can only have value `me`.",
-                        "required": true
-                    }
-                ],
+        "/api/signup/": {
+            "post": {
+                "operationId": "signup_create",
+                "description": "Create an account, and send the email to verify it.\n\nResponds with a pending `email_verify` step whether or not the account existed.",
                 "tags": [
-                    "users"
+                    "signup"
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Signup"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Signup"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Signup"
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "security": [
                     {
                         "cookieAuth": []
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "401": {
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "$ref": "#/components/schemas/AuthState"
                                 }
                             }
                         },
                         "description": ""
                     }
                 }
-            },
-            "put": {
-                "operationId": "users_update",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "me"
-                            ]
-                        },
-                        "description": "Key identifying user, can only have value `me`.",
-                        "required": true
-                    }
-                ],
+            }
+        },
+        "/api/users/me/": {
+            "get": {
+                "operationId": "users_me_retrieve",
+                "description": "The logged-in user.\n\nWith HIdP's OIDC provider installed, an OAuth2 access token with the `profile`\nand `email` scopes can read the user too, but not change it.",
                 "tags": [
                     "users"
                 ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/User"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/User"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/User"
-                            }
-                        }
-                    },
-                    "required": true
-                },
                 "security": [
                     {
                         "cookieAuth": []
@@ -502,19 +619,8 @@
                 }
             },
             "patch": {
-                "operationId": "users_partial_update",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "schema": {
-                            "type": "string",
-                            "format": "uuid"
-                        },
-                        "description": "A UUID string identifying this user.",
-                        "required": true
-                    }
-                ],
+                "operationId": "users_me_partial_update",
+                "description": "The logged-in user.\n\nWith HIdP's OIDC provider installed, an OAuth2 access token with the `profile`\nand `email` scopes can read the user too, but not change it.",
                 "tags": [
                     "users"
                 ],
@@ -585,11 +691,55 @@
             "EmailChange": {
                 "type": "object",
                 "properties": {
+                    "current_email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true,
+                        "title": "Current email address"
+                    },
                     "proposed_email": {
                         "type": "string",
                         "format": "email",
-                        "writeOnly": true,
-                        "maxLength": 254
+                        "readOnly": true,
+                        "title": "Proposed email address"
+                    },
+                    "confirmed_by_current_email": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "confirmed_by_proposed_email": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "confirmed_by_current_email",
+                    "confirmed_by_proposed_email",
+                    "current_email",
+                    "proposed_email"
+                ]
+            },
+            "EmailChangeConfirm": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "EmailChangeRequest": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "proposed_email": {
+                        "type": "string",
+                        "format": "email",
+                        "writeOnly": true
                     },
                     "password": {
                         "type": "string",
@@ -601,20 +751,9 @@
                     "proposed_email"
                 ]
             },
-            "EmailChangeConfirm": {
-                "type": "object",
-                "properties": {
-                    "confirmation_token": {
-                        "type": "string",
-                        "writeOnly": true
-                    }
-                },
-                "required": [
-                    "confirmation_token"
-                ]
-            },
             "EmailVerificationConfirm": {
                 "type": "object",
+                "description": "Confirm the email address, with a name when the user does not have one yet.",
                 "properties": {
                     "token": {
                         "type": "string",
@@ -622,11 +761,11 @@
                     },
                     "first_name": {
                         "type": "string",
-                        "maxLength": 150
+                        "writeOnly": true
                     },
                     "last_name": {
                         "type": "string",
-                        "maxLength": 150
+                        "writeOnly": true
                     }
                 },
                 "required": [
@@ -656,8 +795,24 @@
                     "requires_name"
                 ]
             },
+            "ForbiddenResponse": {
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "detail"
+                ]
+            },
             "Login": {
                 "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
                 "properties": {
                     "username": {
                         "type": "string",
@@ -673,17 +828,39 @@
                     "username"
                 ]
             },
-            "PasswordResetConfirmation": {
+            "PasswordChange": {
                 "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
                 "properties": {
-                    "token": {
-                        "type": "string"
-                    },
-                    "uidb64": {
-                        "type": "string"
+                    "old_password": {
+                        "type": "string",
+                        "writeOnly": true
                     },
                     "new_password": {
-                        "type": "string"
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "new_password",
+                    "old_password"
+                ]
+            },
+            "PasswordResetConfirmation": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "uidb64": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "writeOnly": true
                     }
                 },
                 "required": [
@@ -694,10 +871,12 @@
             },
             "PasswordResetRequest": {
                 "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
                 "properties": {
                     "email": {
                         "type": "string",
-                        "format": "email"
+                        "format": "email",
+                        "writeOnly": true
                     }
                 },
                 "required": [
@@ -706,6 +885,7 @@
             },
             "PatchedUser": {
                 "type": "object",
+                "description": "The user in the authentication state, and at `/users/me/`.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -713,16 +893,23 @@
                         "readOnly": true
                     },
                     "first_name": {
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 150
                     },
                     "last_name": {
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 150
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
                         "readOnly": true,
-                        "title": "Email address"
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "has_usable_password": {
+                        "type": "boolean",
+                        "readOnly": true
                     }
                 }
             },
@@ -737,6 +924,43 @@
                     "step"
                 ]
             },
+            "SetPassword": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "new_password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "new_password"
+                ]
+            },
+            "Signup": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "writeOnly": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "agreed_to_tos": {
+                        "type": "boolean",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "agreed_to_tos",
+                    "email",
+                    "password"
+                ]
+            },
             "StepEnum": {
                 "enum": [
                     "email_verify"
@@ -744,23 +968,9 @@
                 "type": "string",
                 "description": "* `email_verify` - email_verify"
             },
-            "UpdateChangeEmailRequestResponse": {
-                "type": "object",
-                "properties": {
-                    "confirmed_by_current_email": {
-                        "type": "boolean"
-                    },
-                    "confirmed_by_proposed_email": {
-                        "type": "boolean"
-                    }
-                },
-                "required": [
-                    "confirmed_by_current_email",
-                    "confirmed_by_proposed_email"
-                ]
-            },
             "User": {
                 "type": "object",
+                "description": "The user in the authentication state, and at `/users/me/`.",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -768,21 +978,29 @@
                         "readOnly": true
                     },
                     "first_name": {
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 150
                     },
                     "last_name": {
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 150
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
                         "readOnly": true,
-                        "title": "Email address"
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "has_usable_password": {
+                        "type": "boolean",
+                        "readOnly": true
                     }
                 },
                 "required": [
                     "email",
                     "first_name",
+                    "has_usable_password",
                     "id",
                     "last_name"
                 ]

@@ -4,7 +4,8 @@ from oauth2_provider.models import get_access_token_model, get_application_model
 from rest_framework.test import APITestCase
 
 from django.core import mail
-from django.urls import reverse
+from django.test import SimpleTestCase, override_settings
+from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
 from django.utils.timezone import now as tz_now
 
@@ -16,7 +17,7 @@ AccessToken = get_access_token_model()
 Application = get_application_model()
 
 
-class TestUserViewSetViaSession(APITestCase):
+class TestUserViewViaSession(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory(
@@ -24,7 +25,7 @@ class TestUserViewSetViaSession(APITestCase):
             last_name="White",
             email="walter@example.com",
         )
-        cls.url = reverse("api:user-detail", kwargs={"pk": "me"})
+        cls.url = reverse("hidp_api:user")
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -33,15 +34,6 @@ class TestUserViewSetViaSession(APITestCase):
         self.client.logout()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
-
-    def test_get_other_user_not_allowed(self):
-        other_user = user_factories.UserFactory()
-        self.client.force_login(other_user)
-
-        response = self.client.get(
-            reverse("api:user-detail", kwargs={"pk": self.user.pk}),
-        )
-        self.assertEqual(response.status_code, 404)
 
     def test_get(self):
         response = self.client.get(self.url)
@@ -52,100 +44,52 @@ class TestUserViewSetViaSession(APITestCase):
                 "first_name": "Walter",
                 "last_name": "White",
                 "email": "walter@example.com",
+                "has_usable_password": True,
             },
             response.json(),
         )
 
     def test_update_user_unauthenticated(self):
         self.client.logout()
-        response = self.client.patch(
-            self.url,
-            data={"first_name": "Skyler"},
-        )
+        response = self.client.patch(self.url, data={"first_name": "Skyler"})
         self.assertEqual(response.status_code, 403)
 
-    def test_update_with_pk_not_allowed(self):
-        response = self.client.patch(
-            reverse("api:user-detail", kwargs={"pk": self.user.pk}),
-            data={"first_name": "Skyler"},
-        )
-        self.assertEqual(response.status_code, 404)
-
-    def test_update_other_user_not_allowed(self):
-        other_user = user_factories.UserFactory()
-        self.client.force_login(other_user)
-
-        response = self.client.patch(
-            reverse("api:user-detail", kwargs={"pk": self.user.pk}),
-            data={"first_name": "Skyler"},
-        )
-        self.assertEqual(response.status_code, 404)
-
     def test_update_user_with_patch_with_read_only_field(self):
-        # Patch with read only field doesn't update the field.
         response = self.client.patch(
             self.url,
-            data={"email": "skyler@example.com"},
+            data={"email": "skyler@example.com", "is_superuser": True},
         )
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
         self.assertEqual(self.user.email, "walter@example.com")
+        self.assertFalse(self.user.is_superuser)
 
-    def test_update_user_with_patch_without_all_required_fields(self):
-        # Patch without all required fields should partially update.
-        response = self.client.patch(
-            self.url,
-            data={"first_name": "Skyler"},
-        )
+    def test_update_user_with_patch(self):
+        response = self.client.patch(self.url, data={"first_name": "Skyler"})
         self.assertEqual(response.status_code, 200)
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, "Skyler")
         self.assertEqual(self.user.last_name, "White")
 
-    def test_update_user_with_patch_with_all_required_fields(self):
-        # Patch with all required fields should update the user."
-        response = self.client.patch(
-            self.url,
-            data={"first_name": "Jesse", "last_name": "Pinkman"},
-        )
-        self.assertEqual(response.status_code, 200)
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, "Jesse")
-        self.assertEqual(self.user.last_name, "Pinkman")
-
-    def test_update_user_with_put_without_all_required_fields(self):
-        # Put without all required fields should throw an error.
-        response = self.client.put(
-            self.url,
-            data={"first_name": "Skyler"},
-        )
+    def test_update_user_with_blank_name(self):
+        response = self.client.patch(self.url, data={"first_name": ""})
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(
-            '{"last_name":["This field is required."]}',
-            response.content.decode("utf-8"),
-        )
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, "Walter")
+        self.assertIn("first_name", response.json())
 
-    def test_update_user_with_put_with_all_required_fields(self):
-        # Put with all required fields should update the user.
+    def test_put_not_allowed(self):
         response = self.client.put(
-            self.url,
-            data={"first_name": "Jesse", "last_name": "Pinkman"},
+            self.url, data={"first_name": "Jesse", "last_name": "Pinkman"}
         )
-        self.assertEqual(response.status_code, 200)
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, "Jesse")
-        self.assertEqual(self.user.last_name, "Pinkman")
+        self.assertEqual(response.status_code, 405)
 
 
-class TestUserViewSetViaAccessToken(APITestCase):
+class TestUserViewViaAccessToken(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory(
             first_name="Walter", last_name="White", email="walter@example.com"
         )
-        cls.url = reverse("api:user-detail", kwargs={"pk": "me"})
+        cls.url = reverse("hidp_api:user")
         cls.trusted_application = Application.objects.create(
             name="Happy App",
             client_id="happy-app",
@@ -157,13 +101,13 @@ class TestUserViewSetViaAccessToken(APITestCase):
             algorithm=Application.RS256_ALGORITHM,
         )
 
-    def set_client_access_token(self, expires_in=300):
+    def set_client_access_token(self, expires_in=300, scope="openid profile email"):
         """Add an access token to the test client."""
         # Utility method to add an access token to the test client, used in
         # the test methods to simulate a logged-in user.
         token = AccessToken.objects.create(
             user=self.user,
-            scope="openid profile email",
+            scope=scope,
             expires=tz_now() + timedelta(seconds=expires_in),
             token="secret-access-token-key",
             application=self.trusted_application,
@@ -187,6 +131,7 @@ class TestUserViewSetViaAccessToken(APITestCase):
                 "first_name": "Walter",
                 "last_name": "White",
                 "email": "walter@example.com",
+                "has_usable_password": True,
             },
             response.json(),
         )
@@ -203,6 +148,12 @@ class TestUserViewSetViaAccessToken(APITestCase):
         self.assertEqual(self.user.first_name, "Walter")
         self.assertEqual(self.user.last_name, "White")
 
+    def test_get_without_profile_and_email_scopes(self):
+        self.set_client_access_token(scope="openid")
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
     def test_update_user_with_access_token(self):
         self.set_client_access_token()
 
@@ -210,13 +161,61 @@ class TestUserViewSetViaAccessToken(APITestCase):
             self.url,
             data={"first_name": "Skyler"},
         )
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, "Skyler")
-        self.assertEqual(self.user.last_name, "White")
+        self.assertEqual(self.user.first_name, "Walter")
+
+    def test_response_is_not_cached(self):
+        self.set_client_access_token()
+
+        response = self.client.get(self.url)
+        self.assertIn("no-store", response["Cache-Control"])
+
+    def test_get_with_only_profile_scope(self):
+        self.set_client_access_token(scope="openid profile")
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_for_inactive_user(self):
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+        self.set_client_access_token()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_access_token_does_not_authenticate_other_endpoints(self):
+        self.set_client_access_token()
+
+        response = self.client.post(
+            reverse("hidp_api:password_change"),
+            {"old_password": "P@ssw0rd!", "new_password": "N3wP@ssw0rd!"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_hidp_urls_mount_the_user_endpoint(self):
+        self.set_client_access_token()
+
+        with override_settings(ROOT_URLCONF="hidp.config.urls"):
+            url = reverse("api:user")
+            response = self.client.get(url)
+
+        self.assertEqual(url, "/api/users/me/")
+        self.assertEqual(response.status_code, 200)
 
 
-class TestEmailChangeViewSet(APITestCase):
+@override_settings(ROOT_URLCONF="hidp.config.urls")
+class TestHidpUrls(SimpleTestCase):
+    """The HIdP URLs mount the user endpoint, but not the headless API."""
+
+    def test_headless_api_is_not_mounted(self):
+        with self.assertRaises(NoReverseMatch):
+            reverse("hidp_api:login")
+
+
+class TestEmailChangeView(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory(
@@ -233,6 +232,17 @@ class TestEmailChangeViewSet(APITestCase):
 
         self.assertEqual(response.status_code, 403)
 
+    def test_post_current_email(self):
+        response = self.client.post(
+            self.url,
+            {"proposed_email": "walter@example.com", "password": "P@ssw0rd!"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(EmailChangeRequest.objects.exists())
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_post_user_without_password_requests_email_change(self):
         self.user.set_unusable_password()
         self.user.save()
@@ -246,8 +256,8 @@ class TestEmailChangeViewSet(APITestCase):
             },
         )
 
-        self.assertEqual(400, response.status_code)
-        self.assertIn("password", response.json())
+        self.assertEqual(403, response.status_code)
+        self.assertEqual(response.json()["code"], "password_not_set")
 
     def test_post_user_with_wrong_password_requests_email_change(self):
         self.user.save()
@@ -463,37 +473,33 @@ class TestEmailChangeConfirmView(APITestCase):
 
     def test_unauthenticated_user(self):
         self.client.logout()
-        response = self.client.put(
-            self.url, data={"confirmation_token": self.current_mail_token}
-        )
+        response = self.client.post(self.url, data={"token": self.current_mail_token})
 
         self.assertEqual(403, response.status_code)
 
     def test_valid_token_wrong_user(self):
         self.client.force_login(user_factories.UserFactory())
-        response = self.client.put(
-            self.url, data={"confirmation_token": self.current_mail_token}
-        )
+        response = self.client.post(self.url, data={"token": self.current_mail_token})
 
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(400, response.status_code)
+        self.assertIn("token", response.json())
 
     def test_already_confirmed(self):
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.save()
-        response = self.client.put(
-            self.url, data={"confirmation_token": self.current_mail_token}
-        )
+        response = self.client.post(self.url, data={"token": self.current_mail_token})
 
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(400, response.status_code)
+        self.assertIn("token", response.json())
 
     def test_current_email_valid_token(self):
-        response = self.client.put(
-            self.url, data={"confirmation_token": self.current_mail_token}
-        )
+        response = self.client.post(self.url, data={"token": self.current_mail_token})
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(
             {
+                "current_email": "walter@example.com",
+                "proposed_email": "heisenberg@example.com",
                 "confirmed_by_current_email": True,
                 "confirmed_by_proposed_email": False,
             },
@@ -511,13 +517,13 @@ class TestEmailChangeConfirmView(APITestCase):
         self.assertEqual(len(mail.outbox), 0)
 
     def test_proposed_email_valid_token(self):
-        response = self.client.put(
-            self.url, data={"confirmation_token": self.proposed_mail_token}
-        )
+        response = self.client.post(self.url, data={"token": self.proposed_mail_token})
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(
             {
+                "current_email": "walter@example.com",
+                "proposed_email": "heisenberg@example.com",
                 "confirmed_by_current_email": False,
                 "confirmed_by_proposed_email": True,
             },
@@ -534,17 +540,17 @@ class TestEmailChangeConfirmView(APITestCase):
         # Email changed mail should not be sent yet
         self.assertEqual(len(mail.outbox), 0)
 
-    def test_put_second_valid_token(self):
+    def test_post_second_valid_token(self):
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.save()
 
-        response = self.client.put(
-            self.url, data={"confirmation_token": self.proposed_mail_token}
-        )
+        response = self.client.post(self.url, data={"token": self.proposed_mail_token})
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(
             {
+                "current_email": "walter@example.com",
+                "proposed_email": "heisenberg@example.com",
                 "confirmed_by_current_email": True,
                 "confirmed_by_proposed_email": True,
             },
@@ -571,28 +577,33 @@ class TestEmailChangeConfirmView(APITestCase):
             ["walter@example.com", "heisenberg@example.com"],
         )
 
-    def test_put_proposed_email_already_exists(self):
+    def test_post_proposed_email_already_exists(self):
         # Should only happen if an account was created with the proposed email
         # address after email change request was made.
         user_factories.UserFactory(email="heisenberg@example.com")
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.save()
 
-        response = self.client.put(
-            self.url, data={"confirmation_token": self.proposed_mail_token}
-        )
+        response = self.client.post(self.url, data={"token": self.proposed_mail_token})
         self.assertEqual(400, response.status_code)
-        self.assertIn(
-            "An account with this email address already exists.", response.json()
+        self.assertEqual(
+            response.json(),
+            {
+                "non_field_errors": [
+                    (
+                        "Sorry, changing your email address is not possible because"
+                        " an account with this email address already exists."
+                    )
+                ]
+            },
         )
 
-    def test_put_already_completed_request(self):
+    def test_post_already_completed_request(self):
         self.email_change_request.confirmed_by_current_email = True
         self.email_change_request.confirmed_by_proposed_email = True
         self.email_change_request.save()
 
-        response = self.client.put(
-            self.url, data={"confirmation_token": self.current_mail_token}
-        )
+        response = self.client.post(self.url, data={"token": self.current_mail_token})
 
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(400, response.status_code)
+        self.assertIn("token", response.json())

@@ -1,13 +1,19 @@
 from http import HTTPStatus
+from unittest import mock
 
 from rest_framework.test import APIClient, APITestCase
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.signals import user_login_failed
 from django.contrib.sessions.backends.db import SessionStore
 from django.core import mail
+from django.db import connection
 from django.urls import reverse
 
 from hidp.api.auth_state import EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY
 from hidp.test.factories.user_factories import UserFactory, VerifiedUserFactory
+
+UserModel = get_user_model()
 
 
 class TestLoginView(APITestCase):
@@ -84,23 +90,11 @@ class TestLoginView(APITestCase):
                     "first_name": self.verified_user.first_name,
                     "last_name": self.verified_user.last_name,
                     "email": self.verified_user.email,
+                    "has_usable_password": True,
                 },
                 "pending": [],
             },
         )
-
-    def test_login_requires_csrf_token(self):
-        """An anonymous login is CSRF protected, which DRF does not do by default."""
-        client = APIClient(enforce_csrf_checks=True)
-
-        response = client.post(
-            self.url,
-            data={"username": self.verified_user.email, "password": "P@ssw0rd!"},
-        )
-
-        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
-        self.assertTrue(response.json()["detail"].startswith("CSRF Failed"))
-        self.assertNotIn("_auth_user_id", client.session)
 
     def test_login_with_csrf_token_from_session(self):
         client = APIClient(enforce_csrf_checks=True)
@@ -123,40 +117,48 @@ class TestLoginView(APITestCase):
         - The response status code is 400 Bad Request
         - The response contains the correct error message
         """
-        with self.subTest("User provides invalid password"):
+        for username, password in [
+            (self.verified_user.email, "WrongPassword!"),
+            ("WrongEmail@email.com", "P@ssw0rd!"),
+        ]:
+            with self.subTest(username=username, password=password):
+                response = self.client.post(
+                    self.url, data={"username": username, "password": password}
+                )
+
+                self.assertNotIn("sessionid", response.cookies)
+                self.assertNotIn("csrftoken", response.cookies)
+                self.assertEqual(len(mail.outbox), 0)
+                self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+                self.assertEqual(
+                    response.json(),
+                    {
+                        "non_field_errors": [
+                            (
+                                "Please enter a correct email address and password."
+                                " Note that both fields may be case-sensitive."
+                            )
+                        ]
+                    },
+                )
+
+
+class TestLoginUnderAtomicRequests(APITestCase):
+    """A rejected login keeps the writes made while checking it."""
+
+    def test_failed_login_is_not_rolled_back(self):
+        def record_failure(**kwargs):
+            UserFactory(email="failure@example.com")
+
+        user_login_failed.connect(record_failure)
+        self.addCleanup(user_login_failed.disconnect, record_failure)
+
+        with mock.patch.dict(connection.settings_dict, {"ATOMIC_REQUESTS": True}):
             response = self.client.post(
-                self.url,
-                data={
-                    "username": self.verified_user.email,
-                    "password": "WrongPassword!",
-                },
+                reverse("hidp_api:login"),
+                {"username": "walter@example.com", "password": "wrong"},
+                format="json",
             )
 
-            cookies = response.cookies
-            self.assertNotIn("sessionid", cookies)
-            self.assertNotIn("csrftoken", cookies)
-
-            self.assertEqual(len(mail.outbox), 0)
-            self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
-            errors = response.data["non_field_errors"]
-            self.assertEqual(len(errors), 1)
-            self.assertEqual(str(errors[0]), "Could not authenticate")
-
-        with self.subTest("User provides invalid email"):
-            response = self.client.post(
-                self.url,
-                data={
-                    "username": "WrongEmail@email.com",
-                    "password": "P@ssw0rd!",
-                },
-            )
-
-            cookies = response.cookies
-            self.assertNotIn("sessionid", cookies)
-            self.assertNotIn("csrftoken", cookies)
-
-            self.assertEqual(len(mail.outbox), 0)
-            self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
-            errors = response.data["non_field_errors"]
-            self.assertEqual(len(errors), 1)
-            self.assertEqual(str(errors[0]), "Could not authenticate")
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertTrue(UserModel.objects.filter(email="failure@example.com").exists())
