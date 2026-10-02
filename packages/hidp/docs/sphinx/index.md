@@ -27,6 +27,7 @@ translations
 management-commands
 rate-limiting
 terms-of-service
+upgrading
 :::
 
 # Indices and tables

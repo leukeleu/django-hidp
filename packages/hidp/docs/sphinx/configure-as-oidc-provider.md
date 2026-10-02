@@ -139,7 +139,10 @@ so that clients are able to verify them.
 
 ### `/api/users/me/`
 
-API endpoint to retrieve and update the user's basic information (first and last name).
+API endpoint to retrieve the user's basic information, with an access token that
+has the `profile` and `email` scopes. It is mounted when `hidp.api` is installed.
+The [headless API](headless.md) is not: it is only served where you include
+`hidp.api.urls`.
 
 ## Django REST Framework recommendations
 
