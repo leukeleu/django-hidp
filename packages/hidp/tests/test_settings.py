@@ -82,13 +82,15 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-# URLs/URL templates for urls sent in emails
-EMAIL_VERIFICATION_URL = "email_verification_url/{token}/"
-PASSWORD_CHANGED_URL = "password_changed_url/"
-PASSWORD_RESET_URL = "password_reset_url/{uidb64}/{token}/"
-SET_PASSWORD_URL = "set_password_url/"
-EMAIL_CHANGE_CONFIRMATION_URL = "placeholder/confirm/{token}/"
-EMAIL_CHANGE_CANCEL_URL = "placeholder/cancel/"
+# URL templates for the links in emails sent by the API
+HIDP_FRONTEND_URLS = {
+    "email_verification": "/frontend/verify/{token}/",
+    "password_reset": "/frontend/reset/{uidb64}/{token}/",
+    "password_reset_request": "/frontend/reset/",
+    "set_password": "/frontend/set-password/",
+    "email_change_confirm": "/frontend/change-email/{token}/",
+    "email_change_cancel": "/frontend/change-email/cancel/",
+}
 
 USE_TZ = True
 
@@ -148,7 +150,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
-ROOT_URLCONF = "hidp.config.urls"
+ROOT_URLCONF = "tests.urls"
 
 # Help Django find and update HIdP's message catalogs
 LOCALE_PATHS = [

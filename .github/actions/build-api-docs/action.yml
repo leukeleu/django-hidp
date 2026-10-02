@@ -1,12 +1,14 @@
-name: Build HIdP Documentation
-description: Build the documentation for the HIdP package
+name: Build API Documentation
+description: Build the Redoc documentation of the HIdP OpenAPI schema
 
 runs:
   using: composite
 
   steps:
     - name: Setup Node
-      uses: ./.github/actions/setup-node
+      uses: actions/setup-node@v6
+      with:
+        node-version: '24'
 
     - name: Build documentation
       run: |
