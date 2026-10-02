@@ -47,11 +47,11 @@ msgstr ""
 msgid "Please note that this also changes the username you use to sign in."
 msgstr ""
 
-#: hidp/accounts/forms.py hidp/api/serializers.py
+#: hidp/accounts/forms.py
 msgid "The new email address is the same as the current email address."
 msgstr ""
 
-#: hidp/accounts/forms.py hidp/api/serializers.py
+#: hidp/accounts/forms.py
 msgid "The password is incorrect."
 msgstr ""
 
@@ -162,16 +162,8 @@ msgstr ""
 msgid "Sign up using {provider}"
 msgstr ""
 
-#: hidp/accounts/views.py
+#: hidp/accounts/views.py hidp/api/views.py
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
-msgstr ""
-
-#: hidp/api/serializers.py
-msgid "An account with this email address already exists."
-msgstr ""
-
-#: hidp/api/serializers.py
-msgid "Could not authenticate"
 msgstr ""
 
 #: hidp/api/serializers.py
@@ -180,6 +172,23 @@ msgstr ""
 
 #: hidp/api/serializers.py
 msgid "Invalid token or user ID."
+msgstr ""
+
+#: hidp/api/views.py hidp/templates/hidp/accounts/management/set_password.html
+msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
+msgstr ""
+
+#: hidp/api/views.py
+msgid "Logged-in users cannot register a new account."
+msgstr ""
+
+#: hidp/api/views.py
+msgid "Your account already has a password."
+msgstr ""
+
+#: hidp/api/views.py
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Your account does not currently have a password set."
 msgstr ""
 
 #: hidp/federated/forms.py
@@ -530,10 +539,6 @@ msgstr ""
 msgid "You will receive an email on both your current and the new email address with a link to confirm this change."
 msgstr ""
 
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "Your account does not currently have a password set."
-msgstr ""
-
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "Changing your account email address requires confirmation from both your current and new email addresses. Please check your email for a confirmation link."
 msgstr ""
@@ -570,10 +575,6 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Add a password to your account. This will allow you to sign in using your email address and password as well as any linked services."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/set_password.html
-msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/set_password.html

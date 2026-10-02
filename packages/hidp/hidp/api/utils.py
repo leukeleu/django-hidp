@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 
 from rest_framework import exceptions
 from rest_framework.authentication import CSRFCheck, SessionAuthentication
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.views import APIView
 
 from django.apps import apps
@@ -43,3 +44,24 @@ def get_authentication_classes():
 def get_frontend_url(key, *, base_url):
     """Return the `HIDP_FRONTEND_URLS` template for `key`, joined to `base_url`."""
     return urljoin(base_url, settings.HIDP_FRONTEND_URLS[key])
+
+
+class AccessTokenScopePermission(BasePermission):
+    """
+    Let an OAuth2 access token read the user, but never change it.
+
+    The token needs the `profile` and `email` scopes, which cover the fields of the
+    user. Requests authenticated by the session are not affected.
+    """
+
+    user_scopes = ["profile", "email"]
+
+    def has_permission(self, request, view):
+        if request.auth is None:
+            return True
+        # Django OAuth Toolkit accepts the tokens of deactivated users.
+        return (
+            request.user.is_active
+            and request.method in SAFE_METHODS
+            and request.auth.allow_scopes(self.user_scopes)
+        )

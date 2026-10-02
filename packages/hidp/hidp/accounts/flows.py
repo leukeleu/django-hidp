@@ -4,7 +4,7 @@ import logging
 
 from datetime import timedelta
 
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
@@ -61,6 +61,13 @@ def send_password_reset_email(user, *, password_reset_mailer, set_password_maile
     except Exception:
         # Do not leak the existence of the user.
         logger.exception("Failed to send password (re)set email.")
+
+
+def change_password(request, form):
+    """Save the new password of a valid password form, keeping the session valid."""
+    user = form.save()
+    update_session_auth_hash(request, user)
+    return user
 
 
 def requires_reauthentication(user, *, delta=REAUTHENTICATION_DELTA):
