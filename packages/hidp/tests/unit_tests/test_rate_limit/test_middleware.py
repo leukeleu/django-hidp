@@ -13,3 +13,17 @@ class TestRateLimitMiddleware(TestCase):
                 " Please try again later."
             ),
         )
+
+    def test_rate_limited_api_view(self):
+        response = self.client.get("/rate_limited_api_view/")
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(
+            response.json(),
+            {
+                "detail": (
+                    "Sorry, you have made too many requests to the server."
+                    " Please try again later."
+                )
+            },
+        )
+        self.assertIn("no-store", response["Cache-Control"])
