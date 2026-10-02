@@ -15,6 +15,9 @@ The following rate limit is added for views that need to be more strict:
 
 - 100 requests per 15 minutes
 
+Each view counts its requests separately, so heavy use of one page does not use up
+the limits of another.
+
 The time component of each rate limit also serves as the 'lockout period'. Meaning
 requests from the same IP will be blocked for this duration when they exceed the limit.
 
@@ -41,6 +44,10 @@ This measure is relatively easy to bypass, so it is recommended to override
 the `hidp.accounts.views.LoginView` and configure a custom `rate_limited_form_class`
 that implements a more robust countermeasure.
 
+The login endpoint of the [headless API](headless.md#login) has no such form. It
+limits the attempts per username for each IP address instead, so no client can lock
+a user out.
+
 ## Adding your own rate limits
 
 You can add additional rate limits to views like this:
@@ -59,6 +66,13 @@ class MyCustomLoginView(LoginView):
 
 ```
 
+Decorate `dispatch`, as above, also on Django REST framework views: DRF turns the
+exception that a rate limit raises inside a handler such as `post` into a 403
+instead of a 429.
+
+Views that check the same secret can share one limit by setting the same
+`rate_limit_group` class attribute, as the OTP verification views do.
+
 :::{note}
 For more examples, see [django-ratelimit documentation](https://django-ratelimit.readthedocs.io/en/stable/usage.html).
 :::
@@ -66,7 +80,7 @@ For more examples, see [django-ratelimit documentation](https://django-ratelimit
 ## Security considerations
 
 HIdP uses `ip` as the [ratelimit key](https://django-ratelimit.readthedocs.io/en/stable/keys.html#ratelimit-keys)
-for most rate limits. To ensure safety, it is crucial to that `REMOTE_ADDR` is resolved
+for most rate limits. To ensure safety, it is crucial that `REMOTE_ADDR` is resolved
 correctly, especially when Django is behind a load balancer or reverse proxy.
 
 If `REMOTE_ADDR` is not resolved correctly, the rate limits may be applied to all
