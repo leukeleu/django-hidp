@@ -16,7 +16,10 @@ from django.views.decorators.debug import sensitive_variables
 from hidp.accounts import auth as hidp_auth
 from hidp.accounts import tokens
 from hidp.accounts.email_change import Recipient
+from hidp.accounts.email_verification import get_unverified_user_from_token
 from hidp.accounts.models import EmailChangeRequest
+
+from .constants import Step
 
 UserModel = get_user_model()
 
@@ -28,11 +31,21 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = [
+            "id",
             "first_name",
             "last_name",
             "email",
         ]
-        read_only_fields = ["email"]
+        read_only_fields = ["id", "email"]
+
+
+class PendingStepSerializer(serializers.Serializer):
+    step = serializers.ChoiceField(choices=[step.value for step in Step])
+
+
+class AuthStateSerializer(serializers.Serializer):
+    user = UserSerializer(allow_null=True)
+    pending = PendingStepSerializer(many=True)
 
 
 @method_decorator(sensitive_variables(), name="validate")
@@ -122,6 +135,52 @@ class PasswordResetConfirmationSerializer(serializers.Serializer):
             raise serializers.ValidationError(_("Invalid token or user ID."))
 
         self._validate_new_password(user, attrs["new_password"])
+        attrs["user"] = user
+        return attrs
+
+
+class EmailVerificationTokenSerializer(serializers.Serializer):
+    token = serializers.CharField(write_only=True)
+
+    def validate_token(self, value):  # noqa: PLR6301 (no-self-use)
+        """
+        Validate the email verification token from the verification email.
+
+        Returns the unverified user the token belongs to.
+        """
+        user = get_unverified_user_from_token(
+            value, token_generator=tokens.email_verification_token_generator
+        )
+        if user is None:
+            raise serializers.ValidationError(_("Invalid or expired token."))
+        return user
+
+    def validate(self, attrs):  # noqa: PLR6301 (no-self-use)
+        attrs["user"] = attrs.pop("token")
+        return attrs
+
+
+class EmailVerificationConfirmSerializer(EmailVerificationTokenSerializer):
+    first_name = serializers.CharField(required=False, max_length=150)
+    last_name = serializers.CharField(required=False, max_length=150)
+
+    def validate(self, attrs):
+        """
+        Require a first and last name unless the user already has both.
+
+        This matches the HTML verification form, which asks for a name only when an
+        OIDC provider did not supply one.
+        """
+        attrs = super().validate(attrs)
+        user = attrs["user"]
+        if not (user.first_name and user.last_name):
+            missing = {
+                field: [self.fields[field].error_messages["required"]]
+                for field in ("first_name", "last_name")
+                if not attrs.get(field)
+            }
+            if missing:
+                raise serializers.ValidationError(missing)
         return attrs
 
 
