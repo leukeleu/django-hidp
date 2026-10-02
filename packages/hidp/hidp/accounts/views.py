@@ -28,6 +28,7 @@ from ..csp.decorators import hidp_csp_protection
 from ..federated.views import OIDCContextMixin
 from ..otp.decorators import otp_exempt
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
+from ..rate_limit.keys import username_rate_limit_key
 from . import auth as hidp_auth
 from . import email_verification, forms, mailers, tokens
 from .email_change import Recipient
@@ -426,7 +427,8 @@ class EmailVerificationCompleteView(auth_views.RedirectURLMixin, generic.Templat
 
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(
-    ratelimit(key="post:username", rate="10/m", method="POST", block=False), name="post"
+    ratelimit(key=username_rate_limit_key, rate="10/m", method="POST", block=False),
+    name="post",
 )
 @method_decorator(rate_limit_strict, name="dispatch")
 class LoginView(OIDCContextMixin, auth_views.LoginView):
