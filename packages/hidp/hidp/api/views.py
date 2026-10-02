@@ -26,7 +26,8 @@ from django.views.decorators.debug import sensitive_post_parameters
 from hidp.accounts import auth as hidp_auth
 from hidp.accounts import flows, mailers, tokens
 from hidp.accounts.email_change import get_pending_email_change_request
-from hidp.utils import is_registration_enabled
+from hidp.otp.decorators import otp_exempt
+from hidp.utils import get_frontend_url, is_registration_enabled
 
 from ..rate_limit.decorators import rate_limit, rate_limit_default, rate_limit_strict
 from ..rate_limit.keys import ip_username_rate_limit_key
@@ -54,7 +55,6 @@ from .utils import (
     AccessTokenScopePermission,
     CSRFProtectedAPIView,
     get_authentication_classes,
-    get_frontend_url,
 )
 
 AUTH_STATE_RESPONSES = {
@@ -147,6 +147,7 @@ class PasswordChangedMailerMixin:
         ).send()
 
 
+@method_decorator(otp_exempt, name="dispatch")
 @method_decorator(ensure_csrf_cookie, name="dispatch")
 @extend_schema_view(get=extend_schema(responses=AUTH_STATE_RESPONSES))
 class SessionView(BaseView):
@@ -185,6 +186,7 @@ class LoginView(VerificationMailerMixin, BaseView):
         return auth_state_response(request)
 
 
+@method_decorator(otp_exempt, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
 @extend_schema_view(
     post=extend_schema(

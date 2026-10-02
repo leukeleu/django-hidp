@@ -90,6 +90,7 @@ HIDP_FRONTEND_URLS = {
     "set_password": "/frontend/set-password/",
     "email_change_confirm": "/frontend/change-email/{token}/",
     "email_change_cancel": "/frontend/change-email/cancel/",
+    "otp_management": "/frontend/otp/",
 }
 
 USE_TZ = True

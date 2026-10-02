@@ -2,10 +2,12 @@ from http import HTTPStatus
 
 from rest_framework.response import Response
 
+from django.apps import apps
+
 from hidp.accounts import tokens
 from hidp.accounts.email_verification import get_unverified_user_from_token
 
-from .constants import Step
+from ..constants import Step
 from .serializers import AuthStateSerializer
 
 # Shared with the HTML views, so either can resume a flow the other started.
@@ -27,6 +29,18 @@ def get_email_verification_user(request):
     )
 
 
+def _get_pending_otp_step(request):
+    if not apps.is_installed("hidp.otp"):
+        return None
+    from hidp.otp.middleware import get_otp_middlewares  # noqa: PLC0415
+
+    # The first policy that applies is the one that answers protected views.
+    for otp_middleware in get_otp_middlewares():
+        if otp_middleware.session_needs_verification(request):
+            return otp_middleware.get_pending_step(request)
+    return None
+
+
 def get_pending_steps(request):
     """
     Return the steps the session must complete before the user is authenticated.
@@ -35,7 +49,8 @@ def get_pending_steps(request):
     after signing up does not reveal whether the account existed.
     """
     if request.user.is_authenticated:
-        return []
+        step = _get_pending_otp_step(request)
+        return [step] if step else []
     token = request.session.get(EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY)
     if token and tokens.email_verification_request_token_generator.check_token(token):
         return [Step.EMAIL_VERIFY]
@@ -49,8 +64,8 @@ def auth_state_response(request):
     Responds with 200 when the user is fully authenticated, otherwise with 401 and
     the steps the client must complete next.
     """
-    user = request.user if request.user.is_authenticated else None
     pending = get_pending_steps(request)
+    user = request.user if request.user.is_authenticated and not pending else None
     serializer = AuthStateSerializer(
         {"user": user, "pending": [{"step": step} for step in pending]},
         context={"request": request},

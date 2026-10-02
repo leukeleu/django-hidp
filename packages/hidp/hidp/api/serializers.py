@@ -21,7 +21,7 @@ from hidp.accounts.email_change import get_email_change_request_from_token_data
 from hidp.accounts.email_verification import get_unverified_user_from_token
 from hidp.accounts.models import EmailChangeRequest
 
-from .constants import Step
+from ..constants import Step
 
 UserModel = get_user_model()
 
