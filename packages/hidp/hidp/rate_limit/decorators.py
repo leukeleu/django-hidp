@@ -1,24 +1,50 @@
 from django_ratelimit.decorators import ratelimit
 
-_default_rate_limits = [
-    ratelimit(key="ip", method=ratelimit.UNSAFE, rate="10/s"),
-    ratelimit(key="ip", method=ratelimit.UNSAFE, rate="30/m"),
+_DEFAULT_RATE_LIMITS = [
+    ("ip", ratelimit.UNSAFE, "10/s"),
+    ("ip", ratelimit.UNSAFE, "30/m"),
+]
+
+_STRICT_RATE_LIMITS = [
+    *_DEFAULT_RATE_LIMITS,
+    ("ip", ratelimit.ALL, "100/15m"),
 ]
 
 
-def _apply_rate_limits(*rate_limits, view):
-    for rate_limit in rate_limits:
-        view = rate_limit(view)
+def _view_class_group(view):
+    """
+    Name the rate limit group after the class of a class-based view.
+
+    Views that guard the same secret can share a budget by setting the same
+    `rate_limit_group` class attribute.
+    """
+    # method_decorator passes a partial of the bound method, on every request.
+    instance = getattr(getattr(view, "func", None), "__self__", None)
+    view_class = getattr(view, "view_class", None) or (
+        type(instance) if instance is not None else None
+    )
+    if view_class is None:
+        return None
+    return getattr(view_class, "rate_limit_group", None) or (
+        f"{view_class.__module__}.{view_class.__qualname__}"
+    )
+
+
+def _apply_rate_limits(rate_limits, view):
+    group = _view_class_group(view)
+    for key, method, rate in rate_limits:
+        view = ratelimit(group=group, key=key, method=method, rate=rate)(view)
     return view
 
 
 def rate_limit_default(view):
-    return _apply_rate_limits(*_default_rate_limits, view=view)
+    return _apply_rate_limits(_DEFAULT_RATE_LIMITS, view)
 
 
 def rate_limit_strict(view):
-    return _apply_rate_limits(
-        *_default_rate_limits,
-        ratelimit(key="ip", method=ratelimit.ALL, rate="100/15m"),
-        view=view,
-    )
+    return _apply_rate_limits(_STRICT_RATE_LIMITS, view)
+
+
+def rate_limit(*, key, rate, method=ratelimit.ALL):
+    """Apply one rate limit, counted per view class like the default limits."""
+    return lambda view: _apply_rate_limits([(key, method, rate)], view)
