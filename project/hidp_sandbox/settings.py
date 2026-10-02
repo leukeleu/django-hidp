@@ -284,6 +284,7 @@ HIDP_FRONTEND_URLS = {
     "set_password": "/manage/set-password/",
     "email_change_confirm": "/manage/change-email-confirm/{token}/",
     "email_change_cancel": "/manage/change-email-cancel/",
+    "otp_management": "/manage/otp/",
 }
 
 # Sentry
