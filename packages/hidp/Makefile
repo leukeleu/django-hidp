@@ -13,6 +13,7 @@ help:
 	@echo "  make coveragetest - Generate coverage report"
 	@echo "  make coverage - Generate test coverage html report"
 	@echo "  make django-checks - Run Django system checks"
+	@echo "  make docs - Build the documentation"
 	@echo "  make build - Build the package"
 	@echo
 
@@ -104,6 +105,13 @@ django-checks:
 	# Run Django system checks
 	$(call group,Running Django system checks)
 	uv run  manage.py check --fail-level WARNING
+	$(call endgroup)
+
+.PHONY: docs
+docs:
+	# Build the documentation
+	$(call group,Building documentation)
+	uv run --group docs make -C docs html
 	$(call endgroup)
 
 .PHONY: build
