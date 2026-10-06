@@ -44,6 +44,7 @@ If you do not want to include a ToS checkbox, override the `UserCreationForm` to
    ```python
    from hidp.accounts.views import RegistrationView
 
+
    class CustomRegistrationView(RegistrationView):
        form_class = CustomUserCreationForm
    ```
@@ -55,7 +56,9 @@ If you do not want to include a ToS checkbox, override the `UserCreationForm` to
     from .views import CustomRegistrationView
 
     urlpatterns = [
-        path('signup/', CustomRegistrationView.as_view(), name='register'),  # Above the hidp URLs
+        path(
+            "signup/", CustomRegistrationView.as_view(), name="register"
+        ),  # Above the hidp URLs
         path("", include(hidp_urls)),
     ]
     ```

@@ -9,7 +9,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   # Linting
-  "ruff==0.14.10",
+  "ruff==0.16.10",
 
   # Testing
   "coverage~=7.16",
@@ -53,6 +53,7 @@ ignore = [
   "RET505",  # else after return is OK
   "RET506",  # else after raise is OK
   "RUF012",  # typing.ClassVar is not required
+  "RUF105",  # standard noqa comments are fine, no need for ruff: ignore comments
   "SIM105",  # contextlib.suppress and try/except/pass are both OK
   "SIM108",  # if/else blocks and tenary operators are both OK
   "TD001",  # "FIXME" is OK

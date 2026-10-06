@@ -83,10 +83,10 @@ extend = "../hidp-pycqa/pyproject.toml"
 
 [tool.ruff.lint.extend-per-file-ignores]
 "hidp/config/*" = [
-  "N803",  # ALL_UPPERCASE is OK in config code
+  "invalid-argument-name",  # ALL_UPPERCASE is OK in config code
 ]
 "docs/conf.py" = [
-  "INP001",  # Not a package
+  "implicit-namespace-package",  # Not a package
 ]
 
 [tool.coverage.run]
