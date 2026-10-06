@@ -50,7 +50,10 @@ management command in your project (e.g. `remove_stale_unverified_accounts.py`
 in the `management/commands` directory of an app) with the following content:
 
 ```python
-from hidp.accounts.management.commands.remove_stale_unverified_accounts import Command as BaseCommand
+from hidp.accounts.management.commands.remove_stale_unverified_accounts import (
+    Command as BaseCommand,
+)
+
 
 class Command(BaseCommand):
     DEFAULT_MAX_DAYS = 30
@@ -107,7 +110,10 @@ management command in your project (e.g. `remove_complete_and_stale_email_change
 in the `management/commands` directory of an app) with the following content:
 
 ```python
-from hidp.accounts.management.commands.remove_complete_and_stale_email_change_requests import Command as BaseCommand
+from hidp.accounts.management.commands.remove_complete_and_stale_email_change_requests import (
+    Command as BaseCommand,
+)
+
 
 class Command(BaseCommand):
     DEFAULT_MAX_DAYS = 30

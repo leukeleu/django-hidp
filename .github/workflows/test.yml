@@ -13,19 +13,17 @@ on:
 
 jobs:
   test:
-    name: Linting, checks & tests (${{ toJSON(matrix) }})
+    name: Tests (${{ toJSON(matrix) }})
 
     strategy:
       matrix:
-        django-version: ['4.2', '5.2', '6.0']
+        django-version: ['5.2', '6.0', '6.1']
         python-version: ['3.11', '3.12', '3.13', '3.14']
         working-directory: ['./packages/hidp']
         exclude:
-          - django-version: '4.2'
-            python-version: '3.13'
-          - django-version: '4.2'
-            python-version: '3.14'
           - django-version: '6.0'
+            python-version: '3.11'
+          - django-version: '6.1'
             python-version: '3.11'
         include:
           - working-directory: './project'
@@ -37,7 +35,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_PASSWORD: postgres
         ports:
@@ -50,16 +48,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Linting, checks & tests
+      - name: Django checks & tests
         uses: ./.github/actions/python-qa
         with:
           working-directory: ${{ matrix.working-directory }}
           django-version: ${{ matrix.django-version }}
           python-version: ${{ matrix.python-version }}
+          # The test cells only run the Django version sensitive targets,
+          # version independent tooling runs in the toolchain job.
+          make-targets: django-checks coveragetest
 
-      - name: Build documentation
-        uses: ./.github/actions/build-hidp-docs
-        if: ${{ matrix.working-directory == './packages/hidp' && matrix.django-version == '5.2' && matrix.python-version == '3.12' }}
+  toolchain:
+    name: Linting, migration & message checks, documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      UV_PROJECT_ENVIRONMENT: ${{ github.workspace }}/.venv
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: ./.github/actions/setup-python
+        with:
+          working-directory: './packages/hidp'
+          python-version: '3.14'
+          django-version: '5.2'
+
+      - name: Lint, check and build
+        run: |
+          make lint migrationtest checkmessages docs
+        working-directory: ./packages/hidp
+        shell: bash
+        env:
+          RUFF_OUTPUT_FORMAT: github
 
   # Report success/failure
   success:
@@ -68,6 +92,7 @@ jobs:
     if: ${{ always() }}
     needs:
       - test
+      - toolchain
     steps:
       - run: exit 1
         if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}

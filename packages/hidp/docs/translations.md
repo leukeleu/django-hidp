@@ -54,9 +54,7 @@ First configure the `LOCALE_PATHS` setting in your Django settings:
 
 ```python
 # settings.py
-LOCALE_PATHS = [
-    BASE_DIR / "locale"
-]
+LOCALE_PATHS = [BASE_DIR / "locale"]
 ```
 
 Inside the `locale` directory, create a subdirectory for each language you want to support. For example,

@@ -84,8 +84,8 @@ Add a custom `User` model to the `accounts` app you just created, that inherits 
 ```python models.py
 from hidp.accounts.models import BaseUser
 
-class User(BaseUser):
-  ...
+
+class User(BaseUser): ...
 ```
 
 After defining the model, run `./manage.py makemigrations accounts`.
