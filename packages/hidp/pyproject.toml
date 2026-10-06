@@ -47,7 +47,7 @@ all = [
 [dependency-groups]
 dev = [
   "hidp-pycqa",
-  "psycopg[binary]~=3.2",
+  "psycopg[binary]~=3.3",
 ]
 docs = [
   "sphinx~=8.1.3",
