@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 
 [[package]]
@@ -252,10 +252,10 @@ all = [
 
 [package.metadata]
 requires-dist = [
-    { name = "django", specifier = ">=4.2" },
+    { name = "django", specifier = ">=5.2" },
     { name = "django-hidp", extras = ["oidc-provider", "otp"], marker = "extra == 'all'" },
     { name = "django-hidp", extras = ["otp"], marker = "extra == 'recommended'" },
-    { name = "django-oauth-toolkit", marker = "extra == 'oidc-provider'", specifier = ">=3.0.1" },
+    { name = "django-oauth-toolkit", marker = "extra == 'oidc-provider'", specifier = ">=3.4.1" },
     { name = "django-otp", marker = "extra == 'otp'", specifier = ">=1.5.0" },
     { name = "django-ratelimit", specifier = ">=4.1.0,<5" },
     { name = "djangorestframework", marker = "extra == 'oidc-provider'", specifier = ">=3.15.2" },
@@ -278,17 +278,18 @@ docs = [
 
 [[package]]
 name = "django-oauth-toolkit"
-version = "3.1.0"
+version = "3.4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "jwcrypto" },
     { name = "oauthlib" },
     { name = "requests" },
+    { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/9f/2f183535b1ae1e3b6b07b59e74e75c47c057a690a83cc7ed1edc2621f3a4/django_oauth_toolkit-3.1.0.tar.gz", hash = "sha256:d5a59d07588cfefa8818e99d65040a252eb2ede22512483e2240c91d0b885c8e", size = 102563, upload-time = "2025-10-03T16:12:25.236Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/66/42/b3c6a5d7e204011a702cc02ababb756d10538645dfd188ea441e4c65a082/django_oauth_toolkit-3.4.1.tar.gz", hash = "sha256:c4de73c0765eed55a99ea0fa8433b20664dcc1f43930149cff569abed166c5c2", size = 256139, upload-time = "2026-08-21T03:45:36.538Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/40/c36397edbd020319403a76ce3229f757c262db8652a424f354d848799271/django_oauth_toolkit-3.1.0-py3-none-any.whl", hash = "sha256:10ddc90804297d913dfb958edd58d5fac541eb1ca912f47893ca1e482bb2a11f", size = 78658, upload-time = "2025-10-03T16:12:24.038Z" },
+    { url = "https://files.pythonhosted.org/packages/c4/16/11cf2eacd7ac1c32908288b6d56fadef5676071a4ac0af7e626fd1abd3ef/django_oauth_toolkit-3.4.1-py3-none-any.whl", hash = "sha256:c47f2a70e83bade0a47a5e9b20e86030d8ed9c0a8f10ec4ed30446cad7291f2d", size = 163957, upload-time = "2026-08-21T03:45:34.904Z" },
 ]
 
 [[package]]

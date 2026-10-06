@@ -68,7 +68,7 @@ class TestOAuthFlow(TestCase):
             token="secret-access-token-key",
             application=self.trusted_application,
         )
-        (client or self.client).defaults["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+        (client or self.client).defaults["HTTP_AUTHORIZATION"] = f"Bearer {token.token}"
 
     def authorization_request(
         self, code_verifier="secret", client_id="happy-app", **oauth_params
@@ -240,7 +240,8 @@ class TestOAuthFlow(TestCase):
         with self.subTest("No user logged in"):
             response = self.authorization_request(prompt="create")
             next_url = (
-                f"{response.request['PATH_INFO']}?{response.request['QUERY_STRING']}"
+                f"http://testserver{response.request['PATH_INFO']}"
+                f"?{response.request['QUERY_STRING']}"
             ).replace("&prompt=create", "")
             self.assertRedirects(
                 response,
@@ -254,7 +255,8 @@ class TestOAuthFlow(TestCase):
             self.client.force_login(self.user)
             response = self.authorization_request(prompt="create")
             next_url = (
-                f"{response.request['PATH_INFO']}?{response.request['QUERY_STRING']}"
+                f"http://testserver{response.request['PATH_INFO']}"
+                f"?{response.request['QUERY_STRING']}"
             ).replace("&prompt=create", "")
             self.assertRedirects(
                 response,

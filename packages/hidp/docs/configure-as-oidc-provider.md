@@ -194,7 +194,7 @@ The settings provided by `get_oauth2_provider_settings` are as follows:
 
 ```{eval-rst}
 .. literalinclude:: ../hidp/config/oauth2_provider.py
-  :lines: 1-60
+  :lines: 1-65
 ```
 
 Refer to the [Django OAuth Toolkit documentation](https://django-oauth-toolkit.readthedocs.io/en/latest/settings.html)
