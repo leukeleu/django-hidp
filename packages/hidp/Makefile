@@ -60,7 +60,16 @@ migrationtest:
 .PHONY: messages
 messages:
 	# Update the message catalog
-	uv run manage.py makemessages
+	# The catalogs are verified byte for byte by CI, so this target re-runs
+	# itself in the python container, whose gettext version matches CI's.
+	@if [ -f /.dockerenv ] || [ "$${CI:-}" = "true" ]; then \
+		uv run manage.py makemessages; \
+	else \
+		echo "Updating the message catalog in the python container..."; \
+		docker compose -f ../../compose.yaml run --rm --no-deps \
+			--workdir /code --entrypoint /bin/bash python \
+			-c "cd project && uv sync && cd ../packages/hidp && UV_NO_SYNC=1 make messages"; \
+	fi
 
 .PHONY: compilemessages
 compilemessages:
