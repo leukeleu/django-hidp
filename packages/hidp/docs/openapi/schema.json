@@ -106,36 +106,51 @@
                 }
             }
         },
-        "/api/email-verified/": {
-            "get": {
-                "operationId": "email_verified_retrieve",
+        "/api/email-verification/confirm/": {
+            "post": {
+                "operationId": "email_verification_confirm_create",
+                "description": "Mark the email address as verified. The user still has to log in.",
                 "tags": [
-                    "email-verified"
+                    "email-verification"
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "security": [
                     {
                         "cookieAuth": []
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/GetEmailVerifiedResponse"
-                                }
-                            }
-                        },
-                        "description": ""
+                    "204": {
+                        "description": "No response body"
                     }
                 }
             }
         },
-        "/api/email-verified/resend/": {
+        "/api/email-verification/resend/": {
             "post": {
-                "operationId": "email_verified_resend_create",
+                "operationId": "email_verification_resend_create",
+                "description": "Resend the verification email to the user this session is waiting for.\n\nAlways responds with 204, so the response does not reveal whether an email\nwas sent.",
                 "tags": [
-                    "email-verified"
+                    "email-verification"
                 ],
                 "security": [
                     {
@@ -149,9 +164,56 @@
                 }
             }
         },
+        "/api/email-verification/verify/": {
+            "post": {
+                "operationId": "email_verification_verify_create",
+                "description": "Check an email verification token before confirming it.\n\nTells the client whether the confirmation must include a first and last name.",
+                "tags": [
+                    "email-verification"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationToken"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationToken"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationToken"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailVerificationVerifyResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/login/": {
             "post": {
                 "operationId": "login_create",
+                "description": "Log in with a username and password.\n\nResponds with the authentication state. A user whose email address is not\nverified is not logged in, is sent a verification email, and the response has a\npending `email_verify` step.",
                 "tags": [
                     "login"
                 ],
@@ -175,12 +237,31 @@
                     },
                     "required": true
                 },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
                 "responses": {
-                    "204": {
-                        "description": "No response body"
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
                     },
                     "401": {
-                        "description": "No response body"
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -198,8 +279,15 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No response body"
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -207,6 +295,7 @@
         "/api/password-reset/": {
             "post": {
                 "operationId": "password_reset_create",
+                "description": "Email a password reset link, or a set password link to a user without a password.\n\nAlways responds with 204, so the response does not reveal whether an account\nexists.",
                 "tags": [
                     "password-reset"
                 ],
@@ -230,6 +319,11 @@
                     },
                     "required": true
                 },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No response body"
@@ -240,6 +334,7 @@
         "/api/password-reset/confirm/": {
             "post": {
                 "operationId": "password_reset_confirm_create",
+                "description": "Set a new password for the user identified by the password reset token.\n\nChanging the password invalidates the user's existing sessions. The user still\nhas to log in.",
                 "tags": [
                     "password-reset"
                 ],
@@ -271,6 +366,42 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/session/": {
+            "get": {
+                "operationId": "session_retrieve",
+                "description": "Describe the authentication state of the current session.\n\nAlso sets the CSRF cookie, which clients need for every unsafe request.",
+                "tags": [
+                    "session"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -428,6 +559,29 @@
     },
     "components": {
         "schemas": {
+            "AuthState": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "pending": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PendingStep"
+                        }
+                    }
+                },
+                "required": [
+                    "pending",
+                    "user"
+                ]
+            },
             "EmailChange": {
                 "type": "object",
                 "properties": {
@@ -459,15 +613,47 @@
                     "confirmation_token"
                 ]
             },
-            "GetEmailVerifiedResponse": {
+            "EmailVerificationConfirm": {
                 "type": "object",
                 "properties": {
-                    "email_verified": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 150
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 150
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "EmailVerificationToken": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "EmailVerificationVerifyResponse": {
+                "type": "object",
+                "properties": {
+                    "requires_name": {
                         "type": "boolean"
                     }
                 },
                 "required": [
-                    "email_verified"
+                    "requires_name"
                 ]
             },
             "Login": {
@@ -521,6 +707,11 @@
             "PatchedUser": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
                     "first_name": {
                         "type": "string"
                     },
@@ -534,6 +725,24 @@
                         "title": "Email address"
                     }
                 }
+            },
+            "PendingStep": {
+                "type": "object",
+                "properties": {
+                    "step": {
+                        "$ref": "#/components/schemas/StepEnum"
+                    }
+                },
+                "required": [
+                    "step"
+                ]
+            },
+            "StepEnum": {
+                "enum": [
+                    "email_verify"
+                ],
+                "type": "string",
+                "description": "* `email_verify` - email_verify"
             },
             "UpdateChangeEmailRequestResponse": {
                 "type": "object",
@@ -553,6 +762,11 @@
             "User": {
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
                     "first_name": {
                         "type": "string"
                     },
@@ -569,6 +783,7 @@
                 "required": [
                     "email",
                     "first_name",
+                    "id",
                     "last_name"
                 ]
             }

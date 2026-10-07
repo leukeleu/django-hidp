@@ -19,7 +19,7 @@ class TestSchema(APITestCase):
         # remove added trailing newline
         generated_schema = schema_output.getvalue()[:-1]
 
-        existing_schema = existing_schema_path.read_text()
+        existing_schema = existing_schema_path.read_text(encoding="utf-8")
 
         self.assertEqual(
             generated_schema,
