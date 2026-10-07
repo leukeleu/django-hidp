@@ -1,19 +1,25 @@
 from datetime import timedelta
 from http import HTTPStatus
+from unittest import mock
 
 from rest_framework.test import APITestCase
 
-from django.contrib.auth import SESSION_KEY
+from django.contrib.auth import SESSION_KEY, get_user_model
 from django.core import mail
+from django.core.exceptions import ValidationError
+from django.db import connection
 from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from hidp.accounts.forms import PasswordChangeForm
 from hidp.api.serializers import UserSerializer, get_user_serializer_class
 from hidp.test.factories.user_factories import (
     EmailChangeRequestFactory,
     VerifiedUserFactory,
 )
+
+UserModel = get_user_model()
 
 
 class StaffUserSerializer(UserSerializer):
@@ -61,6 +67,26 @@ class TestPasswordChangeView(APITestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
         self.assertEqual(set(response.json()), {"old_password"})
+
+    def test_rejected_change_is_rolled_back(self):
+        """Only views that count failed attempts keep the writes of a 400."""
+
+        def clean_old_password(form):
+            VerifiedUserFactory(email="written@example.com")
+            raise ValidationError("Wrong password.")
+
+        with (
+            mock.patch.object(
+                PasswordChangeForm, "clean_old_password", clean_old_password
+            ),
+            mock.patch.dict(connection.settings_dict, {"ATOMIC_REQUESTS": True}),
+        ):
+            response = self.client.post(
+                self.url, {"old_password": "wrong", "new_password": "N3w-P@ssw0rd!"}
+            )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertFalse(UserModel.objects.filter(email="written@example.com").exists())
 
     @override_settings(
         AUTH_PASSWORD_VALIDATORS=[
