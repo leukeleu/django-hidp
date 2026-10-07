@@ -59,6 +59,24 @@ class TestLoginView(APITestCase):
             response.json(), {"user": None, "pending": [{"step": "email_verify"}]}
         )
 
+    def test_unverified_login_logs_out_the_current_user(self):
+        self.client.force_login(self.verified_user)
+
+        response = self.client.post(
+            self.url,
+            data={
+                "username": self.unverified_user.email,
+                "password": "P@ssw0rd!",
+            },
+        )
+
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertIn(EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY, self.client.session)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        self.assertEqual(
+            response.json(), {"user": None, "pending": [{"step": "email_verify"}]}
+        )
+
     def test_valid_login_verified_email(self):
         """
         Verify behavior when logging in an user that has verified their email.

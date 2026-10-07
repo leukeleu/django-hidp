@@ -248,6 +248,20 @@ class TestOTPSetupView(TestCase):
             response, "/my-special-page/", fetch_redirect_response=False
         )
 
+    def test_redirects_to_recovery_code_with_another_device(self):
+        """A user with only recovery codes must use one before setting up TOTP."""
+        otp_factories.StaticDeviceFactory(user=self.user, confirmed=True)
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("hidp_otp_management:setup"))
+
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_otp:verify-recovery-code')}"
+            f"?{urlencode({'next': reverse('hidp_otp_management:setup')})}",
+            fetch_redirect_response=False,
+        )
+
     def test_valid_form_confirms_devices(self):
         """A valid form should confirm the TOTP and static devices."""
         self.client.force_login(self.user)

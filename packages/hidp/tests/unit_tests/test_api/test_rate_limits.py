@@ -8,6 +8,10 @@ from django.core.cache import cache
 from django.test import override_settings
 from django.urls import reverse
 
+from hidp.test.factories import user_factories
+
+from .test_otp import confirmed_devices
+
 
 @override_settings(
     CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
@@ -78,7 +82,7 @@ TWO_RATE_LIMITS = [("ip", ALL, "100/s"), ("ip", ALL, "3/m")]
 @mock.patch("hidp.rate_limit.decorators._DEFAULT_RATE_LIMITS", TWO_RATE_LIMITS)
 @mock.patch("hidp.rate_limit.decorators._STRICT_RATE_LIMITS", TWO_RATE_LIMITS)
 class TestRateLimitGroups(RateLimitTestCase):
-    """Every API view has a rate limit budget of its own."""
+    """Every API view has a budget of its own, unless it shares a group."""
 
     def test_exhausting_one_view_does_not_limit_another(self):
         resend_url = reverse("hidp_api:email_verification_resend")
@@ -95,3 +99,28 @@ class TestRateLimitGroups(RateLimitTestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
+    def test_otp_codes_and_recovery_codes_share_a_budget(self):
+        user = user_factories.VerifiedUserFactory()
+        self.client.force_login(user)
+        confirmed_devices(user)
+        for _ in range(3):
+            self.client.post(reverse("hidp_api:otp_verify"), {"otp_token": "000000"})
+
+        response = self.client.post(
+            reverse("hidp_api:otp_verify_recovery_code"), {"recovery_code": "x"}
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.TOO_MANY_REQUESTS)
+
+    def test_regenerating_recovery_codes_is_limited(self):
+        user = user_factories.VerifiedUserFactory()
+        self.client.force_login(user)
+        confirmed_devices(user)
+        url = reverse("hidp_api:otp_recovery_codes")
+        for _ in range(3):
+            self.client.post(url)
+
+        self.assertEqual(
+            self.client.post(url).status_code, HTTPStatus.TOO_MANY_REQUESTS
+        )

@@ -335,6 +335,382 @@
                 }
             }
         },
+        "/api/otp/": {
+            "get": {
+                "operationId": "otp_retrieve",
+                "description": "Whether two-factor authentication is configured, and the codes left.",
+                "tags": [
+                    "otp"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OTPStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/otp/disable/": {
+            "post": {
+                "operationId": "otp_disable_create",
+                "description": "Disable two-factor authentication, confirmed with a code from the app.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/otp/disable/recovery-code/": {
+            "post": {
+                "operationId": "otp_disable_recovery_code_create",
+                "description": "Disable two-factor authentication, confirmed with a recovery code.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/otp/recovery-codes/": {
+            "get": {
+                "operationId": "otp_recovery_codes_retrieve",
+                "description": "The recovery codes of the user. POST replaces them with new ones.",
+                "tags": [
+                    "otp"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecoveryCodes"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "otp_recovery_codes_create",
+                "description": "The recovery codes of the user. POST replaces them with new ones.",
+                "tags": [
+                    "otp"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecoveryCodes"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/otp/setup/": {
+            "get": {
+                "operationId": "otp_setup_retrieve",
+                "description": "Set up two-factor authentication with an authenticator app.\n\nGET returns the same unconfirmed device until a POST with a valid code confirms\nit, which also verifies the session.",
+                "tags": [
+                    "otp"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OTPSetupDetails"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            },
+            "post": {
+                "operationId": "otp_setup_create",
+                "description": "Set up two-factor authentication with an authenticator app.\n\nGET returns the same unconfirmed device until a POST with a valid code confirms\nit, which also verifies the session.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPSetup"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPSetup"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPSetup"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/otp/verify/": {
+            "post": {
+                "operationId": "otp_verify_create",
+                "description": "Verify the session with a code from the authenticator app.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/otp/verify/recovery-code/": {
+            "post": {
+                "operationId": "otp_verify_recovery_code_create",
+                "description": "Verify the session with a recovery code, which is used up.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/password-reset/": {
             "post": {
                 "operationId": "password_reset_create",
@@ -828,6 +1204,82 @@
                     "username"
                 ]
             },
+            "OTPSetup": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "otp_token": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "confirm_stored_backup_tokens": {
+                        "type": "boolean",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "confirm_stored_backup_tokens",
+                    "otp_token"
+                ]
+            },
+            "OTPSetupDetails": {
+                "type": "object",
+                "properties": {
+                    "secret": {
+                        "type": "string",
+                        "description": "The TOTP secret, base32 encoded."
+                    },
+                    "config_url": {
+                        "type": "string",
+                        "description": "The `otpauth://` URL of the device."
+                    },
+                    "qr_code": {
+                        "type": "string",
+                        "description": "The config URL as an SVG data URI."
+                    },
+                    "recovery_codes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "config_url",
+                    "qr_code",
+                    "recovery_codes",
+                    "secret"
+                ]
+            },
+            "OTPStatus": {
+                "type": "object",
+                "properties": {
+                    "configured": {
+                        "type": "boolean"
+                    },
+                    "recovery_codes_remaining": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "configured",
+                    "recovery_codes_remaining"
+                ]
+            },
+            "OTPToken": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "otp_token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "otp_token"
+                ]
+            },
             "PasswordChange": {
                 "type": "object",
                 "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
@@ -924,6 +1376,33 @@
                     "step"
                 ]
             },
+            "RecoveryCode": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "recovery_code": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "recovery_code"
+                ]
+            },
+            "RecoveryCodes": {
+                "type": "object",
+                "properties": {
+                    "recovery_codes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "recovery_codes"
+                ]
+            },
             "SetPassword": {
                 "type": "object",
                 "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
@@ -963,10 +1442,12 @@
             },
             "StepEnum": {
                 "enum": [
-                    "email_verify"
+                    "email_verify",
+                    "otp_verify",
+                    "otp_setup"
                 ],
                 "type": "string",
-                "description": "* `email_verify` - email_verify"
+                "description": "* `email_verify` - email_verify\n* `otp_verify` - otp_verify\n* `otp_setup` - otp_setup"
             },
             "User": {
                 "type": "object",
