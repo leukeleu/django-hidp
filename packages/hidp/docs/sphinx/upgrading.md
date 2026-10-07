@@ -44,7 +44,6 @@ changes below can affect a project without it too.
 ### Code
 
 - `get_verify_email_url` takes the verification token instead of the user.
-- `EmailChangeCancelView.token_generator` is removed.
 - The HTML OTP views name their mailers in class attributes: `disabled_mailer`,
   `regenerated_mailer`, `configured_mailer` and `recovery_code_used_mailer`.
 - The account views log failed emails to `hidp.accounts.flows` instead of

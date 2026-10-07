@@ -214,11 +214,10 @@ the request as a whole, and `{detail}` for everything else. A custom
 `EXCEPTION_HANDLER`, such as DRF Standardized Errors, changes these shapes. Input
 errors carry the translated messages of the HTML forms.
 
-A login or OTP request rejected for invalid input keeps its database writes, even
-with `ATOMIC_REQUESTS`, so a wrong OTP code still counts towards the lockout of the
-device, and listeners of `user_login_failed` can count failed logins. The other
-endpoints roll back as usual. A subclass of an API view can change this with
-`keep_writes_on_invalid_input`.
+A rejected login or OTP request keeps its database writes, even with
+`ATOMIC_REQUESTS`, so failed attempts still count: a wrong OTP code towards the
+lockout of the device, a wrong password for listeners of `user_login_failed`. Other
+requests roll back. Subclasses can change this with `keep_writes_on_invalid_input`.
 
 A 403 that the client can act on carries a `code` next to the `detail`:
 
