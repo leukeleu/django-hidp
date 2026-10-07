@@ -1,12 +1,13 @@
 from datetime import timedelta
 from http import HTTPStatus
+from unittest import mock
 
 from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from hidp.accounts.forms import EditUserForm
+from hidp.accounts.forms import EditUserForm, SetPasswordForm
 from hidp.test.factories import user_factories
 
 
@@ -269,3 +270,16 @@ class TestSetPasswordView(TestCase):
             reverse("hidp_accounts:password_reset_request"),
             message.body,
         )
+
+    def test_set_password_saves_once(self):
+        """The password is hashed and saved a single time."""
+        self.client.force_login(self.user)
+        with mock.patch.object(
+            SetPasswordForm, "save", autospec=True, side_effect=SetPasswordForm.save
+        ) as save:
+            self.client.post(
+                self.set_password_url,
+                {"new_password1": "new_password", "new_password2": "new_password"},
+            )
+
+        save.assert_called_once()

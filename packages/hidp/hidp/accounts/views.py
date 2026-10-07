@@ -1,6 +1,4 @@
-import logging
-
-from datetime import timedelta
+from functools import partial
 from urllib.parse import urlencode
 
 from django_ratelimit.decorators import ratelimit
@@ -10,12 +8,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db import IntegrityError
 from django.db.models.functions import MD5
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import resolve_url
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
@@ -30,11 +26,13 @@ from ..otp.decorators import otp_exempt
 from ..rate_limit.decorators import rate_limit_default, rate_limit_strict
 from ..rate_limit.keys import username_rate_limit_key
 from . import auth as hidp_auth
-from . import email_verification, forms, mailers, tokens
-from .email_change import Recipient
+from . import email_verification, flows, forms, mailers, tokens
+from .email_change import (
+    get_email_change_request_from_token_data,
+    get_pending_email_change_request,
+)
 from .models import EmailChangeRequest
 
-logger = logging.getLogger(__name__)
 UserModel = get_user_model()
 
 
@@ -108,33 +106,21 @@ class RegistrationView(auth_views.RedirectURLMixin, OIDCContextMixin, generic.Fo
     def send_email(self, user):
         """Send the appropriate email to the user."""
         base_url = self.request.build_absolute_uri("/")
-
-        try:
-            if not user.email_verified:
-                self.verification_mailer(
-                    user,
-                    base_url=base_url,
-                    post_verification_redirect=self.get_redirect_url(),
-                ).send()
-            elif user.is_active:
-                # Email the user to inform them that they have an account.
-                self.account_exists_mailer(
-                    user,
-                    base_url=base_url,
-                ).send()
-        except Exception:
-            # Do not leak the existence of the user. Log the error and
-            # continue as if the email was sent successfully.
-            logger.exception("Failed to send verification email.")
+        flows.send_registration_email(
+            user,
+            verification_mailer=partial(
+                self.verification_mailer,
+                base_url=base_url,
+                post_verification_redirect=self.get_redirect_url(),
+            ),
+            account_exists_mailer=partial(
+                self.account_exists_mailer, base_url=base_url
+            ),
+        )
 
     def form_valid(self, form):
         """Save the new user and redirect to the email verification required page."""
-        try:
-            user = form.save()
-        except IntegrityError:
-            # The user exists! Find the user by the email address (case-insensitive).
-            user = UserModel.objects.get(email__iexact=form.cleaned_data["email"])
-
+        user = flows.register(form)
         self.send_email(user)
 
         # Always redirect to the email verification required page.
@@ -283,18 +269,7 @@ class EmailChangeTokenMixin(BaseTokenMixin):
             EmailChangeRequest | None:
                 The email change request if the token is valid, otherwise None.
         """
-        email_change_request = (
-            EmailChangeRequest.objects.filter(id=token_object["uuid"])
-            .exclude(**{f"confirmed_by_{token_object['recipient']}": True})
-            .first()
-        )
-
-        if (
-            email_change_request is None
-            or email_change_request.user != self.request.user
-        ):
-            return None
-        return email_change_request
+        return get_email_change_request_from_token_data(self.request.user, token_object)
 
     def validate_token_data(self, token_data):
         """
@@ -535,16 +510,10 @@ class LoginView(OIDCContextMixin, auth_views.LoginView):
         to the email verification required flow.
         """
         user = form.get_user()
-        if user.email_verified:
-            # Only log in the user if their email address has been verified.
-            hidp_auth.login(self.request, user)
+        if flows.login(self.request, user):
             return HttpResponseRedirect(self.get_success_url())
 
-        # If the user's email address is not yet verified:
-        # Send the email verification email.
         self.send_email(user)
-
-        # Then redirect them to the email verification required page.
         return HttpResponseRedirect(
             email_verification.get_email_verification_required_url(
                 user, next_url=self.get_redirect_url()
@@ -623,19 +592,14 @@ class PasswordResetRequestView(generic.FormView):
 
     def send_email(self, user):
         """Send the appropriate email to the user."""
-        if user.has_usable_password():
-            mailer_class = self.password_reset_request_mailer
-        else:
-            mailer_class = self.set_password_mailer
-        try:
-            mailer_class(
-                user=user,
-                base_url=self.request.build_absolute_uri("/"),
-            ).send()
-        except Exception:
-            # Do not leak the existence of the user. Log the error and
-            # continue as if the email was sent successfully.
-            logger.exception("Failed to send password (re)set email.")
+        base_url = self.request.build_absolute_uri("/")
+        flows.send_password_reset_email(
+            user,
+            password_reset_mailer=partial(
+                self.password_reset_request_mailer, base_url=base_url
+            ),
+            set_password_mailer=partial(self.set_password_mailer, base_url=base_url),
+        )
 
     def form_valid(self, form):
         if user := form.get_user():
@@ -753,7 +717,7 @@ class SetPasswordView(
     form_class = forms.SetPasswordForm
     template_name = "hidp/accounts/management/set_password.html"
     success_url = reverse_lazy("hidp_account_management:set_password_done")
-    login_delta = timedelta(minutes=5)
+    login_delta = flows.REAUTHENTICATION_DELTA
     password_changed_mailer = mailers.PasswordChangedMailer
 
     def dispatch(self, request, *args, **kwargs):
@@ -765,11 +729,8 @@ class SetPasswordView(
                 reverse_lazy("hidp_account_management:change_password")
             )
 
-        last_login = request.user.last_login
-        # If the user has not logged in recently, they must re-authenticate
-        # to prove their identity before setting a password.
-        self.must_reauthenticate = last_login is None or last_login < (
-            timezone.now() - self.login_delta
+        self.must_reauthenticate = flows.requires_reauthentication(
+            request.user, delta=self.login_delta
         )
 
         return super().dispatch(request, *args, **kwargs)
@@ -812,9 +773,10 @@ class SetPasswordView(
         ).send()
 
     def form_valid(self, form):
-        form.save()
+        # PasswordChangeView saves the password and keeps the session valid.
+        response = super().form_valid(form)
         self.send_email()
-        return super().form_valid(form)
+        return response
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -916,34 +878,17 @@ class EmailChangeRequestView(LoginRequiredMixin, generic.CreateView):
 
     def send_email(self, email_change_request):
         """Send the email change confirmation emails."""
-        mailer_kwargs = {
-            "user": self.request.user,
-            "email_change_request": email_change_request,
-            "base_url": self.request.build_absolute_uri("/"),
-        }
-        self.email_change_request_mailer(
-            **mailer_kwargs,
-            recipient=Recipient.CURRENT_EMAIL,
-        ).send()
-
-        proposed_email_mailer_class = self.email_change_request_mailer
-        existing_user = UserModel.objects.filter(
-            email__iexact=email_change_request.proposed_email
-        ).first()
-
-        if existing_user and not existing_user.is_active:
-            # Do nothing if the user exists but is not active.
-            return
-
-        if existing_user:
-            # Send an email to the proposed email address to inform them that
-            # an account with this email address already exists.
-            proposed_email_mailer_class = self.proposed_email_exists_mailer
-
-        proposed_email_mailer_class(
-            **mailer_kwargs,
-            recipient=Recipient.PROPOSED_EMAIL,
-        ).send()
+        base_url = self.request.build_absolute_uri("/")
+        flows.send_email_change_emails(
+            self.request.user,
+            email_change_request,
+            email_change_request_mailer=partial(
+                self.email_change_request_mailer, base_url=base_url
+            ),
+            proposed_email_exists_mailer=partial(
+                self.proposed_email_exists_mailer, base_url=base_url
+            ),
+        )
 
     def form_valid(self, form):
         email_change_request = form.save()
@@ -1005,9 +950,7 @@ class EmailChangeConfirmView(
         return self.email_change_request
 
     def form_valid(self, form):
-        try:
-            form.save()
-        except IntegrityError:
+        if not flows.confirm_email_change(form):
             form.add_error(
                 None,
                 _(
@@ -1111,19 +1054,8 @@ class EmailChangeCancelView(LoginRequiredMixin, generic.DeleteView):
             # To avoid duplicate queries in the get and post handlers, return
             # the object that was already retrieved in the dispatch method.
             return self.object
-        return (
-            EmailChangeRequest.objects.filter(
-                user=self.request.user,
-                created_at__gte=(
-                    timezone.now()
-                    - timedelta(seconds=self.token_generator.token_timeout)
-                ),
-            )
-            .exclude(
-                confirmed_by_current_email=True,
-                confirmed_by_proposed_email=True,
-            )
-            .first()
+        return get_pending_email_change_request(
+            self.request.user, token_generator=self.token_generator
         )
 
 
