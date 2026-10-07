@@ -58,6 +58,8 @@ def _confirmed_static_device(user):
 
 class OTPView(BaseView):
     permission_classes = [IsAuthenticated]
+    # A wrong code must still count towards the lockout of the device.
+    keep_writes_on_invalid_input = True
 
     def send_mail(self, mailer_class):
         mailer_class(

@@ -95,6 +95,9 @@ def _password_not_set():
 class BaseView(CSRFProtectedAPIView, GenericAPIView):
     authentication_classes = [SessionAuthentication]
     permission_classes = []
+    # Keep the database writes of a request rejected for invalid input, even with
+    # ATOMIC_REQUESTS. Views that count failed attempts need this.
+    keep_writes_on_invalid_input = False
 
     @property
     def base_url(self):
@@ -109,7 +112,10 @@ class BaseView(CSRFProtectedAPIView, GenericAPIView):
         return serializer
 
     def handle_exception(self, exc):
-        if not isinstance(exc, exceptions.ValidationError):
+        if not (
+            self.keep_writes_on_invalid_input
+            and isinstance(exc, exceptions.ValidationError)
+        ):
             return super().handle_exception(exc)
         # DRF's exception handler rolls back ATOMIC_REQUESTS transactions. Keep the
         # writes of a rejected form, such as an OTP throttle's failure count.
@@ -177,10 +183,15 @@ class LoginView(VerificationMailerMixin, BaseView):
     """
 
     serializer_class = LoginSerializer
+    # Listeners of `user_login_failed` may count failed logins.
+    keep_writes_on_invalid_input = True
 
     def post(self, request, *args, **kwargs):
         user = self.validated_serializer().form.get_user()
         if not flows.login(request, user):
+            # Do not stay logged in as another user while waiting for `user`.
+            if request.user.is_authenticated:
+                hidp_auth.logout(request)
             self.get_verification_mailer()(user).send()
             start_email_verification(request, user)
         return auth_state_response(request)
