@@ -1,41 +1,32 @@
-import logging
-
-from datetime import timedelta
+from functools import partial
 from http import HTTPStatus
 
-from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
-    OpenApiParameter,
     OpenApiResponse,
     extend_schema,
     extend_schema_view,
     inline_serializer,
 )
-from rest_framework import mixins, viewsets
+from rest_framework import exceptions
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.serializers import BooleanField
+from rest_framework.serializers import BooleanField, CharField
+from rest_framework.settings import api_settings
 
-from django.contrib.auth import get_user_model
+from django.db import connections, transaction
 from django.http import Http404
-from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.debug import sensitive_post_parameters
 
 from hidp.accounts import auth as hidp_auth
-from hidp.accounts import mailers, tokens
-from hidp.accounts.email_change import Recipient
-from hidp.accounts.mailers import (
-    EmailVerificationMailer,
-    PasswordChangedMailer,
-    PasswordResetRequestMailer,
-    SetPasswordMailer,
-)
-from hidp.accounts.models import EmailChangeRequest
+from hidp.accounts import flows, mailers, tokens
+from hidp.accounts.email_change import get_pending_email_change_request
+from hidp.utils import is_registration_enabled
 
 from ..rate_limit.decorators import rate_limit, rate_limit_default, rate_limit_strict
 from ..rate_limit.keys import ip_username_rate_limit_key
@@ -47,90 +38,123 @@ from .auth_state import (
 from .serializers import (
     AuthStateSerializer,
     EmailChangeConfirmSerializer,
+    EmailChangeRequestSerializer,
     EmailChangeSerializer,
     EmailVerificationConfirmSerializer,
     EmailVerificationTokenSerializer,
     LoginSerializer,
+    PasswordChangeSerializer,
     PasswordResetConfirmationSerializer,
     PasswordResetRequestSerializer,
-    UserSerializer,
+    SetPasswordSerializer,
+    SignupSerializer,
+    get_user_serializer_class,
 )
 from .utils import (
+    AccessTokenScopePermission,
     CSRFProtectedAPIView,
     get_authentication_classes,
     get_frontend_url,
 )
-
-UserModel = get_user_model()
-
-logger = logging.getLogger(__name__)
 
 AUTH_STATE_RESPONSES = {
     HTTPStatus.OK: AuthStateSerializer,
     HTTPStatus.UNAUTHORIZED: AuthStateSerializer,
 }
 
-
-def _base_url(request):
-    return request.build_absolute_uri("/")
-
-
-@extend_schema_view(
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="id",
-                type=OpenApiTypes.STR,
-                enum=["me"],
-                location="path",
-                description="Key identifying user, can only have value `me`.",
-            ),
-        ]
+FORBIDDEN_RESPONSE = OpenApiResponse(
+    inline_serializer(
+        name="ForbiddenResponse",
+        fields={
+            "detail": CharField(),
+            "code": CharField(),
+        },
     ),
-    update=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                name="id",
-                type=OpenApiTypes.STR,
-                enum=["me"],
-                location="path",
-                description="Key identifying user, can only have value `me`.",
-            ),
-        ]
-    ),
+    description="`code` says why the user may not do this.",
 )
-class UserViewSet(
-    mixins.RetrieveModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet
-):
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
-    queryset = UserModel.objects.all()
 
-    def get_authenticators(self):  # noqa: PLR6301 (no-self-use)
-        return [
-            authentication_class()
-            for authentication_class in get_authentication_classes()
-        ]
+NO_CONTENT_OR_FORBIDDEN = {
+    HTTPStatus.NO_CONTENT: None,
+    HTTPStatus.FORBIDDEN: FORBIDDEN_RESPONSE,
+}
 
-    def get_object(self):
-        # Users can only ever access themselves using the "me" shortcut.
-        if self.kwargs.get(self.lookup_url_kwarg or self.lookup_field) == "me":
-            return self.request.user
-        raise Http404
+
+def permission_denied(detail, code):
+    """Return a 403 error with a `code` for the client next to the `detail`."""
+    return exceptions.PermissionDenied({"detail": detail, "code": code})
+
+
+def _password_not_set():
+    return permission_denied(
+        _("Your account does not currently have a password set."),
+        "password_not_set",
+    )
+
+
+@method_decorator(never_cache, name="dispatch")
+class BaseView(CSRFProtectedAPIView, GenericAPIView):
+    authentication_classes = [SessionAuthentication]
+    permission_classes = []
+
+    @property
+    def base_url(self):
+        return self.request.build_absolute_uri("/")
+
+    def frontend_url(self, key):
+        return get_frontend_url(key, base_url=self.base_url)
+
+    def validated_serializer(self):
+        serializer = self.get_serializer(data=self.request.data)
+        serializer.is_valid(raise_exception=True)
+        return serializer
+
+    def handle_exception(self, exc):
+        if not isinstance(exc, exceptions.ValidationError):
+            return super().handle_exception(exc)
+        # DRF's exception handler rolls back ATOMIC_REQUESTS transactions. Keep the
+        # writes of a rejected form, such as an OTP throttle's failure count.
+        rollback = {
+            connection.alias: transaction.get_rollback(using=connection.alias)
+            for connection in connections.all(initialized_only=True)
+            if connection.settings_dict["ATOMIC_REQUESTS"]
+            and connection.in_atomic_block
+        }
+        response = super().handle_exception(exc)
+        for alias, needs_rollback in rollback.items():
+            transaction.set_rollback(needs_rollback, using=alias)
+        return response
+
+
+class VerificationMailerMixin:
+    verification_mailer = mailers.EmailVerificationMailer
+
+    def get_verification_mailer(self):
+        return partial(
+            self.verification_mailer,
+            base_url=self.base_url,
+            verification_url=self.frontend_url("email_verification"),
+        )
+
+
+class PasswordChangedMailerMixin:
+    password_changed_mailer = mailers.PasswordChangedMailer
+
+    def send_password_changed_mail(self, user):
+        self.password_changed_mailer(
+            user,
+            base_url=self.base_url,
+            password_reset_url=self.frontend_url("password_reset_request"),
+        ).send()
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")
-@method_decorator(never_cache, name="dispatch")
 @extend_schema_view(get=extend_schema(responses=AUTH_STATE_RESPONSES))
-class SessionView(GenericAPIView):
+class SessionView(BaseView):
     """
     Describe the authentication state of the current session.
 
     Also sets the CSRF cookie, which clients need for every unsafe request.
     """
-
-    authentication_classes = [SessionAuthentication]
-    permission_classes = []
 
     def get(self, request, *args, **kwargs):  # noqa: PLR6301 (no-self-use)
         return auth_state_response(request)
@@ -143,61 +167,21 @@ class SessionView(GenericAPIView):
     name="dispatch",
 )
 @extend_schema_view(post=extend_schema(responses=AUTH_STATE_RESPONSES))
-class LoginView(CSRFProtectedAPIView, GenericAPIView):
+class LoginView(VerificationMailerMixin, BaseView):
     """
     Log in with a username and password.
 
-    Responds with the authentication state. A user whose email address is not
-    verified is not logged in, is sent a verification email, and the response has a
-    pending `email_verify` step.
+    A user whose email address is not verified is sent a verification email instead,
+    and the response has a pending `email_verify` step.
     """
 
-    authentication_classes = [SessionAuthentication]
-    permission_classes = []
     serializer_class = LoginSerializer
-    verification_mailer = EmailVerificationMailer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        # User is authenticated and is allowed to log in.
-        user = serializer.validated_data["user"]
-
-        # Only log in the user if their email address has been verified.
-        if user.email_verified:
-            hidp_auth.login(request, user)
-            return auth_state_response(request)
-
-        # If the user's email address is not verified, send a verification email.
-        self.verification_mailer(
-            user,
-            base_url=_base_url(request),
-            verification_url=get_frontend_url(
-                "email_verification", base_url=_base_url(request)
-            ),
-        ).send()
-        start_email_verification(request, user)
-        return auth_state_response(request)
-
-
-@extend_schema_view(
-    post=extend_schema(
-        request=None,
-        responses={HTTPStatus.UNAUTHORIZED: AuthStateSerializer},
-    )
-)
-class LogoutView(CSRFProtectedAPIView, GenericAPIView):
-    authentication_classes = [SessionAuthentication]
-    permission_classes = []
-
-    def post(self, request, *args, **kwargs):  # noqa: PLR6301
-        """
-        Logs out the user, regardless of whether a user is logged in.
-
-        Enforces that a CSRF token is provided.
-        """
-        hidp_auth.logout(request)
+        user = self.validated_serializer().form.get_user()
+        if not flows.login(request, user):
+            self.get_verification_mailer()(user).send()
+            start_email_verification(request, user)
         return auth_state_response(request)
 
 
@@ -205,10 +189,64 @@ class LogoutView(CSRFProtectedAPIView, GenericAPIView):
 @extend_schema_view(
     post=extend_schema(
         request=None,
-        responses={HTTPStatus.NO_CONTENT: None},
-    ),
+        responses={HTTPStatus.UNAUTHORIZED: AuthStateSerializer},
+    )
 )
-class EmailVerificationResendView(CSRFProtectedAPIView, GenericAPIView):
+class LogoutView(BaseView):
+    """Log out, whether or not a user is logged in."""
+
+    def post(self, request, *args, **kwargs):  # noqa: PLR6301 (no-self-use)
+        hidp_auth.logout(request)
+        return auth_state_response(request)
+
+
+@method_decorator(sensitive_post_parameters("password"), name="dispatch")
+@method_decorator(rate_limit(key="ip", rate="2/s", method="POST"), name="dispatch")
+@method_decorator(rate_limit(key="ip", rate="5/m", method="POST"), name="dispatch")
+@method_decorator(rate_limit(key="ip", rate="30/15m", method="POST"), name="dispatch")
+@extend_schema_view(
+    post=extend_schema(responses={HTTPStatus.UNAUTHORIZED: AuthStateSerializer})
+)
+class SignupView(VerificationMailerMixin, BaseView):
+    """
+    Create an account, and send the email to verify it.
+
+    Responds with a pending `email_verify` step whether or not the account existed.
+    """
+
+    serializer_class = SignupSerializer
+    account_exists_mailer = mailers.AccountExistsMailer
+
+    def initial(self, request, *args, **kwargs):
+        if not is_registration_enabled():
+            raise Http404("Registration is disabled.")
+        super().initial(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            raise permission_denied(
+                _("Logged-in users cannot register a new account."),
+                "already_authenticated",
+            )
+        user = flows.register(self.validated_serializer().form)
+        flows.send_registration_email(
+            user,
+            verification_mailer=self.get_verification_mailer(),
+            account_exists_mailer=partial(
+                self.account_exists_mailer,
+                base_url=self.base_url,
+                password_reset_url=self.frontend_url("password_reset_request"),
+            ),
+        )
+        start_email_verification(request, user)
+        return auth_state_response(request)
+
+
+@method_decorator(rate_limit_default, name="dispatch")
+@extend_schema_view(
+    post=extend_schema(request=None, responses={HTTPStatus.NO_CONTENT: None}),
+)
+class EmailVerificationResendView(VerificationMailerMixin, BaseView):
     """
     Resend the verification email to the user this session is waiting for.
 
@@ -216,20 +254,10 @@ class EmailVerificationResendView(CSRFProtectedAPIView, GenericAPIView):
     was sent.
     """
 
-    authentication_classes = [SessionAuthentication]
-    permission_classes = []
-    verification_mailer = EmailVerificationMailer
-
     def post(self, request, *args, **kwargs):
         user = get_email_verification_user(request)
         if user is not None:
-            self.verification_mailer(
-                user,
-                base_url=_base_url(request),
-                verification_url=get_frontend_url(
-                    "email_verification", base_url=_base_url(request)
-                ),
-            ).send()
+            self.get_verification_mailer()(user).send()
             start_email_verification(request, user)
         return Response(status=HTTPStatus.NO_CONTENT)
 
@@ -245,61 +273,61 @@ class EmailVerificationResendView(CSRFProtectedAPIView, GenericAPIView):
         },
     ),
 )
-class EmailVerificationVerifyView(CSRFProtectedAPIView, GenericAPIView):
+class EmailVerificationVerifyView(BaseView):
     """
     Check an email verification token before confirming it.
 
     Tells the client whether the confirmation must include a first and last name.
     """
 
-    authentication_classes = [SessionAuthentication]
-    permission_classes = []
     serializer_class = EmailVerificationTokenSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        return Response(
-            {"requires_name": not (user.first_name and user.last_name)},
-            status=HTTPStatus.OK,
-        )
+        user = self.validated_serializer().validated_data["user"]
+        return Response({"requires_name": not (user.first_name and user.last_name)})
 
 
 @method_decorator(rate_limit_default, name="dispatch")
-@extend_schema_view(
-    post=extend_schema(responses={HTTPStatus.NO_CONTENT: None}),
-)
-class EmailVerificationConfirmView(CSRFProtectedAPIView, GenericAPIView):
+@extend_schema_view(post=extend_schema(responses={HTTPStatus.NO_CONTENT: None}))
+class EmailVerificationConfirmView(BaseView):
     """Mark the email address as verified. The user still has to log in."""
 
-    authentication_classes = [SessionAuthentication]
-    permission_classes = []
     serializer_class = EmailVerificationConfirmSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-        update_fields = ["email_verified"]
-        for field in ("first_name", "last_name"):
-            if field in serializer.validated_data:
-                setattr(user, field, serializer.validated_data[field])
-                update_fields.append(field)
-        user.email_verified = timezone.now()
-        user.save(update_fields=update_fields)
+        self.validated_serializer().form.save()
         return Response(status=HTTPStatus.NO_CONTENT)
 
 
+@method_decorator(never_cache, name="dispatch")
 @method_decorator(rate_limit_default, name="dispatch")
-@extend_schema_view(
-    post=extend_schema(
-        responses={
-            HTTPStatus.NO_CONTENT: None,
-        },
-    )
-)
-class PasswordResetRequestView(CSRFProtectedAPIView, GenericAPIView):
+class UserView(RetrieveUpdateAPIView):
+    """
+    The logged-in user.
+
+    With HIdP's OIDC provider installed, an OAuth2 access token with the `profile`
+    and `email` scopes can read the user too, but not change it.
+    """
+
+    http_method_names = ["get", "patch", "head", "options"]
+    permission_classes = [IsAuthenticated, AccessTokenScopePermission]
+
+    def get_authenticators(self):  # noqa: PLR6301 (no-self-use)
+        return [
+            authentication_class()
+            for authentication_class in get_authentication_classes()
+        ]
+
+    def get_serializer_class(self):  # noqa: PLR6301 (no-self-use)
+        return get_user_serializer_class()
+
+    def get_object(self):
+        return self.request.user
+
+
+@method_decorator(rate_limit_strict, name="dispatch")
+@extend_schema_view(post=extend_schema(responses={HTTPStatus.NO_CONTENT: None}))
+class PasswordResetRequestView(BaseView):
     """
     Email a password reset link, or a set password link to a user without a password.
 
@@ -307,43 +335,25 @@ class PasswordResetRequestView(CSRFProtectedAPIView, GenericAPIView):
     exists.
     """
 
-    authentication_classes = [SessionAuthentication]
-    permission_classes = []
     serializer_class = PasswordResetRequestSerializer
-
-    def send_email(self, user):
-        base_url = _base_url(self.request)
-        mailer_kwargs = {"user": user, "base_url": base_url}
-
-        if user.has_usable_password():
-            mailer_class = PasswordResetRequestMailer
-            mailer_kwargs["password_reset_url"] = get_frontend_url(
-                "password_reset", base_url=base_url
-            )
-        else:
-            mailer_class = SetPasswordMailer
-            mailer_kwargs["set_password_url"] = get_frontend_url(
-                "set_password", base_url=base_url
-            )
-
-        try:
-            mailer_class(**mailer_kwargs).send()
-        except Exception:
-            # Do not leak the existence of the user. Log the error and
-            # continue as if the email was sent successfully.
-            logger.exception("Failed to send password reset email.")
+    password_reset_request_mailer = mailers.PasswordResetRequestMailer
+    set_password_mailer = mailers.SetPasswordMailer
 
     def post(self, request, *args, **kwargs):
-        # Get user from serializer if it exists for given email
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user = serializer.validated_data["user"]
-
-        # Send an password reset email if the user exists
-        if user:
-            self.send_email(user)
-
+        if user := self.validated_serializer().form.get_user():
+            flows.send_password_reset_email(
+                user,
+                password_reset_mailer=partial(
+                    self.password_reset_request_mailer,
+                    base_url=self.base_url,
+                    password_reset_url=self.frontend_url("password_reset"),
+                ),
+                set_password_mailer=partial(
+                    self.set_password_mailer,
+                    base_url=self.base_url,
+                    set_password_url=self.frontend_url("set_password"),
+                ),
+            )
         return Response(status=HTTPStatus.NO_CONTENT)
 
 
@@ -351,14 +361,8 @@ class PasswordResetRequestView(CSRFProtectedAPIView, GenericAPIView):
     sensitive_post_parameters("token", "uidb64", "new_password"), name="dispatch"
 )
 @method_decorator(rate_limit_default, name="dispatch")
-@extend_schema_view(
-    post=extend_schema(
-        responses={
-            HTTPStatus.NO_CONTENT: None,
-        },
-    )
-)
-class PasswordResetConfirmationView(CSRFProtectedAPIView, GenericAPIView):
+@extend_schema_view(post=extend_schema(responses={HTTPStatus.NO_CONTENT: None}))
+class PasswordResetConfirmationView(PasswordChangedMailerMixin, BaseView):
     """
     Set a new password for the user identified by the password reset token.
 
@@ -366,206 +370,162 @@ class PasswordResetConfirmationView(CSRFProtectedAPIView, GenericAPIView):
     has to log in.
     """
 
-    authentication_classes = [SessionAuthentication]
-    permission_classes = []
     serializer_class = PasswordResetConfirmationSerializer
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user = serializer.validated_data["user"]
-        user.set_password(serializer.validated_data["new_password"])
-        user.save()
-
-        PasswordChangedMailer(
-            user,
-            base_url=_base_url(request),
-            password_reset_url=get_frontend_url(
-                "password_reset_request", base_url=_base_url(request)
-            ),
-        ).send()
+        user = self.validated_serializer().form.save()
+        self.send_password_changed_mail(user)
         return Response(status=HTTPStatus.NO_CONTENT)
 
 
-@extend_schema_view(
-    create=extend_schema(
-        responses={201: OpenApiResponse(None)},
-    ),
+@method_decorator(
+    sensitive_post_parameters("old_password", "new_password"), name="dispatch"
 )
-class EmailChangeView(
-    mixins.CreateModelMixin, mixins.DestroyModelMixin, viewsets.GenericViewSet
-):
-    authentication_classes = [SessionAuthentication]
+@method_decorator(rate_limit_default, name="dispatch")
+@extend_schema_view(post=extend_schema(responses=NO_CONTENT_OR_FORBIDDEN))
+class PasswordChangeView(PasswordChangedMailerMixin, BaseView):
+    """Change the password of the logged-in user, who must enter the current one."""
+
     permission_classes = [IsAuthenticated]
-    serializer_class = EmailChangeSerializer
+    serializer_class = PasswordChangeSerializer
 
-    def get_object(self):
-        """
-        Get the email change request to cancel.
+    def post(self, request, *args, **kwargs):
+        if not request.user.has_usable_password():
+            raise _password_not_set()
+        user = flows.change_password(request, self.validated_serializer().form)
+        self.send_password_changed_mail(user)
+        return Response(status=HTTPStatus.NO_CONTENT)
 
-        But only if there is a request for the current user that has not been confirmed
-        by both the current and proposed email addresses, and has not expired.
-        """
-        change_request = (
-            EmailChangeRequest.objects.filter(
-                user=self.request.user,
-                created_at__gte=(
-                    timezone.now()
-                    - timedelta(
-                        seconds=tokens.email_change_token_generator.token_timeout
-                    )
+
+@method_decorator(sensitive_post_parameters("new_password"), name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
+@extend_schema_view(post=extend_schema(responses=NO_CONTENT_OR_FORBIDDEN))
+class SetPasswordView(PasswordChangedMailerMixin, BaseView):
+    """
+    Set a password for a logged-in user who does not have one.
+
+    Only allowed shortly after logging in, to prove the user's identity.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = SetPasswordSerializer
+    login_delta = flows.REAUTHENTICATION_DELTA
+
+    def post(self, request, *args, **kwargs):
+        if request.user.has_usable_password():
+            raise permission_denied(
+                _("Your account already has a password."), "password_already_set"
+            )
+        if flows.requires_reauthentication(request.user, delta=self.login_delta):
+            raise permission_denied(
+                _(
+                    "For your security, you need to re-authenticate via a linked"
+                    " service before you can set a password."
                 ),
+                "reauthentication_required",
             )
-            .exclude(
-                confirmed_by_current_email=True,
-                confirmed_by_proposed_email=True,
-            )
-            .first()
-        )
-
-        if not change_request:
-            raise Http404
-
-        return change_request
-
-    def create(self, request, *args, **kwargs):
-        super().create(request, *args, **kwargs)
-        self.send_mail(self.created_instance)
-
-        return Response(status=HTTPStatus.CREATED)
-
-    def perform_create(self, serializer):
-        """Create an email change request and save it on this view instance."""
-        self.created_instance = serializer.save()
-
-    def send_mail(self, email_change_request):
-        """Send the email change confirmation emails."""
-        mailer_kwargs = {
-            "user": self.request.user,
-            "email_change_request": email_change_request,
-            "base_url": _base_url(self.request),
-        }
-        confirmation_url = get_frontend_url(
-            "email_change_confirm", base_url=_base_url(self.request)
-        )
-        cancel_url = get_frontend_url(
-            "email_change_cancel", base_url=_base_url(self.request)
-        )
-        mailers.EmailChangeRequestMailer(
-            **mailer_kwargs,
-            recipient=Recipient.CURRENT_EMAIL,
-            confirmation_url=confirmation_url,
-            cancel_url=cancel_url,
-        ).send()
-
-        existing_user = UserModel.objects.filter(
-            email__iexact=email_change_request.proposed_email
-        ).first()
-
-        if existing_user and not existing_user.is_active:
-            # Do nothing if the user exists but is not active.
-            return
-
-        if existing_user:
-            # Send an email to the proposed email address to inform them that
-            # an account with this email address already exists.
-            mailers.ProposedEmailExistsMailer(
-                **mailer_kwargs,
-                recipient=Recipient.PROPOSED_EMAIL,
-                cancel_url=cancel_url,
-            ).send()
-            return
-
-        mailers.EmailChangeRequestMailer(
-            **mailer_kwargs,
-            recipient=Recipient.PROPOSED_EMAIL,
-            confirmation_url=confirmation_url,
-            cancel_url=cancel_url,
-        ).send()
+        user = flows.change_password(request, self.validated_serializer().form)
+        self.send_password_changed_mail(user)
+        return Response(status=HTTPStatus.NO_CONTENT)
 
 
+@method_decorator(sensitive_post_parameters("password"), name="dispatch")
+@method_decorator(rate_limit_default, name="dispatch")
 @extend_schema_view(
-    put=extend_schema(
+    get=extend_schema(responses=EmailChangeSerializer),
+    post=extend_schema(
+        request=EmailChangeRequestSerializer,
         responses={
-            200: inline_serializer(
-                name="UpdateChangeEmailRequestResponse",
-                fields={
-                    "confirmed_by_current_email": BooleanField(),
-                    "confirmed_by_proposed_email": BooleanField(),
-                },
-            )
+            HTTPStatus.CREATED: EmailChangeSerializer,
+            HTTPStatus.FORBIDDEN: FORBIDDEN_RESPONSE,
         },
     ),
+    delete=extend_schema(responses={HTTPStatus.NO_CONTENT: None}),
 )
-class EmailChangeConfirmView(GenericAPIView):
-    authentication_classes = [SessionAuthentication]
+class EmailChangeView(BaseView):
+    """
+    The pending email change request of the logged-in user.
+
+    Starting a new request replaces the pending one.
+    """
+
     permission_classes = [IsAuthenticated]
-    serializer_class = EmailChangeConfirmSerializer
+    serializer_class = EmailChangeRequestSerializer
+    email_change_request_mailer = mailers.EmailChangeRequestMailer
+    proposed_email_exists_mailer = mailers.ProposedEmailExistsMailer
+    token_generator = tokens.email_change_token_generator
 
     def get_object(self):
-        """
-        Find the email change request associated with the token in the session.
-
-        Exclude the request if it has already been confirmed for this email address.
-
-        Raises a 404 exception if no request is found.
-        """
-        email_change_request = (
-            EmailChangeRequest.objects.filter(id=self.token_uuid)
-            .exclude(**{f"confirmed_by_{self.token_recipient}": True})
-            .first()
-        )
-
-        if (
-            email_change_request is None
-            or email_change_request.user != self.request.user
+        if email_change_request := get_pending_email_change_request(
+            self.request.user, token_generator=self.token_generator
         ):
-            raise Http404
+            return email_change_request
+        raise Http404
 
-        return email_change_request
+    def get(self, request, *args, **kwargs):
+        return Response(EmailChangeSerializer(self.get_object()).data)
 
-    def put(self, request, *args, **kwargs):
-        """
-        Get the existing email change request and update it.
-
-        If the request is complete the email of the user is updated and
-        an email to inform the user is sent.
-
-        Returns a response containing whether the request is confirmed
-        by the current and proposed mail. If both have confirmed the request
-        the change can be considered complete.
-        """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        # get the token_data from the validated serializer first so it can be used in
-        # `get_object()` to get the instance. Then set the instance on the serializer.
-        token_data = serializer.validated_data["confirmation_token"]
-        self.token_recipient, self.token_uuid = (
-            token_data["recipient"],
-            token_data["uuid"],
+    def post(self, request, *args, **kwargs):
+        if not request.user.has_usable_password():
+            raise _password_not_set()
+        email_change_request = self.validated_serializer().form.save()
+        mailer_kwargs = {
+            "base_url": self.base_url,
+            "confirmation_url": self.frontend_url("email_change_confirm"),
+            "cancel_url": self.frontend_url("email_change_cancel"),
+        }
+        flows.send_email_change_emails(
+            request.user,
+            email_change_request,
+            email_change_request_mailer=partial(
+                self.email_change_request_mailer, **mailer_kwargs
+            ),
+            proposed_email_exists_mailer=partial(
+                self.proposed_email_exists_mailer, **mailer_kwargs
+            ),
         )
-        email_change_request = self.get_object()
-        serializer.instance = email_change_request
-
-        instance = serializer.save()
-
-        if instance.is_complete():
-            self.send_email(instance)
-
         return Response(
-            {
-                "confirmed_by_current_email": instance.confirmed_by_current_email,
-                "confirmed_by_proposed_email": instance.confirmed_by_proposed_email,
-            },
-            status=HTTPStatus.OK,
+            EmailChangeSerializer(email_change_request).data,
+            status=HTTPStatus.CREATED,
         )
 
-    def send_email(self, email_change_request):
-        """Send the email changed email."""
-        mailers.EmailChangedMailer(
-            self.request.user,
-            email_change_request=email_change_request,
-            base_url=self.request.build_absolute_uri("/"),
-        ).send()
+    def delete(self, request, *args, **kwargs):
+        self.get_object().delete()
+        return Response(status=HTTPStatus.NO_CONTENT)
+
+
+@method_decorator(rate_limit_default, name="dispatch")
+@extend_schema_view(post=extend_schema(responses=EmailChangeSerializer))
+class EmailChangeConfirmView(BaseView):
+    """
+    Confirm the email change request with the token from one of its emails.
+
+    The email address changes once both the current and proposed address confirm it.
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = EmailChangeConfirmSerializer
+    email_changed_mailer = mailers.EmailChangedMailer
+
+    def post(self, request, *args, **kwargs):
+        email_change_request = flows.confirm_email_change(
+            self.validated_serializer().form
+        )
+        if email_change_request is None:
+            raise exceptions.ValidationError(
+                {
+                    api_settings.NON_FIELD_ERRORS_KEY: [
+                        _(
+                            "Sorry, changing your email address is not possible because"
+                            " an account with this email address already exists."
+                        )
+                    ]
+                }
+            )
+        if email_change_request.is_complete():
+            self.email_changed_mailer(
+                request.user,
+                email_change_request=email_change_request,
+                base_url=self.base_url,
+            ).send()
+        return Response(EmailChangeSerializer(email_change_request).data)

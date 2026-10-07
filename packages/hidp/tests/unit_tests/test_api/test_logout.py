@@ -43,7 +43,7 @@ class TestLogoutView(APITestCase):
         logged_in_session_key = self.client.session.session_key
 
         # Use the user endpoint to verify user is logged in
-        me_response = self.client.get(reverse("api:user-detail", args=["me"]))
+        me_response = self.client.get(reverse("hidp_api:user"))
         self.assertEqual(me_response.status_code, HTTPStatus.OK)
         self.assertEqual(
             {
@@ -51,6 +51,7 @@ class TestLogoutView(APITestCase):
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "email": user.email,
+                "has_usable_password": True,
             },
             me_response.json(),
         )
@@ -65,5 +66,5 @@ class TestLogoutView(APITestCase):
         self.assertNotEqual(logged_in_session_key, self.client.session.session_key)
 
         # User is no longer able to access "me" endpoint
-        me_response = self.client.get(reverse("api:user-detail", args=["me"]))
+        me_response = self.client.get(reverse("hidp_api:user"))
         self.assertEqual(me_response.status_code, HTTPStatus.FORBIDDEN)

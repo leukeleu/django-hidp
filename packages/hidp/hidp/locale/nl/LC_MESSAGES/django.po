@@ -48,11 +48,11 @@ msgstr "Bevestig dat je geen robot bent."
 msgid "Please note that this also changes the username you use to sign in."
 msgstr "Let op dat hiermee ook je gebruikersnaam voor het inloggen verandert."
 
-#: hidp/accounts/forms.py hidp/api/serializers.py
+#: hidp/accounts/forms.py
 msgid "The new email address is the same as the current email address."
 msgstr "Het nieuwe e-mailadres is hetzelfde als het huidige e-mailadres."
 
-#: hidp/accounts/forms.py hidp/api/serializers.py
+#: hidp/accounts/forms.py
 msgid "The password is incorrect."
 msgstr "Het wachtwoord is incorrect."
 
@@ -163,25 +163,34 @@ msgstr "Opnieuw inloggen met {provider}"
 msgid "Sign up using {provider}"
 msgstr "Registreer met {provider}"
 
-#: hidp/accounts/views.py
+#: hidp/accounts/views.py hidp/api/views.py
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
 #: hidp/api/serializers.py
-msgid "An account with this email address already exists."
-msgstr "Er bestaat al een account met dit e-mailadres."
-
-#: hidp/api/serializers.py
-msgid "Could not authenticate"
-msgstr ""
-
-#: hidp/api/serializers.py
 msgid "Invalid or expired token."
-msgstr ""
+msgstr "Ongeldige of verlopen token."
 
 #: hidp/api/serializers.py
 msgid "Invalid token or user ID."
-msgstr ""
+msgstr "Ongeldige token of gebruikers-ID."
+
+#: hidp/api/views.py hidp/templates/hidp/accounts/management/set_password.html
+msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
+msgstr "Voor je veiligheid moet je opnieuw inloggen via een gekoppelde dienst voordat je een wachtwoord kunt instellen."
+
+#: hidp/api/views.py
+msgid "Logged-in users cannot register a new account."
+msgstr "Je kunt geen nieuw account aanmaken terwijl je bent ingelogd."
+
+#: hidp/api/views.py
+msgid "Your account already has a password."
+msgstr "Er is al een wachtwoord ingesteld voor je account."
+
+#: hidp/api/views.py
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Your account does not currently have a password set."
+msgstr "Er is momenteel geen wachtwoord ingesteld voor je account."
 
 #: hidp/federated/forms.py
 msgid "Yes, I want to link this account"
@@ -531,10 +540,6 @@ msgstr "Stel eerst een wachtwoord in om het e-mailadres van je account te kunnen
 msgid "You will receive an email on both your current and the new email address with a link to confirm this change."
 msgstr "Je ontvangt een e-mail op zowel je huidige als het nieuwe e-mailadres met een link om de wijziging te bevestigen."
 
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "Your account does not currently have a password set."
-msgstr "Er is momenteel geen wachtwoord ingesteld voor je account."
-
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "Changing your account email address requires confirmation from both your current and new email addresses. Please check your email for a confirmation link."
 msgstr "Om het e-mailadres van je account te wijzigen moet je bevestigen vanaf zowel je huidige als het nieuwe e-mailadres. Check je e-mail voor een bevestigingslink."
@@ -572,10 +577,6 @@ msgstr "Wachtwoord wijzigen"
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Add a password to your account. This will allow you to sign in using your email address and password as well as any linked services."
 msgstr "Stel een wachtwoord in voor je account. Hiermee kun je inloggen met je e-mailadres en wachtwoord, evenals met eventuele gekoppelde diensten."
-
-#: hidp/templates/hidp/accounts/management/set_password.html
-msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
-msgstr "Voor je veiligheid moet je opnieuw inloggen via een gekoppelde dienst voordat je een wachtwoord kunt instellen."
 
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "However, your account is not currently linked to any service, so you cannot set a password at this time."
