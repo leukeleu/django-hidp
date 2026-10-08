@@ -182,6 +182,10 @@ msgstr ""
 msgid "Login failed. Invalid credentials."
 msgstr ""
 
+#: hidp/api/oidc_views.py
+msgid "The page has expired."
+msgstr ""
+
 #: hidp/api/oidc_views.py hidp/federated/forms.py
 msgid "You cannot unlink your only way to sign in."
 msgstr ""

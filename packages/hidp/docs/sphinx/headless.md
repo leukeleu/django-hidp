@@ -344,6 +344,8 @@ HIDP_FRONTEND_URLS = {
 | `oidc_registration` | | Optional. Creating an account at the first login with an OIDC provider. |
 | `oidc_link` | | Optional. Linking an OIDC provider to the logged-in user. |
 | `email_verification_required` | | Optional. The page of the pending `email_verify` step after logging in with an OIDC provider. Defaults to `login`. |
+| `oidc_provider_consent` | | Optional. Asking the user to authorize an application of HIdP's OIDC provider. |
+| `oidc_provider_logout` | | Optional. Confirming a logout that an application of HIdP's OIDC provider asked for. |
 
 Logging in with an OIDC provider hands off to the frontend when `login`,
 `oidc_registration` and `oidc_link` are all set. HIdP adds the parameters of these
@@ -404,8 +406,9 @@ A project can leave out `hidp.config.urls` and mount only the API:
 
   The OIDC views require HTTPS: behind a proxy, set `SECURE_PROXY_SSL_HEADER`.
 - With HIdP's OIDC provider, set `OIDC_RP_INITIATED_REGISTRATION_URL` in
-  `OAUTH2_PROVIDER` to the signup page of your frontend, see
-  [Configure as OIDC provider](configure-as-oidc-provider.md).
+  `OAUTH2_PROVIDER` to the signup page of your frontend, and the
+  `oidc_provider_consent` and `oidc_provider_logout` keys of `HIDP_FRONTEND_URLS`,
+  see [Configure as OIDC provider](configure-as-oidc-provider.md#headless-mode).
 
 ## APIs that are not Django REST framework
 

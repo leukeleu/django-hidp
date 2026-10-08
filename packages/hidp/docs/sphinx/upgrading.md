@@ -86,3 +86,7 @@ changes below can affect a project without it too.
 - `trust_email_verified_claim` and `is_email_verified` on OIDC clients, see
   [Configure OIDC Clients](configure-oidc-clients.md#verified-email-addresses).
 - `MicrosoftOIDCClient` takes a `tenant_id`, for single-tenant applications.
+- The consent and logout pages of HIdP's OIDC provider on the frontend: the
+  `oidc_provider_consent` and `oidc_provider_logout` keys of `HIDP_FRONTEND_URLS`,
+  and `GET oidc-provider/page/` of the API. See
+  [Configure as OIDC provider](configure-as-oidc-provider.md#headless-mode).
