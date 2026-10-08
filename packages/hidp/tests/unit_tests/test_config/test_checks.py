@@ -18,7 +18,8 @@ urlpatterns = []
     AUTH_USER_MODEL="auth.User",
     MIDDLEWARE=[],
     USE_TZ=False,
-    OAUTH2_PROVIDER=None,
+    # Django OAuth Toolkit reloads its settings on change and needs a dict.
+    OAUTH2_PROVIDER={},
     ROOT_URLCONF=__name__,  # This module is the ROOT_URLCONF
 )
 class TestConfigChecks(TestCase):
@@ -260,3 +261,56 @@ class TestUserSerializerCheck(TestCase):
     @override_settings(HIDP_API_USER_SERIALIZER="hidp.api.serializers.LoginSerializer")
     def test_not_a_user_serializer(self):
         self.assertEqual(self._check_ids(), ["hidp.E014"])
+
+
+class TestOAuth2ProviderRegistrationUrlCheck(TestCase):
+    """prompt=create must be able to redirect to a registration page."""
+
+    def test_valid(self):
+        self.assertEqual(checks.check_oauth2_provider_registration_url(), [])
+
+    @override_settings(
+        OAUTH2_PROVIDER=settings.OAUTH2_PROVIDER
+        | {"OIDC_RP_INITIATED_REGISTRATION_URL": "/signup"}
+    )
+    def test_frontend_path(self):
+        self.assertEqual(checks.check_oauth2_provider_registration_url(), [])
+
+    @override_settings(ROOT_URLCONF="tests.unit_tests.test_config.headless_urls")
+    def test_registration_url_not_mounted(self):
+        self.assertEqual(checks.check_oauth2_provider_registration_url(), [checks.E016])
+
+    @override_settings(
+        ROOT_URLCONF="tests.unit_tests.test_config.headless_urls",
+        OAUTH2_PROVIDER=settings.OAUTH2_PROVIDER
+        | {"OIDC_RP_INITIATED_REGISTRATION_ENABLED": False},
+    )
+    def test_registration_disabled(self):
+        self.assertEqual(checks.check_oauth2_provider_registration_url(), [])
+
+
+@override_settings(ROOT_URLCONF="hidp.config.urls")
+class TestApiPathPrefixesCheck(TestCase):
+    """HIDP_API_PATH_PREFIXES must not cover pages that browsers navigate to."""
+
+    def test_not_set(self):
+        self.assertEqual(checks.check_api_path_prefixes(), [])
+
+    @override_settings(HIDP_API_PATH_PREFIXES=["/api/"])
+    def test_api_paths(self):
+        self.assertEqual(checks.check_api_path_prefixes(), [])
+
+    @override_settings(HIDP_API_PATH_PREFIXES="/api/")
+    def test_not_a_list(self):
+        self.assertEqual(checks.check_api_path_prefixes(), [checks.E018])
+
+    @override_settings(HIDP_API_PATH_PREFIXES=["api/"])
+    def test_relative_path(self):
+        self.assertEqual(checks.check_api_path_prefixes(), [checks.E018])
+
+    @override_settings(HIDP_API_PATH_PREFIXES=["/"])
+    def test_covers_browser_pages(self):
+        self.assertEqual(
+            [error.id for error in checks.check_api_path_prefixes()],
+            ["hidp.W003"] * 4,
+        )

@@ -3,7 +3,7 @@ import json
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from http import HTTPStatus
-from urllib.parse import parse_qs, urlencode, urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from jwcrypto import jwk, jwt
 from oauth2_provider.models import get_access_token_model, get_application_model
@@ -68,7 +68,7 @@ class TestOAuthFlow(TestCase):
             token="secret-access-token-key",
             application=self.trusted_application,
         )
-        (client or self.client).defaults["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+        (client or self.client).defaults["HTTP_AUTHORIZATION"] = f"Bearer {token.token}"
 
     def authorization_request(
         self, code_verifier="secret", client_id="happy-app", **oauth_params
@@ -239,29 +239,48 @@ class TestOAuthFlow(TestCase):
         """prompt=create redirects to registration."""
         with self.subTest("No user logged in"):
             response = self.authorization_request(prompt="create")
-            next_url = (
-                f"{response.request['PATH_INFO']}?{response.request['QUERY_STRING']}"
-            ).replace("&prompt=create", "")
-            self.assertRedirects(
-                response,
-                (
-                    f"{reverse('hidp_accounts:register')}"
-                    f"?{urlencode({'next': next_url})}"
-                ),
+
+            self.assertEqual(HTTPStatus.FOUND, response.status_code)
+            location = urlsplit(response["Location"])
+            self.assertEqual(reverse("hidp_accounts:register"), location.path)
+            # Returns to the authorization request, without prompt=create.
+            next_url = urlsplit(parse_qs(location.query)["next"][0])
+            self.assertEqual("/o/authorize/", next_url.path)
+            next_params = parse_qs(next_url.query)
+            self.assertNotIn("prompt", next_params)
+            self.assertEqual(["happy-app"], next_params["client_id"])
+
+        with self.subTest("Other prompt values are kept"):
+            response = self.authorization_request(prompt="create login")
+
+            location = urlsplit(response["Location"])
+            next_url = urlsplit(parse_qs(location.query)["next"][0])
+            self.assertEqual(["login"], parse_qs(next_url.query)["prompt"])
+
+        with self.subTest("Unknown client"):
+            response = self.authorization_request(
+                prompt="create", client_id="unknown-app"
             )
 
+            self.assertEqual(HTTPStatus.BAD_REQUEST, response.status_code)
+
+        with (
+            self.subTest("Registration disabled"),
+            override_settings(REGISTRATION_ENABLED=False),
+        ):
+            response = self.authorization_request(prompt="create")
+
+            self.assertEqual(HTTPStatus.BAD_REQUEST, response.status_code)
+            self.assertEqual("invalid_request", response.json()["error"])
+
         with self.subTest("User logged in"):
+            # The user already has an account: continue the authorization.
             self.client.force_login(self.user)
             response = self.authorization_request(prompt="create")
-            next_url = (
-                f"{response.request['PATH_INFO']}?{response.request['QUERY_STRING']}"
-            ).replace("&prompt=create", "")
-            self.assertRedirects(
-                response,
-                (
-                    f"{reverse('hidp_accounts:register')}"
-                    f"?{urlencode({'next': next_url})}"
-                ),
+
+            self.assertEqual(HTTPStatus.FOUND, response.status_code)
+            self.assertRegex(
+                response["Location"], r"^https://127\.0\.0\.1/\?code=[A-z0-9]+$"
             )
 
     def test_userinfo_limited_scope(self):

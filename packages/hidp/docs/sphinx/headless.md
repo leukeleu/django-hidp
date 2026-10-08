@@ -125,11 +125,12 @@ Logins are limited by IP address, and to 10 per minute for each username from on
 IP address. The username is stripped and case-folded first, so padded or recased
 variants share one limit. Exceeding a limit returns a 429 with a JSON `detail`.
 
-The HTML login also counts the attempts for a username across all IP addresses,
-and then asks the user to prove they are not a robot. The API has no such
-challenge, and a limit across addresses would let anyone lock a user out, so it
-leaves that limit out. Add a CAPTCHA to a subclass of `hidp.api.views.LoginView`
-if you need more protection against guessing from many addresses.
+Like the HTML login, the API also counts the attempts for a username across all IP
+addresses. Past 10 per minute it does not refuse the login, but requires an "I am
+not a robot" checkbox: a 400 with an error for `i_am_not_a_robot`, which the client
+sends as `true` with the next attempt. HIdP has no CAPTCHA. To add one, set
+`rate_limited_serializer_class` on a subclass of `hidp.api.views.LoginView` to a
+subclass of `hidp.api.serializers.RateLimitedLoginSerializer` with your own form.
 
 Every API view has its own limits, except views that check the same secret: OTP
 verification with an app code or a recovery code share one limit, and so do the two
@@ -210,9 +211,10 @@ alike.
 
 Errors use the shapes of Django REST framework's default exception handler:
 `{field: [messages]}` for invalid input, with `non_field_errors` for errors about
-the request as a whole, and `{detail}` for everything else. A custom
-`EXCEPTION_HANDLER`, such as DRF Standardized Errors, changes these shapes. Input
-errors carry the translated messages of the HTML forms.
+the request as a whole, and `{detail}` for everything else. The endpoints keep these
+shapes under a project-wide `EXCEPTION_HANDLER`, such as DRF Standardized Errors;
+only `users/me/` uses it. Input errors carry the translated messages of the HTML
+forms, and the rate limit and CSRF messages are translated too.
 
 A rejected login or OTP request keeps its database writes, even with
 `ATOMIC_REQUESTS`, so failed attempts still count: a wrong OTP code towards the
@@ -309,6 +311,24 @@ A project can leave out `hidp.config.urls` and mount only the API:
 - Set `otp_verify` and `otp_setup` in `HIDP_FRONTEND_URLS`, so the OTP middleware
   sends users of HTML views to your frontend. The original path is passed as `next`;
   check that it is a local path before redirecting back to it.
+- With HIdP's OIDC provider, set `OIDC_RP_INITIATED_REGISTRATION_URL` in
+  `OAUTH2_PROVIDER` to the signup page of your frontend, see
+  [Configure as OIDC provider](configure-as-oidc-provider.md).
+
+## APIs that are not Django REST framework
+
+The OTP middleware answers a Django REST framework view with the authentication
+state as a JSON 401 instead of a redirect, and `RateLimitMiddleware` answers it
+with a JSON 429. APIs built with something else, such as Django Ninja or views that
+return `JsonResponse`, get the same responses when their paths are listed in
+`HIDP_API_PATH_PREFIXES`:
+
+```python
+HIDP_API_PATH_PREFIXES = ["/api/v2/"]
+```
+
+A prefix must not cover pages that browsers navigate to, such as `/o/authorize/`
+or the OIDC callback: they would answer with JSON instead of a redirect.
 
 ## System checks
 
@@ -318,6 +338,9 @@ A project can leave out `hidp.config.urls` and mount only the API:
 | `hidp.E012` | A URL template lacks a required placeholder. |
 | `hidp.E013` | A URL template is not a string, or has a placeholder it cannot receive. |
 | `hidp.E014` | `HIDP_API_USER_SERIALIZER` does not name a subclass of `UserSerializer`. |
+| `hidp.E016` | `OIDC_RP_INITIATED_REGISTRATION_URL` does not resolve, while `prompt=create` is enabled. |
+| `hidp.E018` | `HIDP_API_PATH_PREFIXES` is not a list of paths that start with a slash. |
+| `hidp.W003` | `HIDP_API_PATH_PREFIXES` covers a page that browsers navigate to. |
 
 ## OpenAPI Specification
 

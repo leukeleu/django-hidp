@@ -74,6 +74,42 @@ class TestLoginRateLimit(RateLimitTestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 
+    def test_many_attempts_across_clients_require_i_am_not_a_robot(self):
+        """Like the HTML login, a username tried from many IPs needs the checkbox."""
+        for ip in range(10):
+            self._login("walter@example.com", ip=f"10.0.1.{ip}")
+
+        response = self._login("walter@example.com", ip="10.0.2.1")
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertIn("i_am_not_a_robot", response.json())
+
+    def test_i_am_not_a_robot_accepts_the_login(self):
+        user = user_factories.VerifiedUserFactory(email="walter@example.com")
+        for ip in range(10):
+            self._login(user.email, ip=f"10.0.1.{ip}")
+
+        response = self.client.post(
+            self.url,
+            {
+                "username": user.email,
+                "password": "P@ssw0rd!",
+                "i_am_not_a_robot": True,
+            },
+            format="json",
+            REMOTE_ADDR="10.0.2.1",
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK, response.json())
+
+    def test_other_usernames_need_no_i_am_not_a_robot(self):
+        for ip in range(10):
+            self._login("walter@example.com", ip=f"10.0.1.{ip}")
+
+        response = self._login("jesse@example.com", ip="10.0.2.1")
+
+        self.assertNotIn("i_am_not_a_robot", response.json())
+
 
 # The limit under test is not the first, which django-ratelimit names differently.
 TWO_RATE_LIMITS = [("ip", ALL, "100/s"), ("ip", ALL, "3/m")]

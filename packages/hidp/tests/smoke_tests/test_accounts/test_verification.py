@@ -133,6 +133,21 @@ class TestEmailVerificationView(TestCase):
         """Works when the token is considered valid."""
         self._assert_response(self.client.get(self.url, follow=True))
 
+    def test_keeps_the_pending_verification(self):
+        """Opening the link does not replace the token of a pending verification."""
+        request_token = tokens.email_verification_request_token_generator.make_token(
+            self.user
+        )
+        session = self.client.session
+        session["_email_verification_request_token"] = request_token
+        session.save()
+
+        self._assert_response(self.client.get(self.url, follow=True))
+
+        self.assertEqual(
+            self.client.session["_email_verification_request_token"], request_token
+        )
+
     def test_get_invalid_token(self):
         """Invalid token."""
         response = self.client.get(

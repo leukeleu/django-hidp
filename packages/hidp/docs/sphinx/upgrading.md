@@ -40,6 +40,20 @@ changes below can affect a project without it too.
 - `SetPasswordView` keeps the user logged in after setting a password.
 - System check `hidp.E006` also passes when the login endpoint of the API is
   mounted.
+- Django OAuth Toolkit 3.4 or later is required. It handles `prompt=create`, which
+  it refused with a 400 before: HIdP's own handling no longer ran. A logged-in user
+  now continues the authorization instead of seeing the registration page, `next`
+  is an absolute URL, discovery lists `create` in `prompt_values_supported`, and the
+  `registration_url` attribute of `hidp.oidc_provider.views.AuthorizationView` is
+  gone: set `OIDC_RP_INITIATED_REGISTRATION_URL` instead.
+- The HTML email verification page keeps its token under its own session key,
+  `_email_verification_token`. A user who opened a verification link just before
+  the upgrade opens it again.
+- The OTP setup page sends a user who must first verify with a recovery code to the
+  `otp_verify` URL of `HIDP_FRONTEND_URLS` when it is set.
+- The OTP views of the API are only mounted when `django_otp.plugins.otp_totp` and
+  `django_otp.plugins.otp_static` are installed too, like the HTML views.
+- The rate limit message and the CSRF failure message of the API are translated.
 
 ### Code
 
@@ -55,3 +69,7 @@ changes below can affect a project without it too.
   [headless mode](headless.md#settings).
 - System checks `hidp.E011` to `hidp.E014`, which only apply when
   `hidp.api.urls` is included or `HIDP_API_USER_SERIALIZER` is set.
+- `HIDP_API_PATH_PREFIXES`, for APIs that are not Django REST framework, see
+  [headless mode](headless.md#apis-that-are-not-django-rest-framework), with
+  checks `hidp.E018` and `hidp.W003`.
+- System check `hidp.E016` for an unresolvable `OIDC_RP_INITIATED_REGISTRATION_URL`.

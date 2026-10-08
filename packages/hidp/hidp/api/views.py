@@ -7,7 +7,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
 )
-from rest_framework import exceptions
+from rest_framework import exceptions, views
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -30,11 +30,12 @@ from hidp.otp.decorators import otp_exempt
 from hidp.utils import get_frontend_url, is_registration_enabled
 
 from ..rate_limit.decorators import rate_limit, rate_limit_default, rate_limit_strict
-from ..rate_limit.keys import ip_username_rate_limit_key
+from ..rate_limit.keys import ip_username_rate_limit_key, username_rate_limit_key
 from .auth_state import (
     auth_state_response,
     get_email_verification_user,
     start_email_verification,
+    stop_email_verification,
 )
 from .serializers import (
     AuthStateSerializer,
@@ -47,6 +48,7 @@ from .serializers import (
     PasswordChangeSerializer,
     PasswordResetConfirmationSerializer,
     PasswordResetRequestSerializer,
+    RateLimitedLoginSerializer,
     SetPasswordSerializer,
     SignupSerializer,
     get_user_serializer_class,
@@ -111,6 +113,10 @@ class BaseView(CSRFProtectedAPIView, GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return serializer
 
+    def get_exception_handler(self):  # noqa: PLR6301 (no-self-use)
+        # The documented error responses, also under a project-wide EXCEPTION_HANDLER.
+        return views.exception_handler
+
     def handle_exception(self, exc):
         if not (
             self.keep_writes_on_invalid_input
@@ -173,6 +179,10 @@ class SessionView(BaseView):
     rate_limit(key=ip_username_rate_limit_key, rate="10/m", method="POST"),
     name="dispatch",
 )
+@method_decorator(
+    rate_limit(key=username_rate_limit_key, rate="10/m", method="POST", block=False),
+    name="dispatch",
+)
 @extend_schema_view(post=extend_schema(responses=AUTH_STATE_RESPONSES))
 class LoginView(VerificationMailerMixin, BaseView):
     """
@@ -180,11 +190,21 @@ class LoginView(VerificationMailerMixin, BaseView):
 
     A user whose email address is not verified is sent a verification email instead,
     and the response has a pending `email_verify` step.
+
+    After many attempts for a username from any IP address, the login also requires
+    `i_am_not_a_robot` to be `true`. Without it, the response is a 400.
     """
 
     serializer_class = LoginSerializer
+    rate_limited_serializer_class = RateLimitedLoginSerializer
     # Listeners of `user_login_failed` may count failed logins.
     keep_writes_on_invalid_input = True
+
+    def get_serializer_class(self):
+        # Set by the rate limit across IP addresses, which does not block.
+        if getattr(self.request, "limited", False):
+            return self.rate_limited_serializer_class
+        return self.serializer_class
 
     def post(self, request, *args, **kwargs):
         user = self.validated_serializer().form.get_user()
@@ -308,7 +328,12 @@ class EmailVerificationConfirmView(BaseView):
     serializer_class = EmailVerificationConfirmSerializer
 
     def post(self, request, *args, **kwargs):
-        self.validated_serializer().form.save()
+        serializer = self.validated_serializer()
+        pending_user = get_email_verification_user(request)
+        serializer.form.save()
+        # The session no longer waits for this user to verify their email address.
+        if pending_user == serializer.validated_data["user"]:
+            stop_email_verification(request)
         return Response(status=HTTPStatus.NO_CONTENT)
 
 

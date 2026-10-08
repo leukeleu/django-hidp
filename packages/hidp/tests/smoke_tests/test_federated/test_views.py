@@ -692,6 +692,10 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
         response = self.client.get(self.url, {"token": token})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "hidp/federated/account_link.html")
+        self.assertEqual(
+            response.context["cancel_url"],
+            reverse("hidp_oidc_management:linked_services"),
+        )
 
     def test_post_with_valid_token(self):
         token = self._add_oidc_data_to_session()
@@ -751,6 +755,10 @@ class TestOIDCAccountUnlinkView(TestCase):
         response = self.client.get(self.url)
         self.assertTemplateUsed(response, "hidp/federated/account_unlink.html")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context["cancel_url"],
+            reverse("hidp_oidc_management:linked_services"),
+        )
 
     def test_post_with_valid_provider(self):
         response = self.client.post(self.url, {"allow_unlink": "on"}, follow=True)
