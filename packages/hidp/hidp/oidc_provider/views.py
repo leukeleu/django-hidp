@@ -6,6 +6,7 @@ from django.utils.decorators import method_decorator
 
 from ..csp.decorators import hidp_csp_protection
 from ..utils import is_registration_enabled
+from .frontend import FrontendPageMixin
 
 
 def _has_prompt_create(request):
@@ -17,7 +18,23 @@ def _has_prompt_create(request):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
-class AuthorizationView(oauth2_views.AuthorizationView):
+class AuthorizationView(FrontendPageMixin, oauth2_views.AuthorizationView):
+    frontend_step = "oidc_provider_consent"
+    page_name = "consent"
+
+    def get_page(self, context):
+        page = super().get_page(context)
+        if page["page"] == self.page_name:
+            page["scopes"] = [
+                {"scope": scope, "description": description}
+                for scope, description in zip(
+                    context.get("scopes", []),
+                    context.get("scopes_descriptions", []),
+                    strict=True,
+                )
+            ]
+        return page
+
     def get(self, request, *args, **kwargs):
         if _has_prompt_create(request):
             # Switch request.user to AnonymousUser. This forces handle_no_permission
@@ -43,5 +60,7 @@ class AuthorizationView(oauth2_views.AuthorizationView):
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
-class RPInitiatedLogoutView(oauth2_views.RPInitiatedLogoutView):
+class RPInitiatedLogoutView(FrontendPageMixin, oauth2_views.RPInitiatedLogoutView):
+    frontend_step = "oidc_provider_logout"
+    page_name = "logout"
     template_name = "hidp/accounts/logout_confirm.html"

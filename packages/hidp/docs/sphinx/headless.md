@@ -361,6 +361,8 @@ query has the `step`, and its parameters:
 | `email_verify` | `next` | Logging in with an OIDC provider, while the email address is not verified. |
 | `otp_verify` | `next` | The OTP middleware requires a user of an HTML view to verify. |
 | `otp_setup` | `next` | The OTP middleware requires a user of an HTML view to set up two-factor authentication. |
+| `oidc_provider_consent` | `token` | HIdP's OIDC provider asks the user to authorize an application. |
+| `oidc_provider_logout` | `token` | HIdP's OIDC provider asks the user to confirm a logout of an application. |
 
 `email_verify`, `otp_verify` and `otp_setup` are also the `pending` steps of the
 [authentication state](#the-authentication-state), so the frontend can show the
@@ -413,8 +415,9 @@ A project can leave out `hidp.config.urls` and mount only the API:
 
   The OIDC views require HTTPS: behind a proxy, set `SECURE_PROXY_SSL_HEADER`.
 - With HIdP's OIDC provider, set `OIDC_RP_INITIATED_REGISTRATION_URL` in
-  `OAUTH2_PROVIDER` to the signup page of your frontend, see
-  [Configure as OIDC provider](configure-as-oidc-provider.md).
+  `OAUTH2_PROVIDER` to the signup page of your frontend, and `auth` in
+  `HIDP_FRONTEND_URLS`, see
+  [Configure as OIDC provider](configure-as-oidc-provider.md#headless-mode).
 
 ## APIs that are not Django REST framework
 

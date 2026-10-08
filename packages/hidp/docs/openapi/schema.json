@@ -354,6 +354,42 @@
                 }
             }
         },
+        "/api/oidc-provider/page/": {
+            "get": {
+                "operationId": "oidc_provider_page_retrieve",
+                "description": "A page of HIdP's OIDC provider, which the frontend shows in place of HTML.\n\nThe `consent` page asks the user to authorize an application, the `logout` page\nto log out. The frontend posts a form to `action` with `fields`, `allow` set to\n`true` (or left out to refuse), and the `csrfmiddlewaretoken`, as a normal page\nload: the response redirects to the application. The `error` page shows an\nerror that could not be sent to the application.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc-provider"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OIDCProviderPage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/oidc/authenticate/{provider_key}/": {
             "post": {
                 "operationId": "oidc_authenticate_create",
@@ -1657,6 +1693,78 @@
                 "required": [
                     "key",
                     "name"
+                ]
+            },
+            "OIDCProviderApplication": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "client_id": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "name"
+                ]
+            },
+            "OIDCProviderPage": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "type": "string",
+                        "description": "consent, logout or error"
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "application": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/OIDCProviderApplication"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "scopes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OIDCProviderScope"
+                        }
+                    },
+                    "fields": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "error_description": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "page"
+                ]
+            },
+            "OIDCProviderScope": {
+                "type": "object",
+                "properties": {
+                    "scope": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "description",
+                    "scope"
                 ]
             },
             "OIDCRegistration": {
