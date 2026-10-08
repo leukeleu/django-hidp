@@ -43,6 +43,7 @@ from .serializers import (
     EmailChangeRequestSerializer,
     EmailChangeSerializer,
     EmailVerificationConfirmSerializer,
+    EmailVerificationResendSerializer,
     EmailVerificationTokenSerializer,
     LoginSerializer,
     PasswordChangeSerializer,
@@ -140,11 +141,13 @@ class BaseView(CSRFProtectedAPIView, GenericAPIView):
 class VerificationMailerMixin:
     verification_mailer = mailers.EmailVerificationMailer
 
-    def get_verification_mailer(self):
+    def get_verification_mailer(self, *, next_url=None):
+        """The mailer of the verification email, with a link to the frontend."""
         return partial(
             self.verification_mailer,
             base_url=self.base_url,
             verification_url=self.frontend_url("email_verification"),
+            post_verification_redirect=next_url,
         )
 
 
@@ -207,12 +210,15 @@ class LoginView(VerificationMailerMixin, BaseView):
         return self.serializer_class
 
     def post(self, request, *args, **kwargs):
-        user = self.validated_serializer().form.get_user()
+        serializer = self.validated_serializer()
+        user = serializer.form.get_user()
         if not flows.login(request, user):
             # Do not stay logged in as another user while waiting for `user`.
             if request.user.is_authenticated:
                 hidp_auth.logout(request)
-            self.get_verification_mailer()(user).send()
+            self.get_verification_mailer(
+                next_url=serializer.validated_data.get("next")
+            )(user).send()
             start_email_verification(request, user)
         return auth_state_response(request)
 
@@ -261,10 +267,13 @@ class SignupView(VerificationMailerMixin, BaseView):
                 _("Logged-in users cannot register a new account."),
                 "already_authenticated",
             )
-        user = flows.register(self.validated_serializer().form)
+        serializer = self.validated_serializer()
+        user = flows.register(serializer.form)
         flows.send_registration_email(
             user,
-            verification_mailer=self.get_verification_mailer(),
+            verification_mailer=self.get_verification_mailer(
+                next_url=serializer.validated_data.get("next")
+            ),
             account_exists_mailer=partial(
                 self.account_exists_mailer,
                 base_url=self.base_url,
@@ -276,9 +285,7 @@ class SignupView(VerificationMailerMixin, BaseView):
 
 
 @method_decorator(rate_limit_default, name="dispatch")
-@extend_schema_view(
-    post=extend_schema(request=None, responses={HTTPStatus.NO_CONTENT: None}),
-)
+@extend_schema_view(post=extend_schema(responses={HTTPStatus.NO_CONTENT: None}))
 class EmailVerificationResendView(VerificationMailerMixin, BaseView):
     """
     Resend the verification email to the user this session is waiting for.
@@ -287,10 +294,13 @@ class EmailVerificationResendView(VerificationMailerMixin, BaseView):
     was sent.
     """
 
+    serializer_class = EmailVerificationResendSerializer
+
     def post(self, request, *args, **kwargs):
+        next_url = self.validated_serializer().validated_data.get("next")
         user = get_email_verification_user(request)
         if user is not None:
-            self.get_verification_mailer()(user).send()
+            self.get_verification_mailer(next_url=next_url)(user).send()
             start_email_verification(request, user)
         return Response(status=HTTPStatus.NO_CONTENT)
 

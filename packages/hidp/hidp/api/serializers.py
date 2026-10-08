@@ -20,6 +20,7 @@ from hidp.accounts import forms, tokens
 from hidp.accounts.email_change import get_email_change_request_from_token_data
 from hidp.accounts.email_verification import get_unverified_user_from_token
 from hidp.accounts.models import EmailChangeRequest
+from hidp.utils import get_local_redirect
 
 from ..constants import Step
 
@@ -125,6 +126,8 @@ class FormSerializer(serializers.Serializer):
     form_class = NotImplemented
     # Serializer field name to the form fields it fills, where they differ.
     form_fields = {}
+    # Serializer fields that the form does not get.
+    non_form_fields = ()
 
     def get_form_kwargs(self, attrs):  # noqa: PLR6301 (no-self-use)
         return {}
@@ -132,6 +135,8 @@ class FormSerializer(serializers.Serializer):
     def get_form_data(self, attrs):
         data = {}
         for name, value in attrs.items():
+            if name in self.non_form_fields:
+                continue
             for form_field in self.form_fields.get(name, [name]):
                 data[form_field] = value
         return data
@@ -155,7 +160,30 @@ class FormSerializer(serializers.Serializer):
         return self.context["request"]
 
 
-class LoginSerializer(FormSerializer):
+class NextSerializerMixin(serializers.Serializer):
+    """
+    An optional `next`: where the client continues after the flow.
+
+    It must be a path on this site, or an absolute URL on its host, and is sent on
+    as a path, for example in the link of the verification email.
+    """
+
+    non_form_fields = ("next",)
+
+    next = serializers.CharField(write_only=True, required=False)
+
+    def validate_next(self, value):
+        path = get_local_redirect(self.context["request"], value)
+        if path is None:
+            raise serializers.ValidationError(_("Enter a path on this site."))
+        return path
+
+
+class EmailVerificationResendSerializer(NextSerializerMixin):
+    pass
+
+
+class LoginSerializer(NextSerializerMixin, FormSerializer):
     form_class = forms.AuthenticationForm
 
     username = serializers.CharField(write_only=True)
@@ -177,7 +205,7 @@ class RateLimitedLoginSerializer(LoginSerializer):
     i_am_not_a_robot = serializers.BooleanField(write_only=True, required=False)
 
 
-class SignupSerializer(FormSerializer):
+class SignupSerializer(NextSerializerMixin, FormSerializer):
     form_class = forms.UserCreationForm
     form_fields = {
         "email": [UserModel.USERNAME_FIELD],

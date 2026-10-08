@@ -4,6 +4,7 @@ from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
 
 from django.conf import settings
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 
 from .config import oidc_clients
@@ -78,6 +79,23 @@ def is_api_view(view_func):
     except ImportError:
         return False
     return issubclass(view_class, APIView)
+
+
+def get_local_redirect(request, url):
+    """
+    Return `url` as a path on this site, or `None` when it leads elsewhere.
+
+    Accepts a path, or an absolute URL on the host of the request, such as the
+    `next` that Django OAuth Toolkit builds for `prompt=create`.
+    """
+    if not url or not url_has_allowed_host_and_scheme(
+        url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return None
+    _scheme, _netloc, path, query, fragment = urlsplit(url)
+    if not path.startswith("/"):
+        return None
+    return urlunsplit(("", "", path, query, fragment))
 
 
 def get_api_path_prefixes():

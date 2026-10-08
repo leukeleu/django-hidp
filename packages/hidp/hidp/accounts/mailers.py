@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
+from ..utils import add_query_params
 from . import email_verification, tokens
 from .email_change import Recipient
 
@@ -105,7 +106,10 @@ class EmailVerificationMailer(BaseMailer):
         token = tokens.email_verification_token_generator.make_token(self.user)
 
         if self.verification_url:
-            return self.verification_url.format(token=token)
+            return add_query_params(
+                self.verification_url.format(token=token),
+                next=self.post_verification_redirect or None,
+            )
 
         return urljoin(
             self.base_url,

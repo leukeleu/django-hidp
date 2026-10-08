@@ -124,11 +124,65 @@ hidp_config.configure_oidc_clients(
 )
 ```
 
-:::{note}
-Creating a client that is limited to a specific tenant (Active Directory, or similar)
-has not been tested and might require some customisation of the
-provided `MicrosoftOIDCClient`.
-:::
+An application for the accounts of one organisation (single tenant) cannot use the
+`/common/` endpoints of Microsoft (error AADSTS50194). Pass the ID of its tenant, a
+UUID or a verified domain name:
+
+```python
+MicrosoftOIDCClient(client_id="your-client-id", tenant_id="your-tenant-id")
+```
+
+(verified-email-addresses)=
+## Verified email addresses
+
+An account created by logging in with a provider must verify its email address, like
+any other account, unless the provider is trusted to have verified it. Set
+`trust_email_verified_claim` on a subclass of the client to trust the
+`email_verified` claim of the provider: the account is then verified, and the user
+logged in, right away.
+
+```python
+class TrustedGoogleOIDCClient(GoogleOIDCClient):
+    trust_email_verified_claim = True
+```
+
+Some providers verify every address without sending the claim, such as the tenant of
+an organisation in Microsoft Entra. Override `is_email_verified(*, claims,
+user_info)` to decide:
+
+```python
+class OrganisationOIDCClient(MicrosoftOIDCClient):
+    def is_email_verified(self, *, claims, user_info):
+        return True
+```
+
+Trusting a provider never links an existing account: an email address with an
+account still has to log in to it first, and link the provider.
+
+(authentication-backends)=
+## Authentication backends
+
+`hidp.federated.auth.backends.OIDCModelBackend` logs in the user of an account of a
+provider. A subclass can check or update the user with the claims of the provider,
+for instance to sync groups, through the `claims` argument: the claims of the ID
+token, completed with the user info.
+
+```python
+class GroupSyncBackend(OIDCModelBackend):
+    def authenticate(self, request=None, claims=None, **credentials):
+        user = super().authenticate(request, claims=claims, **credentials)
+        if user is not None and claims is not None:
+            sync_groups(user, claims.get("groups", []))
+        return user
+```
+
+Django skips a backend that does not accept an argument. So that a subclass written
+before this argument keeps working, no OIDC backend gets `claims` until they all
+accept it, and system check `hidp.W002` warns about the ones that do not.
+
+`hidp.federated.flows.is_oidc_session(request)` tells whether the user of a session
+logged in with a provider, for example for an OTP policy that leaves two-factor
+authentication to the provider.
 
 (adding-support-for-other-oidc-providers)=
 ## Adding support for other OIDC Providers
