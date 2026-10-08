@@ -16,6 +16,8 @@ ANONYMOUS_ENDPOINTS = [
     ("post", "hidp_api:email_verification_confirm"),
     ("post", "hidp_api:password_reset_request"),
     ("post", "hidp_api:password_reset_confirm"),
+    ("post", "hidp_api:oidc_authenticate", {"provider_key": "example"}),
+    ("post", "hidp_api:oidc_registration"),
 ]
 
 AUTHENTICATED_ENDPOINTS = [
@@ -26,6 +28,8 @@ AUTHENTICATED_ENDPOINTS = [
     ("post", "hidp_api:email_change"),
     ("delete", "hidp_api:email_change"),
     ("post", "hidp_api:email_change_confirm"),
+    ("post", "hidp_api:oidc_link"),
+    ("delete", "hidp_api:oidc_connection", {"provider_key": "example"}),
 ]
 
 
@@ -36,10 +40,12 @@ class TestCSRF(APITestCase):
         self.client = APIClient(enforce_csrf_checks=True)
 
     def _assert_rejected(self, endpoints):
-        for method, url_name in endpoints:
+        for method, url_name, *kwargs in endpoints:
             with self.subTest(method=method, url_name=url_name):
                 response = getattr(self.client, method)(
-                    reverse(url_name), {}, format="json"
+                    reverse(url_name, kwargs=kwargs[0] if kwargs else None),
+                    {},
+                    format="json",
                 )
                 self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
                 self.assertIn("CSRF Failed", response.json()["detail"])

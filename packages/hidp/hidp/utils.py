@@ -1,9 +1,10 @@
 import warnings
 
-from urllib.parse import urljoin
+from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
 
 from django.conf import settings
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 
 from .config import oidc_clients
@@ -34,6 +35,34 @@ def get_frontend_url(key, *, base_url):
     return urljoin(base_url, settings.HIDP_FRONTEND_URLS[key])
 
 
+# Logging in with an OIDC provider uses the frontend when all of these are set.
+OIDC_FRONTEND_URL_KEYS = ("login", "oidc_registration", "oidc_link")
+
+
+def is_headless_oidc():
+    """Return whether logging in with an OIDC provider hands off to the frontend."""
+    return all(has_frontend_url(key) for key in OIDC_FRONTEND_URL_KEYS)
+
+
+def add_query_params(url, **params):
+    """Return `url` with `params` added to its query, skipping `None`."""
+    scheme, netloc, path, query, fragment = urlsplit(url)
+    query = urlencode(
+        [
+            *parse_qsl(query, keep_blank_values=True),
+            *((name, value) for name, value in params.items() if value is not None),
+        ]
+    )
+    return urlunsplit((scheme, netloc, path, query, fragment))
+
+
+def get_frontend_redirect_url(request, key, **params):
+    """Return the frontend URL of `key` with `params` in its query, skipping `None`."""
+    return add_query_params(
+        get_frontend_url(key, base_url=request.build_absolute_uri("/")), **params
+    )
+
+
 def has_frontend_url(key):
     """Return whether `HIDP_FRONTEND_URLS` has a URL template for `key`."""
     return key in getattr(settings, "HIDP_FRONTEND_URLS", {})
@@ -49,6 +78,23 @@ def is_api_view(view_func):
     except ImportError:
         return False
     return issubclass(view_class, APIView)
+
+
+def get_local_redirect(request, url):
+    """
+    Return `url` as a path on this site, or `None` when it leads elsewhere.
+
+    Accepts a path, or an absolute URL on the host of the request, such as the
+    `next` that Django OAuth Toolkit builds for `prompt=create`.
+    """
+    if not url or not url_has_allowed_host_and_scheme(
+        url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return None
+    _scheme, _netloc, path, query, fragment = urlsplit(url)
+    if not path.startswith("/"):
+        return None
+    return urlunsplit(("", "", path, query, fragment))
 
 
 def get_api_path_prefixes():

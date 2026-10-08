@@ -167,6 +167,26 @@ msgstr "Registreer met {provider}"
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
+#: hidp/api/oidc_serializers.py
+msgid "The login has expired. Please log in again."
+msgstr "Het inloggen is verlopen. Log opnieuw in."
+
+#: hidp/api/oidc_views.py hidp/api/views.py
+msgid "Logged-in users cannot register a new account."
+msgstr "Je kunt geen nieuw account aanmaken terwijl je bent ingelogd."
+
+#: hidp/api/oidc_views.py
+msgid "Logging in with a provider requires HTTPS."
+msgstr "Inloggen via een externe dienst vereist HTTPS."
+
+#: hidp/api/oidc_views.py hidp/federated/views.py
+msgid "Login failed. Invalid credentials."
+msgstr "Inloggen mislukt. Ongeldige inloggegevens."
+
+#: hidp/api/oidc_views.py hidp/federated/forms.py
+msgid "You cannot unlink your only way to sign in."
+msgstr "Je kunt je enige manier om in te loggen niet ontkoppelen."
+
 #: hidp/api/otp_views.py
 msgid "Two-factor authentication is already configured."
 msgstr "Tweefactorauthenticatie is al ingesteld."
@@ -178,6 +198,10 @@ msgstr "Tweefactorauthenticatie is niet ingesteld."
 #: hidp/api/otp_views.py
 msgid "Verify this session with a recovery code first."
 msgstr "Verifieer deze sessie eerst met een herstelcode."
+
+#: hidp/api/serializers.py
+msgid "Enter a path on this site."
+msgstr "Voer een pad op deze site in."
 
 #: hidp/api/serializers.py
 msgid "Invalid or expired token."
@@ -197,10 +221,6 @@ msgid "For your security, you need to re-authenticate via a linked service befor
 msgstr "Voor je veiligheid moet je opnieuw inloggen via een gekoppelde dienst voordat je een wachtwoord kunt instellen."
 
 #: hidp/api/views.py
-msgid "Logged-in users cannot register a new account."
-msgstr "Je kunt geen nieuw account aanmaken terwijl je bent ingelogd."
-
-#: hidp/api/views.py
 msgid "Your account already has a password."
 msgstr "Er is al een wachtwoord ingesteld voor je account."
 
@@ -218,8 +238,8 @@ msgid "Yes, I want to unlink this account"
 msgstr "Ja, ik wil dit account ontkoppelen"
 
 #: hidp/federated/forms.py
-msgid "You cannot unlink your only way to sign in."
-msgstr "Je kunt je enige manier om in te loggen niet ontkoppelen."
+msgid "Your account is already linked to an account of this service."
+msgstr "Je account is al gekoppeld aan een account van deze dienst."
 
 #: hidp/federated/models.py
 msgid "OpenID connection"
@@ -250,10 +270,6 @@ msgstr "Verlopen of ongeldig token. Probeer het opnieuw."
 #, python-brace-format
 msgid "Link with {provider}"
 msgstr "Koppel met {provider}"
-
-#: hidp/federated/views.py
-msgid "Login failed. Invalid credentials."
-msgstr "Inloggen mislukt. Ongeldige inloggegevens."
 
 #: hidp/federated/views.py
 msgid "Registration is disabled."

@@ -1,11 +1,11 @@
 # Headless mode
 
 The `api` extra adds a JSON API for the flows of the HTML views: login,
-registration, email verification, password recovery, account management and
-two-factor authentication. Logging in with an OIDC provider and managing linked
-services stay HTML-only. A single-page app or a server-rendered frontend (such as
-Nuxt or Next.js) can then own the whole user interface, while HIdP keeps owning the
-rules: rate limits, anti-enumeration, emails and OTP policies.
+registration, email verification, password recovery, account management,
+two-factor authentication, and logging in with an OIDC provider. A single-page app
+or a server-rendered frontend (such as Nuxt or Next.js) can then own the whole user
+interface, while HIdP keeps owning the rules: rate limits, anti-enumeration, emails
+and OTP policies.
 
 The API shares the session with the HTML views, so a project can offer both, or
 only the API.
@@ -146,6 +146,11 @@ the verification email. The response has a pending `email_verify` step whether o
 the account already existed; an existing user is told by email instead. The endpoint
 returns 404 when `REGISTRATION_ENABLED` is `False`.
 
+`signup/`, `login/` and `email-verification/resend/` take an optional `next`: a path
+on this site, or an absolute URL on its host. The link in the verification email
+gets it as `?next=<path>`, so the frontend can continue there after verifying, for
+example to an authorization request of HIdP's OIDC provider.
+
 The verification email links to your frontend, with the token in the URL. The
 frontend then:
 
@@ -207,6 +212,70 @@ Which users must set up or verify OTP is decided by the
 [OTP policy](one-time-passwords.md) middleware, for the API and the HTML views
 alike.
 
+### Logging in with an OIDC provider
+
+Logging in with a provider [configured](configure-oidc-clients.md) for HIdP
+redirects through the provider and HIdP's callback, and hands every page to the
+frontend once `HIDP_FRONTEND_URLS` has `login`, `oidc_registration` and `oidc_link`
+(see [the settings](#hidp_frontend_urls)). Include `hidp.config.headless_urls` (or
+`hidp.config.urls`) for the callback.
+
+1. `GET oidc/providers/` lists `[{key, name}]` for the login buttons.
+2. `POST oidc/authenticate/<key>/` with an optional `next` responds with
+   `{redirect_url}`, the authorization page of the provider. The frontend sends the
+   browser there, with a full page load. HTTPS is required.
+3. The provider returns to HIdP's callback, which redirects to:
+   - `next` (or `/`), for an account that logs in with the provider. A user whose
+     email address is not verified is sent the verification email instead, and
+     redirected to `email_verification_required` (or `login`) with `next`; the
+     session has a pending `email_verify` step.
+   - `oidc_registration?token=…&next=…` for a first login.
+   - `oidc_link?token=…&next=…` for a logged-in user who logs in with an account of
+     the provider that is not linked yet.
+   - `login?oidc_error=…`, with `next` for `account_exists`, when it fails.
+
+On the registration page, `GET oidc/registration/?token=…` gives
+`{provider: {key, name}, email, first_name, last_name, requires_name}`, and
+`POST oidc/registration/` with `{token, agreed_to_tos}` creates the account. The
+names default to the ones the provider sent; when it sent none, they are asked for
+when the email address is verified. When the provider is
+[trusted to verify email addresses](configure-oidc-clients.md#verified-email-addresses),
+the user is logged in. Otherwise they are sent the verification email, with an
+optional `next`, and the response has a pending `email_verify` step. The endpoint
+returns 404 when `REGISTRATION_ENABLED` is `False`.
+
+On the link page, `GET oidc/link/?token=…` gives `{provider, provider_email, email}`,
+and `POST oidc/link/` with `{token}` links the account, which needs a fully
+authenticated user. A user links one account per provider.
+
+| `oidc_error` | Meaning |
+| --- | --- |
+| `account_exists` | The email address of the provider account has an account. The user logs in to it, then links the provider. |
+| `request_expired` | The login took too long, or started in another session. |
+| `unexpected_error` | The provider or the network failed. |
+| `invalid_token` | The token of the step expired, or is not of this session. |
+| `invalid_credentials` | The account is inactive, or a backend refused it. |
+| `registration_disabled` | A first login while `REGISTRATION_ENABLED` is `False`. |
+
+The tokens are in the URLs of the frontend pages, so give them the same care as the
+email links (see [Settings](#hidp_frontend_urls)). The registration and link tokens
+expire after 15 minutes, and work once.
+
+#### Linked providers
+
+| Endpoint | Behaviour |
+| --- | --- |
+| `GET oidc/connections/` | `[{key, name, linked, can_unlink}]` for every provider. `can_unlink` is false for the only way a user without a password logs in. |
+| `DELETE oidc/connections/<key>/` | Unlinks the provider. |
+
+To link a provider, the frontend starts a login with it while the user is logged in.
+
+`POST password/set/` needs a login within the last 5 minutes. When it responds with
+`reauthentication_required`, the frontend starts
+`POST oidc/authenticate/<key>/` with `{reauthenticate: true, next}` for a linked
+provider. The provider asks for the credentials again, and the user returns to
+`next`.
+
 ### Errors
 
 Errors use the shapes of Django REST framework's default exception handler:
@@ -225,7 +294,9 @@ A 403 that the client can act on carries a `code` next to the `detail`:
 
 | Code | Returned by |
 | --- | --- |
-| `already_authenticated` | `signup/` |
+| `already_authenticated` | `signup/`, `oidc/registration/` |
+| `invalid_credentials` | `oidc/registration/`, when a backend refuses the user of a verified email address. The account is not created. |
+| `only_login_method` | `DELETE oidc/connections/<key>/` |
 | `password_not_set` | `password/change/`, `POST email-change/` |
 | `password_already_set` | `password/set/` |
 | `reauthentication_required` | `password/set/`, when the user logged in more than 5 minutes ago. |
@@ -269,6 +340,14 @@ HIDP_FRONTEND_URLS = {
 | `otp_management` | | Managing two-factor authentication. Required when `hidp.otp` is installed. |
 | `otp_verify` | | Optional. Takes the place of the HTML OTP verification view in redirects. |
 | `otp_setup` | | Optional. Takes the place of the HTML OTP setup view in redirects. |
+| `login` | | Optional. The login page, for the errors of logging in with an OIDC provider. |
+| `oidc_registration` | | Optional. Creating an account at the first login with an OIDC provider. |
+| `oidc_link` | | Optional. Linking an OIDC provider to the logged-in user. |
+| `email_verification_required` | | Optional. The page of the pending `email_verify` step after logging in with an OIDC provider. Defaults to `login`. |
+
+Logging in with an OIDC provider hands off to the frontend when `login`,
+`oidc_registration` and `oidc_link` are all set. HIdP adds the parameters of these
+pages to their query.
 
 Emails sent by the HTML views keep linking to the HTML views.
 
@@ -311,6 +390,19 @@ A project can leave out `hidp.config.urls` and mount only the API:
 - Set `otp_verify` and `otp_setup` in `HIDP_FRONTEND_URLS`, so the OTP middleware
   sends users of HTML views to your frontend. The original path is passed as `next`;
   check that it is a local path before redirecting back to it.
+- With OIDC providers to log in with, include `hidp.config.headless_urls`. It
+  mounts the views that the login redirects through at `login/oidc/`, the user
+  endpoint for access tokens at `api/users/me/`, and HIdP's OIDC provider at `o/`
+  when it is installed:
+
+  ```python
+  urlpatterns = [
+      path("", include("hidp.config.headless_urls")),
+      path("api/auth/", include("hidp.api.urls")),
+  ]
+  ```
+
+  The OIDC views require HTTPS: behind a proxy, set `SECURE_PROXY_SSL_HEADER`.
 - With HIdP's OIDC provider, set `OIDC_RP_INITIATED_REGISTRATION_URL` in
   `OAUTH2_PROVIDER` to the signup page of your frontend, see
   [Configure as OIDC provider](configure-as-oidc-provider.md).
@@ -338,8 +430,11 @@ or the OIDC callback: they would answer with JSON instead of a redirect.
 | `hidp.E012` | A URL template lacks a required placeholder. |
 | `hidp.E013` | A URL template is not a string, or has a placeholder it cannot receive. |
 | `hidp.E014` | `HIDP_API_USER_SERIALIZER` does not name a subclass of `UserSerializer`. |
+| `hidp.E015` | `HIDP_FRONTEND_URLS` has some, but not all, of `login`, `oidc_registration` and `oidc_link`. |
 | `hidp.E016` | `OIDC_RP_INITIATED_REGISTRATION_URL` does not resolve, while `prompt=create` is enabled. |
+| `hidp.E017` | OIDC providers are configured and the OIDC endpoints of the API are mounted, but HIdP's OIDC callback is not. |
 | `hidp.E018` | `HIDP_API_PATH_PREFIXES` is not a list of paths that start with a slash. |
+| `hidp.W002` | An OIDC authentication backend does not accept `claims`, see [Configure OIDC Clients](configure-oidc-clients.md#authentication-backends). |
 | `hidp.W003` | `HIDP_API_PATH_PREFIXES` covers a page that browsers navigate to. |
 
 ## OpenAPI Specification
@@ -352,8 +447,6 @@ The endpoints are described in the [OpenAPI Specification](./redoc-static.html){
   a site with the API. Only `users/me/` also accepts access tokens of HIdP's OIDC
   provider, read-only.
 - **No automatic login after email verification**, as in the HTML flow.
-- **Logging in with an OIDC provider stays HTML.** The federated login flow
-  redirects through the HTML views, and does not hand off to the frontend.
 - **No session management.** The API cannot list or end the other sessions of a
   user.
 - **Signup requires `agreed_to_tos`.** A project without terms of service can

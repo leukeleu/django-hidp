@@ -54,6 +54,12 @@ changes below can affect a project without it too.
 - The OTP views of the API are only mounted when `django_otp.plugins.otp_totp` and
   `django_otp.plugins.otp_static` are installed too, like the HTML views.
 - The rate limit message and the CSRF failure message of the API are translated.
+- The OIDC login token is used once: opening the login link of a callback again
+  shows `oidc_error=invalid_token`.
+- A user links one account per provider. Linking a second one shows a form error.
+- An OIDC backend gets the claims of the provider as `claims`, when every OIDC
+  backend accepts that argument. Add `claims=None` to the `authenticate` method of
+  your subclass of `OIDCModelBackend` (system check `hidp.W002`).
 
 ### Code
 
@@ -73,3 +79,10 @@ changes below can affect a project without it too.
   [headless mode](headless.md#apis-that-are-not-django-rest-framework), with
   checks `hidp.E018` and `hidp.W003`.
 - System check `hidp.E016` for an unresolvable `OIDC_RP_INITIATED_REGISTRATION_URL`.
+- Logging in with an OIDC provider in headless mode: the `login`,
+  `oidc_registration`, `oidc_link` and `email_verification_required` keys of
+  `HIDP_FRONTEND_URLS`, `hidp.config.headless_urls`, and system checks `hidp.E015`
+  and `hidp.E017`. See [headless mode](headless.md#logging-in-with-an-oidc-provider).
+- `trust_email_verified_claim` and `is_email_verified` on OIDC clients, see
+  [Configure OIDC Clients](configure-oidc-clients.md#verified-email-addresses).
+- `MicrosoftOIDCClient` takes a `tenant_id`, for single-tenant applications.
