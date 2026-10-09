@@ -166,6 +166,26 @@ msgstr ""
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr ""
 
+#: hidp/api/oidc_serializers.py
+msgid "The login has expired. Please log in again."
+msgstr ""
+
+#: hidp/api/oidc_views.py hidp/api/views.py
+msgid "Logged-in users cannot register a new account."
+msgstr ""
+
+#: hidp/api/oidc_views.py
+msgid "Logging in with a provider requires HTTPS."
+msgstr ""
+
+#: hidp/api/oidc_views.py hidp/federated/views.py
+msgid "Login failed. Invalid credentials."
+msgstr ""
+
+#: hidp/api/oidc_views.py hidp/federated/forms.py
+msgid "You cannot unlink your only way to sign in."
+msgstr ""
+
 #: hidp/api/otp_views.py
 msgid "Two-factor authentication is already configured."
 msgstr ""
@@ -176,6 +196,10 @@ msgstr ""
 
 #: hidp/api/otp_views.py
 msgid "Verify this session with a recovery code first."
+msgstr ""
+
+#: hidp/api/serializers.py
+msgid "Enter a path on this site."
 msgstr ""
 
 #: hidp/api/serializers.py
@@ -196,10 +220,6 @@ msgid "For your security, you need to re-authenticate via a linked service befor
 msgstr ""
 
 #: hidp/api/views.py
-msgid "Logged-in users cannot register a new account."
-msgstr ""
-
-#: hidp/api/views.py
 msgid "Your account already has a password."
 msgstr ""
 
@@ -217,7 +237,7 @@ msgid "Yes, I want to unlink this account"
 msgstr ""
 
 #: hidp/federated/forms.py
-msgid "You cannot unlink your only way to sign in."
+msgid "Your account is already linked to an account of this service."
 msgstr ""
 
 #: hidp/federated/models.py
@@ -248,10 +268,6 @@ msgstr ""
 #: hidp/federated/views.py
 #, python-brace-format
 msgid "Link with {provider}"
-msgstr ""
-
-#: hidp/federated/views.py
-msgid "Login failed. Invalid credentials."
 msgstr ""
 
 #: hidp/federated/views.py

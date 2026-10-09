@@ -11,14 +11,19 @@ from django.http import (
     HttpResponseRedirect,
 )
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import generic
 
-from hidp.utils import is_registration_enabled
+from hidp.utils import (
+    get_frontend_redirect_url,
+    get_frontend_url,
+    has_frontend_url,
+    is_headless_oidc,
+    is_registration_enabled,
+)
 
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailers
@@ -26,14 +31,43 @@ from ..config import oidc_clients
 from ..csp.decorators import hidp_csp_protection
 from ..federated.constants import OIDCError
 from ..rate_limit.decorators import rate_limit_strict
-from . import forms, tokens
-from .models import OpenIdConnection
+from . import flows, forms, tokens
 from .oidc import authorization_code_flow
 from .oidc.exceptions import InvalidOIDCStateError, OAuth2Error
 
 logger = logging.getLogger(__name__)
 
 UserModel = get_user_model()
+
+
+def get_oidc_error_url(request, error, *, next_url=None, url=None):
+    """
+    Return the URL of the page that shows an error of logging in with a provider.
+
+    That is the frontend's `login` page when the frontend takes the place of the
+    HTML views, otherwise `url` or the HTML login page.
+    """
+    if is_headless_oidc():
+        return get_frontend_redirect_url(
+            request, "login", oidc_error=error, next=next_url
+        )
+    params = {"oidc_error": error} | ({"next": next_url} if next_url else {})
+    return f"{url or reverse('hidp_accounts:login')}?{urlencode(params)}"
+
+
+class FrontendRedirectMixin:
+    """Send the request to a frontend page, with its query, in headless mode."""
+
+    frontend_url_key = NotImplemented
+
+    def dispatch(self, request, *args, **kwargs):
+        if is_headless_oidc():
+            return HttpResponseRedirect(
+                get_frontend_redirect_url(
+                    request, self.frontend_url_key, **request.GET.dict()
+                )
+            )
+        return super().dispatch(request, *args, **kwargs)
 
 
 class OIDCMixin:
@@ -167,65 +201,41 @@ class OIDCAuthenticationCallbackView(OIDCMixin, generic.View):
         redirect_url=None,
     ):
         """Decide which flow the user should be redirected to next."""
-        connection = OpenIdConnection.objects.get_by_provider_and_claims(
-            provider_key=provider_key,
-            issuer_claim=claims["iss"],
-            subject_claim=claims["sub"],
+        step, token = flows.resolve_callback(
+            request, provider_key=provider_key, claims=claims, user_info=user_info
         )
-        if connection:
-            # A connection exists for the given claims. This must be a login attempt.
-            token = OIDCLoginView.add_data_to_session(
-                request,
-                provider_key=provider_key,
-                claims=claims,
-                user_info=user_info,
+        if step == flows.CallbackStep.ACCOUNT_EXISTS:
+            # Display a message instructing the user to log in to link the accounts.
+            # Respect the `next` parameter if it is present in the request.
+            if redirect_url and not url_has_allowed_host_and_scheme(
+                url=redirect_url,
+                allowed_hosts=request.get_host(),
+                require_https=request.is_secure(),
+            ):
+                redirect_url = None
+            return get_oidc_error_url(
+                request, OIDCError.ACCOUNT_EXISTS, next_url=redirect_url
             )
-            view_name = "hidp_oidc_client:login"
 
-            # Update the last used date of the connection.
-            connection.last_usage = timezone.now()
-            connection.save()
-        elif request.user.is_authenticated:
-            # `sub` claim does not match an existing user:
-            # Display a form allowing the user to link the OIDC account.
-            token = OIDCAccountLinkView.add_data_to_session(
+        if is_headless_oidc() and step != flows.CallbackStep.LOGIN:
+            # The frontend registers or links with the API, using the token.
+            if step == flows.CallbackStep.REGISTER and not is_registration_enabled():
+                flows.discard_token_data(request, token)
+                return get_oidc_error_url(request, OIDCError.REGISTRATION_DISABLED)
+            return get_frontend_redirect_url(
                 request,
-                provider_key=provider_key,
-                claims=claims,
-                user_info=user_info,
+                "oidc_registration"
+                if step == flows.CallbackStep.REGISTER
+                else "oidc_link",
+                token=token,
+                next=redirect_url,
             )
-            view_name = "hidp_oidc_management:link_account"
-        else:
-            # `sub` claim does not match an existing user, and no user is logged in:
-            # Check if a user exists for the given email.
-            user = UserModel.objects.filter(email__iexact=claims["email"]).first()
-            if not user:
-                # `sub` and `email` claim do not match an existing user:
-                # Redirect the user to the registration page.
-                token = OIDCRegistrationView.add_data_to_session(
-                    request,
-                    provider_key=provider_key,
-                    claims=claims,
-                    user_info=user_info,
-                )
-                view_name = "hidp_oidc_client:register"
-            else:
-                # `sub` claim does not match an existing user, but `email` claim does:
-                # Display a message instructing the user to log in to link the accounts.
-                params = {
-                    "oidc_error": OIDCError.ACCOUNT_EXISTS,
-                }
 
-                # Respect the `next` parameter if it is present in the request.
-                if redirect_url and url_has_allowed_host_and_scheme(
-                    url=redirect_url,
-                    allowed_hosts=request.get_host(),
-                    require_https=request.is_secure(),
-                ):
-                    params["next"] = redirect_url
-
-                return f"{reverse('hidp_accounts:login')}?{urlencode(params)}"
-
+        view_name = {
+            flows.CallbackStep.LOGIN: "hidp_oidc_client:login",
+            flows.CallbackStep.REGISTER: "hidp_oidc_client:register",
+            flows.CallbackStep.LINK: "hidp_oidc_management:link_account",
+        }[step]
         # Prepare the URL parameters for the next view. Drop any None values.
         params = {
             key: value
@@ -253,16 +263,14 @@ class OIDCAuthenticationCallbackView(OIDCMixin, generic.View):
             # Redirect the user to the login page to try again.
             logger.exception("Invalid OIDC state parameter")
             return HttpResponseRedirect(
-                reverse("hidp_accounts:login")
-                + f"?oidc_error={OIDCError.REQUEST_EXPIRED}"
+                get_oidc_error_url(request, OIDCError.REQUEST_EXPIRED)
             )
         except OAuth2Error:
             # One of many things went wrong during the authentication process.
             # Redirect the user to the login page to try again.
             logger.exception("Error during OIDC authentication")
             return HttpResponseRedirect(
-                reverse("hidp_accounts:login")
-                + f"?oidc_error={OIDCError.UNEXPECTED_ERROR}"
+                get_oidc_error_url(request, OIDCError.UNEXPECTED_ERROR)
             )
 
         return HttpResponseRedirect(
@@ -284,28 +292,32 @@ class TokenDataMixin:
 
     @classmethod
     def add_data_to_session(cls, request, *, provider_key, claims, user_info):
-        token = cls.token_generator.make_token()
-        request.session[token] = {
-            "provider_key": provider_key,
-            "claims": claims,
-            "user_info": user_info,
-        }
-        return token
+        return flows.store_token_data(
+            request,
+            cls.token_generator,
+            provider_key=provider_key,
+            claims=claims,
+            user_info=user_info,
+        )
 
     def dispatch(self, request, *args, **kwargs):
         self.token = request.GET.get("token")
-        valid_token = self.token and self.token_generator.check_token(self.token)
-        self.token_data = valid_token and request.session.get(self.token)
+        self.token_data = flows.get_token_data(
+            request, self.token, token_generator=self.token_generator
+        )
         self.provider = (
-            oidc_clients.get_oidc_client_or_none(self.token_data["provider_key"])
+            oidc_clients.get_oidc_client(self.token_data["provider_key"])
             if self.token_data
             else None
         )
 
-        if not valid_token or self.provider is None:
+        if self.token_data is None:
             return HttpResponseRedirect(
-                self.invalid_token_redirect_url
-                + f"?oidc_error={OIDCError.INVALID_TOKEN}"
+                get_oidc_error_url(
+                    request,
+                    OIDCError.INVALID_TOKEN,
+                    url=self.invalid_token_redirect_url,
+                )
             )
         return super().dispatch(request, *args, **kwargs)
 
@@ -313,9 +325,14 @@ class TokenDataMixin:
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 class OIDCRegistrationView(
-    auth_views.RedirectURLMixin, TokenDataMixin, generic.FormView
+    FrontendRedirectMixin,
+    auth_views.RedirectURLMixin,
+    TokenDataMixin,
+    generic.FormView,
 ):
     """Register a new user using the OIDC provider's claims and user info."""
+
+    frontend_url_key = "oidc_registration"
 
     token_generator = tokens.OIDCRegistrationTokenGenerator()
     form_class = forms.OIDCRegistrationForm
@@ -328,8 +345,7 @@ class OIDCRegistrationView(
         if not is_registration_enabled():
             # Registration is disabled. Redirect to the login page.
             return HttpResponseRedirect(
-                reverse("hidp_accounts:login")
-                + f"?oidc_error={OIDCError.REGISTRATION_DISABLED}"
+                get_oidc_error_url(request, OIDCError.REGISTRATION_DISABLED)
             )
         return super().dispatch(request, *args, **kwargs)
 
@@ -349,9 +365,21 @@ class OIDCRegistrationView(
         ).send()
 
     def form_valid(self, form):
-        user = form.save()
+        try:
+            user = flows.register(self.request, form, token_data=self.token_data)
+        except flows.RegistrationRefusedError:
+            user = None
         # Remove the token from the session after the form has been saved.
-        del self.request.session[self.token]
+        flows.discard_token_data(self.request, self.token)
+
+        if user is None:
+            return HttpResponseRedirect(
+                get_oidc_error_url(self.request, OIDCError.INVALID_CREDENTIALS)
+            )
+        if user.email_verified:
+            # The provider verified the email address.
+            hidp_auth.login(self.request, user)
+            return HttpResponseRedirect(self.get_success_url())
 
         # Send the email verification email.
         self.send_email(user)
@@ -381,6 +409,36 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, generic.FormVie
             post_verification_redirect=self.get_redirect_url(),
         ).send()
 
+    def start_headless_email_verification(self, user):
+        """
+        Send the verification email with a link to the frontend, like the API login.
+
+        The frontend shows the pending `email_verify` step of the session.
+        """
+        from hidp.api.auth_state import start_email_verification  # noqa: PLC0415
+
+        # Do not stay logged in as another user while waiting for `user`.
+        if self.request.user.is_authenticated:
+            hidp_auth.logout(self.request)
+        base_url = self.request.build_absolute_uri("/")
+        next_url = self.get_redirect_url() or None
+        self.verification_mailer(
+            user,
+            base_url=base_url,
+            verification_url=get_frontend_url("email_verification", base_url=base_url),
+            post_verification_redirect=next_url,
+        ).send()
+        start_email_verification(self.request, user)
+        return HttpResponseRedirect(
+            get_frontend_redirect_url(
+                self.request,
+                "email_verification_required"
+                if has_frontend_url("email_verification_required")
+                else "login",
+                next=next_url,
+            )
+        )
+
     def get(self, request):
         """
         User has provided valid credentials and is allowed to log in.
@@ -391,24 +449,23 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, generic.FormVie
         If the user's email address has not been verified, redirect them
         to the email verification required flow.
         """
-        user = hidp_auth.authenticate(
-            request,
-            provider_key=self.token_data["provider_key"],
-            issuer_claim=self.token_data["claims"]["iss"],
-            subject_claim=self.token_data["claims"]["sub"],
-        )
+        user = flows.authenticate(request, self.token_data)
+        # The token is for one login.
+        flows.discard_token_data(request, self.token)
         if user is None:
             # The user could not be authenticated using the OIDC claims.
             # The account is probably disabled. Just redirect to the login page.
             return HttpResponseRedirect(
-                reverse("hidp_accounts:login")
-                + f"?oidc_error={OIDCError.INVALID_CREDENTIALS}"
+                get_oidc_error_url(request, OIDCError.INVALID_CREDENTIALS)
             )
 
         if user.email_verified:
             # Only log in the user if their email address has been verified.
             hidp_auth.login(self.request, user)
             return HttpResponseRedirect(self.get_success_url())
+
+        if is_headless_oidc():
+            return self.start_headless_email_verification(user)
 
         # If the user's email address is not yet verified:
         # Send the email verification email.
@@ -425,8 +482,10 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, generic.FormVie
 @method_decorator(hidp_csp_protection, name="dispatch")
 @method_decorator(rate_limit_strict, name="dispatch")
 @method_decorator(login_required, name="dispatch")
-class OIDCAccountLinkView(TokenDataMixin, generic.FormView):
+class OIDCAccountLinkView(FrontendRedirectMixin, TokenDataMixin, generic.FormView):
     """Link an existing user account to an OIDC account."""
+
+    frontend_url_key = "oidc_link"
 
     form_class = forms.OIDCAccountLinkForm
     template_name = "hidp/federated/account_link.html"

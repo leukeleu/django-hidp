@@ -47,6 +47,14 @@ class TestEmailVerificationResendView(APITestCase):
         self.assertEqual(email.to, [self.unverified_user.email])
         self.assertRegex(email.body, VERIFICATION_URL_PATTERN)
 
+    def test_resend_with_next(self):
+        self._start_verification(self.unverified_user)
+
+        response = self.client.post(self.url, {"next": "/somewhere/"}, format="json")
+
+        self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
+        self.assertIn("?next=%2Fsomewhere%2F", mail.outbox[0].body)
+
     def test_resend_after_user_verified(self):
         """A user who verified in the meantime does not get another email."""
         user = VerifiedUserFactory()

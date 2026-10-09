@@ -38,4 +38,6 @@ See [verification email templates](project:templates.md#accountsverificationemai
 
 HIdP also adds the option to directly register via an OpenID Connect client. For each registered client, a sign-up option is added to the registration view. See [Configure OIDC Clients](project:configure-oidc-clients.md) on how to set up such a client.
 
-In contrast to the email and password registration flow, when a user tries to sign up with an already registered email, they will either be logged in (if their email is verified) or they will be redirected to the `EmailVerificationRequiredView` if the email hasn't been verified.
+A user who logs in with an account of the provider that is already linked is logged in, or sent to the `EmailVerificationRequiredView` when their email address is not verified yet. When the email address of the provider account belongs to an account that is not linked to it, the user is asked to log in to that account first, and link the provider from there.
+
+An account created this way has to verify its email address, unless the provider is [trusted to verify it](project:configure-oidc-clients.md#verified-email-addresses).

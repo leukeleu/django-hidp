@@ -11,7 +11,14 @@ class OIDCModelBackend(ModelBackend):
         provider_key=None,
         issuer_claim=None,
         subject_claim=None,
+        claims=None,
     ):
+        """
+        Return the active user of the OpenID connection for the claims, or `None`.
+
+        `claims` are the claims of the ID token and the user info, for subclasses
+        that check or update the user with them, such as groups or roles.
+        """
         if any(value is None for value in (provider_key, issuer_claim, subject_claim)):
             # None of the required parameters are provided,
             # skip authentication and let another backend handle it.

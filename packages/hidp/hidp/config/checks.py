@@ -9,6 +9,8 @@ from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
 
 from ..accounts.models import BaseUser
+from ..utils import OIDC_FRONTEND_URL_KEYS
+from . import oidc_clients
 
 REQUIRED_APPS = [
     "django.contrib.contenttypes",
@@ -58,10 +60,14 @@ REQUIRED_OTP_FRONTEND_URLS = {
     "otp_management": set(),
 }
 
-# Take the place of the HTML OTP views in redirects, when set.
+# Take the place of the HTML views in redirects, when set. HIdP adds the query.
 OPTIONAL_FRONTEND_URLS = {
     "otp_verify": set(),
     "otp_setup": set(),
+    "login": set(),
+    "oidc_registration": set(),
+    "oidc_link": set(),
+    "email_verification_required": set(),
 }
 
 
@@ -452,3 +458,71 @@ def check_api_path_prefixes(**kwargs):
         if path.startswith(tuple(prefixes)):
             errors.append(_w003(path))
     return errors
+
+
+# Make sure OIDC backends receive the claims of the provider
+W002 = checks.Warning(
+    "An OIDC authentication backend does not accept the `claims` argument.",
+    hint=(
+        "Add `claims=None` to the `authenticate` method of your subclass of"
+        " OIDCModelBackend. Until then, no OIDC backend gets the claims."
+    ),
+    id="hidp.W002",
+)
+
+
+@checks.register(Tags.settings)
+def check_oidc_backends_accept_claims(**kwargs):
+    from ..federated.flows import backends_accept_claims  # noqa: PLC0415
+
+    return [] if backends_accept_claims() else [W002]
+
+
+# Make sure logging in with an OIDC provider hands off to the frontend completely
+E015 = checks.Error(
+    "HIDP_FRONTEND_URLS has some, but not all, of the pages for logging in with an"
+    " OIDC provider.",
+    hint=(
+        "Set all of: {}. Logging in with an OIDC provider only hands off to the"
+        " frontend when they are all set."
+    ).format(", ".join(OIDC_FRONTEND_URL_KEYS)),
+    id="hidp.E015",
+)
+
+
+@checks.register(Tags.settings)
+def check_oidc_frontend_urls(**kwargs):
+    frontend_urls = getattr(settings, "HIDP_FRONTEND_URLS", None)
+    if not isinstance(frontend_urls, dict):
+        return []
+    present = [key for key in OIDC_FRONTEND_URL_KEYS if key in frontend_urls]
+    if present and len(present) < len(OIDC_FRONTEND_URL_KEYS):
+        return [E015]
+    return []
+
+
+# Make sure the OIDC callback is mounted for the OIDC endpoints of the API
+E017 = checks.Error(
+    "The headless API can start logging in with an OIDC provider, but the OIDC"
+    " callback is not mounted.",
+    hint=(
+        "Include hidp.config.headless_urls (or hidp.config.urls) in your"
+        " ROOT_URLCONF, so the provider can return to HIdP."
+    ),
+    id="hidp.E017",
+)
+
+
+@checks.register(Tags.settings)
+def check_oidc_callback_url(**kwargs):
+    if not oidc_clients.get_registered_oidc_clients():
+        return []
+    try:
+        reverse("hidp_api:oidc_authenticate", kwargs={"provider_key": "provider"})
+    except NoReverseMatch:
+        return []
+    try:
+        reverse("hidp_oidc_client:callback", kwargs={"provider_key": "provider"})
+    except NoReverseMatch:
+        return [E017]
+    return []

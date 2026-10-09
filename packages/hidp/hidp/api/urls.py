@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.urls import path
 
-from . import views
+from . import oidc_views, views
 
 app_name = "hidp_api"
 
@@ -45,6 +45,32 @@ urlpatterns = [
         "email-change/confirm/",
         views.EmailChangeConfirmView.as_view(),
         name="email_change_confirm",
+    ),
+    path(
+        "oidc/providers/",
+        oidc_views.OIDCProvidersView.as_view(),
+        name="oidc_providers",
+    ),
+    path(
+        "oidc/authenticate/<slug:provider_key>/",
+        oidc_views.OIDCAuthenticateView.as_view(),
+        name="oidc_authenticate",
+    ),
+    path(
+        "oidc/registration/",
+        oidc_views.OIDCRegistrationView.as_view(),
+        name="oidc_registration",
+    ),
+    path("oidc/link/", oidc_views.OIDCLinkView.as_view(), name="oidc_link"),
+    path(
+        "oidc/connections/",
+        oidc_views.OIDCConnectionsView.as_view(),
+        name="oidc_connections",
+    ),
+    path(
+        "oidc/connections/<slug:provider_key>/",
+        oidc_views.OIDCConnectionView.as_view(),
+        name="oidc_connection",
     ),
 ]
 

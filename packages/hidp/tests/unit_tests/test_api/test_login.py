@@ -25,6 +25,19 @@ class TestLoginView(APITestCase):
         cls.unverified_user = UserFactory()
         cls.verified_user = VerifiedUserFactory()
 
+    def test_next_is_in_the_verification_link(self):
+        self.client.post(
+            self.url,
+            {
+                "username": self.unverified_user.email,
+                "password": "P@ssw0rd!",
+                "next": "/somewhere/",
+            },
+            format="json",
+        )
+
+        self.assertIn("?next=%2Fsomewhere%2F", mail.outbox[0].body)
+
     def test_login_method_get_not_allowed(self):
         """Tests that a GET request to the login endpoint is not allowed."""
         response = self.client.get(self.url)
