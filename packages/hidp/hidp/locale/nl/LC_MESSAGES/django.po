@@ -184,8 +184,8 @@ msgid "Login failed. Invalid credentials."
 msgstr "Inloggen mislukt. Ongeldige inloggegevens."
 
 #: hidp/api/oidc_views.py
-msgid "The page has expired."
-msgstr "De pagina is verlopen."
+msgid "This request has expired. Please go back to the application and try again."
+msgstr "Dit verzoek is verlopen. Ga terug naar de applicatie en probeer het opnieuw."
 
 #: hidp/api/oidc_views.py hidp/federated/forms.py
 msgid "You cannot unlink your only way to sign in."

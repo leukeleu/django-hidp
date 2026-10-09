@@ -183,7 +183,7 @@ msgid "Login failed. Invalid credentials."
 msgstr ""
 
 #: hidp/api/oidc_views.py
-msgid "The page has expired."
+msgid "This request has expired. Please go back to the application and try again."
 msgstr ""
 
 #: hidp/api/oidc_views.py hidp/federated/forms.py

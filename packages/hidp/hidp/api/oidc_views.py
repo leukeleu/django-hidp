@@ -346,5 +346,9 @@ class OIDCProviderPageView(BaseView):
     def get(self, request, *args, **kwargs):  # noqa: PLR6301 (no-self-use)
         page = get_stored_page(request, request.query_params.get("token"))
         if page is None:
-            raise ValidationError({"token": [_("The page has expired.")]})
+            message = _(
+                "This request has expired. Please go back to the application and"
+                " try again."
+            )
+            raise ValidationError({"token": [message]})
         return Response(page)
