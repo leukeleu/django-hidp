@@ -183,6 +183,10 @@ msgstr "Inloggen via een externe dienst vereist HTTPS."
 msgid "Login failed. Invalid credentials."
 msgstr "Inloggen mislukt. Ongeldige inloggegevens."
 
+#: hidp/api/oidc_views.py
+msgid "This request has expired. Please go back to the application and try again."
+msgstr "Dit verzoek is verlopen. Ga terug naar de applicatie en probeer het opnieuw."
+
 #: hidp/api/oidc_views.py hidp/federated/forms.py
 msgid "You cannot unlink your only way to sign in."
 msgstr "Je kunt je enige manier om in te loggen niet ontkoppelen."

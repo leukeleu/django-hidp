@@ -68,6 +68,8 @@ OPTIONAL_FRONTEND_URLS = {
     "oidc_registration": set(),
     "oidc_link": set(),
     "email_verification_required": set(),
+    "oidc_provider_consent": set(),
+    "oidc_provider_logout": set(),
 }
 
 

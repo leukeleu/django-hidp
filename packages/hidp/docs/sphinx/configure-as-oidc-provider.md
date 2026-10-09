@@ -168,6 +168,56 @@ has the `profile` and `email` scopes. It is mounted when `hidp.api` is installed
 The [headless API](headless.md) is not: it is only served where you include
 `hidp.api.urls`.
 
+## Headless mode
+
+In [headless mode](headless.md), the frontend shows the pages of the OIDC provider.
+
+### Logging in
+
+An anonymous authorization request redirects to `LOGIN_URL`, with the request as
+`next`. Set it to the login page of your frontend. After logging in, and any pending
+step such as two-factor authentication, the frontend goes to `next` with a full page
+load: it is a URL of HIdP, which continues the authorization.
+
+A request with `prompt=login` asks the user to log in again. Its `next` leaves out
+`prompt=login`, so the login page must always show its form, also to a user who is
+logged in already.
+
+`UiLocalesMiddleware` stores the language of `ui_locales` in Django's language
+cookie (`LANGUAGE_COOKIE_NAME`, `django_language` by default). With Django's
+`LocaleMiddleware`, the API uses it for its messages and emails too. A frontend that
+reads that cookie shows the pages in the language the application asked for.
+
+### Consent and logging out
+
+An application with `skip_authorization` is authorized without asking the user,
+which suits your own applications. For other applications, and for confirming an
+RP-initiated logout, set these keys of `HIDP_FRONTEND_URLS`:
+
+```python
+HIDP_FRONTEND_URLS = {
+    ...,
+    "oidc_provider_consent": "/authorize/",
+    "oidc_provider_logout": "/logout/",
+}
+```
+
+Instead of showing a page, the provider redirects to the URL with a `token`.
+`GET oidc-provider/page/?token=…` of the [headless API](headless.md) responds with
+what the page shows:
+
+- `consent`: the `application` (`{name, client_id}`) asks for `scopes`
+  (`[{scope, description}]`).
+- `logout`: the `application`, when known, asks to log the user out.
+- `error`: an `error` and `error_description` that could not be sent to the
+  application, such as an unknown client.
+
+The frontend posts a form to the `action` of the page, as a normal page load, with
+the `fields` as hidden inputs, the `csrfmiddlewaretoken`, and `allow` set to `true`
+when the user agrees. Leaving `allow` out refuses. The response redirects to the
+application. Like HIdP's own pages, the frontend pages must not be shown in frames
+of other sites: send `Content-Security-Policy: frame-ancestors 'none'`.
+
 ## Django REST Framework recommendations
 
 If you are using HIdP as a standalone service, or integrating it in a Django project that doesn't use

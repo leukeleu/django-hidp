@@ -14,9 +14,10 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
 )
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.serializers import BooleanField, CharField
+from rest_framework.serializers import BooleanField, CharField, DictField
 
 from django.http import Http404
 from django.urls import reverse
@@ -28,6 +29,7 @@ from hidp.config import oidc_clients
 from hidp.federated import flows
 from hidp.federated.forms import OIDCAccountUnlinkForm
 from hidp.federated.oidc import authorization_code_flow
+from hidp.oidc_provider.frontend import get_stored_page
 from hidp.otp.decorators import otp_exempt
 from hidp.rate_limit.decorators import rate_limit_default, rate_limit_strict
 from hidp.utils import is_registration_enabled
@@ -300,3 +302,53 @@ class OIDCConnectionView(BaseView):
             )
         connections.delete()
         return Response(status=HTTPStatus.NO_CONTENT)
+
+
+@method_decorator(rate_limit_default, name="dispatch")
+@extend_schema_view(
+    get=extend_schema(
+        responses=inline_serializer(
+            name="OIDCProviderPage",
+            fields={
+                "page": CharField(help_text="consent, logout or error"),
+                "action": CharField(required=False),
+                "application": inline_serializer(
+                    name="OIDCProviderApplication",
+                    fields={"name": CharField(), "client_id": CharField()},
+                    allow_null=True,
+                    required=False,
+                ),
+                "scopes": inline_serializer(
+                    name="OIDCProviderScope",
+                    fields={"scope": CharField(), "description": CharField()},
+                    many=True,
+                    required=False,
+                ),
+                "fields": DictField(child=CharField(), required=False),
+                "error": CharField(required=False),
+                "error_description": CharField(required=False, allow_null=True),
+            },
+        ),
+        **TOKEN_QUERY,
+    ),
+)
+class OIDCProviderPageView(BaseView):
+    """
+    A page of HIdP's OIDC provider, which the frontend shows in place of HTML.
+
+    The `consent` page asks the user to authorize an application, the `logout` page
+    to log out. The frontend posts a form to `action` with `fields`, `allow` set to
+    `true` (or left out to refuse), and the `csrfmiddlewaretoken`, as a normal page
+    load: the response redirects to the application. The `error` page shows an
+    error that could not be sent to the application.
+    """
+
+    def get(self, request, *args, **kwargs):  # noqa: PLR6301 (no-self-use)
+        page = get_stored_page(request, request.query_params.get("token"))
+        if page is None:
+            message = _(
+                "This request has expired. Please go back to the application and"
+                " try again."
+            )
+            raise ValidationError({"token": [message]})
+        return Response(page)

@@ -105,3 +105,12 @@ if all(
             name="otp_recovery_codes",
         ),
     ]
+
+if apps.is_installed("hidp.oidc_provider"):
+    urlpatterns += [
+        path(
+            "oidc-provider/page/",
+            oidc_views.OIDCProviderPageView.as_view(),
+            name="oidc_provider_page",
+        ),
+    ]
