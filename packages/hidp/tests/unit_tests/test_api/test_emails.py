@@ -176,3 +176,30 @@ class TestEmailVerificationConfirmView(APITestCase):
         response = self.client.post(self.url, {"token": "invalid"})
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+
+    def _start_verification(self, user):
+        session = self.client.session
+        session[EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY] = (
+            tokens.email_verification_request_token_generator.make_token(user)
+        )
+        session.save()
+
+    def test_confirm_ends_the_pending_verification(self):
+        user = UserFactory()
+        self._start_verification(user)
+        token = tokens.email_verification_token_generator.make_token(user)
+
+        self.client.post(self.url, {"token": token})
+
+        response = self.client.get(reverse("hidp_api:session"))
+        self.assertEqual(response.json()["pending"], [])
+
+    def test_confirm_keeps_the_pending_verification_of_another_user(self):
+        pending_user = UserFactory()
+        self._start_verification(pending_user)
+        token = tokens.email_verification_token_generator.make_token(UserFactory())
+
+        self.client.post(self.url, {"token": token})
+
+        response = self.client.get(reverse("hidp_api:session"))
+        self.assertEqual(response.json()["pending"], [{"step": "email_verify"}])

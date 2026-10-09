@@ -51,6 +51,24 @@ def is_api_view(view_func):
     return issubclass(view_class, APIView)
 
 
+def get_api_path_prefixes():
+    """Return the `HIDP_API_PATH_PREFIXES` setting: paths of APIs that are not DRF."""
+    return tuple(getattr(settings, "HIDP_API_PATH_PREFIXES", ()))
+
+
+def is_api_request(request, view_func=None):
+    """
+    Return whether `request` goes to an API, which gets JSON instead of a page.
+
+    That is a Django REST framework view, or a path under one of the
+    `HIDP_API_PATH_PREFIXES`, for APIs built with something else.
+    """
+    if view_func is not None and is_api_view(view_func):
+        return True
+    prefixes = get_api_path_prefixes()
+    return bool(prefixes) and request.path_info.startswith(prefixes)
+
+
 def get_account_management_links(user):
     """
     Get a list of account management links for the given user.

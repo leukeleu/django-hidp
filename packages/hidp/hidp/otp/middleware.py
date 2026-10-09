@@ -13,7 +13,27 @@ from django.utils.cache import add_never_cache_headers
 from django.utils.module_loading import import_string
 
 from hidp.constants import Step
-from hidp.utils import get_frontend_url, has_frontend_url, is_api_view
+from hidp.utils import get_frontend_url, has_frontend_url, is_api_request
+
+
+def get_step_url(request, step, *, next_url):
+    """
+    Return the URL of the page for an OTP `step`, which returns to `next_url`.
+
+    The `otp_verify` and `otp_setup` keys of `HIDP_FRONTEND_URLS` take the place of
+    the HTML views when set.
+    """
+    if has_frontend_url(step):
+        target = get_frontend_url(step, base_url=request.build_absolute_uri("/"))
+    else:
+        target = reverse(
+            "hidp_otp:verify"
+            if step == Step.OTP_VERIFY
+            else "hidp_otp_management:setup"
+        )
+    scheme, netloc, path, query, fragment = urlsplit(target)
+    query = urlencode([*parse_qsl(query, keep_blank_values=True), ("next", next_url)])
+    return urlunsplit((scheme, netloc, path, query, fragment))
 
 
 class OTPMiddlewareBase:
@@ -80,23 +100,9 @@ class OTPMiddlewareBase:
         Returns:
             str: The URL to redirect to.
         """
-        step = self.get_pending_step(request)
-        if has_frontend_url(step):
-            target = get_frontend_url(step, base_url=request.build_absolute_uri("/"))
-        else:
-            target = reverse(
-                "hidp_otp:verify"
-                if step == Step.OTP_VERIFY
-                else "hidp_otp_management:setup"
-            )
-        scheme, netloc, path, query, fragment = urlsplit(target)
-        query = urlencode(
-            [
-                *parse_qsl(query, keep_blank_values=True),
-                ("next", request.get_full_path()),
-            ]
+        return get_step_url(
+            request, self.get_pending_step(request), next_url=request.get_full_path()
         )
-        return urlunsplit((scheme, netloc, path, query, fragment))
 
     def get_api_response(self, request):
         """Return the 401 authentication state for a Django REST framework view."""
@@ -192,7 +198,7 @@ class OTPMiddlewareBase:
             requires the user to verify OTP, None otherwise.
         """
         if self.request_needs_verification(request, view_func):
-            if is_api_view(view_func):
+            if is_api_request(request, view_func):
                 return self.get_api_response(request)
             return redirect(self.get_redirect_url(request))
 

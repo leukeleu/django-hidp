@@ -4,6 +4,7 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.views import APIView
 
 from django.apps import apps
+from django.utils.translation import gettext as _
 
 
 class CSRFProtectedAPIView(APIView):
@@ -18,7 +19,9 @@ class CSRFProtectedAPIView(APIView):
         # Populates request.META["CSRF_COOKIE"], which process_view reads.
         check.process_request(request)
         if reason := check.process_view(request, None, (), {}):
-            raise exceptions.PermissionDenied(f"CSRF Failed: {reason}")
+            raise exceptions.PermissionDenied(
+                _("CSRF Failed: %(reason)s") % {"reason": reason}
+            )
         super().initial(request, *args, **kwargs)
 
 

@@ -186,6 +186,11 @@ msgstr ""
 msgid "Invalid token or user ID."
 msgstr ""
 
+#: hidp/api/utils.py
+#, python-format
+msgid "CSRF Failed: %(reason)s"
+msgstr ""
+
 #: hidp/api/views.py hidp/templates/hidp/accounts/management/set_password.html
 msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
 msgstr ""
@@ -304,6 +309,10 @@ msgstr ""
 #: hidp/otp/views.py hidp/templates/hidp/otp/setup_device.html
 #: hidp/templates/hidp/otp/setup_device_done.html
 msgid "Set up two-factor authentication"
+msgstr ""
+
+#: hidp/rate_limit/views.py
+msgid "Sorry, you have made too many requests to the server. Please try again later."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html

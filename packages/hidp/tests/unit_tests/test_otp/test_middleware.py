@@ -1,8 +1,10 @@
+import json
+
 from unittest import mock
 
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpResponse
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 
 from hidp.otp.decorators import otp_exempt
 from hidp.otp.middleware import (
@@ -128,6 +130,31 @@ class TestOTPRequiredMiddleware(OTPMiddlewareTestBase):
         response = self.middleware.process_view(request, basic_view, [], {})
 
         self.assertIsNone(response)
+
+    @override_settings(HIDP_API_PATH_PREFIXES=["/ninja/"])
+    def test_process_view_answers_api_paths_with_json(self):
+        """Views of APIs that are not DRF get the auth state instead of a redirect."""
+        request = self.request_factory.get("/ninja/things/")
+        request.user = self.user
+
+        response = self.middleware.process_view(request, basic_view, [], {})
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(
+            json.loads(response.content),
+            {"user": None, "pending": [{"step": "otp_setup"}]},
+        )
+
+    @override_settings(HIDP_API_PATH_PREFIXES=["/ninja/"])
+    def test_process_view_redirects_outside_api_paths(self):
+        request = self.request_factory.get("/some-path/")
+        request.user = self.user
+
+        response = self.middleware.process_view(request, basic_view, [], {})
+
+        self.assertMiddlewareRedirects(
+            response, "/manage/otp/setup/?next=%2Fsome-path%2F"
+        )
 
 
 class TestOTPRequiredIfConfiguredMiddleware(OTPMiddlewareTestBase):

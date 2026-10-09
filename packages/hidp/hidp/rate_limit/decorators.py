@@ -30,10 +30,12 @@ def _view_class_group(view):
     )
 
 
-def _apply_rate_limits(rate_limits, view):
+def _apply_rate_limits(rate_limits, view, *, block=True):
     group = _view_class_group(view)
     for key, method, rate in rate_limits:
-        view = ratelimit(group=group, key=key, method=method, rate=rate)(view)
+        view = ratelimit(group=group, key=key, method=method, rate=rate, block=block)(
+            view
+        )
     return view
 
 
@@ -45,6 +47,11 @@ def rate_limit_strict(view):
     return _apply_rate_limits(_STRICT_RATE_LIMITS, view)
 
 
-def rate_limit(*, key, rate, method=ratelimit.ALL):
-    """Apply one rate limit, counted per view class like the default limits."""
-    return lambda view: _apply_rate_limits([(key, method, rate)], view)
+def rate_limit(*, key, rate, method=ratelimit.ALL, block=True):
+    """
+    Apply one rate limit, counted per view class like the default limits.
+
+    With `block=False` an exceeded limit sets `request.limited` instead of
+    refusing the request.
+    """
+    return lambda view: _apply_rate_limits([(key, method, rate)], view, block=block)

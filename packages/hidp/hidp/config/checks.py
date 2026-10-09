@@ -5,6 +5,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core import checks
+from django.shortcuts import resolve_url
 from django.urls import NoReverseMatch, reverse
 
 from ..accounts.models import BaseUser
@@ -196,10 +197,37 @@ def check_oidc_provider_installed_apps(**kwargs):
     return []
 
 
+# Make sure prompt=create can redirect to a registration page
+E016 = checks.Error(
+    "Unable to resolve OIDC_RP_INITIATED_REGISTRATION_URL in OAUTH2_PROVIDER.",
+    hint=(
+        "Include hidp.config.urls in your ROOT_URLCONF, or set"
+        " OIDC_RP_INITIATED_REGISTRATION_URL to the registration page of your"
+        " frontend. Set OIDC_RP_INITIATED_REGISTRATION_ENABLED to False to refuse"
+        " prompt=create instead."
+    ),
+    id="hidp.E016",
+)
+
+
+def check_oauth2_provider_registration_url(**kwargs):
+    oauth2_provider_settings = getattr(settings, "OAUTH2_PROVIDER", None)
+    if not isinstance(oauth2_provider_settings, dict) or not (
+        oauth2_provider_settings.get("OIDC_RP_INITIATED_REGISTRATION_ENABLED")
+    ):
+        return []
+    try:
+        resolve_url(oauth2_provider_settings.get("OIDC_RP_INITIATED_REGISTRATION_URL"))
+    except NoReverseMatch:
+        return [E016]
+    return []
+
+
 if importlib.util.find_spec("oauth2_provider") is not None:
     # Only enable the OIDC provider checks if OAuth2 Provider is installed
     checks.register(Tags.settings)(check_oauth2_provider)
     checks.register(Tags.dependencies)(check_oidc_provider_installed_apps)
+    checks.register(Tags.settings)(check_oauth2_provider_registration_url)
 
 
 # Make sure the required apps for OTP are installed
@@ -379,3 +407,48 @@ def check_hidp_otp_installed_apps_when_django_otp_installed(**kwargs):
     ):
         return [W001]
     return []
+
+
+# Make sure the paths of non-DRF APIs are given correctly
+E018 = checks.Error(
+    "HIDP_API_PATH_PREFIXES must be a list of paths that start with a slash.",
+    id="hidp.E018",
+)
+
+# Pages that browsers navigate to, which must not get JSON responses
+BROWSER_URL_NAMES = [
+    ("hidp_oidc_client:authenticate", {"provider_key": "provider"}),
+    ("hidp_oidc_client:callback", {"provider_key": "provider"}),
+    ("oauth2_provider:authorize", {}),
+    ("oauth2_provider:rp-initiated-logout", {}),
+]
+
+
+def _w003(path):
+    return checks.Warning(
+        f"HIDP_API_PATH_PREFIXES includes {path!r}, which browsers navigate to.",
+        hint=(
+            "Such a page answers with JSON instead of a redirect when OTP"
+            " verification is pending or a rate limit is exceeded."
+            " Use prefixes that only cover the paths of your API."
+        ),
+        id="hidp.W003",
+    )
+
+
+@checks.register(Tags.settings)
+def check_api_path_prefixes(**kwargs):
+    prefixes = getattr(settings, "HIDP_API_PATH_PREFIXES", ())
+    if not isinstance(prefixes, list | tuple) or not all(
+        isinstance(prefix, str) and prefix.startswith("/") for prefix in prefixes
+    ):
+        return [E018]
+    errors = []
+    for url_name, url_kwargs in BROWSER_URL_NAMES:
+        try:
+            path = reverse(url_name, kwargs=url_kwargs)
+        except NoReverseMatch:
+            continue
+        if path.startswith(tuple(prefixes)):
+            errors.append(_w003(path))
+    return errors

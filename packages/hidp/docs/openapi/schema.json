@@ -256,7 +256,7 @@
         "/api/login/": {
             "post": {
                 "operationId": "login_create",
-                "description": "Log in with a username and password.\n\nA user whose email address is not verified is sent a verification email instead,\nand the response has a pending `email_verify` step.",
+                "description": "Log in with a username and password.\n\nA user whose email address is not verified is sent a verification email instead,\nand the response has a pending `email_verify` step.\n\nAfter many attempts for a username from any IP address, the login also requires\n`i_am_not_a_robot` to be `true`. Without it, the response is a 400.",
                 "tags": [
                     "login"
                 ],

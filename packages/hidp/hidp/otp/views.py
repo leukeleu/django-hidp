@@ -18,6 +18,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, TemplateView
 
+from hidp.constants import Step
 from hidp.csp.decorators import hidp_csp_protection
 from hidp.otp.devices import (
     STATIC_DEVICE_NAME,
@@ -27,6 +28,7 @@ from hidp.otp.devices import (
 )
 from hidp.otp.forms import OTPSetupForm, VerifyStaticTokenForm, VerifyTOTPForm
 from hidp.rate_limit.decorators import rate_limit_default
+from hidp.utils import has_frontend_url
 
 from . import flows
 from .decorators import otp_exempt
@@ -36,6 +38,7 @@ from .mailers import (
     RecoveryCodesRegeneratedMailer,
     RecoveryCodeUsedMailer,
 )
+from .middleware import get_step_url
 
 
 @method_decorator(hidp_csp_protection, name="dispatch")
@@ -185,6 +188,12 @@ class OTPSetupDeviceView(RedirectURLMixin, FormView):
 
         # A user with another confirmed device verifies with it before setting up TOTP.
         if flows.setup_requires_verification(self.user):
+            if has_frontend_url(Step.OTP_VERIFY):
+                return HttpResponseRedirect(
+                    get_step_url(
+                        request, Step.OTP_VERIFY, next_url=request.get_full_path()
+                    )
+                )
             verify_url = reverse("hidp_otp:verify-recovery-code")
             params = {"next": request.get_full_path()}
             return HttpResponseRedirect(f"{verify_url}?{urlencode(params)}")

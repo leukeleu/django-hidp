@@ -44,9 +44,10 @@ This measure is relatively easy to bypass, so it is recommended to override
 the `hidp.accounts.views.LoginView` and configure a custom `rate_limited_form_class`
 that implements a more robust countermeasure.
 
-The login endpoint of the [headless API](headless.md#login) has no such form. It
-limits the attempts per username for each IP address instead, so a client can only
-lock a user out on its own IP address.
+The login endpoint of the [headless API](headless.md#login) requires the same
+checkbox, and can be overridden through `rate_limited_serializer_class`. Its blocking limit counts the
+attempts per username for each IP address, so a client can only lock a user out on
+its own IP address.
 
 ## Adding your own rate limits
 

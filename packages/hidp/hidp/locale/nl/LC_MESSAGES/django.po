@@ -187,6 +187,11 @@ msgstr "Ongeldige of verlopen token."
 msgid "Invalid token or user ID."
 msgstr "Ongeldige token of gebruikers-ID."
 
+#: hidp/api/utils.py
+#, python-format
+msgid "CSRF Failed: %(reason)s"
+msgstr "CSRF-controle mislukt: %(reason)s"
+
 #: hidp/api/views.py hidp/templates/hidp/accounts/management/set_password.html
 msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
 msgstr "Voor je veiligheid moet je opnieuw inloggen via een gekoppelde dienst voordat je een wachtwoord kunt instellen."
@@ -306,6 +311,10 @@ msgstr "Je kunt deze codes gebruiken om in te loggen als je geen toegang meer he
 #: hidp/templates/hidp/otp/setup_device_done.html
 msgid "Set up two-factor authentication"
 msgstr "Tweefactor­authenticatie instellen"
+
+#: hidp/rate_limit/views.py
+msgid "Sorry, you have made too many requests to the server. Please try again later."
+msgstr "Sorry, je hebt te veel verzoeken naar de server gestuurd. Probeer het later opnieuw."
 
 #: hidp/templates/hidp/accounts/login.html
 msgid "Excessive login attempts have been detected for this account. For your safety, additional security measures are now in place."
