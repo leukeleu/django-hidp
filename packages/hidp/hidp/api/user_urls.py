@@ -1,14 +1,9 @@
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
-from django.urls import include, path
-
-from .views import UserViewSet
-
-router = DefaultRouter()
-router.register("users", UserViewSet, basename="user")
+from . import views
 
 app_name = "api"
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("users/me/", views.UserView.as_view(), name="user"),
 ]
