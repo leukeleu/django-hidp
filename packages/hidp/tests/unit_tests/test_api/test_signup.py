@@ -39,6 +39,31 @@ class TestSignupView(APITestCase):
         self.assertEqual(mail.outbox[0].subject, "Verify your email address")
         self.assertIn("http://testserver/frontend/verify/", mail.outbox[0].body)
 
+    def test_next_is_in_the_verification_link(self):
+        """The client continues at `next` after verifying, such as an authorization."""
+        self._signup(next="/o/authorize/?client_id=app&scope=openid")
+
+        self.assertRegex(
+            mail.outbox[0].body,
+            r"http://testserver/frontend/verify/\S+/"
+            r"\?next=%2Fo%2Fauthorize%2F%3Fclient_id%3Dapp%26scope%3Dopenid",
+        )
+
+    def test_absolute_next_on_this_host(self):
+        # Django OAuth Toolkit sends prompt=create with an absolute `next`.
+        self._signup(next="http://testserver/o/authorize/?client_id=app")
+
+        self.assertIn(
+            "?next=%2Fo%2Fauthorize%2F%3Fclient_id%3Dapp", mail.outbox[0].body
+        )
+
+    def test_next_on_another_host(self):
+        response = self._signup(next="https://evil.example.com/")
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertIn("next", response.json())
+        self.assertEqual(len(mail.outbox), 0)
+
     def test_new_account_is_not_logged_in(self):
         self._signup()
 

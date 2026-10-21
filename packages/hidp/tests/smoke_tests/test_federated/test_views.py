@@ -4,7 +4,9 @@ from http import HTTPStatus
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import ModelBackend
 from django.core import mail
+from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -363,7 +365,7 @@ class OIDCTokenDataTestMixin:
             response.content.decode("utf-8"),
         )
 
-    def _add_oidc_data_to_session(self, *, save=True):
+    def _add_oidc_data_to_session(self, *, save=True, **extra_claims):
         session = self.client.session
         request = HttpRequest()
         request.session = session
@@ -374,6 +376,7 @@ class OIDCTokenDataTestMixin:
                 "iss": "example",
                 "sub": "test-subject",
                 "email": "user@example.com",
+                **extra_claims,
             },
             user_info={
                 "given_name": "Firstname",
@@ -452,6 +455,71 @@ class TestOIDCRegistrationView(OIDCTokenDataTestMixin, TestCase):
         )
 
 
+class TrustingOIDCClient(ExampleOIDCClient):
+    trust_email_verified_claim = True
+
+
+class RefusingBackend(ModelBackend):
+    """Refuses every OIDC login, like a backend that checks a group."""
+
+    def authenticate(self, request=None, provider_key=None, **credentials):
+        if provider_key is not None:
+            raise PermissionDenied
+
+
+@override_settings(REGISTRATION_ENABLED=True)
+class TestOIDCRegistrationWithVerifiedEmail(OIDCTokenDataTestMixin, TestCase):
+    """A provider that is trusted to verify email addresses."""
+
+    view_class = views.OIDCRegistrationView
+    view_name = "hidp_oidc_client:register"
+
+    def setUp(self):
+        configure_oidc_clients(TrustingOIDCClient(client_id="test"))
+
+    def _register(self, token):
+        return self.client.post(
+            self.url + f"?token={token}&next=/welcome/",
+            {"first_name": "Firstname", "last_name": "Lastname", "agreed_to_tos": "on"},
+        )
+
+    def test_verified_email_logs_in(self):
+        token = self._add_oidc_data_to_session(email_verified=True)
+
+        response = self._register(token)
+
+        self.assertRedirects(response, "/welcome/", fetch_redirect_response=False)
+        user = UserModel.objects.get(email="user@example.com")
+        self.assertIsNotNone(user.email_verified)
+        self.assertEqual(self.client.session["_auth_user_id"], str(user.pk))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_unverified_email_must_be_verified(self):
+        token = self._add_oidc_data_to_session(email_verified=False)
+
+        self._register(token)
+
+        user = UserModel.objects.get(email="user@example.com")
+        self.assertIsNone(user.email_verified)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertEqual(len(mail.outbox), 1)
+
+    @override_settings(
+        AUTHENTICATION_BACKENDS=[f"{__name__}.RefusingBackend"],
+    )
+    def test_refused_user_is_not_registered(self):
+        token = self._add_oidc_data_to_session(email_verified=True)
+
+        response = self._register(token)
+
+        self.assertRedirects(
+            response,
+            f"{reverse('hidp_accounts:login')}?oidc_error=invalid_credentials",
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(UserModel.objects.filter(email="user@example.com").exists())
+
+
 class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
     view_class = views.OIDCLoginView
     view_name = "hidp_oidc_client:login"
@@ -471,6 +539,12 @@ class TestOIDCLoginView(OIDCTokenDataTestMixin, TestCase):
         token = self._add_oidc_data_to_session()
         response = self.client.get(self.url, {"token": token})
         self.assertEqual(response.wsgi_request.user, self.user)
+
+    def test_token_is_used_once(self):
+        token = self._add_oidc_data_to_session()
+        self.client.get(self.url, {"token": token})
+
+        self.assertNotIn(token, self.client.session)
 
     def test_valid_login_inactive_user(self):
         self.user.is_active = False
@@ -716,6 +790,25 @@ class TestOIDCAccountLinkView(OIDCTokenDataTestMixin, TestCase):
             ),
         )
         self.assertTemplateUsed(response, "hidp/federated/account_link_done.html")
+
+    def test_post_with_a_linked_provider(self):
+        """A user links one account per provider."""
+        models.OpenIdConnection.objects.create(
+            user=self.user,
+            provider_key="example",
+            issuer_claim="example",
+            subject_claim="other-subject",
+        )
+        token = self._add_oidc_data_to_session()
+
+        response = self.client.post(self.url + f"?token={token}", {"allow_link": "on"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "already linked to an account of this service",
+            response.content.decode("utf-8"),
+        )
+        self.assertEqual(self.user.openid_connections.count(), 1)
 
 
 class TestOIDCAccountUnlinkView(TestCase):

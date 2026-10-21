@@ -195,6 +195,25 @@
                 "tags": [
                     "email-verification"
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        }
+                    }
+                },
                 "security": [
                     {
                         "cookieAuth": []
@@ -331,6 +350,331 @@
                             }
                         },
                         "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc/authenticate/{provider_key}/": {
+            "post": {
+                "operationId": "oidc_authenticate_create",
+                "description": "Start logging in with a provider: send the user to `redirect_url`.\n\nThe provider returns the user to the frontend, or to `next` after a login.\nWith `reauthenticate`, the provider asks for the credentials again, for\nendpoints that need a recent login.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "provider_key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCAuthenticate"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCAuthenticate"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCAuthenticate"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OIDCAuthenticateResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc/connections/": {
+            "get": {
+                "operationId": "oidc_connections_list",
+                "description": "The providers, and whether the user logs in with them.\n\nA user keeps at least one way to log in, so `can_unlink` is false for the only\nlinked provider of a user without a password.",
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OIDCConnection"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc/connections/{provider_key}/": {
+            "delete": {
+                "operationId": "oidc_connections_destroy",
+                "description": "Stop logging in with a provider.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "provider_key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/oidc/link/": {
+            "get": {
+                "operationId": "oidc_link_retrieve",
+                "description": "Let the logged-in user also log in with a provider.\n\nThe user logged in with the provider while logged in, which sent them to the\nfrontend with the token.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OIDCLinkDetails"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "oidc_link_create",
+                "description": "Let the logged-in user also log in with a provider.\n\nThe user logged in with the provider while logged in, which sent them to the\nfrontend with the token.",
+                "tags": [
+                    "oidc"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCLink"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCLink"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCLink"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/oidc/providers/": {
+            "get": {
+                "operationId": "oidc_providers_list",
+                "description": "The OIDC providers that users can log in with.",
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OIDCProvider"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc/registration/": {
+            "get": {
+                "operationId": "oidc_registration_retrieve",
+                "description": "Create the account of a user who logs in with a provider for the first time.\n\nWhen the provider is trusted to verify email addresses, the user is logged in.\nOtherwise they are sent a verification email, and the response has a pending\n`email_verify` step.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OIDCRegistrationDetails"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "oidc_registration_create",
+                "description": "Create the account of a user who logs in with a provider for the first time.\n\nWhen the provider is trusted to verify email addresses, the user is logged in.\nOtherwise they are sent a verification email, and the response has a pending\n`email_verify` step.",
+                "tags": [
+                    "oidc"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCRegistration"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCRegistration"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCRegistration"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
                     }
                 }
             }
@@ -1148,6 +1492,16 @@
                     "token"
                 ]
             },
+            "EmailVerificationResend": {
+                "type": "object",
+                "description": "An optional `next`: where the client continues after the flow.\n\nIt must be a path on this site, or an absolute URL on its host, and is sent on\nas a path, for example in the link of the verification email.",
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                }
+            },
             "EmailVerificationToken": {
                 "type": "object",
                 "properties": {
@@ -1188,8 +1542,12 @@
             },
             "Login": {
                 "type": "object",
-                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "description": "An optional `next`: where the client continues after the flow.\n\nIt must be a path on this site, or an absolute URL on its host, and is sent on\nas a path, for example in the link of the verification email.",
                 "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
                     "username": {
                         "type": "string",
                         "writeOnly": true
@@ -1202,6 +1560,162 @@
                 "required": [
                     "password",
                     "username"
+                ]
+            },
+            "OIDCAuthenticate": {
+                "type": "object",
+                "description": "An optional `next`: where the client continues after the flow.\n\nIt must be a path on this site, or an absolute URL on its host, and is sent on\nas a path, for example in the link of the verification email.",
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "reauthenticate": {
+                        "type": "boolean",
+                        "writeOnly": true,
+                        "default": false
+                    }
+                }
+            },
+            "OIDCAuthenticateResponse": {
+                "type": "object",
+                "properties": {
+                    "redirect_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "redirect_url"
+                ]
+            },
+            "OIDCConnection": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "linked": {
+                        "type": "boolean"
+                    },
+                    "can_unlink": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "can_unlink",
+                    "key",
+                    "linked",
+                    "name"
+                ]
+            },
+            "OIDCLink": {
+                "type": "object",
+                "description": "Link the account of the provider to the logged-in user.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "OIDCLinkDetails": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "$ref": "#/components/schemas/OIDCProvider"
+                    },
+                    "provider_email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "provider",
+                    "provider_email"
+                ]
+            },
+            "OIDCProvider": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "name"
+                ]
+            },
+            "OIDCRegistration": {
+                "type": "object",
+                "description": "Create the account of a first login with a provider.\n\nThe names default to the ones the provider sent. Without those, they are asked\nfor when the email address is verified.",
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "agreed_to_tos": {
+                        "type": "boolean",
+                        "writeOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "agreed_to_tos",
+                    "token"
+                ]
+            },
+            "OIDCRegistrationDetails": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "$ref": "#/components/schemas/OIDCProvider"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "requires_name": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "provider",
+                    "requires_name"
                 ]
             },
             "OTPSetup": {
@@ -1418,8 +1932,12 @@
             },
             "Signup": {
                 "type": "object",
-                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "description": "An optional `next`: where the client continues after the flow.\n\nIt must be a path on this site, or an absolute URL on its host, and is sent on\nas a path, for example in the link of the verification email.",
                 "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
                     "email": {
                         "type": "string",
                         "format": "email",
