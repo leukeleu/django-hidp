@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from unittest import mock
 
+from rest_framework.response import Response
 from rest_framework.test import APIClient, APITestCase
 
 from django.contrib.auth import get_user_model
@@ -8,6 +9,7 @@ from django.contrib.auth.signals import user_login_failed
 from django.contrib.sessions.backends.db import SessionStore
 from django.core import mail
 from django.db import connection
+from django.test import override_settings
 from django.urls import reverse
 
 from hidp.api.auth_state import EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY
@@ -180,3 +182,26 @@ class TestLoginUnderAtomicRequests(APITestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
         self.assertTrue(UserModel.objects.filter(email="failure@example.com").exists())
+
+
+def project_exception_handler(exc, context):
+    return Response({"wrapped": True}, status=HTTPStatus.BAD_REQUEST)
+
+
+class TestProjectExceptionHandler(APITestCase):
+    """The API keeps its documented errors under a project-wide exception handler."""
+
+    @override_settings(
+        REST_FRAMEWORK={
+            "EXCEPTION_HANDLER": (
+                "tests.unit_tests.test_api.test_login.project_exception_handler"
+            )
+        }
+    )
+    def test_errors_keep_their_shape(self):
+        response = self.client.post(
+            reverse("hidp_api:login"), {"username": "walter@example.com"}
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+        self.assertIn("password", response.json())

@@ -125,6 +125,30 @@ PKCE is required by default.
 ### `/o/authorize`
 [AuthorizationView](https://django-oauth-toolkit.readthedocs.io/en/latest/views/details.html#oauth2_provider.views.base.AuthorizationView)
 
+#### Account creation with `prompt=create`
+
+A client can ask for a new account with `prompt=create`
+([OpenID Connect Prompt Create](https://openid.net/specs/openid-connect-prompt-create-1_0.html)).
+The user is sent to the registration page, also when logged in, which returns to
+the authorization request without `create` after signing up. Django OAuth Toolkit
+handles this, with the `OIDC_RP_INITIATED_REGISTRATION_ENABLED` and
+`OIDC_RP_INITIATED_REGISTRATION_URL` settings that `get_oauth2_provider_settings`
+sets to HIdP's registration page.
+
+In [headless mode](headless.md), point it at the signup page of your frontend:
+
+```python
+OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
+    OIDC_RSA_PRIVATE_KEY=OIDC_RSA_PRIVATE_KEY
+) | {
+    "OIDC_RP_INITIATED_REGISTRATION_URL": "/signup",
+}
+```
+
+The page gets the authorization request as an absolute URL on the same host in
+`next`. When registration is disabled, `prompt=create` is refused with a 400
+`invalid_request`, as is a request for an unknown client.
+
 ### `/o/token/`
 [TokenView](https://django-oauth-toolkit.readthedocs.io/en/latest/views/details.html#oauth2_provider.views.base.TokenView)
 
@@ -179,6 +203,9 @@ REST_FRAMEWORK = {
 ```
 
 For more information on the functionality and options of DRF Standardized Errors, refer to the [documentation](https://drf-standardized-errors.readthedocs.io/en/latest/).
+
+The endpoints of the [headless API](headless.md) keep their documented error
+responses under such an exception handler; `/api/users/me/` uses it.
 
 ## Adding/overriding Django OAuth Toolkit settings
 

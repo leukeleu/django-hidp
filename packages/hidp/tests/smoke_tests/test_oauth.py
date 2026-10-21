@@ -239,17 +239,39 @@ class TestOAuthFlow(TestCase):
         """prompt=create redirects to registration."""
         with self.subTest("No user logged in"):
             response = self.authorization_request(prompt="create")
-            next_url = (
-                f"http://testserver{response.request['PATH_INFO']}"
-                f"?{response.request['QUERY_STRING']}"
-            ).replace("&prompt=create", "")
-            self.assertRedirects(
-                response,
-                (
-                    f"{reverse('hidp_accounts:register')}"
-                    f"?{urlencode({'next': next_url})}"
-                ),
+
+            self.assertEqual(HTTPStatus.FOUND, response.status_code)
+            location = urlsplit(response["Location"])
+            self.assertEqual(reverse("hidp_accounts:register"), location.path)
+            # Returns to the authorization request, without prompt=create.
+            next_url = urlsplit(parse_qs(location.query)["next"][0])
+            self.assertEqual("/o/authorize/", next_url.path)
+            next_params = parse_qs(next_url.query)
+            self.assertNotIn("prompt", next_params)
+            self.assertEqual(["happy-app"], next_params["client_id"])
+
+        with self.subTest("Other prompt values are kept"):
+            response = self.authorization_request(prompt="create login")
+
+            location = urlsplit(response["Location"])
+            next_url = urlsplit(parse_qs(location.query)["next"][0])
+            self.assertEqual(["login"], parse_qs(next_url.query)["prompt"])
+
+        with self.subTest("Unknown client"):
+            response = self.authorization_request(
+                prompt="create", client_id="unknown-app"
             )
+
+            self.assertEqual(HTTPStatus.BAD_REQUEST, response.status_code)
+
+        with (
+            self.subTest("Registration disabled"),
+            override_settings(REGISTRATION_ENABLED=False),
+        ):
+            response = self.authorization_request(prompt="create")
+
+            self.assertEqual(HTTPStatus.BAD_REQUEST, response.status_code)
+            self.assertEqual("invalid_request", response.json()["error"])
 
         with self.subTest("User logged in"):
             self.client.force_login(self.user)

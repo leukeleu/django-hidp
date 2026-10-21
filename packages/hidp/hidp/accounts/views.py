@@ -362,7 +362,8 @@ class EmailVerificationView(
     )
     token_generator = tokens.email_verification_token_generator
     success_url = reverse_lazy("hidp_accounts:email_verification_complete")
-    token_session_key = "_email_verification_request_token"  # noqa: S105 (not a password)
+    # Not the key of the pending verification: that holds a different token.
+    token_session_key = "_email_verification_token"  # noqa: S105 (not a password)
 
     def _get_user_queryset(self):
         return super()._get_user_queryset().email_unverified().filter(is_active=True)

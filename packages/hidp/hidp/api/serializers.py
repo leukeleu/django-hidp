@@ -165,6 +165,18 @@ class LoginSerializer(FormSerializer):
         return {"request": self.request}
 
 
+class RateLimitedLoginSerializer(LoginSerializer):
+    """
+    Log in with a username that gets many attempts, with an "I am not a robot" checkbox.
+
+    HIdP has no CAPTCHA. To add one, replace the form with your own.
+    """
+
+    form_class = forms.RateLimitedAuthenticationForm
+
+    i_am_not_a_robot = serializers.BooleanField(write_only=True, required=False)
+
+
 class SignupSerializer(FormSerializer):
     form_class = forms.UserCreationForm
     form_fields = {

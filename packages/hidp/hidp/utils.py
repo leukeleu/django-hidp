@@ -1,6 +1,6 @@
 import warnings
 
-from urllib.parse import urljoin
+from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
 
 from django.conf import settings
 from django.urls import reverse
@@ -34,9 +34,38 @@ def get_frontend_url(key, *, base_url):
     return urljoin(base_url, settings.HIDP_FRONTEND_URLS[key])
 
 
+def add_query_params(url, **params):
+    """Return `url` with `params` added to its query, skipping `None`."""
+    scheme, netloc, path, query, fragment = urlsplit(url)
+    query = urlencode(
+        [
+            *parse_qsl(query, keep_blank_values=True),
+            *((name, value) for name, value in params.items() if value is not None),
+        ]
+    )
+    return urlunsplit((scheme, netloc, path, query, fragment))
+
+
+def get_frontend_redirect_url(request, key, **params):
+    """Return the frontend URL of `key` with `params` in its query, skipping `None`."""
+    return add_query_params(
+        get_frontend_url(key, base_url=request.build_absolute_uri("/")), **params
+    )
+
+
 def has_frontend_url(key):
     """Return whether `HIDP_FRONTEND_URLS` has a URL template for `key`."""
     return key in getattr(settings, "HIDP_FRONTEND_URLS", {})
+
+
+def is_headless():
+    """Return whether HIdP redirects to the frontend's `auth` page, not to HTML."""
+    return has_frontend_url("auth")
+
+
+def get_frontend_step_url(request, step, **params):
+    """Return the frontend's `auth` page for `step`, with `params` in its query."""
+    return get_frontend_redirect_url(request, "auth", step=step, **params)
 
 
 def is_api_view(view_func):
@@ -49,6 +78,24 @@ def is_api_view(view_func):
     except ImportError:
         return False
     return issubclass(view_class, APIView)
+
+
+def get_api_path_prefixes():
+    """Return the `HIDP_API_PATH_PREFIXES` setting: paths of APIs that are not DRF."""
+    return tuple(getattr(settings, "HIDP_API_PATH_PREFIXES", ()))
+
+
+def is_api_request(request, view_func=None):
+    """
+    Return whether `request` goes to an API, which gets JSON instead of a page.
+
+    That is a Django REST framework view, or a path under one of the
+    `HIDP_API_PATH_PREFIXES`, for APIs built with something else.
+    """
+    if view_func is not None and is_api_view(view_func):
+        return True
+    prefixes = get_api_path_prefixes()
+    return bool(prefixes) and request.path_info.startswith(prefixes)
 
 
 def get_account_management_links(user):

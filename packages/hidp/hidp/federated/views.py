@@ -451,7 +451,7 @@ class OIDCAccountLinkView(TokenDataMixin, generic.FormView):
             "provider": self.provider,
             "user_email": self.request.user.email,
             "provider_email": self.token_data["claims"]["email"],
-            "cancel_url": self.success_url,
+            "cancel_url": reverse("hidp_oidc_management:linked_services"),
         }
         return super().get_context_data() | context | kwargs
 
@@ -510,7 +510,7 @@ class OIDCAccountUnlinkView(LoginRequiredMixin, generic.DeleteView):
     def get_context_data(self, **kwargs):
         context = {
             "provider": self.provider,
-            "cancel_url": self.success_url,
+            "cancel_url": reverse("hidp_oidc_management:linked_services"),
         }
         return super().get_context_data() | context | kwargs
 

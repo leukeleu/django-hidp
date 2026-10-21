@@ -48,7 +48,14 @@ urlpatterns = [
     ),
 ]
 
-if apps.is_installed("hidp.otp"):
+if all(
+    apps.is_installed(app)
+    for app in (
+        "hidp.otp",
+        "django_otp.plugins.otp_totp",
+        "django_otp.plugins.otp_static",
+    )
+):
     from . import otp_views
 
     urlpatterns += [
