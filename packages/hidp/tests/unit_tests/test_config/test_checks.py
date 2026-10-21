@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.test import TestCase, override_settings
 
 from hidp.config import checks
@@ -116,69 +117,85 @@ class TestConfigChecks(TestCase):
             ],
         )
 
-    @override_settings(
-        INSTALLED_APPS=["hidp.api"],
-        EMAIL_VERIFICATION_URL="/test_url/verify/{token}/",
-        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/{token}/",
-        PASSWORD_CHANGED_URL="/test_url/password_reset/change/",
-        PASSWORD_RESET_URL="/test_url/password_reset/{uidb64}/{token}/",
-        SET_PASSWORD_URL="/test_url/password_change/change/",
-        EMAIL_CHANGE_CANCEL_URL=None,
-    )
-    def test_missing_frontend_urls(self):
-        self.assertEqual(
-            checks.check_api_email_url_settings(),
-            [
-                checks.E011,
-            ],
-        )
 
-    @override_settings(
-        INSTALLED_APPS=["hidp.api"],
-        EMAIL_VERIFICATION_URL="/test_url/verify/no_placeholder/",
-        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/{token}/",
-        PASSWORD_CHANGED_URL="/test_url/password_reset/change/",
-        PASSWORD_RESET_URL="/test_url/password_reset/{uidb64}/{token}/",
-        SET_PASSWORD_URL="/test_url/password_change/change/",
-        EMAIL_CHANGE_CANCEL_URL="/test_url/change-email/cancel/",
-    )
-    def test_frontend_urls_missing_placeholder(self):
-        self.assertEqual(
-            checks.check_api_email_url_settings(),
-            [
-                checks.E012,
-            ],
-        )
+VALID_FRONTEND_URLS = {
+    "email_verification": "/verify/{token}/",
+    "password_reset": "https://app.example.com/reset/{uidb64}/{token}/",
+    "password_reset_request": "/reset/",
+    "set_password": "/set-password/",
+    "email_change_confirm": "/change-email/{token}/",
+    "email_change_cancel": "/change-email/cancel/",
+}
 
-    @override_settings(
-        INSTALLED_APPS=["hidp.api"],
-        EMAIL_VERIFICATION_URL="/test_url/verify/no_placeholder/",
-        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/{token}/",
-        PASSWORD_CHANGED_URL="/test_url/password_reset/change/",
-        PASSWORD_RESET_URL="/test_url/password_reset/{uidb64}/{token}/",
-        SET_PASSWORD_URL="/test_url/password_change/change/",
-        EMAIL_CHANGE_CANCEL_URL=None,
-    )
-    def test_missing_frontend_urls_and_placeholder(self):
-        self.assertCountEqual(
-            checks.check_api_email_url_settings(),
-            [
-                checks.E011,
-                checks.E012,
-            ],
-        )
 
-    @override_settings(
-        INSTALLED_APPS=["hidp.api"],
-        EMAIL_VERIFICATION_URL="/test_url/verify/{token}/",
-        EMAIL_CHANGE_CONFIRMATION_URL="/test_url/change-email/confirm/{token}/",
-        PASSWORD_CHANGED_URL="/test_url/password_reset/change/",
-        PASSWORD_RESET_URL="/test_url/password_reset/{uidb64}/{token}/",
-        SET_PASSWORD_URL="/test_url/password_change/change/",
-        EMAIL_CHANGE_CANCEL_URL="/test_url/change-email/cancel/",
-    )
-    def test_correct_frontend_urls(self):
-        self.assertCountEqual(
-            checks.check_api_email_url_settings(),
-            [],
-        )
+class TestFrontendUrlsCheck(TestCase):
+    """HIDP_FRONTEND_URLS must hold a valid URL template for every emailed link."""
+
+    def _check_ids(self):
+        return [error.id for error in checks.check_api_frontend_urls()]
+
+    @override_settings(ROOT_URLCONF=__name__)
+    def test_not_checked_without_headless_api(self):
+        with self.settings():
+            del settings.HIDP_FRONTEND_URLS
+            self.assertEqual(checks.check_api_frontend_urls(), [])
+
+    @override_settings(ROOT_URLCONF="hidp.config.urls")
+    def test_not_checked_for_the_user_endpoint_alone(self):
+        # OAuth2 clients use api/users/, which sends no emails.
+        with self.settings():
+            del settings.HIDP_FRONTEND_URLS
+            self.assertEqual(checks.check_api_frontend_urls(), [])
+
+    @override_settings(HIDP_FRONTEND_URLS=VALID_FRONTEND_URLS)
+    def test_valid_frontend_urls(self):
+        self.assertEqual(checks.check_api_frontend_urls(), [])
+
+    def test_setting_missing(self):
+        with self.settings():
+            del settings.HIDP_FRONTEND_URLS
+            self.assertEqual(self._check_ids(), ["hidp.E011"])
+
+    @override_settings(HIDP_FRONTEND_URLS=["/verify/{token}/"])
+    def test_setting_not_a_dict(self):
+        self.assertEqual(self._check_ids(), ["hidp.E011"])
+
+    def test_key_missing(self):
+        frontend_urls = VALID_FRONTEND_URLS.copy()
+        del frontend_urls["email_change_cancel"]
+        with self.settings(HIDP_FRONTEND_URLS=frontend_urls):
+            errors = checks.check_api_frontend_urls()
+        self.assertEqual([error.id for error in errors], ["hidp.E011"])
+        self.assertIn("email_change_cancel", errors[0].hint)
+
+    def test_placeholder_missing(self):
+        frontend_urls = VALID_FRONTEND_URLS | {"password_reset": "/reset/{token}/"}
+        with self.settings(HIDP_FRONTEND_URLS=frontend_urls):
+            errors = checks.check_api_frontend_urls()
+        self.assertEqual([error.id for error in errors], ["hidp.E012"])
+        self.assertIn("{uidb64}", errors[0].hint)
+
+    def test_invalid_template(self):
+        for key, url_template in [
+            # Formatting would raise a KeyError when the email is sent.
+            ("set_password", "/{language}/set/"),
+            ("set_password", "/{}/set/"),
+            ("email_verification", "/verify/{token/"),
+            ("email_verification", "/verify/{token:{x}}/"),
+            ("email_verification", "/verify/{token!r}/"),
+            ("email_change_cancel", None),
+        ]:
+            frontend_urls = VALID_FRONTEND_URLS | {key: url_template}
+            with (
+                self.subTest(url_template=url_template),
+                self.settings(HIDP_FRONTEND_URLS=frontend_urls),
+            ):
+                self.assertEqual(self._check_ids(), ["hidp.E013"])
+
+    def test_every_invalid_key_is_reported(self):
+        frontend_urls = VALID_FRONTEND_URLS | {
+            "email_verification": "/verify/",
+            "email_change_confirm": "/change-email/",
+        }
+        with self.settings(HIDP_FRONTEND_URLS=frontend_urls):
+            self.assertEqual(self._check_ids(), ["hidp.E012", "hidp.E012"])

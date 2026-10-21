@@ -1,17 +1,16 @@
 from http import HTTPStatus
 
-from rest_framework.test import APITestCase
+from rest_framework.test import APIClient, APITestCase
 
 from django.urls import reverse
 
-from hidp.test.api_client import CSRFEnforcingAPIClient
 from hidp.test.factories import user_factories
 
 
 class TestLogoutView(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url = reverse("api:logout")
+        cls.url = reverse("hidp_api:logout")
 
     def test_logout_method_get_not_allowed(self):
         response = self.client.get(self.url)
@@ -26,7 +25,7 @@ class TestLogoutView(APITestCase):
         # Use a CSRF enforcing client since we rely on CSRF protection in the LogoutView
         # and DRF SessionAuthentication only enforces CSRF checks for authenticated
         # users.
-        client = CSRFEnforcingAPIClient()
+        client = APIClient(enforce_csrf_checks=True)
         response = client.post(self.url)
         self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
 
@@ -35,8 +34,7 @@ class TestLogoutView(APITestCase):
         Verify behaviour of logout API when user is logged in.
 
         - Logged in user can access "me" endpoint
-        - Logout response status code is HTTP 204 No Content
-        - Logout response data is empty
+        - Logout responds with the anonymous auth state
         - Session is flushed after logout
         - Logged out user can no longer access "me" endpoint
         """
@@ -49,6 +47,7 @@ class TestLogoutView(APITestCase):
         self.assertEqual(me_response.status_code, HTTPStatus.OK)
         self.assertEqual(
             {
+                "id": str(user.id),
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "email": user.email,
@@ -59,8 +58,8 @@ class TestLogoutView(APITestCase):
         # Logout user
         response = self.client.post(self.url)
 
-        self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
-        self.assertIsNone(response.data)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        self.assertEqual(response.json(), {"user": None, "pending": []})
 
         # Logging out should flush the session
         self.assertNotEqual(logged_in_session_key, self.client.session.session_key)

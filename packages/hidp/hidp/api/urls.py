@@ -1,33 +1,38 @@
-from rest_framework.routers import DefaultRouter
-
-from django.urls import include, path
+from django.urls import path
 
 from .views import (
     EmailChangeConfirmView,
     EmailChangeView,
+    EmailVerificationConfirmView,
     EmailVerificationResendView,
-    EmailVerifiedView,
+    EmailVerificationVerifyView,
     LoginView,
     LogoutView,
     PasswordResetConfirmationView,
     PasswordResetRequestView,
-    UserViewSet,
+    SessionView,
 )
 
-router = DefaultRouter()
-router.register("users", UserViewSet, basename="user")
-
-app_name = "api"
+app_name = "hidp_api"
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("session/", SessionView.as_view(), name="session"),
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
-    path("email-verified/", EmailVerifiedView.as_view(), name="email_verified"),
     path(
-        "email-verified/resend/",
+        "email-verification/resend/",
         EmailVerificationResendView.as_view(),
-        name="email_verified_resend",
+        name="email_verification_resend",
+    ),
+    path(
+        "email-verification/verify/",
+        EmailVerificationVerifyView.as_view(),
+        name="email_verification_verify",
+    ),
+    path(
+        "email-verification/confirm/",
+        EmailVerificationConfirmView.as_view(),
+        name="email_verification_confirm",
     ),
     path(
         "password-reset/",

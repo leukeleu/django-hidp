@@ -2,6 +2,7 @@ from datetime import timedelta
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
+from django.db.models.functions import MD5
 from django.urls import reverse
 from django.utils import timezone
 
@@ -32,6 +33,24 @@ def get_verify_email_url(token, *, next_url=""):
     if next_url:
         url += f"?{urlencode({'next': next_url})}"
     return url
+
+
+def get_unverified_user_from_token(token, *, token_generator):
+    """
+    Return the active, unverified user identified by an email verification token.
+
+    Returns `None` if the token is invalid or expired, or if no such user exists.
+    """
+    email_hash = token_generator.check_token(token) if token else None
+    if email_hash is None:
+        return None
+    return (
+        UserModel.objects.email_unverified()
+        .filter(is_active=True)
+        .annotate(email_hash=MD5("email"))
+        .filter(email_hash=email_hash)
+        .first()
+    )
 
 
 def remove_stale_unverified_accounts(*, days=90, dry_run=False):

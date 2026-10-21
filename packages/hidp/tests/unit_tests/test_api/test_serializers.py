@@ -22,7 +22,7 @@ class TestLoginSerializer(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
-        cls.url = reverse("api:login")
+        cls.url = reverse("hidp_api:login")
         cls.user = UserFactory()
 
     def make_serializer(self, username, password):
@@ -73,7 +73,7 @@ class TestPasswordResetRequestSerializer(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
-        cls.url = reverse("api:password_reset_request")
+        cls.url = reverse("hidp_api:password_reset_request")
         cls.user = UserFactory()
 
     def make_serializer(self, email):
@@ -111,7 +111,7 @@ class TestPasswordResetConfirmationSerializer(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
-        cls.url = reverse("api:password_reset_confirm")
+        cls.url = reverse("hidp_api:password_reset_confirm")
         cls.user = UserFactory()
 
     def make_serializer(self, token, new_password, uidb64=None):
@@ -214,7 +214,7 @@ class TestEmailChangeSerializer(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.factory = RequestFactory()
-        cls.url = reverse("api:email_change")
+        cls.url = reverse("hidp_api:email_change")
         cls.user = UserFactory()
         cls.existing_email_change_request = EmailChangeRequestFactory(user=cls.user)
 
@@ -276,7 +276,7 @@ class TestEmailChangeConfirmSerializer(TestCase):
             str(cls.email_change_request.pk), "proposed_email"
         )
         cls.url = reverse(
-            "api:email_change_confirm",
+            "hidp_api:email_change_confirm",
         )
 
     def make_serializer(self, confirmation_token, instance=None):

@@ -1,18 +1,19 @@
 from http import HTTPStatus
 
-from rest_framework.test import APITestCase
+from rest_framework.test import APIClient, APITestCase
 
 from django.contrib.sessions.backends.db import SessionStore
 from django.core import mail
 from django.urls import reverse
 
+from hidp.api.auth_state import EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY
 from hidp.test.factories.user_factories import UserFactory, VerifiedUserFactory
 
 
 class TestLoginView(APITestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.url = reverse("api:login")
+        cls.url = reverse("hidp_api:login")
         cls.unverified_user = UserFactory()
         cls.verified_user = VerifiedUserFactory()
 
@@ -25,10 +26,10 @@ class TestLoginView(APITestCase):
         """
         Verify behavior when logging in an user that has not verified their email.
 
-        - No session cookies are set
+        - The user is not logged in
         - An email verification email is sent
-        - The response status code is 401 Unauthorized
-        - The response is empty
+        - The session remembers the pending verification
+        - The response is 401 with the pending email verification step
         """
         response = self.client.post(
             self.url,
@@ -38,14 +39,19 @@ class TestLoginView(APITestCase):
             },
         )
 
-        cookies = response.cookies
-        self.assertNotIn("sessionid", cookies)
-        self.assertNotIn("csrftoken", cookies)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertIn(EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY, self.client.session)
 
         self.assertEqual(len(mail.outbox), 1)
+        self.assertRegex(
+            mail.outbox[0].body,
+            r"http://testserver/frontend/verify/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+        )
 
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
-        self.assertIsNone(response.data)
+        self.assertEqual(
+            response.json(), {"user": None, "pending": [{"step": "email_verify"}]}
+        )
 
     def test_valid_login_verified_email(self):
         """
@@ -53,8 +59,7 @@ class TestLoginView(APITestCase):
 
         - Session cookies are set
         - The session contains the correct user ID
-        - The response status code is 204 No Content
-        - The response is empty
+        - The response is 200 with the user and no pending steps
         """
         response = self.client.post(
             self.url,
@@ -70,8 +75,44 @@ class TestLoginView(APITestCase):
 
         session = SessionStore(session_key=cookies["sessionid"].value)
         self.assertEqual(session["_auth_user_id"], str(self.verified_user.id))
-        self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
-        self.assertIsNone(response.data)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(
+            response.json(),
+            {
+                "user": {
+                    "id": str(self.verified_user.id),
+                    "first_name": self.verified_user.first_name,
+                    "last_name": self.verified_user.last_name,
+                    "email": self.verified_user.email,
+                },
+                "pending": [],
+            },
+        )
+
+    def test_login_requires_csrf_token(self):
+        """An anonymous login is CSRF protected, which DRF does not do by default."""
+        client = APIClient(enforce_csrf_checks=True)
+
+        response = client.post(
+            self.url,
+            data={"username": self.verified_user.email, "password": "P@ssw0rd!"},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+        self.assertTrue(response.json()["detail"].startswith("CSRF Failed"))
+        self.assertNotIn("_auth_user_id", client.session)
+
+    def test_login_with_csrf_token_from_session(self):
+        client = APIClient(enforce_csrf_checks=True)
+        client.get(reverse("hidp_api:session"))
+
+        response = client.post(
+            self.url,
+            data={"username": self.verified_user.email, "password": "P@ssw0rd!"},
+            headers={"X-CSRFToken": client.cookies["csrftoken"].value},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_login_invalid_credentials(self):
         """

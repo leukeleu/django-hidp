@@ -1,5 +1,3 @@
-# ruff: noqa: E501, W505
-
 from datetime import timedelta
 
 from oauth2_provider.models import get_access_token_model, get_application_model
@@ -50,6 +48,7 @@ class TestUserViewSetViaSession(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             {
+                "id": str(self.user.id),
                 "first_name": "Walter",
                 "last_name": "White",
                 "email": "walter@example.com",
@@ -184,6 +183,7 @@ class TestUserViewSetViaAccessToken(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             {
+                "id": str(self.user.id),
                 "first_name": "Walter",
                 "last_name": "White",
                 "email": "walter@example.com",
@@ -222,7 +222,7 @@ class TestEmailChangeViewSet(APITestCase):
         cls.user = user_factories.UserFactory(
             first_name="Walter", last_name="White", email="walter@example.com"
         )
-        cls.url = reverse("api:email_change")
+        cls.url = reverse("hidp_api:email_change")
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -295,11 +295,11 @@ class TestEmailChangeViewSet(APITestCase):
         self.assertRegex(
             message.body,
             # Matches the email change confirmation URL:
-            # placeholder/confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
-            r"placeholder/confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+            # http://testserver/frontend/change-email/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"http://testserver/frontend/change-email/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
         )
         self.assertIn(
-            "placeholder/cancel",
+            "http://testserver/frontend/change-email/cancel/",
             message.body,
         )
 
@@ -313,11 +313,11 @@ class TestEmailChangeViewSet(APITestCase):
         self.assertRegex(
             message.body,
             # Matches the email change confirmation URL:
-            # placeholder/confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
-            r"placeholder/confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+            # http://testserver/frontend/change-email/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"http://testserver/frontend/change-email/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
         )
         self.assertIn(
-            "placeholder/cancel/",
+            "http://testserver/frontend/change-email/cancel/",
             message.body,
         )
 
@@ -355,11 +355,11 @@ class TestEmailChangeViewSet(APITestCase):
         self.assertRegex(
             message.body,
             # Matches the email change confirmation URL:
-            # placeholder/confirm/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
-            r"placeholder/confirm/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
+            # http://testserver/frontend/change-email/eyJ1dWlkIjoiMDE5MjZiNGYtODQ0Zi03MjRmLWE2YjQtMWQxYWEyYTU5OTgwIiwicmVjaXBpZW50IjoiY3VycmVudF9lbWFpbCJ9:1sy5S2:R7m51osUdabcMuOGXZRq7MabESIqKGl_mX2jO-TAcj8/
+            r"http://testserver/frontend/change-email/[0-9A-Za-z]+:[0-9a-zA-Z]+:[0-9A-Za-z_-]+/",
         )
         self.assertIn(
-            "placeholder/cancel/",
+            "http://testserver/frontend/change-email/cancel/",
             message.body,
         )
 
@@ -375,7 +375,7 @@ class TestEmailChangeViewSet(APITestCase):
             message.body,
         )
         self.assertIn(
-            "placeholder/cancel/",
+            "http://testserver/frontend/change-email/cancel/",
             message.body,
         )
 
@@ -447,7 +447,7 @@ class TestEmailChangeConfirmView(APITestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = user_factories.UserFactory(email="walter@example.com")
-        cls.url = reverse("api:email_change_confirm")
+        cls.url = reverse("hidp_api:email_change_confirm")
         cls.email_change_request = user_factories.EmailChangeRequestFactory(
             user=cls.user, proposed_email="heisenberg@example.com"
         )

@@ -1,20 +1,45 @@
+from urllib.parse import urljoin
+
+from rest_framework import exceptions
+from rest_framework.authentication import CSRFCheck, SessionAuthentication
 from rest_framework.views import APIView
 
-from django.views.decorators.csrf import csrf_protect
+from django.apps import apps
+from django.conf import settings
 
 
 class CSRFProtectedAPIView(APIView):
     """
-    API view enforcing CSRF validation.
+    API view that enforces CSRF validation on every request, as a DRF 403.
 
-    By default, DRF APIViews are made exempt from CSRF checks by setting `csrf_exempt`
-    to True. The DRF SessionAuthentication class does enforce CSRF checks, but only for
-    authenticated users. This class re-enables CSRF checks for all requests, regardless
-    of authentication state.
+    DRF only checks CSRF for users that `SessionAuthentication` authenticated.
     """
 
-    @classmethod
-    def as_view(cls, **initkwargs):
-        view = super().as_view(**initkwargs)
-        view.csrf_exempt = False
-        return csrf_protect(view)
+    def initial(self, request, *args, **kwargs):
+        check = CSRFCheck(lambda request: None)
+        # Populates request.META["CSRF_COOKIE"], which process_view reads.
+        check.process_request(request)
+        if reason := check.process_view(request, None, (), {}):
+            raise exceptions.PermissionDenied(f"CSRF Failed: {reason}")
+        super().initial(request, *args, **kwargs)
+
+
+def get_authentication_classes():
+    """
+    Return the authentication classes for API views that act on the current user.
+
+    OAuth2 bearer tokens are only accepted when HIdP's OIDC provider is installed.
+    """
+    authentication_classes = [SessionAuthentication]
+    if apps.is_installed("hidp.oidc_provider"):
+        from oauth2_provider.contrib.rest_framework import (  # noqa: PLC0415
+            OAuth2Authentication,
+        )
+
+        authentication_classes.append(OAuth2Authentication)
+    return authentication_classes
+
+
+def get_frontend_url(key, *, base_url):
+    """Return the `HIDP_FRONTEND_URLS` template for `key`, joined to `base_url`."""
+    return urljoin(base_url, settings.HIDP_FRONTEND_URLS[key])
