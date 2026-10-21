@@ -31,11 +31,9 @@ from django.utils.decorators import method_decorator
 from hidp.csp.decorators import hidp_csp_protection
 
 
-@method_decorator(hidp_csp_protection, name='dispatch')
+@method_decorator(hidp_csp_protection, name="dispatch")
 class MyCustomView(View):
-    def get(self, request):
-        ...
-
+    def get(self, request): ...
 ```
 
 ## Template tag

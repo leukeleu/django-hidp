@@ -33,7 +33,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         "NAME": "hidp.accounts.password_validation.SymbolValidator",
-    }
+    },
 ]
 ```
 

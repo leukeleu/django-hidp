@@ -84,8 +84,8 @@ Add a custom `User` model to the `accounts` app you just created, that inherits 
 ```python models.py
 from hidp.accounts.models import BaseUser
 
-class User(BaseUser):
-  ...
+
+class User(BaseUser): ...
 ```
 
 After defining the model, run `./manage.py makemigrations accounts`.
@@ -142,7 +142,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 :::{note}
 HIdP comes with a set of extra password validators that can be added to
-`settings.AUTH_PASSWORD_VALIDATORS` if desired. See [Password Validators](project:password-validation.md)
+`settings.AUTH_PASSWORD_VALIDATORS` if desired. See [Password Validators](project:password-validators.md)
 for more information.
 :::
 

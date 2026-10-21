@@ -20,7 +20,7 @@ New user creation is handled by the `UserCreationForm`, which builds upon Django
 
 - A `TermsOfServiceMixin` is included to ensure users agree to your Terms of Service before they can create an account. See [Terms of Service](project:terms-of-service.md) for instructions on how to disable this.
 
-The password is validated using the validators configured in `settings.AUTH_PASSWORD_VALIDATORS`. See [Password Validation](project:password-validation.md) on custom HIdP password validators.
+The password is validated using the validators configured in `settings.AUTH_PASSWORD_VALIDATORS`. See [Password Validation](project:password-validators.md) on custom HIdP password validators.
 
 ### Verification email
 

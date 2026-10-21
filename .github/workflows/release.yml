@@ -24,7 +24,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_PASSWORD: postgres
         ports:
@@ -42,7 +42,7 @@ jobs:
         with:
           working-directory: ./packages/hidp
           django-version: '5.2'
-          python-version: '3.12'
+          python-version: '3.14'
 
       - name: Set version
         run: uv version ${GITHUB_REF#refs/tags/}
