@@ -121,7 +121,7 @@ django-checks:
 docs:
 	# Build the documentation
 	$(call group,Building documentation)
-	uv run --group docs make -C docs html
+	uv run --group docs make -C docs/sphinx html
 	$(call endgroup)
 
 .PHONY: build

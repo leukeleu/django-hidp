@@ -85,7 +85,7 @@ extend = "../hidp-pycqa/pyproject.toml"
 "hidp/config/*" = [
   "invalid-argument-name",  # ALL_UPPERCASE is OK in config code
 ]
-"docs/conf.py" = [
+"docs/sphinx/conf.py" = [
   "implicit-namespace-package",  # Not a package
 ]
 
