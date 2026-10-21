@@ -1,12 +1,9 @@
-from urllib.parse import urljoin
-
 from rest_framework import exceptions
 from rest_framework.authentication import CSRFCheck, SessionAuthentication
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.views import APIView
 
 from django.apps import apps
-from django.conf import settings
 
 
 class CSRFProtectedAPIView(APIView):
@@ -39,11 +36,6 @@ def get_authentication_classes():
 
         authentication_classes.append(OAuth2Authentication)
     return authentication_classes
-
-
-def get_frontend_url(key, *, base_url):
-    """Return the `HIDP_FRONTEND_URLS` template for `key`, joined to `base_url`."""
-    return urljoin(base_url, settings.HIDP_FRONTEND_URLS[key])
 
 
 class AccessTokenScopePermission(BasePermission):

@@ -166,6 +166,18 @@ msgstr ""
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr ""
 
+#: hidp/api/otp_views.py
+msgid "Two-factor authentication is already configured."
+msgstr ""
+
+#: hidp/api/otp_views.py
+msgid "Two-factor authentication is not configured."
+msgstr ""
+
+#: hidp/api/otp_views.py
+msgid "Verify this session with a recovery code first."
+msgstr ""
+
 #: hidp/api/serializers.py
 msgid "Invalid or expired token."
 msgstr ""

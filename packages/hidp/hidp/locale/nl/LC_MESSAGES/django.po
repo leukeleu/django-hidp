@@ -167,6 +167,18 @@ msgstr "Registreer met {provider}"
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr "Sorry, het wijzigen van je e-mailadres is niet mogelijk omdat er al een account bestaat met dit e-mailadres."
 
+#: hidp/api/otp_views.py
+msgid "Two-factor authentication is already configured."
+msgstr "Tweefactorauthenticatie is al ingesteld."
+
+#: hidp/api/otp_views.py
+msgid "Two-factor authentication is not configured."
+msgstr "Tweefactorauthenticatie is niet ingesteld."
+
+#: hidp/api/otp_views.py
+msgid "Verify this session with a recovery code first."
+msgstr "Verifieer deze sessie eerst met een herstelcode."
+
 #: hidp/api/serializers.py
 msgid "Invalid or expired token."
 msgstr "Ongeldige of verlopen token."
