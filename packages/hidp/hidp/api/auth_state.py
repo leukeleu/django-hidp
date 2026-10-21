@@ -21,6 +21,11 @@ def start_email_verification(request, user):
     )
 
 
+def stop_email_verification(request):
+    """Forget the pending email verification of the session."""
+    request.session.pop(EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY, None)
+
+
 def get_email_verification_user(request):
     """Return the user whose email verification this session is waiting for."""
     return get_unverified_user_from_token(

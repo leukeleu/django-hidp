@@ -105,22 +105,22 @@ class TestOTPAuthState(APITestCase):
         confirmed_devices(self.user)
 
         self._assert_html_view_redirects_to(
-            "http://testserver/frontend/otp/verify/?next=%2Fmanage%2F",
-            otp_verify="/frontend/otp/verify/",
+            "http://testserver/frontend/auth/?step=otp_verify&next=%2Fmanage%2F",
+            auth="/frontend/auth/",
         )
 
     def test_frontend_redirect_keeps_the_query_of_the_template(self):
         confirmed_devices(self.user)
 
         self._assert_html_view_redirects_to(
-            "http://testserver/frontend/otp/verify/?lang=nl&next=%2Fmanage%2F",
-            otp_verify="/frontend/otp/verify/?lang=nl",
+            "http://testserver/frontend/auth/?lang=nl&step=otp_verify&next=%2Fmanage%2F",
+            auth="/frontend/auth/?lang=nl",
         )
 
     def test_html_view_redirects_to_frontend_setup(self):
         self._assert_html_view_redirects_to(
-            "http://testserver/frontend/otp/setup/?next=%2Fmanage%2F",
-            otp_setup="/frontend/otp/setup/",
+            "http://testserver/frontend/auth/?step=otp_setup&next=%2Fmanage%2F",
+            auth="/frontend/auth/",
         )
 
     def test_protected_endpoints_need_verification(self):

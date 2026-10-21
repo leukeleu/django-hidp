@@ -6,7 +6,7 @@ from django_otp.plugins.otp_static.models import StaticDevice
 from django_otp.plugins.otp_totp.models import TOTPDevice
 
 from django.core import mail
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from hidp.otp.devices import reset_static_tokens
@@ -259,6 +259,23 @@ class TestOTPSetupView(TestCase):
             response,
             f"{reverse('hidp_otp:verify-recovery-code')}"
             f"?{urlencode({'next': reverse('hidp_otp_management:setup')})}",
+            fetch_redirect_response=False,
+        )
+
+    @override_settings(HIDP_FRONTEND_URLS={"auth": "/frontend/auth/"})
+    def test_redirects_to_frontend_verification_with_another_device(self):
+        """The frontend verification page takes the place of the recovery code view."""
+        otp_factories.StaticDeviceFactory(user=self.user, confirmed=True)
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("hidp_otp_management:setup"))
+
+        self.assertRedirects(
+            response,
+            "http://testserver/frontend/auth/?"
+            + urlencode(
+                {"step": "otp_verify", "next": reverse("hidp_otp_management:setup")}
+            ),
             fetch_redirect_response=False,
         )
 
