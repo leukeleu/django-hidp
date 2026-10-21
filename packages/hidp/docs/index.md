@@ -19,7 +19,7 @@ configure-oidc-clients
 configure-as-oidc-provider
 content-security-policy
 user-model
-password-validation
+password-validators
 one-time-passwords
 templates
 translations

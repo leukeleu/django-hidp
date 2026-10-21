@@ -146,7 +146,7 @@ class TestUserViewSetViaAccessToken(APITestCase):
             token="secret-access-token-key",
             application=self.trusted_application,
         )
-        self.client.defaults["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+        self.client.defaults["HTTP_AUTHORIZATION"] = f"Bearer {token.token}"
 
     def test_get_with_expired_token(self):
         self.set_client_access_token(expires_in=-300)

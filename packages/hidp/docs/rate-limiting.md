@@ -52,11 +52,12 @@ from django_ratelimit.decorators import ratelimit
 
 from hidp.accounts.views import LoginView
 
-@method_decorator(ratelimit(key='ip', rate='1/m', method=ratelimit.UNSAFE), name='dispatch')
-class MyCustomLoginView(LoginView):
-    def get(self, request):
-        ...
 
+@method_decorator(
+    ratelimit(key="ip", rate="1/m", method=ratelimit.UNSAFE), name="dispatch"
+)
+class MyCustomLoginView(LoginView):
+    def get(self, request): ...
 ```
 
 :::{note}

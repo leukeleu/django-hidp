@@ -17,7 +17,7 @@ urlpatterns = []
     AUTH_USER_MODEL="auth.User",
     MIDDLEWARE=[],
     USE_TZ=False,
-    OAUTH2_PROVIDER=None,
+    OAUTH2_PROVIDER={},
     ROOT_URLCONF=__name__,  # This module is the ROOT_URLCONF
 )
 class TestConfigChecks(TestCase):

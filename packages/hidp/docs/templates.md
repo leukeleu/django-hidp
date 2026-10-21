@@ -15,9 +15,9 @@ configuration is required.
 ```python
 # settings.py
 INSTALLED_APPS = [
-  ...,
-  "django.forms",
-  ...,
+    ...,
+    "django.forms",
+    ...,
 ]
 
 FORM_RENDERER = "django.forms.renderers.TemplatesSetting"

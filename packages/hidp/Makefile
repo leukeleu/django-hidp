@@ -13,6 +13,7 @@ help:
 	@echo "  make coveragetest - Generate coverage report"
 	@echo "  make coverage - Generate test coverage html report"
 	@echo "  make django-checks - Run Django system checks"
+	@echo "  make docs - Build the documentation"
 	@echo "  make build - Build the package"
 	@echo
 
@@ -59,7 +60,16 @@ migrationtest:
 .PHONY: messages
 messages:
 	# Update the message catalog
-	uv run manage.py makemessages
+	# The catalogs are verified byte for byte by CI, so this target re-runs
+	# itself in the python container, whose gettext version matches CI's.
+	@if [ -f /.dockerenv ] || [ "$${CI:-}" = "true" ]; then \
+		uv run manage.py makemessages; \
+	else \
+		echo "Updating the message catalog in the python container..."; \
+		docker compose -f ../../compose.yaml run --rm --no-deps \
+			--workdir /code --entrypoint /bin/bash python \
+			-c "cd project && uv sync && cd ../packages/hidp && UV_NO_SYNC=1 make messages"; \
+	fi
 
 .PHONY: compilemessages
 compilemessages:
@@ -104,6 +114,13 @@ django-checks:
 	# Run Django system checks
 	$(call group,Running Django system checks)
 	uv run  manage.py check --fail-level WARNING
+	$(call endgroup)
+
+.PHONY: docs
+docs:
+	# Build the documentation
+	$(call group,Building documentation)
+	uv run --group docs make -C docs html
 	$(call endgroup)
 
 .PHONY: build

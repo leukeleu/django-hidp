@@ -72,11 +72,27 @@ Then edit the settings to your liking.
 Normally, you start all containers in the foreground:
 
 ```sh
-docker-compose up
+docker compose up
 ```
 
 You can also start all containers in the background:
 
 ```sh
-docker-compose up -d
+docker compose up -d
 ```
+
+### 5. Updating the message catalogs
+
+CI verifies the message catalogs byte for byte, and the gettext version of
+the host machine may produce different output than the one used by CI. The
+`messages` target therefore re-runs itself inside the `python` container
+when it is invoked on a host machine (see `packages/hidp/Makefile`): `make
+messages` and `make checkmessages` always generate the catalogs with a
+matching gettext version. The target runs directly when it is already
+inside a container, or in CI.
+
+> *NOTE*: The container command syncs the shared demo project environment
+> (`var/venv`) and then runs the target with `UV_NO_SYNC=1`, to prevent the
+> `uv run` commands used by the make targets from syncing that environment
+> against the `packages/hidp` project, which would remove the demo
+> project's dependencies.

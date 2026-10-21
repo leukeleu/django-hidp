@@ -42,6 +42,12 @@ OAUTH2_PROVIDER = {
     # Enable and configure RP-Initiated Logout
     # Default in DOT is False
     "OIDC_RP_INITIATED_LOGOUT_ENABLED": True,
+    # Enable and configure RP-Initiated Registration.
+    # This handles the prompt=create parameter on the authorization endpoint,
+    # redirecting users to the registration page.
+    # Default in DOT is False
+    "OIDC_RP_INITIATED_REGISTRATION_ENABLED": True,
+    "OIDC_RP_INITIATED_REGISTRATION_URL": "hidp_accounts:register",
     "OIDC_RSA_PRIVATE_KEY": None,
     # A list of scopes that can be requested by clients, with descriptions.
     "SCOPES": {

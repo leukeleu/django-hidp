@@ -25,18 +25,18 @@ To enable OTP support in HIdP, the following needs to be added to the Django set
 ```python
 INSTALLED_APPS = [
     ...,
-    'django_otp',
-    'django_otp.plugins.otp_totp',
-    'django_otp.plugins.otp_static',
-    'hidp.otp',
-    ...
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_static",
+    "hidp.otp",
+    ...,
 ]
 
 MIDDLEWARE = [
     ...,
-    # Add the OTP middleware to the middleware list, after 
+    # Add the OTP middleware to the middleware list, after
     # the session and authentication middleware
-    'django_otp.middleware.OTPMiddleware',
+    "django_otp.middleware.OTPMiddleware",
 ]
 ```
 
@@ -107,10 +107,10 @@ For example, to make OTP required for staff users and optional for non-staff use
 ```python
 MIDDLEWARE = [
     ...,
-    'django_otp.middleware.OTPMiddleware',
-    'hidp.otp.middleware.OTPSetupRequiredIfStaffUserMiddleware',
-    'hidp.otp.middleware.OTPVerificationRequiredIfConfiguredMiddleware',
-    ...
+    "django_otp.middleware.OTPMiddleware",
+    "hidp.otp.middleware.OTPSetupRequiredIfStaffUserMiddleware",
+    "hidp.otp.middleware.OTPVerificationRequiredIfConfiguredMiddleware",
+    ...,
 ]
 ```
 
@@ -119,9 +119,10 @@ If you have certain views that should be exempt from OTP verification, you can u
 ```python
 from hidp.otp.decorators import otp_exempt
 
+
 @otp_exempt
 def my_view(request):
-    # This view can be accessed without verifying OTP  
+    # This view can be accessed without verifying OTP
     ...
 
 
@@ -129,9 +130,9 @@ def my_view(request):
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 
-@method_decorator(otp_exempt, name='dispatch')
-class MyView(View):
-    ...
+
+@method_decorator(otp_exempt, name="dispatch")
+class MyView(View): ...
 ```
 
 
@@ -147,9 +148,10 @@ middleware class like this:
 ```python
 from hidp.otp.middleware import OTPMiddlewareBase
 
+
 class OTPRequiredForGroupMiddleware(OTPMiddlewareBase):
     def user_needs_verification(self, user):
-        return user.groups.filter(name='RequireOTP').exists()
+        return user.groups.filter(name="RequireOTP").exists()
 ```
 
 See the source code of the `hidp.otp.middleware` module for more examples of custom OTP policies.

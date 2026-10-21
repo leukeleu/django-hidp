@@ -9,7 +9,7 @@ runs:
       uses: ./.github/actions/setup-python
       with:
         working-directory: './packages/hidp'
-        python-version: '3.13'
+        python-version: '3.14'
         django-version: '5.2'
 
     - name: Build documentation
