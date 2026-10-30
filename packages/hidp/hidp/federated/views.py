@@ -1,5 +1,6 @@
 import logging
 
+from functools import partial
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
@@ -27,6 +28,7 @@ from hidp.utils import (
 
 from ..accounts import auth as hidp_auth
 from ..accounts import email_verification, mailers
+from ..accounts import flows as account_flows
 from ..config import oidc_clients
 from ..csp.decorators import hidp_csp_protection
 from ..federated.constants import OIDCError
@@ -418,12 +420,17 @@ class OIDCLoginView(auth_views.RedirectURLMixin, TokenDataMixin, generic.FormVie
             hidp_auth.logout(self.request)
         base_url = self.request.build_absolute_uri("/")
         next_url = self.get_redirect_url() or None
-        self.verification_mailer(
+        account_flows.send_verification_email(
             user,
-            base_url=base_url,
-            verification_url=get_frontend_url("email_verification", base_url=base_url),
-            post_verification_redirect=next_url,
-        ).send()
+            verification_mailer=partial(
+                self.verification_mailer,
+                base_url=base_url,
+                verification_url=get_frontend_url(
+                    "email_verification", base_url=base_url
+                ),
+                post_verification_redirect=next_url,
+            ),
+        )
         start_email_verification(self.request, user)
         return HttpResponseRedirect(
             get_frontend_step_url(self.request, Step.EMAIL_VERIFY, next=next_url)

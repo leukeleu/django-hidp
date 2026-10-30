@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from unittest import mock
 from urllib.parse import parse_qs, urlsplit
 
 from rest_framework.test import APITestCase
@@ -11,6 +12,8 @@ from django.http import HttpRequest
 from django.test import override_settings
 from django.urls import reverse
 
+from hidp.api.auth_state import EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY
+from hidp.api.oidc_views import OIDCRegistrationView
 from hidp.config import configure_oidc_clients
 from hidp.federated import flows
 from hidp.federated.constants import OIDC_STATES_SESSION_KEY
@@ -183,6 +186,30 @@ class TestRegistration(OIDCTestCase):
             r"http://testserver/frontend/verify/\S+/\?next=%2Fsomewhere%2F",
         )
         self.assertNotIn(token, self.client.session)
+
+    @mock.patch.object(OIDCRegistrationView, "verification_mailer")
+    @mock.patch("hidp.accounts.flows.logger")
+    def test_register_mailer_raises_exception(self, mock_logger, mock_mailer):
+        """
+        Verify behavior when sending the verification email raises an exception.
+
+        - The exception is logged
+        - The account is registered
+        - The session remembers the pending verification
+        - The response is 401 with the pending email verification step
+        """
+        token = self._store_token_data(flows.registration_token_generator)
+        mock_instance = mock_mailer.return_value
+        mock_instance.send.side_effect = Exception()
+
+        response = self._register(token)
+
+        mock_logger.exception.assert_called_with("Failed to send verification email.")
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertTrue(UserModel.objects.filter(email="jesse@example.com").exists())
+        self.assertIn(EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY, self.client.session)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        self.assertEqual(response.json()["pending"], [{"step": "email_verify"}])
 
     def test_terms_are_required(self):
         token = self._store_token_data(flows.registration_token_generator)

@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from unittest import mock
 
 from rest_framework.test import APIClient, APITestCase
 
@@ -7,6 +8,7 @@ from django.urls import reverse
 
 from hidp.accounts import tokens
 from hidp.api.auth_state import EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY
+from hidp.api.views import EmailVerificationResendView
 from hidp.test.factories.user_factories import UserFactory, VerifiedUserFactory
 
 VERIFICATION_URL_PATTERN = (
@@ -64,6 +66,26 @@ class TestEmailVerificationResendView(APITestCase):
 
         self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
         self.assertEqual(len(mail.outbox), 0)
+
+    @mock.patch.object(EmailVerificationResendView, "verification_mailer")
+    @mock.patch("hidp.accounts.flows.logger")
+    def test_resend_mailer_raises_exception(self, mock_logger, mock_mailer):
+        """
+        Verify behavior when sending the verification email raises an exception.
+
+        - The exception is logged
+        - No verification email is sent
+        - The response status code is 204 No Content, like a successful resend
+        """
+        self._start_verification(self.unverified_user)
+        mock_instance = mock_mailer.return_value
+        mock_instance.send.side_effect = Exception()
+
+        response = self.client.post(self.url)
+
+        mock_logger.exception.assert_called_with("Failed to send verification email.")
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
 
     def test_resend_requires_csrf_token(self):
         client = APIClient(enforce_csrf_checks=True)

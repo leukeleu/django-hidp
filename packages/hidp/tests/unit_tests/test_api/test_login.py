@@ -13,6 +13,7 @@ from django.test import override_settings
 from django.urls import reverse
 
 from hidp.api.auth_state import EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY
+from hidp.api.views import LoginView
 from hidp.test.factories.user_factories import UserFactory, VerifiedUserFactory
 
 UserModel = get_user_model()
@@ -86,6 +87,35 @@ class TestLoginView(APITestCase):
         )
 
         self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertIn(EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY, self.client.session)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
+        self.assertEqual(
+            response.json(), {"user": None, "pending": [{"step": "email_verify"}]}
+        )
+
+    @mock.patch.object(LoginView, "verification_mailer")
+    @mock.patch("hidp.accounts.flows.logger")
+    def test_verification_mailer_raises_exception(self, mock_logger, mock_mailer):
+        """
+        Verify behavior when sending the verification email raises an exception.
+
+        - The exception is logged
+        - The session still remembers the pending verification
+        - The response is 401 with the pending email verification step
+        """
+        mock_instance = mock_mailer.return_value
+        mock_instance.send.side_effect = Exception()
+
+        response = self.client.post(
+            self.url,
+            data={
+                "username": self.unverified_user.email,
+                "password": "P@ssw0rd!",
+            },
+        )
+
+        mock_logger.exception.assert_called_with("Failed to send verification email.")
+        self.assertEqual(len(mail.outbox), 0)
         self.assertIn(EMAIL_VERIFICATION_REQUEST_TOKEN_SESSION_KEY, self.client.session)
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
         self.assertEqual(

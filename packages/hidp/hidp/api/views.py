@@ -216,9 +216,12 @@ class LoginView(VerificationMailerMixin, BaseView):
             # Do not stay logged in as another user while waiting for `user`.
             if request.user.is_authenticated:
                 hidp_auth.logout(request)
-            self.get_verification_mailer(
-                next_url=serializer.validated_data.get("next")
-            )(user).send()
+            flows.send_verification_email(
+                user,
+                verification_mailer=self.get_verification_mailer(
+                    next_url=serializer.validated_data.get("next")
+                ),
+            )
             start_email_verification(request, user)
         return auth_state_response(request)
 
@@ -300,7 +303,10 @@ class EmailVerificationResendView(VerificationMailerMixin, BaseView):
         next_url = self.validated_serializer().validated_data.get("next")
         user = get_email_verification_user(request)
         if user is not None:
-            self.get_verification_mailer(next_url=next_url)(user).send()
+            flows.send_verification_email(
+                user,
+                verification_mailer=self.get_verification_mailer(next_url=next_url),
+            )
             start_email_verification(request, user)
         return Response(status=HTTPStatus.NO_CONTENT)
 

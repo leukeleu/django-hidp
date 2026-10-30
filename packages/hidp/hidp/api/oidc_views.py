@@ -25,6 +25,7 @@ from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 
 from hidp.accounts import auth as hidp_auth
+from hidp.accounts import flows as account_flows
 from hidp.config import oidc_clients
 from hidp.federated import flows
 from hidp.federated.forms import OIDCAccountUnlinkForm
@@ -193,9 +194,12 @@ class OIDCRegistrationView(VerificationMailerMixin, BaseView):
         if user.email_verified:
             hidp_auth.login(request, user)
         else:
-            self.get_verification_mailer(
-                next_url=serializer.validated_data.get("next")
-            )(user).send()
+            account_flows.send_verification_email(
+                user,
+                verification_mailer=self.get_verification_mailer(
+                    next_url=serializer.validated_data.get("next")
+                ),
+            )
             start_email_verification(request, user)
         return auth_state_response(request)
 

@@ -43,6 +43,19 @@ def send_registration_email(user, *, verification_mailer, account_exists_mailer)
         logger.exception("Failed to send verification email.")
 
 
+def send_verification_email(user, *, verification_mailer):
+    """
+    Send the email verification email, logging a failure instead of raising it.
+
+    A failed send must not fail the request of a user who is waiting for the
+    email, such as a login with valid credentials.
+    """
+    try:
+        verification_mailer(user).send()
+    except Exception:
+        logger.exception("Failed to send verification email.")
+
+
 def login(request, user):
     """Log in a user with a verified email address, and return whether it did."""
     if user.email_verified:

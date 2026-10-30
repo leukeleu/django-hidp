@@ -11,6 +11,7 @@ from django.urls import reverse
 from hidp.config import checks, configure_oidc_clients
 from hidp.federated import flows, models
 from hidp.federated.oidc.exceptions import InvalidOIDCStateError
+from hidp.federated.views import OIDCLoginView
 from hidp.test.factories import user_factories
 
 from ...unit_tests.test_federated.test_providers.example import ExampleOIDCClient
@@ -147,6 +148,26 @@ class TestHeadlessLogin(TestCase):
         self.assertRegex(
             mail.outbox[0].body,
             r"http://testserver/frontend/verify/\S+/\?next=%2Fn%2F",
+        )
+        session_state = self.client.get(reverse("hidp_api:session")).json()
+        self.assertEqual(session_state["pending"], [{"step": "email_verify"}])
+
+    def test_unverified_user_mailer_raises_exception(self):
+        """A failed verification email does not fail the headless login."""
+        with (
+            mock.patch.object(OIDCLoginView, "verification_mailer") as mock_mailer,
+            self.assertLogs("hidp.accounts.flows", level="ERROR") as logs,
+        ):
+            mock_instance = mock_mailer.return_value
+            mock_instance.send.side_effect = Exception()
+
+            response = self.client.get(self.url, {"token": self._token()})
+
+        self.assertIn("Failed to send verification email.", logs.records[0].msg)
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertEqual(
+            response.url,
+            "http://testserver/frontend/auth/?step=email_verify",
         )
         session_state = self.client.get(reverse("hidp_api:session")).json()
         self.assertEqual(session_state["pending"], [{"step": "email_verify"}])
