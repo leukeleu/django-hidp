@@ -19,6 +19,7 @@ help:
 	@echo
 
 GITHUB_ACTIONS ?= false
+REDOCLY_CLI_VERSION ?= 2.54.3
 
 # Helper function to define a GitHub Actions group
 define group
@@ -140,7 +141,7 @@ clean:
 
 .PHONY: generate-schema
 generate-schema:
-	DJANGO_SETTINGS_MODULE="hidp.spectacular_settings" python manage.py spectacular --format openapi-json --file ./docs/openapi/schema.json
+	uv run manage.py spectacular --settings tests.test_settings --format openapi-json --file ./docs/openapi/schema.json
 
 ##
 # These targets are used by GitHub actions
@@ -174,5 +175,4 @@ install-pipeline: install-requirements post-install
 
 .PHONY: build-redoc
 build-redoc:
-	npm install @redocly/cli -g
-	redocly build-docs ./docs/openapi/schema.json -o ./docs/_build/html/redoc-static.html
+	npx --yes @redocly/cli@$(REDOCLY_CLI_VERSION) build-docs ./docs/openapi/schema.json -o ./docs/_build/html/redoc-static.html

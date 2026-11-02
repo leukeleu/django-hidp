@@ -11,4 +11,5 @@ urlpatterns = [
         name="root",
     ),
     path("", include(hidp_urls)),
+    path("api/", include("hidp.api.urls")),
 ]

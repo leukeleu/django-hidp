@@ -13,3 +13,24 @@ class TestRateLimitMiddleware(TestCase):
                 " Please try again later."
             ),
         )
+
+    def test_rate_limited_api_view(self):
+        response = self.client.get("/rate_limited_api_view/")
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(
+            response.json(),
+            {
+                "detail": (
+                    "Sorry, you have made too many requests to the server."
+                    " Please try again later."
+                )
+            },
+        )
+        self.assertIn("no-store", response["Cache-Control"])
+
+    @override_settings(HIDP_API_PATH_PREFIXES=["/rate_limited_view/"])
+    def test_rate_limited_view_under_api_path(self):
+        """Views of APIs that are not DRF get the JSON response."""
+        response = self.client.get("/rate_limited_view/")
+        self.assertEqual(response.status_code, 429)
+        self.assertIn("detail", response.json())

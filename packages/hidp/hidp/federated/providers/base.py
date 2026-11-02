@@ -77,6 +77,12 @@ class OIDCClient:
             Alternative base URL to use instead of the one of the request when
             constructing the callback URL.
 
+        trust_email_verified_claim (``boolean``):
+            Whether an account created with this provider counts as verified when
+            the provider says it verified the email address, in the
+            ``email_verified`` claim. Override ``is_email_verified`` for a provider
+            that verifies every address without that claim.
+
     """
 
     provider_key = NotImplemented
@@ -100,6 +106,9 @@ class OIDCClient:
     client_id = None
     client_secret = None
     callback_base_url = None
+    # Note: Only set to True if the provider verifies the email addresses it reports.
+    trust_email_verified_claim = False
+
     # Note: Most providers should support these scopes. If not, (e.g. Facebook) override
     #       the attribute in the subclass.
     scope = "openid email profile"
@@ -181,6 +190,27 @@ class OIDCClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.callback_base_url = callback_base_url
+
+    def is_email_verified(self, *, claims, user_info):
+        """
+        Return whether the provider verified the email address of the user.
+
+        A new account counts as verified when this returns True, so the user does
+        not have to verify their email address again.
+
+        Arguments:
+            claims (``dict``):
+                The claims from the ID token.
+            user_info (``dict``):
+                The normalized data from the userinfo endpoint.
+
+        Returns:
+            ``bool``:
+                Whether the email address is verified.
+        """
+        if not self.trust_email_verified_claim:
+            return False
+        return (user_info | claims).get("email_verified") in {True, "true"}
 
     def get_issuer(self, *, claims):
         """

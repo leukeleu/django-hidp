@@ -47,11 +47,11 @@ msgstr ""
 msgid "Please note that this also changes the username you use to sign in."
 msgstr ""
 
-#: hidp/accounts/forms.py hidp/api/serializers.py
+#: hidp/accounts/forms.py
 msgid "The new email address is the same as the current email address."
 msgstr ""
 
-#: hidp/accounts/forms.py hidp/api/serializers.py
+#: hidp/accounts/forms.py
 msgid "The password is incorrect."
 msgstr ""
 
@@ -162,16 +162,48 @@ msgstr ""
 msgid "Sign up using {provider}"
 msgstr ""
 
-#: hidp/accounts/views.py
+#: hidp/accounts/views.py hidp/api/views.py
 msgid "Sorry, changing your email address is not possible because an account with this email address already exists."
 msgstr ""
 
-#: hidp/api/serializers.py
-msgid "An account with this email address already exists."
+#: hidp/api/oidc_serializers.py
+msgid "The login has expired. Please log in again."
+msgstr ""
+
+#: hidp/api/oidc_views.py hidp/api/views.py
+msgid "Logged-in users cannot register a new account."
+msgstr ""
+
+#: hidp/api/oidc_views.py
+msgid "Logging in with a provider requires HTTPS."
+msgstr ""
+
+#: hidp/api/oidc_views.py hidp/federated/views.py
+msgid "Login failed. Invalid credentials."
+msgstr ""
+
+#: hidp/api/oidc_views.py
+msgid "This request has expired. Please go back to the application and try again."
+msgstr ""
+
+#: hidp/api/oidc_views.py hidp/federated/forms.py
+msgid "You cannot unlink your only way to sign in."
+msgstr ""
+
+#: hidp/api/otp_views.py
+msgid "Two-factor authentication is already configured."
+msgstr ""
+
+#: hidp/api/otp_views.py
+msgid "Two-factor authentication is not configured."
+msgstr ""
+
+#: hidp/api/otp_views.py
+msgid "Verify this session with a recovery code first."
 msgstr ""
 
 #: hidp/api/serializers.py
-msgid "Could not authenticate"
+msgid "Enter a path on this site."
 msgstr ""
 
 #: hidp/api/serializers.py
@@ -180,6 +212,24 @@ msgstr ""
 
 #: hidp/api/serializers.py
 msgid "Invalid token or user ID."
+msgstr ""
+
+#: hidp/api/utils.py
+#, python-format
+msgid "CSRF Failed: %(reason)s"
+msgstr ""
+
+#: hidp/api/views.py hidp/templates/hidp/accounts/management/set_password.html
+msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
+msgstr ""
+
+#: hidp/api/views.py
+msgid "Your account already has a password."
+msgstr ""
+
+#: hidp/api/views.py
+#: hidp/templates/hidp/accounts/management/email_change_request.html
+msgid "Your account does not currently have a password set."
 msgstr ""
 
 #: hidp/federated/forms.py
@@ -191,7 +241,7 @@ msgid "Yes, I want to unlink this account"
 msgstr ""
 
 #: hidp/federated/forms.py
-msgid "You cannot unlink your only way to sign in."
+msgid "Your account is already linked to an account of this service."
 msgstr ""
 
 #: hidp/federated/models.py
@@ -222,10 +272,6 @@ msgstr ""
 #: hidp/federated/views.py
 #, python-brace-format
 msgid "Link with {provider}"
-msgstr ""
-
-#: hidp/federated/views.py
-msgid "Login failed. Invalid credentials."
 msgstr ""
 
 #: hidp/federated/views.py
@@ -283,6 +329,10 @@ msgstr ""
 #: hidp/otp/views.py hidp/templates/hidp/otp/setup_device.html
 #: hidp/templates/hidp/otp/setup_device_done.html
 msgid "Set up two-factor authentication"
+msgstr ""
+
+#: hidp/rate_limit/views.py
+msgid "Sorry, you have made too many requests to the server. Please try again later."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/login.html
@@ -530,10 +580,6 @@ msgstr ""
 msgid "You will receive an email on both your current and the new email address with a link to confirm this change."
 msgstr ""
 
-#: hidp/templates/hidp/accounts/management/email_change_request.html
-msgid "Your account does not currently have a password set."
-msgstr ""
-
 #: hidp/templates/hidp/accounts/management/email_change_request_sent.html
 msgid "Changing your account email address requires confirmation from both your current and new email addresses. Please check your email for a confirmation link."
 msgstr ""
@@ -570,10 +616,6 @@ msgstr ""
 
 #: hidp/templates/hidp/accounts/management/set_password.html
 msgid "Add a password to your account. This will allow you to sign in using your email address and password as well as any linked services."
-msgstr ""
-
-#: hidp/templates/hidp/accounts/management/set_password.html
-msgid "For your security, you need to re-authenticate via a linked service before you can set a password."
 msgstr ""
 
 #: hidp/templates/hidp/accounts/management/set_password.html

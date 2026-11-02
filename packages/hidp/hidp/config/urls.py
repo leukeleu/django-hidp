@@ -33,5 +33,5 @@ if apps.is_installed("hidp.oidc_provider"):
 
 if apps.is_installed("hidp.api"):
     urlpatterns += [
-        path("api/", include("hidp.api.urls")),
+        path("api/", include("hidp.api.user_urls")),
     ]

@@ -85,6 +85,10 @@ jobs:
         env:
           RUFF_OUTPUT_FORMAT: github
 
+      - name: Build API documentation
+        uses: ./.github/actions/build-api-docs
+        if: ${{ matrix.working-directory == './packages/hidp' && matrix.django-version == '5.2' && matrix.python-version == '3.12' }}
+
   # Report success/failure
   success:
     name: Success
