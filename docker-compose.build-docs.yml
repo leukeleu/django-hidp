@@ -1,0 +1,11 @@
+# Builds the Redoc API documentation: docker compose -f docker-compose.build-docs.yml up
+
+services:
+
+  redoc-build:
+    image: 'redocly/cli:2.54.3'
+    restart: 'no'
+    volumes:
+      - './packages/hidp:/hidp'
+    working_dir: '/hidp'
+    command: 'build-docs ./docs/openapi/schema.json -o ./docs/_build/html/redoc-static.html'

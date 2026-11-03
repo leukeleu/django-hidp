@@ -22,6 +22,17 @@ LOGGING = {
     },
 }
 
+# URL templates for the links in emails sent by the API
+HIDP_FRONTEND_URLS = {
+    "email_verification": "/frontend/verify/{token}/",
+    "password_reset": "/frontend/reset/{uidb64}/{token}/",
+    "password_reset_request": "/frontend/reset/",
+    "set_password": "/frontend/set-password/",
+    "email_change_confirm": "/frontend/change-email/{token}/",
+    "email_change_cancel": "/frontend/change-email/cancel/",
+    "otp_management": "/frontend/otp/",
+}
+
 # Test key
 SECRET_KEY = "secret-key-only-for-testing"
 

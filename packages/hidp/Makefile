@@ -15,9 +15,11 @@ help:
 	@echo "  make django-checks - Run Django system checks"
 	@echo "  make docs - Build the documentation"
 	@echo "  make build - Build the package"
+	@echo "  make generate-schema - Generate a new OpenAPI schema file"
 	@echo
 
 GITHUB_ACTIONS ?= false
+REDOCLY_CLI_VERSION ?= 2.54.3
 
 # Helper function to define a GitHub Actions group
 define group
@@ -120,7 +122,7 @@ django-checks:
 docs:
 	# Build the documentation
 	$(call group,Building documentation)
-	uv run --group docs make -C docs html
+	uv run --group docs make -C docs/sphinx html
 	$(call endgroup)
 
 .PHONY: build
@@ -137,8 +139,12 @@ clean:
 	rm -rf ../../var/dist/*.whl ../../var/dist/*.tar.gz
 	$(call endgroup)
 
+.PHONY: generate-schema
+generate-schema:
+	uv run manage.py spectacular --settings tests.test_settings --format openapi-json --file ./docs/openapi/schema.json
+
 ##
-# This target is used by GitHub actions
+# These targets are used by GitHub actions
 ##
 
 ../../var/requirements_frozen.txt:
@@ -166,3 +172,7 @@ post-install:
 
 .PHONY: install-pipeline
 install-pipeline: install-requirements post-install
+
+.PHONY: build-redoc
+build-redoc:
+	npx --yes @redocly/cli@$(REDOCLY_CLI_VERSION) build-docs ./docs/openapi/schema.json -o ./docs/_build/html/redoc-static.html

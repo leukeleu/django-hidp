@@ -29,9 +29,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-oidc_provider = [
-  "django-oauth-toolkit>=3.4.1",
+api = [
   "djangorestframework>=3.15.2",
+  "drf-spectacular>=0.28.0",
+]
+oidc_provider = [
+  "django-hidp[api]",
+  "django-oauth-toolkit>=3.4.1",
 ]
 otp = [
   "django-otp>=1.5.0",
@@ -41,7 +45,7 @@ recommended = [
   "django-hidp[otp]",
 ]
 all = [
-  "django-hidp[oidc_provider,otp]",
+  "django-hidp[api,oidc_provider,otp]",
 ]
 
 [dependency-groups]
@@ -85,7 +89,7 @@ extend = "../hidp-pycqa/pyproject.toml"
 "hidp/config/*" = [
   "invalid-argument-name",  # ALL_UPPERCASE is OK in config code
 ]
-"docs/conf.py" = [
+"docs/sphinx/conf.py" = [
   "implicit-namespace-package",  # Not a package
 ]
 

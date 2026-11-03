@@ -93,6 +93,16 @@ class OIDCAccountLinkForm(forms.ModelForm):
         model = OpenIdConnection
         fields = []
 
+    def clean(self):
+        cleaned_data = super().clean()
+        # Unlinking goes by provider, so a user links one account per provider.
+        if self.user.openid_connections.filter(provider_key=self.provider_key).exists():
+            raise ValidationError(
+                _("Your account is already linked to an account of this service."),
+                code="already_linked",
+            )
+        return cleaned_data
+
     @transaction.atomic
     def save(self, *, commit=True):
         self.instance = OpenIdConnection(

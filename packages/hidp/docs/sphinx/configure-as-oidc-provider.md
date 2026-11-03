@@ -125,6 +125,30 @@ PKCE is required by default.
 ### `/o/authorize`
 [AuthorizationView](https://django-oauth-toolkit.readthedocs.io/en/latest/views/details.html#oauth2_provider.views.base.AuthorizationView)
 
+#### Account creation with `prompt=create`
+
+A client can ask for a new account with `prompt=create`
+([OpenID Connect Prompt Create](https://openid.net/specs/openid-connect-prompt-create-1_0.html)).
+The user is sent to the registration page, also when logged in, which returns to
+the authorization request without `create` after signing up. Django OAuth Toolkit
+handles this, with the `OIDC_RP_INITIATED_REGISTRATION_ENABLED` and
+`OIDC_RP_INITIATED_REGISTRATION_URL` settings that `get_oauth2_provider_settings`
+sets to HIdP's registration page.
+
+In [headless mode](headless.md), point it at the signup page of your frontend:
+
+```python
+OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
+    OIDC_RSA_PRIVATE_KEY=OIDC_RSA_PRIVATE_KEY
+) | {
+    "OIDC_RP_INITIATED_REGISTRATION_URL": "/signup",
+}
+```
+
+The page gets the authorization request as an absolute URL on the same host in
+`next`. When registration is disabled, `prompt=create` is refused with a 400
+`invalid_request`, as is a request for an unknown client.
+
 ### `/o/token/`
 [TokenView](https://django-oauth-toolkit.readthedocs.io/en/latest/views/details.html#oauth2_provider.views.base.TokenView)
 
@@ -139,7 +163,61 @@ so that clients are able to verify them.
 
 ### `/api/users/me/`
 
-API endpoint to retrieve and update the user's basic information (first and last name).
+API endpoint to retrieve the user's basic information, with an access token that
+has the `profile` and `email` scopes. It is mounted when `hidp.api` is installed.
+The [headless API](headless.md) is not: it is only served where you include
+`hidp.api.urls`.
+
+## Headless mode
+
+In [headless mode](headless.md), the frontend shows the pages of the OIDC provider.
+
+### Logging in
+
+An anonymous authorization request redirects to `LOGIN_URL`, with the request as
+`next`. Set it to the login page of your frontend. After logging in, and any pending
+step such as two-factor authentication, the frontend goes to `next` with a full page
+load: it is a URL of HIdP, which continues the authorization.
+
+A request with `prompt=login` asks the user to log in again. Its `next` leaves out
+`prompt=login`, so the login page must always show its form, also to a user who is
+logged in already.
+
+`UiLocalesMiddleware` stores the language of `ui_locales` in Django's language
+cookie (`LANGUAGE_COOKIE_NAME`, `django_language` by default). With Django's
+`LocaleMiddleware`, the API uses it for its messages and emails too. A frontend that
+reads that cookie shows the pages in the language the application asked for.
+
+### Consent and logging out
+
+An application with `skip_authorization` is authorized without asking the user,
+which suits your own applications. For other applications, and for confirming an
+RP-initiated logout, set the [`auth`](headless.md#the-auth-page) page of
+`HIDP_FRONTEND_URLS`:
+
+```python
+HIDP_FRONTEND_URLS = {
+    ...,
+    "auth": "/auth/",
+}
+```
+
+Instead of showing a page, the provider redirects to it with a `token`, and the
+`step` `oidc_provider_consent` or `oidc_provider_logout`.
+`GET oidc-provider/page/?token=…` of the [headless API](headless.md) responds with
+what the page shows:
+
+- `consent`: the `application` (`{name, client_id}`) asks for `scopes`
+  (`[{scope, description}]`).
+- `logout`: the `application`, when known, asks to log the user out.
+- `error`: an `error` and `error_description` that could not be sent to the
+  application, such as an unknown client.
+
+The frontend posts a form to the `action` of the page, as a normal page load, with
+the `fields` as hidden inputs, the `csrfmiddlewaretoken`, and `allow` set to `true`
+when the user agrees. Leaving `allow` out refuses. The response redirects to the
+application. Like HIdP's own pages, the frontend pages must not be shown in frames
+of other sites: send `Content-Security-Policy: frame-ancestors 'none'`.
 
 ## Django REST Framework recommendations
 
@@ -177,6 +255,9 @@ REST_FRAMEWORK = {
 
 For more information on the functionality and options of DRF Standardized Errors, refer to the [documentation](https://drf-standardized-errors.readthedocs.io/en/latest/).
 
+The endpoints of the [headless API](headless.md) keep their documented error
+responses under such an exception handler; `/api/users/me/` uses it.
+
 ## Adding/overriding Django OAuth Toolkit settings
 
 To add to or override the settings provided by `get_oauth2_provider_settings` you can update the dictionary
@@ -193,7 +274,7 @@ OAUTH2_PROVIDER = hidp_config.get_oauth2_provider_settings(
 The settings provided by `get_oauth2_provider_settings` are as follows:
 
 ```{eval-rst}
-.. literalinclude:: ../hidp/config/oauth2_provider.py
+.. literalinclude:: ../../hidp/config/oauth2_provider.py
   :lines: 1-65
 ```
 

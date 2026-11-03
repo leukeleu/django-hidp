@@ -5,8 +5,11 @@ These dependencies can be selected using the `[extra]` syntax when installing th
 
 ## Available Extras
 
+`api`
+: Adds the headless JSON API (Django REST framework and drf-spectacular). See [Headless mode](headless.md).
+
 `oidc_provider`
-: Adds support for OpenID Connect (OIDC) provider functionalities.
+: Adds support for OpenID Connect (OIDC) provider functionalities (includes the `api` extra).
   
 `otp`
 : Adds support for one-time passwords (OTP).

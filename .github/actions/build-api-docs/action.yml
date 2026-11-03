@@ -1,0 +1,19 @@
+name: Build API Documentation
+description: Build the Redoc documentation of the HIdP OpenAPI schema
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: '24'
+
+    - name: Build documentation
+      run: |
+        echo ::group::Build API documentation
+        make build-redoc
+        echo ::endgroup::
+      working-directory: './packages/hidp'
+      shell: bash

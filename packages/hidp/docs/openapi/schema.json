@@ -1,0 +1,2128 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "HIdP",
+        "version": "1.0.0",
+        "description": "Hello, ID Please"
+    },
+    "paths": {
+        "/api/email-change/": {
+            "get": {
+                "operationId": "email_change_retrieve",
+                "description": "The pending email change request of the logged-in user.\n\nStarting a new request replaces the pending one.",
+                "tags": [
+                    "email-change"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailChange"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "email_change_create",
+                "description": "The pending email change request of the logged-in user.\n\nStarting a new request replaces the pending one.",
+                "tags": [
+                    "email-change"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailChange"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "email_change_destroy",
+                "description": "The pending email change request of the logged-in user.\n\nStarting a new request replaces the pending one.",
+                "tags": [
+                    "email-change"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/email-change/confirm/": {
+            "post": {
+                "operationId": "email_change_confirm_create",
+                "description": "Confirm the email change request with the token from one of its emails.\n\nThe email address changes once both the current and proposed address confirm it.",
+                "tags": [
+                    "email-change"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailChange"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/email-verification/confirm/": {
+            "post": {
+                "operationId": "email_verification_confirm_create",
+                "description": "Mark the email address as verified. The user still has to log in.",
+                "tags": [
+                    "email-verification"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/email-verification/resend/": {
+            "post": {
+                "operationId": "email_verification_resend_create",
+                "description": "Resend the verification email to the user this session is waiting for.\n\nAlways responds with 204, so the response does not reveal whether an email\nwas sent.",
+                "tags": [
+                    "email-verification"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/email-verification/verify/": {
+            "post": {
+                "operationId": "email_verification_verify_create",
+                "description": "Check an email verification token before confirming it.\n\nTells the client whether the confirmation must include a first and last name.",
+                "tags": [
+                    "email-verification"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationToken"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationToken"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationToken"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailVerificationVerifyResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/login/": {
+            "post": {
+                "operationId": "login_create",
+                "description": "Log in with a username and password.\n\nA user whose email address is not verified is sent a verification email instead,\nand the response has a pending `email_verify` step.\n\nAfter many attempts for a username from any IP address, the login also requires\n`i_am_not_a_robot` to be `true`. Without it, the response is a 400.",
+                "tags": [
+                    "login"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/logout/": {
+            "post": {
+                "operationId": "logout_create",
+                "description": "Log out, whether or not a user is logged in.",
+                "tags": [
+                    "logout"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc-provider/page/": {
+            "get": {
+                "operationId": "oidc_provider_page_retrieve",
+                "description": "A page of HIdP's OIDC provider, which the frontend shows in place of HTML.\n\nThe `consent` page asks the user to authorize an application, the `logout` page\nto log out. The frontend posts a form to `action` with `fields`, `allow` set to\n`true` (or left out to refuse), and the `csrfmiddlewaretoken`, as a normal page\nload: the response redirects to the application. The `error` page shows an\nerror that could not be sent to the application.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc-provider"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OIDCProviderPage"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc/authenticate/{provider_key}/": {
+            "post": {
+                "operationId": "oidc_authenticate_create",
+                "description": "Start logging in with a provider: send the user to `redirect_url`.\n\nThe provider returns the user to the frontend, or to `next` after a login.\nWith `reauthenticate`, the provider asks for the credentials again, for\nendpoints that need a recent login.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "provider_key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCAuthenticate"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCAuthenticate"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCAuthenticate"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OIDCAuthenticateResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc/connections/": {
+            "get": {
+                "operationId": "oidc_connections_list",
+                "description": "The providers, and whether the user logs in with them.\n\nA user keeps at least one way to log in, so `can_unlink` is false for the only\nlinked provider of a user without a password.",
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OIDCConnection"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc/connections/{provider_key}/": {
+            "delete": {
+                "operationId": "oidc_connections_destroy",
+                "description": "Stop logging in with a provider.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "provider_key",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/oidc/link/": {
+            "get": {
+                "operationId": "oidc_link_retrieve",
+                "description": "Let the logged-in user also log in with a provider.\n\nThe user logged in with the provider while logged in, which sent them to the\nfrontend with the token.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OIDCLinkDetails"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "oidc_link_create",
+                "description": "Let the logged-in user also log in with a provider.\n\nThe user logged in with the provider while logged in, which sent them to the\nfrontend with the token.",
+                "tags": [
+                    "oidc"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCLink"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCLink"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCLink"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/oidc/providers/": {
+            "get": {
+                "operationId": "oidc_providers_list",
+                "description": "The OIDC providers that users can log in with.",
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OIDCProvider"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/oidc/registration/": {
+            "get": {
+                "operationId": "oidc_registration_retrieve",
+                "description": "Create the account of a user who logs in with a provider for the first time.\n\nWhen the provider is trusted to verify email addresses, the user is logged in.\nOtherwise they are sent a verification email, and the response has a pending\n`email_verify` step.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "token",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "oidc"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OIDCRegistrationDetails"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "oidc_registration_create",
+                "description": "Create the account of a user who logs in with a provider for the first time.\n\nWhen the provider is trusted to verify email addresses, the user is logged in.\nOtherwise they are sent a verification email, and the response has a pending\n`email_verify` step.",
+                "tags": [
+                    "oidc"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCRegistration"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCRegistration"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OIDCRegistration"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/otp/": {
+            "get": {
+                "operationId": "otp_retrieve",
+                "description": "Whether two-factor authentication is configured, and the codes left.",
+                "tags": [
+                    "otp"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OTPStatus"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/otp/disable/": {
+            "post": {
+                "operationId": "otp_disable_create",
+                "description": "Disable two-factor authentication, confirmed with a code from the app.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/otp/disable/recovery-code/": {
+            "post": {
+                "operationId": "otp_disable_recovery_code_create",
+                "description": "Disable two-factor authentication, confirmed with a recovery code.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/otp/recovery-codes/": {
+            "get": {
+                "operationId": "otp_recovery_codes_retrieve",
+                "description": "The recovery codes of the user. POST replaces them with new ones.",
+                "tags": [
+                    "otp"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecoveryCodes"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "otp_recovery_codes_create",
+                "description": "The recovery codes of the user. POST replaces them with new ones.",
+                "tags": [
+                    "otp"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecoveryCodes"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/otp/setup/": {
+            "get": {
+                "operationId": "otp_setup_retrieve",
+                "description": "Set up two-factor authentication with an authenticator app.\n\nGET returns the same unconfirmed device until a POST with a valid code confirms\nit, which also verifies the session.",
+                "tags": [
+                    "otp"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OTPSetupDetails"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            },
+            "post": {
+                "operationId": "otp_setup_create",
+                "description": "Set up two-factor authentication with an authenticator app.\n\nGET returns the same unconfirmed device until a POST with a valid code confirms\nit, which also verifies the session.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPSetup"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPSetup"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPSetup"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/otp/verify/": {
+            "post": {
+                "operationId": "otp_verify_create",
+                "description": "Verify the session with a code from the authenticator app.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OTPToken"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/otp/verify/recovery-code/": {
+            "post": {
+                "operationId": "otp_verify_recovery_code_create",
+                "description": "Verify the session with a recovery code, which is used up.",
+                "tags": [
+                    "otp"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RecoveryCode"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/password-reset/": {
+            "post": {
+                "operationId": "password_reset_create",
+                "description": "Email a password reset link, or a set password link to a user without a password.\n\nAlways responds with 204, so the response does not reveal whether an account\nexists.",
+                "tags": [
+                    "password-reset"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/password-reset/confirm/": {
+            "post": {
+                "operationId": "password_reset_confirm_create",
+                "description": "Set a new password for the user identified by the password reset token.\n\nChanging the password invalidates the user's existing sessions. The user still\nhas to log in.",
+                "tags": [
+                    "password-reset"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmation"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmation"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordResetConfirmation"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/password/change/": {
+            "post": {
+                "operationId": "password_change_create",
+                "description": "Change the password of the logged-in user, who must enter the current one.",
+                "tags": [
+                    "password"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PasswordChange"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/password/set/": {
+            "post": {
+                "operationId": "password_set_create",
+                "description": "Set a password for a logged-in user who does not have one.\n\nOnly allowed shortly after logging in, to prove the user's identity.",
+                "tags": [
+                    "password"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetPassword"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetPassword"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SetPassword"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "`code` says why the user may not do this."
+                    }
+                }
+            }
+        },
+        "/api/session/": {
+            "get": {
+                "operationId": "session_retrieve",
+                "description": "Describe the authentication state of the current session.\n\nAlso sets the CSRF cookie, which clients need for every unsafe request.",
+                "tags": [
+                    "session"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/signup/": {
+            "post": {
+                "operationId": "signup_create",
+                "description": "Create an account, and send the email to verify it.\n\nResponds with a pending `email_verify` step whether or not the account existed.",
+                "tags": [
+                    "signup"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Signup"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Signup"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Signup"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuthState"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/users/me/": {
+            "get": {
+                "operationId": "users_me_retrieve",
+                "description": "The logged-in user.\n\nWith HIdP's OIDC provider installed, an OAuth2 access token with the `profile`\nand `email` scopes can read the user too, but not change it.",
+                "tags": [
+                    "users"
+                ],
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "users_me_partial_update",
+                "description": "The logged-in user.\n\nWith HIdP's OIDC provider installed, an OAuth2 access token with the `profile`\nand `email` scopes can read the user too, but not change it.",
+                "tags": [
+                    "users"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUser"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUser"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUser"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "cookieAuth": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AuthState": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "pending": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PendingStep"
+                        }
+                    }
+                },
+                "required": [
+                    "pending",
+                    "user"
+                ]
+            },
+            "EmailChange": {
+                "type": "object",
+                "properties": {
+                    "current_email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true,
+                        "title": "Current email address"
+                    },
+                    "proposed_email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true,
+                        "title": "Proposed email address"
+                    },
+                    "confirmed_by_current_email": {
+                        "type": "boolean",
+                        "readOnly": true
+                    },
+                    "confirmed_by_proposed_email": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "confirmed_by_current_email",
+                    "confirmed_by_proposed_email",
+                    "current_email",
+                    "proposed_email"
+                ]
+            },
+            "EmailChangeConfirm": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "EmailChangeRequest": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "proposed_email": {
+                        "type": "string",
+                        "format": "email",
+                        "writeOnly": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "password",
+                    "proposed_email"
+                ]
+            },
+            "EmailVerificationConfirm": {
+                "type": "object",
+                "description": "Confirm the email address, with a name when the user does not have one yet.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "EmailVerificationResend": {
+                "type": "object",
+                "description": "An optional `next`: where the client continues after the flow.\n\nIt must be a path on this site, or an absolute URL on its host, and is sent on\nas a path, for example in the link of the verification email.",
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                }
+            },
+            "EmailVerificationToken": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "EmailVerificationVerifyResponse": {
+                "type": "object",
+                "properties": {
+                    "requires_name": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "requires_name"
+                ]
+            },
+            "ForbiddenResponse": {
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "detail"
+                ]
+            },
+            "Login": {
+                "type": "object",
+                "description": "An optional `next`: where the client continues after the flow.\n\nIt must be a path on this site, or an absolute URL on its host, and is sent on\nas a path, for example in the link of the verification email.",
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "username": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "password",
+                    "username"
+                ]
+            },
+            "OIDCAuthenticate": {
+                "type": "object",
+                "description": "An optional `next`: where the client continues after the flow.\n\nIt must be a path on this site, or an absolute URL on its host, and is sent on\nas a path, for example in the link of the verification email.",
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "reauthenticate": {
+                        "type": "boolean",
+                        "writeOnly": true,
+                        "default": false
+                    }
+                }
+            },
+            "OIDCAuthenticateResponse": {
+                "type": "object",
+                "properties": {
+                    "redirect_url": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "redirect_url"
+                ]
+            },
+            "OIDCConnection": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "linked": {
+                        "type": "boolean"
+                    },
+                    "can_unlink": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "can_unlink",
+                    "key",
+                    "linked",
+                    "name"
+                ]
+            },
+            "OIDCLink": {
+                "type": "object",
+                "description": "Link the account of the provider to the logged-in user.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "OIDCLinkDetails": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "$ref": "#/components/schemas/OIDCProvider"
+                    },
+                    "provider_email": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "email",
+                    "provider",
+                    "provider_email"
+                ]
+            },
+            "OIDCProvider": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "name"
+                ]
+            },
+            "OIDCProviderApplication": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "client_id": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "client_id",
+                    "name"
+                ]
+            },
+            "OIDCProviderPage": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "type": "string",
+                        "description": "consent, logout or error"
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "application": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/OIDCProviderApplication"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "scopes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OIDCProviderScope"
+                        }
+                    },
+                    "fields": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "error_description": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "page"
+                ]
+            },
+            "OIDCProviderScope": {
+                "type": "object",
+                "properties": {
+                    "scope": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "description",
+                    "scope"
+                ]
+            },
+            "OIDCRegistration": {
+                "type": "object",
+                "description": "Create the account of a first login with a provider.\n\nThe names default to the ones the provider sent. Without those, they are asked\nfor when the email address is verified.",
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "agreed_to_tos": {
+                        "type": "boolean",
+                        "writeOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "agreed_to_tos",
+                    "token"
+                ]
+            },
+            "OIDCRegistrationDetails": {
+                "type": "object",
+                "properties": {
+                    "provider": {
+                        "$ref": "#/components/schemas/OIDCProvider"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "requires_name": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "provider",
+                    "requires_name"
+                ]
+            },
+            "OTPSetup": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "otp_token": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "confirm_stored_backup_tokens": {
+                        "type": "boolean",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "confirm_stored_backup_tokens",
+                    "otp_token"
+                ]
+            },
+            "OTPSetupDetails": {
+                "type": "object",
+                "properties": {
+                    "secret": {
+                        "type": "string",
+                        "description": "The TOTP secret, base32 encoded."
+                    },
+                    "config_url": {
+                        "type": "string",
+                        "description": "The `otpauth://` URL of the device."
+                    },
+                    "qr_code": {
+                        "type": "string",
+                        "description": "The config URL as an SVG data URI."
+                    },
+                    "recovery_codes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "config_url",
+                    "qr_code",
+                    "recovery_codes",
+                    "secret"
+                ]
+            },
+            "OTPStatus": {
+                "type": "object",
+                "properties": {
+                    "configured": {
+                        "type": "boolean"
+                    },
+                    "recovery_codes_remaining": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "configured",
+                    "recovery_codes_remaining"
+                ]
+            },
+            "OTPToken": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "otp_token": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "otp_token"
+                ]
+            },
+            "PasswordChange": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "old_password": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "new_password",
+                    "old_password"
+                ]
+            },
+            "PasswordResetConfirmation": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "uidb64": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "new_password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "new_password",
+                    "token",
+                    "uidb64"
+                ]
+            },
+            "PasswordResetRequest": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "email"
+                ]
+            },
+            "PatchedUser": {
+                "type": "object",
+                "description": "The user in the authentication state, and at `/users/me/`.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 150
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true,
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "has_usable_password": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                }
+            },
+            "PendingStep": {
+                "type": "object",
+                "properties": {
+                    "step": {
+                        "$ref": "#/components/schemas/StepEnum"
+                    }
+                },
+                "required": [
+                    "step"
+                ]
+            },
+            "RecoveryCode": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "recovery_code": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "recovery_code"
+                ]
+            },
+            "RecoveryCodes": {
+                "type": "object",
+                "properties": {
+                    "recovery_codes": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "recovery_codes"
+                ]
+            },
+            "SetPassword": {
+                "type": "object",
+                "description": "Validate the request data with a Django form, after the serializer fields.\n\nThe form's errors become DRF errors, and the valid form is kept as `form`.",
+                "properties": {
+                    "new_password": {
+                        "type": "string",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "new_password"
+                ]
+            },
+            "Signup": {
+                "type": "object",
+                "description": "An optional `next`: where the client continues after the flow.\n\nIt must be a path on this site, or an absolute URL on its host, and is sent on\nas a path, for example in the link of the verification email.",
+                "properties": {
+                    "next": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "writeOnly": true
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true
+                    },
+                    "agreed_to_tos": {
+                        "type": "boolean",
+                        "writeOnly": true
+                    }
+                },
+                "required": [
+                    "agreed_to_tos",
+                    "email",
+                    "password"
+                ]
+            },
+            "StepEnum": {
+                "enum": [
+                    "email_verify",
+                    "otp_verify",
+                    "otp_setup"
+                ],
+                "type": "string",
+                "description": "* `email_verify` - email_verify\n* `otp_verify` - otp_verify\n* `otp_setup` - otp_setup"
+            },
+            "User": {
+                "type": "object",
+                "description": "The user in the authentication state, and at `/users/me/`.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "first_name": {
+                        "type": "string",
+                        "maxLength": 150
+                    },
+                    "last_name": {
+                        "type": "string",
+                        "maxLength": 150
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true,
+                        "title": "Email address",
+                        "maxLength": 254
+                    },
+                    "has_usable_password": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "email",
+                    "first_name",
+                    "has_usable_password",
+                    "id",
+                    "last_name"
+                ]
+            }
+        },
+        "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "in": "cookie",
+                "name": "sessionid"
+            },
+            "oauth2": {
+                "type": "oauth2",
+                "flows": {}
+            }
+        }
+    }
+}

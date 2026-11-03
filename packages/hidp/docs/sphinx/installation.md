@@ -142,7 +142,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 :::{note}
 HIdP comes with a set of extra password validators that can be added to
-`settings.AUTH_PASSWORD_VALIDATORS` if desired. See [Password Validators](project:password-validation.md)
+`settings.AUTH_PASSWORD_VALIDATORS` if desired. See [Password Validators](project:password-validators.md)
 for more information.
 :::
 

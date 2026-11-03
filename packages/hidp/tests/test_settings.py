@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     "tests.custom_user",
     # Custom makemessages command
     "tests.translations",
+    # drf spectacular for generating OpenAPI specification
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -68,6 +70,28 @@ MIDDLEWARE = [
     "hidp.oidc_provider.middleware.UiLocalesMiddleware",
     "django_otp.middleware.OTPMiddleware",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "HIdP",
+    "DESCRIPTION": "Hello, ID Please",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# URL templates for the links in emails sent by the API
+HIDP_FRONTEND_URLS = {
+    "email_verification": "/frontend/verify/{token}/",
+    "password_reset": "/frontend/reset/{uidb64}/{token}/",
+    "password_reset_request": "/frontend/reset/",
+    "set_password": "/frontend/set-password/",
+    "email_change_confirm": "/frontend/change-email/{token}/",
+    "email_change_cancel": "/frontend/change-email/cancel/",
+    "otp_management": "/frontend/otp/",
+}
 
 USE_TZ = True
 
@@ -127,7 +151,7 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
-ROOT_URLCONF = "hidp.config.urls"
+ROOT_URLCONF = "tests.urls"
 
 # Help Django find and update HIdP's message catalogs
 LOCALE_PATHS = [

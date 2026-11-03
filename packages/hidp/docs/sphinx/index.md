@@ -21,11 +21,13 @@ content-security-policy
 user-model
 password-validators
 one-time-passwords
+headless
 templates
 translations
 management-commands
 rate-limiting
 terms-of-service
+upgrading
 :::
 
 # Indices and tables

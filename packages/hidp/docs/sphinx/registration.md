@@ -20,7 +20,7 @@ New user creation is handled by the `UserCreationForm`, which builds upon Django
 
 - A `TermsOfServiceMixin` is included to ensure users agree to your Terms of Service before they can create an account. See [Terms of Service](project:terms-of-service.md) for instructions on how to disable this.
 
-The password is validated using the validators configured in `settings.AUTH_PASSWORD_VALIDATORS`. See [Password Validators](project:password-validators.md) on custom HIdP password validators.
+The password is validated using the validators configured in `settings.AUTH_PASSWORD_VALIDATORS`. See [Password Validation](project:password-validators.md) on custom HIdP password validators.
 
 ### Verification email
 
@@ -32,10 +32,12 @@ The verification link contains a signed hash of the user's email, with a timesta
 
 If the form contains an email that is already registered, a different email is sent to notify the user that an attempt was made to create an account using their email address.
 
-See [verification email templates](project:templates.md#accounts-verification-email) on which templates are used.
+See [verification email templates](project:templates.md#accountsverificationemail) on which templates are used.
 
 ## Registration via OpenID Connect
 
 HIdP also adds the option to directly register via an OpenID Connect client. For each registered client, a sign-up option is added to the registration view. See [Configure OIDC Clients](project:configure-oidc-clients.md) on how to set up such a client.
 
-In contrast to the email and password registration flow, when a user tries to sign up with an already registered email, they will either be logged in (if their email is verified) or they will be redirected to the `EmailVerificationRequiredView` if the email hasn't been verified.
+A user who logs in with an account of the provider that is already linked is logged in, or sent to the `EmailVerificationRequiredView` when their email address is not verified yet. When the email address of the provider account belongs to an account that is not linked to it, the user is asked to log in to that account first, and link the provider from there.
+
+An account created this way has to verify its email address, unless the provider is [trusted to verify it](project:configure-oidc-clients.md#verified-email-addresses).

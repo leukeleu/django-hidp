@@ -17,5 +17,5 @@ runs:
         echo ::group::Build documentation
         make html
         echo ::endgroup::
-      working-directory: './packages/hidp/docs'
+      working-directory: './packages/hidp/docs/sphinx'
       shell: bash

@@ -275,6 +275,18 @@ else:
 
 DEFAULT_FROM_EMAIL = config.getliteral("app", "default_from_email")
 
+# URL templates for the links in emails sent by the API. The sandbox has no
+# separate frontend, so the links point at the HTML views.
+HIDP_FRONTEND_URLS = {
+    "email_verification": "/verify/{token}/verify/",
+    "password_reset": "/recover/password/{uidb64}/{token}/",
+    "password_reset_request": "/recover/password/",
+    "set_password": "/manage/set-password/",
+    "email_change_confirm": "/manage/change-email-confirm/{token}/",
+    "email_change_cancel": "/manage/change-email-cancel/",
+    "otp_management": "/manage/otp/",
+}
+
 # Sentry
 
 SENTRY_DSN = config.getliteral("app", "sentry_dsn", fallback=None)
